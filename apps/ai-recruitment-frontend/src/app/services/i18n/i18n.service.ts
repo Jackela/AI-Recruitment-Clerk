@@ -278,12 +278,15 @@ export class I18nService {
   public translate(key: string, params?: Record<string, unknown>): string {
     const translations = this.translations.value;
     const keys = key.split('.');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let value: any = translations;
+    let value: unknown = translations;
 
     for (const k of keys) {
-      value = value?.[k];
-      if (value === undefined) break;
+      if (typeof value === 'object' && value !== null) {
+        value = (value as Record<string, unknown>)[k];
+      } else {
+        value = undefined;
+        break;
+      }
     }
 
     if (typeof value !== 'string') {
@@ -293,12 +296,14 @@ export class I18nService {
 
     // Replace parameters
     if (params) {
+      let result = value;
       Object.entries(params).forEach(([param, val]) => {
-        value = (value as string).replace(
+        result = result.replace(
           new RegExp(`{{${param}}}`, 'g'),
           String(val),
         );
       });
+      return result;
     }
 
     return value;

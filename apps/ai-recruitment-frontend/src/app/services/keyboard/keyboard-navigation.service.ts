@@ -20,8 +20,7 @@ export interface KeyboardShortcut {
 export interface NavigationState {
   currentPage: string;
   previousPage?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  preservedState?: any;
+  preservedState?: Record<string, unknown>;
 }
 
 /**
@@ -308,10 +307,9 @@ export class KeyboardNavigationService {
     });
 
     // Use Angular Router if available
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((window as any).ngRouter) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).ngRouter.navigate([path]);
+    const win = window as Window & { ngRouter?: { navigate: (commands: string[]) => void } };
+    if (win.ngRouter) {
+      win.ngRouter.navigate([path]);
     } else {
       window.location.href = path;
     }
@@ -332,17 +330,15 @@ export class KeyboardNavigationService {
     };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private extractFormData(): Record<string, any> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const formData: Record<string, any> = {};
+  private extractFormData(): Record<string, string> {
+    const formData: Record<string, string> = {};
     const inputs = document.querySelectorAll('input, textarea, select');
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    inputs.forEach((input: any) => {
-      if (input.name || input.id) {
-        const key = input.name || input.id;
-        formData[key] = input.value;
+    inputs.forEach((input) => {
+      const inputElement = input as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+      if (inputElement.name || inputElement.id) {
+        const key = inputElement.name || inputElement.id;
+        formData[key] = inputElement.value;
       }
     });
 

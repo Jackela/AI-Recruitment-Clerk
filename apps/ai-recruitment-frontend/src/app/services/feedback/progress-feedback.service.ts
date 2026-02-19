@@ -11,8 +11,7 @@ export interface ProgressUpdate {
   message: string;
   timestamp: Date;
   type: 'info' | 'success' | 'warning' | 'error';
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  details?: any;
+  details?: Record<string, unknown>;
 }
 
 /**

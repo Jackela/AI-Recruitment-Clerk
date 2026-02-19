@@ -72,6 +72,26 @@ export interface RightsRequestStatusDto {
   progress: number;
 }
 
+/**
+ * Defines the shape of cookie consent preferences.
+ */
+export interface CookieConsentPreferences {
+  essential: boolean;
+  analytics: boolean;
+  marketing: boolean;
+  timestamp?: string;
+}
+
+/**
+ * Defines the shape of compliance status.
+ */
+export interface ComplianceStatus {
+  gdprCompliant: boolean;
+  lastAuditDate?: string;
+  dataProcessingActivities: number;
+  consentRecords: number;
+}
+
 export enum DataExportFormat {
   JSON = 'json',
   CSV = 'csv',
@@ -213,22 +233,18 @@ export class PrivacyApiService {
   /**
    * Set cookie consent preferences
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async setCookieConsent(cookieConsent: any): Promise<any> {
+  public async setCookieConsent(cookieConsent: CookieConsentPreferences): Promise<CookieConsentPreferences> {
     return firstValueFrom(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this.http.post<any>(`${this.baseUrl}/cookie-consent`, cookieConsent),
+      this.http.post<CookieConsentPreferences>(`${this.baseUrl}/cookie-consent`, cookieConsent),
     );
   }
 
   /**
    * Get cookie consent preferences
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async getCookieConsent(deviceId: string): Promise<any> {
+  public async getCookieConsent(deviceId: string): Promise<CookieConsentPreferences> {
     return firstValueFrom(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this.http.get<any>(`${this.baseUrl}/cookie-consent/${deviceId}`),
+      this.http.get<CookieConsentPreferences>(`${this.baseUrl}/cookie-consent/${deviceId}`),
     );
   }
 
@@ -250,19 +266,15 @@ export class PrivacyApiService {
   /**
    * Get GDPR compliance status
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public getComplianceStatus(): Observable<any> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return this.http.get<any>(`${this.baseUrl}/compliance-status`);
+  public getComplianceStatus(): Observable<ComplianceStatus> {
+    return this.http.get<ComplianceStatus>(`${this.baseUrl}/compliance-status`);
   }
 
   /**
    * Privacy infrastructure health check
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public privacyHealthCheck(): Observable<any> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return this.http.post<any>(`${this.baseUrl}/privacy-health-check`, {});
+  public privacyHealthCheck(): Observable<{ status: string; timestamp: string }> {
+    return this.http.post<{ status: string; timestamp: string }>(`${this.baseUrl}/privacy-health-check`, {});
   }
 
   /**
@@ -301,8 +313,7 @@ export class PrivacyApiService {
   /**
    * Check if consent is expired
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private isConsentExpired(purposeStatus: any): boolean {
+  private isConsentExpired(purposeStatus: { expiryDate?: string }): boolean {
     if (!purposeStatus.expiryDate) return false;
     return new Date() > new Date(purposeStatus.expiryDate);
   }

@@ -172,10 +172,9 @@ export class WebSocketService implements OnDestroy {
   public onProgress(sessionId: string): Observable<ProgressUpdate> {
     return this.onMessage('progress', sessionId).pipe(
       filter((msg) => !!msg.data),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      map((msg: any) => msg.data as ProgressUpdate),
+      map((msg) => msg.data as unknown as ProgressUpdate),
       takeUntil(this.destroy$),
-    ) as Observable<ProgressUpdate>;
+    );
   }
 
   /**
@@ -184,10 +183,9 @@ export class WebSocketService implements OnDestroy {
   public onCompletion(sessionId: string): Observable<CompletionData> {
     return this.onMessage('completed', sessionId).pipe(
       filter((msg) => !!msg.data),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      map((msg: any) => msg.data as CompletionData),
+      map((msg) => msg.data as unknown as CompletionData),
       takeUntil(this.destroy$),
-    ) as Observable<CompletionData>;
+    );
   }
 
   /**
@@ -196,10 +194,9 @@ export class WebSocketService implements OnDestroy {
   public onError(sessionId: string): Observable<ErrorData> {
     return this.onMessage('error', sessionId).pipe(
       filter((msg) => !!msg.data),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      map((msg: any) => msg.data as ErrorData),
+      map((msg) => msg.data as unknown as ErrorData),
       takeUntil(this.destroy$),
-    ) as Observable<ErrorData>;
+    );
   }
 
   /**

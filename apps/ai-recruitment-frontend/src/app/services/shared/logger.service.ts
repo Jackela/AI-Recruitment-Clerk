@@ -16,8 +16,7 @@ export interface LogEntry {
   level: LogLevel;
   message: string;
   context?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data?: any;
+  data?: Record<string, unknown>;
   timestamp: Date;
   error?: Error;
 }
@@ -39,32 +38,28 @@ export class LoggerService {
   /**
    * Log an informational message
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public log(message: string, context?: string, data?: any): void {
+  public log(message: string, context?: string, data?: Record<string, unknown>): void {
     this.writeLog(LogLevel.LOG, message, context, data);
   }
 
   /**
    * Log a warning message
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public warn(message: string, context?: string, data?: any): void {
+  public warn(message: string, context?: string, data?: Record<string, unknown>): void {
     this.writeLog(LogLevel.WARN, message, context, data);
   }
 
   /**
    * Log an error message
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public error(message: string, context?: string, error?: Error | any): void {
-    this.writeLog(LogLevel.ERROR, message, context, undefined, error);
+  public error(message: string, context?: string, error?: Error | unknown): void {
+    this.writeLog(LogLevel.ERROR, message, context, undefined, error instanceof Error ? error : undefined);
   }
 
   /**
    * Log a debug message (development only)
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public debug(message: string, context?: string, data?: any): void {
+  public debug(message: string, context?: string, data?: Record<string, unknown>): void {
     this.writeLog(LogLevel.DEBUG, message, context, data);
   }
 
@@ -75,8 +70,7 @@ export class LoggerService {
     operation: string,
     duration: number,
     context?: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data?: any,
+    data?: Record<string, unknown>,
   ): void {
     const message = `⚡ ${operation} completed in ${duration}ms`;
     this.writeLog(LogLevel.LOG, message, context, {
@@ -89,8 +83,7 @@ export class LoggerService {
   /**
    * Log user actions for analytics
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public userAction(action: string, context?: string, data?: any): void {
+  public userAction(action: string, context?: string, data?: Record<string, unknown>): void {
     const message = `👤 User action: ${action}`;
     this.writeLog(LogLevel.LOG, message, context, { action, ...data });
   }
@@ -135,8 +128,7 @@ export class LoggerService {
     level: LogLevel,
     message: string,
     context?: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data?: any,
+    data?: Record<string, unknown>,
     error?: Error,
   ): void {
     // Check if we should log at this level
@@ -224,18 +216,12 @@ export class LoggerService {
    * Create a logger instance for a specific component/service
    */
   public createLogger(context: string): {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    log: (message: string, data?: any) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    warn: (message: string, data?: any) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    error: (message: string, error?: Error | any) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    debug: (message: string, data?: any) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    performance: (operation: string, duration: number, data?: any) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    userAction: (action: string, data?: any) => void;
+    log: (message: string, data?: Record<string, unknown>) => void;
+    warn: (message: string, data?: Record<string, unknown>) => void;
+    error: (message: string, error?: Error | unknown) => void;
+    debug: (message: string, data?: Record<string, unknown>) => void;
+    performance: (operation: string, duration: number, data?: Record<string, unknown>) => void;
+    userAction: (action: string, data?: Record<string, unknown>) => void;
     api: (
       method: string,
       url: string,
@@ -244,21 +230,15 @@ export class LoggerService {
     ) => void;
   } {
     return {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      log: (message: string, data?: any) => this.log(message, context, data),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      warn: (message: string, data?: any) => this.warn(message, context, data),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      error: (message: string, error?: Error | any) =>
+      log: (message: string, data?: Record<string, unknown>) => this.log(message, context, data),
+      warn: (message: string, data?: Record<string, unknown>) => this.warn(message, context, data),
+      error: (message: string, error?: Error | unknown) =>
         this.error(message, context, error),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      debug: (message: string, data?: any) =>
+      debug: (message: string, data?: Record<string, unknown>) =>
         this.debug(message, context, data),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      performance: (operation: string, duration: number, data?: any) =>
+      performance: (operation: string, duration: number, data?: Record<string, unknown>) =>
         this.performance(operation, duration, context, data),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      userAction: (action: string, data?: any) =>
+      userAction: (action: string, data?: Record<string, unknown>) =>
         this.userAction(action, context, data),
       api: (method: string, url: string, status: number, duration?: number) =>
         this.api(method, url, status, duration, context),
@@ -270,8 +250,7 @@ export class LoggerService {
  * Logger decorator for automatic context injection
  */
 export function Logger(context?: string) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return function (target: any, propertyKey: string): void {
+  return function (target: object, propertyKey: string): void {
     const loggerContext = context || target.constructor.name;
 
     Object.defineProperty(target, propertyKey, {

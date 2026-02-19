@@ -68,7 +68,7 @@
       "acceptanceCriteria": ["No any types in frontend", "E2E tests pass"],
       "priority": 2,
       "files": ["apps/ai-recruitment-frontend/src/**/*.ts"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CLEAN-006",

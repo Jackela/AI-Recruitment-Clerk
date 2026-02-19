@@ -25,10 +25,9 @@ export interface SwipeAction {
 /**
  * Defines the shape of the swipe event.
  */
-export interface SwipeEvent {
+export interface SwipeEvent<T = unknown> {
   action: SwipeAction;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  item: any;
+  item: T;
 }
 
 /**
@@ -201,14 +200,13 @@ export interface SwipeEvent {
     `,
   ],
 })
-export class MobileSwipeComponent implements OnInit, OnDestroy {
+export class MobileSwipeComponent<T = unknown> implements OnInit, OnDestroy {
   @Input() public actions: SwipeAction[] = [];
   @Input() public swipeThreshold = 80;
   @Input() public disabled = false;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @Input() public item: any;
+  @Input() public item!: T;
 
-  @Output() public swipeAction = new EventEmitter<SwipeEvent>();
+  @Output() public swipeAction = new EventEmitter<SwipeEvent<T>>();
   @Output() public swipeStart = new EventEmitter<void>();
   @Output() public swipeEnd = new EventEmitter<void>();
 

@@ -298,8 +298,7 @@ export class PWAService {
   /**
    * Add to background sync queue
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async addToSyncQueue(tag: string, data: any): Promise<void> {
+  public async addToSyncQueue(tag: string, data: Record<string, unknown>): Promise<void> {
     if (
       !('serviceWorker' in navigator) ||
       !('sync' in window.ServiceWorkerRegistration.prototype)
@@ -325,8 +324,7 @@ export class PWAService {
   /**
    * Store data for background sync
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async storeForSync(tag: string, data: any): Promise<void> {
+  private async storeForSync(tag: string, data: Record<string, unknown>): Promise<void> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open('arc-mobile-db', 1);
 
@@ -348,8 +346,7 @@ export class PWAService {
       };
 
       request.onupgradeneeded = (event) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const db = (event.target as any).result;
+        const db = (event.target as IDBOpenDBRequest).result;
         if (!db.objectStoreNames.contains(tag)) {
           db.createObjectStore(tag, { keyPath: 'id' });
         }

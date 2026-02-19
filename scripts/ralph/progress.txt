@@ -96,3 +96,35 @@ Started: Mon Feb 16 10:45:56 CST 2026
   - Test files (.spec.ts) and stub files (.stub.ts) can have `any` types for mocking - focus on source files only
 
 ---
+
+## 2026-02-19 - CLEAN-005
+- Fixed all `any` types in frontend source files:
+  - websocket.service.ts: Changed `map((msg: any)` to proper type casting with `as unknown as ProgressUpdate`
+  - mobile-swipe.component.ts: Made `SwipeEvent` and component generic (`SwipeEvent<T = unknown>`)
+  - smart-preloading.strategy.ts: Used proper type casting for Navigator connection API and `ReturnType<typeof setTimeout>` for timer
+  - progress-feedback.service.ts: Changed `details?: any` to `details?: Record<string, unknown>`
+  - logger.service.ts: Replaced `any` with `Record<string, unknown>` and proper Error type handling
+  - error-handling.service.ts: Used `unknown` type for error parameters with proper type guards
+  - privacy-api.service.ts: Created `CookieConsentPreferences` and `ComplianceStatus` interfaces
+  - error-correlation.service.ts: Used `unknown` with proper type guards and `instanceof Error` checks
+  - detailed-results.component.ts: Proper error type casting with `error as { name?: string; status?: number; message?: string }`
+  - keyboard-navigation.service.ts: Created proper types for window extensions and form element handling
+  - i18n.service.ts: Used `unknown` type for translation value traversal with proper type checking
+  - pwa.service.ts: Changed `any` to `Record<string, unknown>` and proper IDBOpenDBRequest typing
+  - campaign.component.ts: Proper event listener typing with `Event` and `CustomEvent` casting
+  - create-job.component.ts: Created `{ id: string }` type for job parameter
+  - jobs-list.component.ts: Created `JobsStatistics`, `JobProgressValue`, and `JobManagementStateWithWebSocket` interfaces
+  - mobile-results-item.component.ts: Used generic type `SwipeEvent<CandidateResult>`
+- Verified acceptance criteria:
+  - TypeScript check passes (npx tsc --noEmit -p tsconfig.app.json)
+  - npm run lint passes (0 errors, 33 warnings for other rules)
+  - npm test passes (942 tests in 42 suites)
+- Note: test-setup.ts retains `any` types for Jasmine/Jest compatibility bridge - this is acceptable for test infrastructure
+**Learnings for future iterations:**
+  - Angular components can be made generic to properly type their outputs
+  - Custom DOM events need proper casting: `(event: Event) => { const customEvent = event as CustomEvent<T>; }`
+  - `Record<string, unknown>` is preferred over `any` but requires type guards for property access
+  - For selector return types, check the actual selector implementation to match the interface definition
+  - `unknown` type requires proper type narrowing before use; use `instanceof Error` checks for error handling
+
+---

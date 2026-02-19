@@ -326,7 +326,7 @@ export class MobileResultsItemComponent {
   /**
    * Performs on swipe action operation.
    */
-  public onSwipeAction(event: SwipeEvent): void {
+  public onSwipeAction(event: SwipeEvent<CandidateResult>): void {
     this.candidateAction.emit({
       action: event.action.id,
       candidate: event.item,

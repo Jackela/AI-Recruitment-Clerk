@@ -373,18 +373,18 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private handleLoadError(error: any): void {
+  private handleLoadError(error: unknown): void {
     this.isLoading.set(false);
     this.hasError.set(true);
 
-    if (error?.name === 'TimeoutError') {
+    const errorObj = error as { name?: string; status?: number; message?: string };
+    if (errorObj?.name === 'TimeoutError') {
       this.errorMessage.set('请求超时，请检查网络连接后重试');
-    } else if (error?.status === 404) {
+    } else if (errorObj?.status === 404) {
       this.errorMessage.set('未找到分析结果，请检查会话ID是否正确');
-    } else if (error?.status === 500) {
+    } else if (errorObj?.status === 500) {
       this.errorMessage.set('服务器错误，请稍后重试');
-    } else if (error?.message?.includes('Network')) {
+    } else if (errorObj?.message?.includes('Network')) {
       this.errorMessage.set('网络连接失败，请检查网络设置');
     } else {
       this.errorMessage.set('加载失败，请稍后重试');
