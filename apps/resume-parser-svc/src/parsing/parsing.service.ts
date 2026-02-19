@@ -882,7 +882,7 @@ export class ParsingService {
           jobId,
           resumeId,
           originalData.fileBuffer,
-          originalData.fileName,
+          originalData.fileName ?? 'unknown-filename',
         );
       } else if (originalData.resumeText) {
         // Retry text-based parsing

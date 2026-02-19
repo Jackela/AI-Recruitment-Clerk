@@ -128,3 +128,20 @@ Started: Mon Feb 16 10:45:56 CST 2026
   - `unknown` type requires proper type narrowing before use; use `instanceof Error` checks for error handling
 
 ---
+
+## 2026-02-19 - CLEAN-006
+- Fixed all TypeScript compilation errors:
+  - apps/resume-parser-svc/src/types/parsing.types.ts: Updated `ExperienceMetrics` interface to match actual return type from `fieldMapperService.calculateExperience()` - added `seniorityLevel: string` and changed `completenessScore` to `confidenceScore`
+  - apps/resume-parser-svc/src/parsing/parsing.service.ts: Fixed TS2345 by providing fallback value `originalData.fileName ?? 'unknown-filename'` when `fileName` is undefined
+  - apps/ai-recruitment-frontend-e2e/global-teardown.ts: Removed unused `@ts-expect-error` directive (TS2578) since the `as` type cast makes the import valid
+- Verified acceptance criteria:
+  - TypeScript check passes (npx tsc --noEmit - 0 errors)
+  - npm run lint passes (0 errors for all 27 projects)
+  - npm test passes (3065 tests in 148 suites)
+**Learnings for future iterations:**
+  - When an interface doesn't match the actual return type, update the interface to match reality rather than changing the implementation
+  - Optional properties in interfaces require fallback values when passed to functions expecting non-optional parameters
+  - `@ts-expect-error` directives can become obsolete when surrounding code changes - remove them if no longer needed
+  - The error message "Unused '@ts-expect-error' directive" (TS2578) means TypeScript expected an error but didn't find one
+
+---

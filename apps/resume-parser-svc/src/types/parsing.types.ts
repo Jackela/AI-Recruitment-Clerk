@@ -95,5 +95,6 @@ export type SortOption = Record<string, 1 | -1 | 'asc' | 'desc'>;
 export interface ExperienceMetrics {
   totalYears: number;
   relevantYears: number;
-  completenessScore: number;
+  seniorityLevel: string;
+  confidenceScore: number;
 }

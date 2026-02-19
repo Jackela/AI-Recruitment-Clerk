@@ -76,7 +76,7 @@
       "description": "Fix 42 warnings related to index signatures and unused DI",
       "acceptanceCriteria": ["No TS7053 warnings", "No TS6138 warnings"],
       "priority": 2,
-      "passes": false
+      "passes": true
     },
     {
       "id": "CLEAN-007",
