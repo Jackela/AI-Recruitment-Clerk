@@ -15,9 +15,17 @@ import {
   FileProcessingService,
   ResumeEncryptionService,
 } from '../processing';
+import type { SecuredResumeDto } from '../processing';
 import { ResumeParserConfigService } from '../config';
 import { createHash } from 'crypto';
 import pdfParse from 'pdf-parse-fork';
+import type { ResumeDTO, FileMetadata } from '@ai-recruitment-clerk/resume-dto';
+import type {
+  ResumeSubmittedEventData,
+  ResumeParseSuccessResult,
+  RetryOriginalData,
+  HealthCheckDetails,
+} from '../types/parsing.types';
 /* eslint-enable @typescript-eslint/consistent-type-imports */
 
 /**
@@ -221,8 +229,7 @@ export class ParsingService {
     resetTimeoutMs: 60000,
     monitorWindow: 300000,
   })
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async handleResumeSubmitted(event: any): Promise<void> {
+  public async handleResumeSubmitted(event: ResumeSubmittedEventData): Promise<void> {
     const {
       jobId,
       resumeId,
@@ -515,8 +522,7 @@ export class ParsingService {
    * @param result - The result.
    * @returns A promise that resolves when the operation completes.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async publishSuccessEvent(result: any): Promise<void> {
+  public async publishSuccessEvent(result: ResumeParseSuccessResult): Promise<void> {
     try {
       this.logger.log(
         `Publishing success event for resumeId: ${result.resumeId}`,
@@ -659,8 +665,7 @@ export class ParsingService {
     error: Error,
     jobId: string,
     resumeId: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    originalData?: any,
+    originalData?: RetryOriginalData,
   ): Promise<void> {
     try {
       this.logger.error(
@@ -747,8 +752,7 @@ export class ParsingService {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private validateResumeDto(resumeDto: any): boolean {
+  private validateResumeDto(resumeDto: ResumeDTO): boolean {
     try {
       // Check required fields
       if (!resumeDto.contactInfo) {
@@ -866,8 +870,7 @@ export class ParsingService {
   private async retryParseOperation(
     jobId: string,
     resumeId: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    originalData: any,
+    originalData: RetryOriginalData,
   ): Promise<void> {
     try {
       this.logger.log(`Retrying parsing operation for resumeId: ${resumeId}`);
@@ -947,8 +950,7 @@ export class ParsingService {
   private async downloadAndValidateFile(
     gridFsUrl: string,
     filename: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    metadata?: any,
+    metadata?: FileMetadata,
   ): Promise<Buffer> {
     const result = await this.fileProcessingService.downloadAndValidateFileWithService(
       (url) => this.gridFsService.downloadFile(url),
@@ -970,11 +972,14 @@ export class ParsingService {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private encryptSensitiveData(resumeDto: any, organizationId: string): any {
+  private encryptSensitiveData(
+    resumeDto: ResumeDTO,
+    organizationId: string,
+  ): SecuredResumeDto {
     // Delegate to ResumeEncryptionService
+    // Cast to Record<string, unknown> for compatibility with encryption service
     return this.resumeEncryptionService.encryptSensitiveData(
-      resumeDto,
+      resumeDto as unknown as Record<string, unknown>,
       organizationId,
     );
   }
@@ -1017,10 +1022,9 @@ export class ParsingService {
   // Enhanced health check with security metrics
   /**
    * Performs the health check operation.
-   * @returns A promise that resolves to { status: string; details: any }.
+   * @returns A promise that resolves to { status: string; details: HealthCheckDetails }.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async healthCheck(): Promise<{ status: string; details: any }> {
+  public async healthCheck(): Promise<{ status: string; details: HealthCheckDetails }> {
     try {
       const natsHealth = await this.natsService.getHealthStatus();
       const retryQueueSize = this.retryCounts.size;

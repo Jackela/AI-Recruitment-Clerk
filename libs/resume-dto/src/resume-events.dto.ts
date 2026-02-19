@@ -7,6 +7,15 @@
 import type { ResumeDTO } from './resume.dto';
 
 /**
+ * File metadata for resume uploads
+ */
+export interface FileMetadata {
+  mimeType?: string;
+  size?: number;
+  encoding?: string;
+}
+
+/**
  * @description NATS Event: job.resume.submitted
  */
 export interface ResumeSubmittedEvent {
@@ -14,6 +23,8 @@ export interface ResumeSubmittedEvent {
   resumeId: string;
   originalFilename: string;
   tempGridFsUrl: string; // 用于内部服务访问的临时URL
+  organizationId?: string;
+  fileMetadata?: FileMetadata;
 }
 
 /**

@@ -6,6 +6,7 @@ import type {
   VisionLlmResponse,
 } from '../dto/resume-parsing.dto';
 import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
+import type { ExperienceMetrics } from '../types/parsing.types';
 
 /**
  * Defines the shape of the resume parsing result.
@@ -358,8 +359,7 @@ export class ResumeParserIntegrationService {
    * Normalize fields with validation
    */
   private async normalizeFields(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    rawData: any,
+    rawData: Record<string, unknown>,
     options: ResumeParsingOptions,
   ): Promise<FieldMappingResult> {
     if (options.enableValidation) {
@@ -381,8 +381,7 @@ export class ResumeParserIntegrationService {
   private calculateQualityMetrics(
     mappingResult: FieldMappingResult,
     visionResult: VisionLlmResponse,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    _experienceMetrics?: any,
+    _experienceMetrics?: ExperienceMetrics,
   ): ResumeParsingResult['qualityMetrics'] {
     const resume = mappingResult.resumeDto;
 

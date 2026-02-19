@@ -22,6 +22,7 @@ import {
   ContractViolationError
 } from '@ai-recruitment-clerk/infrastructure-shared';
 import { createHash } from 'crypto';
+import type { ResumeDTO } from '@ai-recruitment-clerk/resume-dto';
 
 /**
  * Resume parsing result interface
@@ -35,8 +36,7 @@ export interface ParsingResult {
   /** Processing status */
   status: 'processing' | 'completed' | 'failed' | 'partial';
   /** Extracted resume data */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  parsedData?: any;
+  parsedData?: ResumeDTO;
   /** File storage URL */
   fileUrl?: string;
   /** Processing warnings */
@@ -468,25 +468,27 @@ export class ParsingService {
    *
    * @private
    * @method calculateConfidence
-   * @param {any} parsedData - Mapped and validated data
-   * @param {any} rawData - Raw extracted data
+   * @param {ResumeDTO} parsedData - Mapped and validated data
+   * @param {Record<string, unknown>} rawData - Raw extracted data
    *
    * @returns {number} Confidence score between 0 and 1
    *
    * @since 1.1.0
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private calculateConfidence(parsedData: any, rawData: any): number {
+  private calculateConfidence(
+    parsedData: ResumeDTO,
+    rawData: Record<string, unknown>,
+  ): number {
     let score = 0.5; // Base score
 
     // Check for essential fields
-    if (parsedData.personalInfo?.name) score += 0.2;
-    if (parsedData.personalInfo?.email) score += 0.1;
-    if (parsedData.experience?.length > 0) score += 0.1;
-    if (parsedData.skills?.length > 0) score += 0.1;
+    if (parsedData.contactInfo?.name) score += 0.2;
+    if (parsedData.contactInfo?.email) score += 0.1;
+    if (parsedData.workExperience && parsedData.workExperience.length > 0) score += 0.1;
+    if (parsedData.skills && parsedData.skills.length > 0) score += 0.1;
 
     // Check data quality indicators from raw extraction
-    if (rawData.confidence && rawData.confidence > 0.8) score += 0.1;
+    if (rawData.confidence && typeof rawData.confidence === 'number' && rawData.confidence > 0.8) score += 0.1;
 
     return Math.min(score, 1.0);
   }

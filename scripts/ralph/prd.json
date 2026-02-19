@@ -38,7 +38,7 @@
       ],
       "priority": 1,
       "files": ["apps/app-gateway/src/**/*.ts"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CLEAN-003",
@@ -47,7 +47,7 @@
       "acceptanceCriteria": ["No any types in resume-parser-svc", "Tests pass"],
       "priority": 1,
       "files": ["apps/resume-parser-svc/src/**/*.ts"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CLEAN-004",

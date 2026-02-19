@@ -3,6 +3,11 @@ import { InjectModel } from '@nestjs/mongoose';
 import type { Model } from 'mongoose';
 import type { ResumeDocument } from '../schemas/resume.schema';
 import { Resume } from '../schemas/resume.schema';
+import type {
+  ResumeStatusUpdateData,
+  SkillsQueryFilter,
+  SortOption,
+} from '../types/parsing.types';
 
 // Mock DatabasePerformanceMonitor since it doesn't exist yet
 class DatabasePerformanceMonitor {
@@ -133,8 +138,7 @@ export class ResumeRepository {
     errorMessage?: string,
   ): Promise<ResumeDocument | null> {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const updateData: any = { status, processedAt: new Date() };
+      const updateData: ResumeStatusUpdateData = { status, processedAt: new Date() };
       if (errorMessage) {
         updateData.errorMessage = errorMessage;
       }
@@ -257,8 +261,7 @@ export class ResumeRepository {
     return this.performanceMonitor.executeWithMonitoring(
       async () => {
         // Build optimized query that uses composite index
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const query: any = {
+        const query: SkillsQueryFilter = {
           skills: { $in: skills },
           processingConfidence: { $gte: minConfidence },
         };
@@ -270,8 +273,7 @@ export class ResumeRepository {
         }
 
         // Optimize sort to match index order
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let sortOption: any;
+        let sortOption: SortOption;
         switch (sortBy) {
           case 'confidence':
             sortOption = { processingConfidence: -1, processedAt: -1 };
@@ -329,8 +331,7 @@ export class ResumeRepository {
    */
   private async findWithSkillsRelevanceRanked(
     skills: string[],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    baseQuery: any,
+    baseQuery: SkillsQueryFilter,
     limit: number,
     projection?: Record<string, number>,
   ): Promise<ResumeDocument[]> {

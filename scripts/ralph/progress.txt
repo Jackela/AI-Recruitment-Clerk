@@ -44,3 +44,40 @@ Started: Mon Feb 16 10:45:56 CST 2026
   - Use `npx nx run <project>:lint` to verify lint passes
 
 ---
+
+## 2026-02-19 - CLEAN-002
+- Verified CLEAN-002 acceptance criteria are met:
+  - No @typescript-eslint/no-explicit-any errors in app-gateway source files (non-test)
+  - npm run lint for app-gateway passes (0 errors, 31 warnings for other rules)
+  - npm test passes (398 tests in 29 suites)
+- Created apps/app-gateway/src/analytics/analytics.dto.ts with proper typed DTOs
+- Fixed circular dependency: moved ReportFiltersDto before GenerateReportDto
+- Fixed test: analytics.controller.spec.ts now provides required DTO properties
+**Learnings for future iterations:**
+  - When using `@Type(() => ClassName)` in class-validator, the referenced class must be defined before the class using it
+  - Forward references in TypeScript can cause "Cannot access X before initialization" errors
+  - Reordering class definitions is the simplest fix for circular dependency issues
+  - Empty objects `{}` in tests fail type checking when DTOs have required properties
+
+---
+
+## 2026-02-19 - CLEAN-003
+- Fixed all `any` types in resume-parser-svc source files:
+  - libs/resume-dto/src/resume-events.dto.ts: Added `FileMetadata` interface and extended `ResumeSubmittedEvent` with `organizationId` and `fileMetadata` fields
+  - apps/resume-parser-svc/src/types/parsing.types.ts: Created internal types file with proper type definitions
+  - apps/resume-parser-svc/src/parsing/parsing.service.ts: Replaced `any` with proper types (`ResumeSubmittedEventData`, `ResumeParseSuccessResult`, `RetryOriginalData`, `HealthCheckDetails`, `SecuredResumeDto`)
+  - apps/resume-parser-svc/src/repositories/resume.repository.ts: Replaced `any` with `ResumeStatusUpdateData`, `SkillsQueryFilter`, `SortOption`
+  - apps/resume-parser-svc/src/services/resume-parser-nats.service.ts: Replaced `any` with `ResumeSubmittedEventData`
+  - apps/resume-parser-svc/src/integration/resume-parser-integration.service.ts: Replaced `any` with `Record<string, unknown>` and `ExperienceMetrics`
+  - apps/resume-parser-svc/src/parsing/parsing.service.enhanced.ts: Replaced `any` with `ResumeDTO` and `Record<string, unknown>`
+- Verified acceptance criteria:
+  - npm run lint for resume-parser-svc passes (0 errors, 4 warnings for empty methods)
+  - npm test passes (432 tests in 19 suites)
+**Learnings for future iterations:**
+  - Create internal types files (`types/parsing.types.ts`) for service-specific types that don't need to be shared
+  - `Record<string, unknown>` is a safe alternative to `any` for JSON-like data from external sources
+  - Mongoose's `Sort` type requires specific values: `Record<string, 1 | -1 | 'asc' | 'desc'>`
+  - When a function parameter expects `Record<string, unknown>` but receives an interface without index signature, cast with `as unknown as Record<string, unknown>`
+  - Test files (.spec.ts) and stub files (.stub.ts) can have `any` types for mocking - focus on source files only
+
+---
