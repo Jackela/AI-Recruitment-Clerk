@@ -145,3 +145,30 @@ Started: Mon Feb 16 10:45:56 CST 2026
   - The error message "Unused '@ts-expect-error' directive" (TS2578) means TypeScript expected an error but didn't find one
 
 ---
+
+---
+
+## 2026-02-20 - SPLIT-001
+- Split incentive.dto.ts (1,182 lines) into 7 modular files under libs/shared-dtos/src/domains/incentive/
+- Created files:
+  - incentive-enums.ts (60 lines) - All enums: IncentiveStatus, VerificationStatus, Currency, RewardType, TriggerType, PaymentMethod
+  - incentive-interfaces.ts (73 lines) - All interfaces: ContactInfoData, IncentiveRewardData, IncentiveTriggerData, IncentiveRecipientData, IncentiveTriggerRestoreData, IncentiveData
+  - incentive-value-objects.ts (463 lines) - Value objects: IncentiveId, IncentiveRecipient, ContactInfo, IncentiveReward, IncentiveTrigger
+  - incentive-results.ts (131 lines) - Result classes: IncentiveValidationResult, PaymentResult, IncentiveSummary
+  - incentive-events.ts (180 lines) - Domain events: IncentiveCreatedEvent, IncentiveValidatedEvent, IncentiveValidationFailedEvent, IncentiveApprovedEvent, IncentiveRejectedEvent, IncentivePaidEvent, PaymentFailedEvent
+  - incentive-aggregate.ts (443 lines) - Incentive aggregate root class
+  - index.ts (54 lines) - Barrel export for backward compatibility
+- Updated original incentive.dto.ts to re-export from the modular directory
+- All files under 500 lines (largest is 463 lines)
+- Verified acceptance criteria:
+  - TypeScript check passes (npx tsc --noEmit)
+  - npm run lint passes (0 errors, 27 warnings)
+  - npm test passes (819 tests in 33 suites)
+**Learnings for future iterations:**
+  - When splitting large files, identify natural boundaries: enums, interfaces, value objects, result classes, events, aggregate root
+  - Barrel export (`export * from './module'`) maintains backward compatibility for existing imports
+  - The `@deprecated` JSDoc comment helps guide developers to new import paths
+  - Value objects that reference other value objects need proper import ordering
+  - Domain events should be in their own file to keep aggregate root focused
+
+---

@@ -108,7 +108,7 @@
       ],
       "priority": 1,
       "dependsOn": ["CLEAN-001"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "SPLIT-002",
