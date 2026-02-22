@@ -1,35 +1,24 @@
-import type {
-  OnModuleInit} from '@nestjs/common';
-import {
-  Injectable,
-  Logger,
-  NotFoundException,
-  ForbiddenException
-} from '@nestjs/common';
+import type { OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import type { CreateJobDto } from './dto/create-job.dto';
 import { ResumeUploadResponseDto } from './dto/resume-upload.dto';
 import type { MulterFile } from './types/multer.types';
 import { JobListDto, JobDetailDto } from './dto/job-response.dto';
 import type { ResumeListItemDto, ResumeDetailDto } from './dto/resume-response.dto';
-import type { AnalysisReportDto} from './dto/report-response.dto';
+import type { AnalysisReportDto } from './dto/report-response.dto';
 import { ReportsListDto } from './dto/report-response.dto';
 import type { JobRepository } from '../repositories/job.repository';
-import type {
-  UserDto} from '@ai-recruitment-clerk/user-management-domain';
-import {
-  UserRole,
-} from '@ai-recruitment-clerk/user-management-domain';
+import type { UserDto } from '@ai-recruitment-clerk/user-management-domain';
+import { UserRole } from '@ai-recruitment-clerk/user-management-domain';
 import type { JobJdSubmittedEvent } from '@ai-recruitment-clerk/job-management-domain';
 import type { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
 import type { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
-import type {
-  CacheService,
-  SemanticCacheOptions,
-} from '../cache/cache.service';
+import type { CacheService } from '../cache/cache.service';
 import type { Job, JobDocument } from '../schemas/job.schema';
 import type { WebSocketGateway } from '../websocket/websocket.gateway';
 import type { ConfigService } from '@nestjs/config';
+import { JobsSemanticCacheService, JobsEventService } from './services';
 
 type JobUpdateStatus =
   | 'processing'
@@ -39,67 +28,35 @@ type JobUpdateStatus =
   | 'draft'
   | 'closed';
 
-interface SemanticJobCacheEntry {
-  cacheKey: string;
-  jobId: string;
-  jobTitle: string;
-  organizationId?: string;
-  status: JobUpdateStatus;
-  extractedKeywords: string[];
-  jdExtractionConfidence: number;
-  jdProcessedAt: string;
-  source: 'semantic-cache';
-  semanticSimilarity?: number;
-  lastUsedAt?: string;
-}
-
 /**
- * Provides jobs functionality.
+ * Main facade service for jobs functionality.
+ * Delegates specialized operations to sub-services:
+ * - JobsSemanticCacheService: Semantic cache operations
+ * - JobsEventService: NATS subscriptions and event handling
  */
 @Injectable()
 export class JobsService implements OnModuleInit {
   private readonly logger = new Logger(JobsService.name);
-  private readonly semanticCacheEnabled: boolean;
-  private readonly semanticCacheThreshold: number;
-  private readonly semanticCacheTtlMs: number;
-  private readonly semanticCacheMaxResults: number;
+  private readonly semanticCacheService: JobsSemanticCacheService;
+  private readonly eventService: JobsEventService;
 
-  /**
-   * Initializes a new instance of the Jobs Service.
-   * @param jobRepository - The job repository for MongoDB persistence.
-   * @param natsClient - The nats client.
-   * @param cacheService - The cache service.
-   * @param webSocketGateway - The WebSocket gateway for real-time updates.
-   */
   constructor(
     private readonly jobRepository: JobRepository,
     private readonly natsClient: AppGatewayNatsService,
     private readonly cacheService: CacheService,
     private readonly webSocketGateway: WebSocketGateway,
-    private readonly configService: ConfigService,
+    configService: ConfigService,
   ) {
-    this.semanticCacheEnabled =
-      (this.configService.get<string>('SEMANTIC_CACHE_ENABLED') ?? 'true') !==
-      'false';
-    this.semanticCacheThreshold = this.normalizeThreshold(
-      this.configService.get<string | number>(
-        'SEMANTIC_CACHE_SIMILARITY_THRESHOLD',
-      ),
+    this.semanticCacheService = new JobsSemanticCacheService(
+      cacheService,
+      configService,
     );
-    this.semanticCacheTtlMs = this.normalizePositiveNumber(
-      this.configService.get<string | number>('SEMANTIC_CACHE_TTL_MS'),
-      1000 * 60 * 60 * 24,
-    );
-    this.semanticCacheMaxResults = Math.max(
-      1,
-      Math.floor(
-        this.normalizePositiveNumber(
-          this.configService.get<string | number>(
-            'SEMANTIC_CACHE_MAX_RESULTS',
-          ),
-          5,
-        ),
-      ),
+    this.eventService = new JobsEventService(
+      jobRepository,
+      natsClient,
+      cacheService,
+      webSocketGateway,
+      this.semanticCacheService,
     );
   }
 
@@ -107,23 +64,7 @@ export class JobsService implements OnModuleInit {
    * Initializes NATS event subscriptions for job processing workflow.
    */
   public async onModuleInit(): Promise<void> {
-    try {
-      // Subscribe to analysis.jd.extracted events (successful JD extraction)
-      await this.subscribeToAnalysisCompleted();
-
-      // Subscribe to job.jd.failed events (JD extraction failures)
-      await this.subscribeToAnalysisFailed();
-
-      this.logger.log(
-        '✅ Successfully initialized NATS event subscriptions for job workflow',
-      );
-    } catch (error) {
-      this.logger.error(
-        '❌ Failed to initialize NATS event subscriptions:',
-        error,
-      );
-      // Continue startup even if NATS subscriptions fail (graceful degradation)
-    }
+    await this.eventService.initializeSubscriptions();
   }
 
   private hasAccessToResource(
@@ -144,7 +85,6 @@ export class JobsService implements OnModuleInit {
     return user.organizationId === resourceOrganizationId;
   }
 
-
   /**
    * Creates job.
    * @param dto - The dto.
@@ -160,12 +100,11 @@ export class JobsService implements OnModuleInit {
       description: dto.jdText,
       status: 'processing',
       createdBy: user.id,
-      company: user.organizationId ?? 'Unknown', // Use organizationId as company for now
-      // Set organization context for multi-tenant access control
+      company: user.organizationId ?? 'Unknown',
       organizationId: user.organizationId,
     };
 
-    if (this.semanticCacheEnabled) {
+    if (this.semanticCacheService.isEnabled()) {
       const reusedJobId = await this.tryCreateJobWithSemanticCache(
         dto,
         user,
@@ -190,23 +129,12 @@ export class JobsService implements OnModuleInit {
     user: UserDto,
     baseJobData: Partial<Job>,
   ): Promise<string | null> {
-    let cacheEntry: SemanticJobCacheEntry | null = null;
-    try {
-      cacheEntry =
-        await this.cacheService.wrapSemantic<SemanticJobCacheEntry | null>(
-          dto.jdText,
-          async () => null,
-          this.buildSemanticCacheOptions(),
-        );
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      this.logger.warn(
-        `Semantic cache lookup failed for JD reuse (fallback to pipeline): ${message}`,
-      );
-      return null;
-    }
+    const cacheEntry = await this.semanticCacheService.tryGetSemanticCache(
+      dto.jdText,
+      user,
+    );
 
-    if (!cacheEntry || !this.canReuseSemanticEntry(cacheEntry, user)) {
+    if (!cacheEntry) {
       return null;
     }
 
@@ -220,16 +148,15 @@ export class JobsService implements OnModuleInit {
 
     try {
       const savedJob = await this.jobRepository.create(jobData);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const actualJobId = (savedJob as any)._id.toString();
+      const actualJobId = this.semanticCacheService.getJobId(savedJob);
 
       this.logger.log(
-        `♻️ Reused semantic analysis from job ${cacheEntry.jobId} for new job ${actualJobId} (similarity ${(cacheEntry.semanticSimilarity ?? 0).toFixed(3)})`,
+        `Reused semantic analysis from job ${cacheEntry.jobId} for new job ${actualJobId} (similarity ${(cacheEntry.semanticSimilarity ?? 0).toFixed(3)})`,
       );
 
-      await this.refreshSemanticCacheEntry(cacheEntry);
+      await this.semanticCacheService.refreshSemanticCacheEntry(cacheEntry);
 
-      await this.emitJobUpdateEvent({
+      await this.eventService.emitJobUpdatedEvent({
         jobId: actualJobId,
         title: dto.jobTitle,
         status: 'completed',
@@ -252,118 +179,6 @@ export class JobsService implements OnModuleInit {
     }
   }
 
-  private canReuseSemanticEntry(
-    entry: SemanticJobCacheEntry,
-    user: UserDto,
-  ): boolean {
-    if (!entry || entry.status !== 'completed') {
-      return false;
-    }
-
-    if (
-      !Array.isArray(entry.extractedKeywords) ||
-      entry.extractedKeywords.length === 0
-    ) {
-      return false;
-    }
-
-    if (
-      entry.organizationId &&
-      user.organizationId &&
-      entry.organizationId !== user.organizationId
-    ) {
-      this.logger.debug(
-        `Semantic cache entry ${entry.jobId} belongs to organization ${entry.organizationId}, skipping reuse for ${user.organizationId}`,
-      );
-      return false;
-    }
-
-    return true;
-  }
-
-  private async refreshSemanticCacheEntry(
-    entry: SemanticJobCacheEntry,
-  ): Promise<void> {
-    if (!entry.cacheKey) {
-      return;
-    }
-    const payload = {
-      ...entry,
-      lastUsedAt: new Date().toISOString(),
-    };
-    try {
-      await this.cacheService.set(entry.cacheKey, payload, {
-        ttl: this.semanticCacheTtlMs,
-      });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      this.logger.warn(
-        `Failed to refresh semantic cache entry ${entry.cacheKey}: ${message}`,
-      );
-    }
-  }
-
-  private async registerSemanticCacheEntry(
-    job: JobDocument,
-    extractedKeywords: string[],
-    confidence: number,
-  ): Promise<void> {
-    if (
-      !this.semanticCacheEnabled ||
-      !job ||
-      typeof job.description !== 'string'
-    ) {
-      return;
-    }
-
-    const jobId = this.getJobId(job);
-    if (!jobId) {
-      return;
-    }
-
-    const cacheKey = this.cacheService.generateKey('semantic', 'job', jobId);
-    const payload: SemanticJobCacheEntry = {
-      cacheKey,
-      jobId,
-      jobTitle: job.title,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      organizationId: (job as any).organizationId,
-      status: 'completed',
-      extractedKeywords,
-      jdExtractionConfidence: confidence,
-      jdProcessedAt: new Date().toISOString(),
-      source: 'semantic-cache',
-    };
-
-    try {
-      await this.cacheService.wrapSemantic<SemanticJobCacheEntry>(
-        job.description,
-        async () => payload,
-        this.buildSemanticCacheOptions({
-          cacheKey,
-          forceRefresh: true,
-        }),
-      );
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      this.logger.warn(
-        `Failed to register semantic cache entry for job ${jobId}: ${message}`,
-      );
-    }
-  }
-
-  private getJobId(job: JobDocument | null | undefined): string {
-    if (!job) {
-      return '';
-    }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rawId = (job as any)._id ?? (job as any).id;
-    if (rawId && typeof rawId === 'object' && typeof rawId.toString === 'function') {
-      return rawId.toString();
-    }
-    return typeof rawId === 'string' ? rawId : '';
-  }
-
   private async createJobWithProcessingPipeline(
     dto: CreateJobDto,
     user: UserDto,
@@ -371,14 +186,13 @@ export class JobsService implements OnModuleInit {
   ): Promise<string> {
     try {
       const savedJob = await this.jobRepository.create(jobData);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const actualJobId = (savedJob as any)._id.toString();
+      const actualJobId = this.semanticCacheService.getJobId(savedJob);
 
       this.logger.log(
         `Created job ${actualJobId} for user ${user.id} in organization ${user.organizationId}`,
       );
 
-      await this.emitJobUpdateEvent({
+      await this.eventService.emitJobUpdatedEvent({
         jobId: actualJobId,
         title: dto.jobTitle,
         status: 'processing',
@@ -423,36 +237,6 @@ export class JobsService implements OnModuleInit {
     }
   }
 
-  private async emitJobUpdateEvent(payload: {
-    jobId: string;
-    title: string;
-    status: JobUpdateStatus;
-    organizationId?: string;
-    updatedBy?: string;
-    metadata?: Record<string, unknown>;
-  }): Promise<void> {
-    try {
-      this.webSocketGateway.emitJobUpdated({
-        jobId: payload.jobId,
-        title: payload.title,
-        status: payload.status,
-        timestamp: new Date(),
-        organizationId: payload.organizationId,
-        updatedBy: payload.updatedBy,
-        metadata: payload.metadata,
-      });
-
-      this.logger.log(
-        `📡 Emitted WebSocket job_updated event for job ${payload.jobId} (status: ${payload.status})`,
-      );
-    } catch (wsError) {
-      this.logger.error(
-        `❌ Failed to emit WebSocket event for job ${payload.jobId}:`,
-        wsError,
-      );
-    }
-  }
-
   /**
    * Performs the upload resumes operation.
    * @param jobId - The job id.
@@ -470,28 +254,24 @@ export class JobsService implements OnModuleInit {
     }
 
     try {
-      // Validate job exists and user has access
       const job = await this.jobRepository.findById(jobId);
       if (!job) {
         throw new NotFoundException(`Job with ID ${jobId} not found`);
       }
 
-      // Check if user has access to this job
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (!this.hasAccessToResource(user, (job as any).organizationId)) {
         throw new ForbiddenException('Access denied to this job');
       }
 
-      // Process each uploaded resume file
       const publishPromises = files.map(async (file) => {
         const resumeId = randomUUID();
 
-        // Publish the NATS event for each resume
         const resumeSubmittedEvent: ResumeSubmittedEvent = {
           jobId,
           resumeId,
           originalFilename: file.originalname,
-          tempGridFsUrl: `/temp/uploads/${resumeId}`, // Temporary URL for internal service access
+          tempGridFsUrl: `/temp/uploads/${resumeId}`,
         };
 
         try {
@@ -517,7 +297,6 @@ export class JobsService implements OnModuleInit {
         }
       });
 
-      // Wait for all resume processing to initiate
       const results = await Promise.all(publishPromises);
       const successCount = results.filter(Boolean).length;
 
@@ -551,12 +330,11 @@ export class JobsService implements OnModuleInit {
           return jobDocuments.map(
             (job) =>
               new JobListDto(
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                (job as any)._id.toString(),
+                this.semanticCacheService.getJobId(job),
                 job.title,
                 job.status as 'processing' | 'completed',
                 job.createdAt,
-                0, // Resume count will be handled by resume service
+                0,
               ),
           );
         } catch (error) {
@@ -564,7 +342,7 @@ export class JobsService implements OnModuleInit {
           throw error;
         }
       },
-      { ttl: 120000 }, // 2分钟缓存(120000毫秒)，职位列表更新不频繁
+      { ttl: 120000 },
     );
   }
 
@@ -580,15 +358,13 @@ export class JobsService implements OnModuleInit {
         throw new NotFoundException(`Job with ID ${jobId} not found`);
       }
 
-      // Convert JobDocument to JobDetailDto
       return new JobDetailDto(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (job as any)._id.toString(),
+        this.semanticCacheService.getJobId(job),
         job.title,
         job.description,
         job.status as 'processing' | 'completed',
         job.createdAt,
-        0, // Resume count will be handled by resume service
+        0,
       );
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -601,20 +377,16 @@ export class JobsService implements OnModuleInit {
 
   /**
    * Retrieves resumes by job id.
-   * NOTE: This method validates job existence. Resume data should be handled by ResumeService.
    * @param jobId - The job id.
    * @returns A promise that resolves to an array of ResumeListItemDto.
    */
   public async getResumesByJobId(jobId: string): Promise<ResumeListItemDto[]> {
     try {
-      // Validate job exists
       const job = await this.jobRepository.findById(jobId);
       if (!job) {
         throw new NotFoundException(`Job with ID ${jobId} not found`);
       }
 
-      // TODO: Delegate to ResumeService once implemented
-      // For now, return empty array as resumes should be handled by resume service
       this.logger.warn(
         `Resume retrieval for job ${jobId} should be handled by ResumeService`,
       );
@@ -633,12 +405,10 @@ export class JobsService implements OnModuleInit {
 
   /**
    * Retrieves resume by id.
-   * NOTE: This method should be handled by ResumeService.
    * @param resumeId - The resume id.
    * @returns A promise that resolves to ResumeDetailDto.
    */
   public async getResumeById(resumeId: string): Promise<ResumeDetailDto> {
-    // TODO: Delegate to ResumeService once implemented
     this.logger.warn(
       `Resume retrieval for resumeId ${resumeId} should be handled by ResumeService`,
     );
@@ -649,20 +419,16 @@ export class JobsService implements OnModuleInit {
 
   /**
    * Retrieves reports by job id.
-   * NOTE: This method validates job existence. Report data should be handled by ReportService.
    * @param jobId - The job id.
    * @returns A promise that resolves to ReportsListDto.
    */
   public async getReportsByJobId(jobId: string): Promise<ReportsListDto> {
     try {
-      // Validate job exists
       const job = await this.jobRepository.findById(jobId);
       if (!job) {
         throw new NotFoundException(`Job with ID ${jobId} not found`);
       }
 
-      // TODO: Delegate to ReportService once implemented
-      // For now, return empty reports list as reports should be handled by report service
       this.logger.warn(
         `Report retrieval for job ${jobId} should be handled by ReportService`,
       );
@@ -681,404 +447,15 @@ export class JobsService implements OnModuleInit {
 
   /**
    * Retrieves report by id.
-   * NOTE: This method should be handled by ReportService.
    * @param reportId - The report id.
    * @returns A promise that resolves to AnalysisReportDto.
    */
   public async getReportById(reportId: string): Promise<AnalysisReportDto> {
-    // TODO: Delegate to ReportService once implemented
     this.logger.warn(
       `Report retrieval for reportId ${reportId} should be handled by ReportService`,
     );
     throw new NotFoundException(
       'Report operations should be handled by ReportService',
     );
-  }
-
-  // Helper methods
-
-  // NATS Subscription Methods
-
-  /**
-   * Sets up subscription to analysis.jd.extracted events.
-   */
-  private async subscribeToAnalysisCompleted(): Promise<void> {
-    this.logger.log(
-      '📡 Setting up subscription to analysis.jd.extracted events',
-    );
-
-    await this.natsClient.subscribeToAnalysisCompleted(
-      this.handleJdAnalysisCompleted.bind(this),
-    );
-
-    this.logger.log(
-      '✅ Successfully subscribed to analysis.jd.extracted events',
-    );
-  }
-
-  /**
-   * Sets up subscription to job.jd.failed events.
-   */
-  private async subscribeToAnalysisFailed(): Promise<void> {
-    this.logger.log('📡 Setting up subscription to job.jd.failed events');
-
-    await this.natsClient.subscribeToAnalysisFailed(
-      this.handleJdAnalysisFailed.bind(this),
-    );
-
-    this.logger.log('✅ Successfully subscribed to job.jd.failed events');
-  }
-
-  // NATS Event Handlers
-
-  /**
-   * Handles successful JD analysis completion events.
-   * Updates job status to 'completed' and stores analysis results in MongoDB.
-   *
-   * @param event - The analysis.jd.extracted event payload
-   * @param metadata - Message metadata from NATS
-   */
-  private async handleJdAnalysisCompleted(
-    event: {
-      jobId: string;
-      extractedData: Record<string, unknown>;
-      processingTimeMs: number;
-      confidence: number;
-      extractionMethod: string;
-      eventType: 'AnalysisJdExtractedEvent';
-      timestamp: string;
-      version: string;
-      service: string;
-      performance: {
-        processingTimeMs: number;
-        extractionMethod: string;
-      };
-      quality: {
-        confidence: number;
-        extractedFields: number;
-      };
-    },
-    _metadata?: unknown,
-  ): Promise<void> {
-    const startTime = Date.now();
-
-    try {
-      this.logger.log(
-        `📨 Processing analysis.jd.extracted event for jobId: ${event.jobId}, confidence: ${event.quality?.confidence ?? event.confidence}, fields: ${event.quality?.extractedFields}`,
-      );
-
-      // Validate event payload
-      if (!event.jobId) {
-        this.logger.error(
-          '❌ Invalid analysis.jd.extracted event: missing jobId',
-        );
-        return;
-      }
-
-      // Check if job exists
-      const job = await this.jobRepository.findById(event.jobId);
-      if (!job) {
-        this.logger.warn(
-          `⚠️ Job ${event.jobId} not found for analysis completion - job may have been deleted`,
-        );
-        return;
-      }
-
-      // Extract keywords from the analysis data
-      const extractedKeywords: string[] = this.extractKeywordsFromAnalysis(
-        event.extractedData,
-      );
-      const confidence = event.quality?.confidence ?? event.confidence ?? 0.85;
-
-      // Update job with analysis results and set status to completed
-      await Promise.all([
-        this.jobRepository.updateJdAnalysis(
-          event.jobId,
-          extractedKeywords,
-          confidence,
-        ),
-        this.jobRepository.updateStatus(event.jobId, 'completed'),
-      ]);
-
-      await this.registerSemanticCacheEntry(
-        job,
-        extractedKeywords,
-        confidence,
-      );
-
-      // Clear related caches
-      await this.cacheService.del(
-        this.cacheService.generateKey('jobs', 'list'),
-      );
-
-      // Emit WebSocket event for real-time job status update
-      try {
-        this.webSocketGateway.emitJobUpdated({
-          jobId: event.jobId,
-          title: job.title,
-          status: 'completed',
-          timestamp: new Date(),
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          organizationId: (job as any).organizationId,
-          metadata: {
-            confidence,
-            extractedKeywords,
-            processingTime:
-              event.performance?.processingTimeMs ?? event.processingTimeMs,
-          },
-        });
-
-        this.logger.log(
-          `📡 Emitted WebSocket job_updated event for completed job ${event.jobId}`,
-        );
-      } catch (wsError) {
-        this.logger.error(
-          `❌ Failed to emit WebSocket event for job ${event.jobId}:`,
-          wsError,
-        );
-        // Don't fail the entire operation if WebSocket emission fails
-      }
-
-      const processingTime = Date.now() - startTime;
-      this.logger.log(
-        `✅ Successfully processed JD analysis completion for jobId: ${event.jobId} - Status: completed, Keywords: ${extractedKeywords.length}, Confidence: ${confidence}, Time: ${processingTime}ms`,
-      );
-    } catch (error) {
-      const processingTime = Date.now() - startTime;
-      this.logger.error(
-        `❌ Error processing JD analysis completion for jobId: ${event.jobId} (${processingTime}ms):`,
-        error,
-      );
-
-      // On error processing the completion event, mark job as failed
-      try {
-        await this.jobRepository.updateStatus(event.jobId, 'failed');
-        this.logger.log(
-          `Updated job ${event.jobId} status to 'failed' due to event processing error`,
-        );
-      } catch (updateError) {
-        this.logger.error(
-          `Failed to update job ${event.jobId} status to failed:`,
-          updateError,
-        );
-      }
-    }
-  }
-
-  /**
-   * Handles JD analysis failure events.
-   * Updates job status to 'failed' in MongoDB.
-   *
-   * @param event - The job.jd.failed event payload
-   * @param metadata - Message metadata from NATS
-   */
-  private async handleJdAnalysisFailed(
-    event: {
-      jobId: string;
-      error: {
-        message: string;
-        stack?: string;
-        name: string;
-        type: string;
-      };
-      context: {
-        service: string;
-        stage: string;
-        inputSize?: number;
-        retryAttempt: number;
-      };
-      timestamp: string;
-      eventType: 'JobJdFailedEvent';
-      version: string;
-      severity: 'low' | 'medium' | 'high' | 'critical';
-    },
-    _metadata?: unknown,
-  ): Promise<void> {
-    const startTime = Date.now();
-
-    try {
-      this.logger.log(
-        `📨 Processing job.jd.failed event for jobId: ${event.jobId}, severity: ${event.severity}, stage: ${event.context.stage}`,
-      );
-
-      // Validate event payload
-      if (!event.jobId) {
-        this.logger.error('❌ Invalid job.jd.failed event: missing jobId');
-        return;
-      }
-
-      // Check if job exists
-      const job = await this.jobRepository.findById(event.jobId);
-      if (!job) {
-        this.logger.warn(
-          `⚠️ Job ${event.jobId} not found for failure handling - job may have been deleted`,
-        );
-        return;
-      }
-
-      // Update job status to failed
-      await this.jobRepository.updateStatus(event.jobId, 'failed');
-
-      // Clear related caches
-      await this.cacheService.del(
-        this.cacheService.generateKey('jobs', 'list'),
-      );
-
-      // Emit WebSocket event for real-time job status update
-      try {
-        this.webSocketGateway.emitJobUpdated({
-          jobId: event.jobId,
-          title: job.title,
-          status: 'failed',
-          timestamp: new Date(),
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          organizationId: (job as any).organizationId,
-          metadata: {
-            errorMessage: event.error.message,
-          },
-        });
-
-        this.logger.log(
-          `📡 Emitted WebSocket job_updated event for failed job ${event.jobId}`,
-        );
-      } catch (wsError) {
-        this.logger.error(
-          `❌ Failed to emit WebSocket event for job ${event.jobId}:`,
-          wsError,
-        );
-        // Don't fail the entire operation if WebSocket emission fails
-      }
-
-      const processingTime = Date.now() - startTime;
-      this.logger.log(
-        `✅ Successfully processed JD analysis failure for jobId: ${event.jobId} - Status: failed, Error: ${event.error.message}, Severity: ${event.severity}, Time: ${processingTime}ms`,
-      );
-
-      // Log detailed error for high/critical severity issues
-      if (event.severity === 'high' || event.severity === 'critical') {
-        this.logger.error(
-          `🚨 High severity JD analysis failure for jobId: ${event.jobId}:`,
-          {
-            error: event.error,
-            context: event.context,
-            severity: event.severity,
-            retryAttempt: event.context.retryAttempt,
-          },
-        );
-      }
-    } catch (error) {
-      const processingTime = Date.now() - startTime;
-      this.logger.error(
-        `❌ Error processing JD analysis failure for jobId: ${event.jobId} (${processingTime}ms):`,
-        error,
-      );
-
-      // Even if we can't process the failure event, we should still try to mark the job as failed
-      try {
-        await this.jobRepository.updateStatus(event.jobId, 'failed');
-        this.logger.log(
-          `Updated job ${event.jobId} status to 'failed' due to failure event processing error`,
-        );
-      } catch (updateError) {
-        this.logger.error(
-          `Failed to update job ${event.jobId} status to failed:`,
-          updateError,
-        );
-      }
-    }
-  }
-
-  private buildSemanticCacheOptions(
-    overrides: Partial<SemanticCacheOptions> = {},
-  ): SemanticCacheOptions {
-    return {
-      ttl: this.semanticCacheTtlMs,
-      similarityThreshold: this.semanticCacheThreshold,
-      maxResults: this.semanticCacheMaxResults,
-      ...overrides,
-    };
-  }
-
-  private normalizeThreshold(value: string | number | undefined): number {
-    const numeric = this.normalizePositiveNumber(value, 0.92);
-    return Math.min(Math.max(numeric, 0), 1);
-  }
-
-  private normalizePositiveNumber(
-    value: string | number | undefined,
-    fallback: number,
-  ): number {
-    if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
-      return value;
-    }
-    if (typeof value === 'string') {
-      const parsed = Number.parseFloat(value);
-      if (Number.isFinite(parsed) && parsed > 0) {
-        return parsed;
-      }
-    }
-    return fallback;
-  }
-
-  /**
-   * Extracts keywords from the analysis data structure.
-   *
-   * @param analysisData - The extracted data from JD analysis
-   * @returns Array of extracted keywords
-   */
-  private extractKeywordsFromAnalysis(analysisData: Record<string, unknown>): string[] {
-    try {
-      if (!analysisData || typeof analysisData !== 'object') {
-        return [];
-      }
-
-      const keywords: string[] = [];
-
-      // Extract skills if available
-      if (Array.isArray(analysisData.skills)) {
-        keywords.push(
-          ...analysisData.skills.filter(
-            (skill: unknown) => typeof skill === 'string',
-          ),
-        );
-      }
-
-      // Extract requirements/keywords if available
-      if (Array.isArray(analysisData.requirements)) {
-        analysisData.requirements.forEach((req: unknown) => {
-          if (req && typeof req === 'object' && 'skill' in req && typeof (req as Record<string, unknown>).skill === 'string') {
-            keywords.push((req as Record<string, unknown>).skill as string);
-          }
-        });
-      }
-
-      // Extract other keyword fields if available
-      if (Array.isArray(analysisData.keywords)) {
-        keywords.push(
-          ...analysisData.keywords.filter(
-            (keyword: unknown) => typeof keyword === 'string',
-          ),
-        );
-      }
-
-      if (Array.isArray(analysisData.extractedKeywords)) {
-        keywords.push(
-          ...analysisData.extractedKeywords.filter(
-            (keyword: unknown) => typeof keyword === 'string',
-          ),
-        );
-      }
-
-      // Deduplicate and clean keywords
-      const uniqueKeywords = [...new Set(keywords)]
-        .map((keyword) => keyword.trim())
-        .filter((keyword) => keyword.length > 0)
-        .slice(0, 20); // Limit to top 20 keywords
-
-      return uniqueKeywords;
-    } catch (error) {
-      this.logger.warn('Error extracting keywords from analysis data:', error);
-      return [];
-    }
   }
 }
