@@ -193,3 +193,28 @@ Started: Mon Feb 16 10:45:56 CST 2026
   - The `getJobId` utility method belongs in the semantic cache service since it's primarily used for cache key generation
 
 ---
+
+## 2026-02-22 - SPLIT-003
+- Split parsing.service.ts (1,086 lines) into 5 modular files under apps/resume-parser-svc/src/parsing/
+- Created files:
+  - services/parsing-event.service.ts (233 lines): NATS event publishing (publishSuccessEvent, publishFailureEvent, publishProcessingError)
+  - services/parsing-retry.service.ts (313 lines): Error handling, retry logic, exponential backoff, processing file tracking
+  - services/parsing-health.service.ts (119 lines): Health checks, security metrics, processing stats
+  - services/parsing-file.service.ts (178 lines): File operations, validation, encryption, text extraction
+  - services/index.ts (4 lines): Barrel export for sub-services
+- Refactored parsing.service.ts (246 lines): Main orchestrator that delegates to sub-services
+- Verified acceptance criteria:
+  - All files under 500 lines (largest is 313 lines)
+  - Orchestrator pattern implemented (ParsingService delegates to 4 sub-services)
+  - npm test passes (432 tests in 19 suites)
+  - TypeScript check passes (npx tsc --noEmit)
+  - Lint passes (0 errors, 4 pre-existing warnings)
+- Added backward-compatible `extractTextFromMaybeTextFile` method for existing tests
+**Learnings for future iterations:**
+  - When splitting large services, identify natural boundaries: events, retry logic, health/metrics, file operations
+  - Orchestrator pattern keeps main service focused on coordination while sub-services handle specialized logic
+  - Sub-services can be instantiated in constructor and stored as private properties
+  - Existing tests that call private methods directly need forwarding methods for backward compatibility
+  - Remove unused imports when refactoring (e.g., ResumeDTO, FileMetadata after moving file operations)
+
+---
