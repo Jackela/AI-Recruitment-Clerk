@@ -121,7 +121,7 @@
       ],
       "priority": 1,
       "dependsOn": ["CLEAN-002"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "SPLIT-003",
@@ -134,7 +134,7 @@
       ],
       "priority": 1,
       "dependsOn": ["CLEAN-003"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "SPLIT-004",

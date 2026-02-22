@@ -172,3 +172,24 @@ Started: Mon Feb 16 10:45:56 CST 2026
   - Domain events should be in their own file to keep aggregate root focused
 
 ---
+
+## 2026-02-22 - SPLIT-002
+- Split jobs.service.ts (1,084 lines) into 3 modular files under apps/app-gateway/src/jobs/
+- Created files:
+  - services/jobs-semantic-cache.service.ts (280 lines): Semantic cache operations including cache lookup, reuse validation, and entry registration
+  - services/jobs-event.service.ts (391 lines): NATS subscriptions and event handlers for JD analysis completion/failure
+  - services/index.ts (2 lines): Barrel export for sub-services
+- Refactored jobs.service.ts (461 lines): Main facade that delegates to sub-services while maintaining all public API
+- Verified acceptance criteria:
+  - All files under 500 lines (largest is 461 lines)
+  - Facade pattern implemented (JobsService delegates to JobsSemanticCacheService and JobsEventService)
+  - npm test passes (398 tests in 29 suites)
+  - TypeScript check passes (npx tsc --noEmit)
+  - Lint passes (0 errors, 33 warnings - none new)
+**Learnings for future iterations:**
+  - When splitting using facade pattern, sub-services can be instantiated in constructor rather than provided via DI
+  - Facade keeps the original public API intact while delegating specialized operations to sub-services
+  - Extracting NATS event handlers into a separate service makes the codebase more testable and maintainable
+  - The `getJobId` utility method belongs in the semantic cache service since it's primarily used for cache key generation
+
+---
