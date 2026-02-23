@@ -263,3 +263,20 @@ Started: Mon Feb 16 10:45:56 CST 2026
   - The facade should keep all original public API methods while delegating to specialized sub-services
 
 ---
+
+## 2026-02-23 - BATCH-1 TESTS + CLEAN-008
+- Completed TEST-001 by expanding `apps/resume-parser-svc/src/field-mapper/field-mapper.service.spec.ts` from 2 to 21 tests
+- Completed TEST-002 by adding `apps/app-gateway/src/domains/resume/resume.service.spec.ts` with 21 tests
+- Verified file-level coverage targets (80%+):
+  - `field-mapper.service.ts`: Statements 89.17%, Branches 72.19%, Functions 96.29%, Lines 91.73%
+  - `resume.service.ts`: Statements 84.37%, Branches 83.33%, Functions 100%, Lines 83.87%
+- Completed CLEAN-008 by fixing TypeScript unused diagnostics:
+  - `apps/app-gateway/src/jobs/jobs.service.ts`: removed unused `JobDocument`, `JobUpdateStatus`, and unused private DI property
+  - `apps/resume-parser-svc/src/parsing/parsing.service.ts`: made backward-compatible helper method public to remove unused private-method error
+  - `apps/ai-recruitment-frontend-e2e/cleanup-ports.mjs.d.ts`: added module declaration to fix TS7016/TS2306 for dynamic import typing
+- Verification evidence:
+  - `npx jest --config apps/resume-parser-svc/jest.config.ts apps/resume-parser-svc/src/field-mapper/field-mapper.service.spec.ts --runInBand` (PASS)
+  - `npx jest --config apps/app-gateway/jest.config.ts apps/app-gateway/src/domains/resume/resume.service.spec.ts --runInBand` (PASS)
+  - `npm run typecheck` (PASS)
+- Note: CLEAN-007 remains open for broader repo-wide dead code / unused import cleanup beyond this batch
+

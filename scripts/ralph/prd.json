@@ -95,7 +95,7 @@
       "description": "Fix 19 warnings related to unused variables and unused types",
       "acceptanceCriteria": ["No TS6133 warnings", "No TS6196 warnings"],
       "priority": 3,
-      "passes": false
+      "passes": true
     },
     {
       "id": "SPLIT-001",
@@ -219,7 +219,7 @@
         "All tests pass"
       ],
       "priority": 1,
-      "passes": false
+      "passes": true
     },
     {
       "id": "TEST-002",
@@ -227,7 +227,7 @@
       "description": "Add unit tests for resume.service.ts with 80%+ coverage",
       "acceptanceCriteria": ["Unit tests added", "80%+ coverage"],
       "priority": 1,
-      "passes": false
+      "passes": true
     },
     {
       "id": "STUB-001A",

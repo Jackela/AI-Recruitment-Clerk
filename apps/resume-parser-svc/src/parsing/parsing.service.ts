@@ -240,7 +240,7 @@ export class ParsingService {
 
   // Backward-compatible method for tests
    
-  private async extractTextFromMaybeTextFile(buffer: Buffer): Promise<string> {
+  public async extractTextFromMaybeTextFile(buffer: Buffer): Promise<string> {
     return this.fileService.extractTextFromMaybeTextFile(buffer);
   }
 }

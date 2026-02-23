@@ -15,18 +15,10 @@ import type { JobJdSubmittedEvent } from '@ai-recruitment-clerk/job-management-d
 import type { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
 import type { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
 import type { CacheService } from '../cache/cache.service';
-import type { Job, JobDocument } from '../schemas/job.schema';
+import type { Job } from '../schemas/job.schema';
 import type { WebSocketGateway } from '../websocket/websocket.gateway';
 import type { ConfigService } from '@nestjs/config';
 import { JobsSemanticCacheService, JobsEventService } from './services';
-
-type JobUpdateStatus =
-  | 'processing'
-  | 'completed'
-  | 'failed'
-  | 'active'
-  | 'draft'
-  | 'closed';
 
 /**
  * Main facade service for jobs functionality.
@@ -44,7 +36,7 @@ export class JobsService implements OnModuleInit {
     private readonly jobRepository: JobRepository,
     private readonly natsClient: AppGatewayNatsService,
     private readonly cacheService: CacheService,
-    private readonly webSocketGateway: WebSocketGateway,
+    webSocketGateway: WebSocketGateway,
     configService: ConfigService,
   ) {
     this.semanticCacheService = new JobsSemanticCacheService(
