@@ -394,3 +394,49 @@ Started: Mon Feb 16 10:45:56 CST 2026
   - Entry/Mid and Senior/Expert seniority tests can be logically grouped
   - The createWorkExperience helper function needs to be defined in each spec file
   - All 5 test suites now import from the same experience-calculator module
+
+---
+
+## 2026-02-23 - SPLIT-008
+- Split report.repository.ts (964 lines) into 3 modular files under apps/report-generator-svc/src/report-generator/
+- Created files:
+  - report.types.ts (193 lines): All interfaces (DateGrouping, PerformanceMetrics, ReportCreateData, ReportUpdateData, ReportQuery, ReportListOptions, PaginatedReports, ReportAnalytics, JobAnalytics, TimeSeriesAnalytics, HealthCheckResult, PerformanceMetricsReport) and allowed sort fields constant
+  - report-analytics.repository.ts (417 lines): Analytics operations (getReportAnalytics, getJobAnalytics, getTimeSeriesAnalytics, and all private helper methods for analytics breakdowns)
+  - report.repository.ts (480 lines): Core CRUD operations (createReport, updateResumeRecord, updateReport, findReport, findReportById, findReports, deleteReport, healthCheck) that delegates to analytics repository
+- Main repository uses facade pattern - instantiates ReportAnalyticsRepository internally and delegates analytics methods
+- Re-exports types from report.types.ts for backward compatibility
+- Verified acceptance criteria:
+  - All files under 500 lines (largest is 480 lines)
+  - TypeScript check passes (npx tsc --noEmit)
+  - Lint passes (0 errors across 27 projects)
+  - All tests pass (3049 tests in 153 suites)
+**Learnings for future iterations:**
+  - When splitting repository files, identify natural boundaries: types, analytics/complex queries, core CRUD operations
+  - The analytics repository can accept a buildQueryFilter callback function to reuse the main repository's filter building logic
+  - Re-exporting types from a central types file maintains backward compatibility for existing imports
+  - When creating new types files, ensure the interfaces match the actual schema types exactly (e.g., MatchingSkill uses `skill` not `skillName`, `matchScore` not `matchLevel`)
+
+---
+
+## 2026-02-23 - SPLIT-009
+- Split validation.util.ts (979 lines) into 7 modular files under libs/infrastructure-shared/src/utilities/validators/
+- Created files:
+  - validation.types.ts (85 lines): All interfaces (ValidationResult, ValidationOptions, EmailValidationOptions, PhoneValidationOptions, IdValidationOptions, SchemaDefinition)
+  - email.validator.ts (178 lines): EmailValidator class with validate, normalize, extractDomain methods
+  - phone.validator.ts (189 lines): PhoneValidator class with validate, format, extractCountryCode methods
+  - id.validator.ts (156 lines): IdValidator class with validate, isUUID, isMongoId methods
+  - schema.validator.ts (251 lines): SchemaValidator class with validate, validateValue, validateType, validateObject, validatorFor methods
+  - validator.ts (176 lines): Generic Validator class with required, validateLength, range, pattern, oneOf, combine methods
+  - index.ts (24 lines): Barrel export for all validators
+- Refactored validation.util.ts (27 lines): Now a pure barrel export that re-exports from validators directory
+- Fixed pre-existing issue: removed unused BadRequestException import from usage-limit-admin.controller.ts
+- All files under 500 lines (largest is 251 lines - schema.validator.ts)
+- Verified acceptance criteria:
+  - TypeScript check passes (npx tsc --noEmit)
+  - Lint passes (0 errors across 27 projects)
+  - All tests pass (3049 tests in 153 suites)
+**Learnings for future iterations:**
+  - Validation utilities naturally split by domain: email, phone, id, schema, and generic validation
+  - Each validator class is self-contained with its own regex patterns and validation logic
+  - The generic Validator class contains utility methods that can be combined with domain-specific validators
+  - Barrel exports with `export type` for interfaces and `export` for classes maintain backward compatibility

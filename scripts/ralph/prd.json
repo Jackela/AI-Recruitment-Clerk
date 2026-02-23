@@ -1,19 +1,10 @@
 {
+  "project": "AI Recruitment Clerk",
   "id": "CODE-004",
   "title": "Comprehensive Code Quality Improvement (Optimized)",
-  "description": "Fix ESLint/type issues, split large files, replace stubs, add tests, and documentation. Tasks have been split into smaller, manageable chunks.",
-  "acceptanceCriteria": [
-    "0 ESLint disable comments in production code",
-    "All files < 500 lines",
-    "0 any type usage",
-    "80%+ test coverage for critical services",
-    "All stubs replaced with real implementations",
-    "Complete documentation for all modules",
-    "npm run ci:full passes"
-  ],
-  "priority": 1,
   "branchName": "refactor/comprehensive-improvement",
-  "subtasks": [
+  "description": "Fix ESLint/type issues, split large files, replace stubs, add tests, and documentation. Tasks have been split into smaller, manageable chunks.",
+  "userStories": [
     {
       "id": "CLEAN-001",
       "title": "Fix any types in shared-dtos library",
@@ -24,8 +15,8 @@
         "npm test passes"
       ],
       "priority": 1,
-      "files": ["libs/shared-dtos/src/**/*.ts"],
-      "passes": true
+      "passes": true,
+      "notes": ""
     },
     {
       "id": "CLEAN-002",
@@ -37,8 +28,8 @@
         "npm test passes"
       ],
       "priority": 1,
-      "files": ["apps/app-gateway/src/**/*.ts"],
-      "passes": true
+      "passes": true,
+      "notes": ""
     },
     {
       "id": "CLEAN-003",
@@ -46,8 +37,8 @@
       "description": "Remove all any types in resume-parser-svc",
       "acceptanceCriteria": ["No any types in resume-parser-svc", "Tests pass"],
       "priority": 1,
-      "files": ["apps/resume-parser-svc/src/**/*.ts"],
-      "passes": true
+      "passes": true,
+      "notes": ""
     },
     {
       "id": "CLEAN-004",
@@ -58,8 +49,8 @@
         "Tests pass"
       ],
       "priority": 1,
-      "files": ["apps/scoring-engine-svc/src/**/*.ts"],
-      "passes": true
+      "passes": true,
+      "notes": ""
     },
     {
       "id": "CLEAN-005",
@@ -67,8 +58,8 @@
       "description": "Remove all any types in frontend",
       "acceptanceCriteria": ["No any types in frontend", "E2E tests pass"],
       "priority": 2,
-      "files": ["apps/ai-recruitment-frontend/src/**/*.ts"],
-      "passes": true
+      "passes": true,
+      "notes": ""
     },
     {
       "id": "CLEAN-006",
@@ -76,7 +67,8 @@
       "description": "Fix 42 warnings related to index signatures and unused DI",
       "acceptanceCriteria": ["No TS7053 warnings", "No TS6138 warnings"],
       "priority": 2,
-      "passes": true
+      "passes": true,
+      "notes": ""
     },
     {
       "id": "CLEAN-007",
@@ -87,7 +79,8 @@
         "No commented-out code blocks"
       ],
       "priority": 2,
-      "passes": true
+      "passes": true,
+      "notes": ""
     },
     {
       "id": "CLEAN-008",
@@ -95,7 +88,8 @@
       "description": "Fix 19 warnings related to unused variables and unused types",
       "acceptanceCriteria": ["No TS6133 warnings", "No TS6196 warnings"],
       "priority": 3,
-      "passes": true
+      "passes": true,
+      "notes": ""
     },
     {
       "id": "SPLIT-001",
@@ -107,8 +101,8 @@
         "npm test passes"
       ],
       "priority": 1,
-      "dependsOn": ["CLEAN-001"],
-      "passes": true
+      "passes": true,
+      "notes": ""
     },
     {
       "id": "SPLIT-002",
@@ -120,8 +114,8 @@
         "Tests pass"
       ],
       "priority": 1,
-      "dependsOn": ["CLEAN-002"],
-      "passes": true
+      "passes": true,
+      "notes": ""
     },
     {
       "id": "SPLIT-003",
@@ -133,8 +127,8 @@
         "Tests pass"
       ],
       "priority": 1,
-      "dependsOn": ["CLEAN-003"],
-      "passes": true
+      "passes": true,
+      "notes": ""
     },
     {
       "id": "SPLIT-004",
@@ -142,8 +136,8 @@
       "description": "Split scoring-confidence.service.ts using facade pattern",
       "acceptanceCriteria": ["All files under 500 lines", "Tests pass"],
       "priority": 1,
-      "dependsOn": ["CLEAN-004"],
-      "passes": true
+      "passes": true,
+      "notes": ""
     },
     {
       "id": "SPLIT-005",
@@ -151,8 +145,8 @@
       "description": "Split usage-limit.controller.ts under 500 lines",
       "acceptanceCriteria": ["All files under 500 lines", "Tests pass"],
       "priority": 2,
-      "dependsOn": ["CLEAN-002"],
-      "passes": true
+      "passes": true,
+      "notes": ""
     },
     {
       "id": "SPLIT-006A",
@@ -163,7 +157,8 @@
         "All tests pass"
       ],
       "priority": 2,
-      "passes": true
+      "passes": true,
+      "notes": ""
     },
     {
       "id": "SPLIT-006B",
@@ -174,8 +169,8 @@
         "All tests pass"
       ],
       "priority": 2,
-      "dependsOn": ["SPLIT-006A"],
-      "passes": true
+      "passes": true,
+      "notes": ""
     },
     {
       "id": "SPLIT-007",
@@ -183,7 +178,8 @@
       "description": "Create modular exports for infrastructure-shared",
       "acceptanceCriteria": ["Modular exports", "Tests pass"],
       "priority": 2,
-      "passes": true
+      "passes": true,
+      "notes": ""
     },
     {
       "id": "SPLIT-008",
@@ -191,7 +187,8 @@
       "description": "Split report.repository.ts under 500 lines",
       "acceptanceCriteria": ["File under 500 lines", "Tests pass"],
       "priority": 2,
-      "passes": false
+      "passes": true,
+      "notes": ""
     },
     {
       "id": "SPLIT-009",
@@ -199,7 +196,8 @@
       "description": "Split into domain-specific validators",
       "acceptanceCriteria": ["Domain-specific validators", "Tests pass"],
       "priority": 2,
-      "passes": false
+      "passes": true,
+      "notes": ""
     },
     {
       "id": "SPLIT-010",
@@ -207,7 +205,8 @@
       "description": "Consolidate analytics endpoints",
       "acceptanceCriteria": ["Consolidated analytics endpoints", "Tests pass"],
       "priority": 2,
-      "passes": false
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "TEST-001",
@@ -219,7 +218,8 @@
         "All tests pass"
       ],
       "priority": 1,
-      "passes": true
+      "passes": true,
+      "notes": ""
     },
     {
       "id": "TEST-002",
@@ -227,7 +227,8 @@
       "description": "Add unit tests for resume.service.ts with 80%+ coverage",
       "acceptanceCriteria": ["Unit tests added", "80%+ coverage"],
       "priority": 1,
-      "passes": true
+      "passes": true,
+      "notes": ""
     },
     {
       "id": "STUB-001A",
@@ -239,7 +240,8 @@
         "TypeScript passes"
       ],
       "priority": 2,
-      "passes": false
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "STUB-001B",
@@ -251,8 +253,8 @@
         "Unit tests pass"
       ],
       "priority": 2,
-      "dependsOn": ["STUB-001A"],
-      "passes": false
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "STUB-002",
@@ -264,7 +266,8 @@
         "Tests pass"
       ],
       "priority": 2,
-      "passes": false
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "STUB-003",
@@ -276,8 +279,8 @@
         "Tests pass"
       ],
       "priority": 2,
-      "dependsOn": ["SPLIT-004"],
-      "passes": false
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "STUB-004",
@@ -289,7 +292,8 @@
         "Tests pass"
       ],
       "priority": 2,
-      "passes": false
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "DOC-LIBS",
@@ -300,7 +304,8 @@
         "Usage examples included"
       ],
       "priority": 3,
-      "passes": false
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "DOC-APPS",
@@ -311,7 +316,8 @@
         "Setup instructions included"
       ],
       "priority": 3,
-      "passes": false
+      "passes": false,
+      "notes": ""
     }
   ]
 }
