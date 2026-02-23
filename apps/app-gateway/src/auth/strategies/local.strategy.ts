@@ -1,7 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 // Avoid extending PassportStrategy mixin to prevent CJS transpile issues
-// import { PassportStrategy } from '@nestjs/passport';
-// import { Strategy } from 'passport-local';
 import type { AuthService } from '../auth.service';
 import type { UserDto } from '@ai-recruitment-clerk/user-management-domain';
 

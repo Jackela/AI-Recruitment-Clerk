@@ -10,7 +10,6 @@ import type {
 import {
   ErrorCorrelationManager,
 } from './error-correlation';
-// import { StandardizedErrorResponseFormatter } from './error-response-formatter';
 
 /**
  * Log levels enum

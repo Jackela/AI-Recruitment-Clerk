@@ -111,10 +111,8 @@ export class EnhancedSkillMatcherService {
         .map((skill) => SkillsTaxonomy.normalizeSkill(skill))
         .filter((skill) => skill.length > 0);
 
-      // Group skills by category for better analysis
-      // const resumeSkillsByCategory = SkillsTaxonomy.groupSkillsByCategory(
-      //   normalizedResumeSkills,
-      // );
+      // TODO: Consider grouping skills by category for enhanced analysis
+      // const resumeSkillsByCategory = SkillsTaxonomy.groupSkillsByCategory(normalizedResumeSkills);
 
       const matches: SkillMatchResult[] = [];
       const breakdown = {

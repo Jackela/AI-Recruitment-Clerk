@@ -9,7 +9,6 @@ import {
   HttpStatus
 } from '@nestjs/common';
 // Avoid extending passport's AuthGuard to prevent CJS class transpile issues
-// import { AuthGuard } from '@nestjs/passport';
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';

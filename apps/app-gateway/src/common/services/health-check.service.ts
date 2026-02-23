@@ -202,12 +202,9 @@ export class HealthCheckService implements OnModuleInit {
     _timeout: number,
   ): Promise<{ healthy: boolean; metadata?: Record<string, unknown> }> {
     try {
-      // Mock HTTP health check - replace with actual HTTP client
-      // const response = await fetch(url, { timeout });
-      // const healthy = response.ok;
-
-      // Mock implementation
-      const healthy = Math.random() > 0.1; // 90% success rate
+      // TODO: Replace mock with actual HTTP client (e.g., using fetch with abort signal)
+      // Mock implementation - 90% success rate
+      const healthy = Math.random() > 0.1;
 
       return {
         healthy,

@@ -1,6 +1,5 @@
 import { Injectable, NgZone, inject } from '@angular/core';
 import { BehaviorSubject, fromEvent } from 'rxjs';
-// import { filter, take } from 'rxjs/operators'; // Reserved for future use
 
 /**
  * Defines the shape of the install prompt event.

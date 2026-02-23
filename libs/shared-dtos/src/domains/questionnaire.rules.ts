@@ -208,9 +208,4 @@ export class QuestionnaireRules {
 
     return score;
   }
-
-  // Simplified implementation - not currently used
-  // private static hasValue(_obj: any, _path: string): boolean {
-  //   return true;
-  // }
 }

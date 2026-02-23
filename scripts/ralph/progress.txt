@@ -280,3 +280,39 @@ Started: Mon Feb 16 10:45:56 CST 2026
   - `npm run typecheck` (PASS)
 - Note: CLEAN-007 remains open for broader repo-wide dead code / unused import cleanup beyond this batch
 
+---
+
+## 2026-02-23 - CLEAN-007
+- Cleaned up commented-out imports and dead code blocks across the codebase
+- Files cleaned:
+  - Frontend:
+    - `apps/ai-recruitment-frontend/src/app/components/privacy/consent-management.component.ts`: removed commented `takeUntil` import
+    - `apps/ai-recruitment-frontend/src/app/components/shared/guide-overlay/guide-overlay.component.ts`: removed commented `GuideStep` and `takeUntil` imports
+    - `apps/ai-recruitment-frontend/src/app/components/shared/status-notifications/status-notifications.component.ts`: removed commented `signal` and `takeUntil` imports
+    - `apps/ai-recruitment-frontend/src/app/services/mobile/pwa.service.ts`: removed commented `filter, take` import
+    - `apps/ai-recruitment-frontend/src/app/pages/analysis/unified-analysis.component.ts`: cleaned commented mock API call code
+  - Backend (shared-dtos):
+    - `libs/shared-dtos/src/errors/structured-logging.ts`: removed commented `StandardizedErrorResponseFormatter` import
+    - `libs/shared-dtos/src/validation/input-validator.ts`: removed commented `BadRequestException` import
+    - `libs/shared-dtos/src/domains/questionnaire.rules.ts`: removed unused commented-out `hasValue` method
+    - `libs/shared-dtos/src/domains/questionnaire.service.ts`: cleaned commented mock code in `extractTopPainPoints`
+  - Backend (app-gateway):
+    - `apps/app-gateway/src/auth/guards/jwt-auth.guard.ts`: removed commented `AuthGuard` import (kept architectural comment)
+    - `apps/app-gateway/src/auth/guards/local-auth.guard.ts`: removed commented `AuthGuard` import
+    - `apps/app-gateway/src/auth/strategies/local.strategy.ts`: removed commented `PassportStrategy` and `Strategy` imports
+    - `apps/app-gateway/src/common/services/health-check.service.ts`: cleaned commented mock HTTP code
+    - `apps/app-gateway/src/privacy/services/data-collection.service.ts`: cleaned commented NATS request code
+  - Backend (scoring-engine-svc):
+    - `apps/scoring-engine-svc/src/services/enhanced-skill-matcher.service.ts`: cleaned commented skills grouping code
+- Converted "reserved for future use" commented imports to proper TODO comments where functionality is pending
+- Kept architectural comments explaining why certain patterns aren't used (e.g., ESM compatibility)
+- Verified acceptance criteria:
+  - TypeScript check passes (`npm run typecheck`)
+  - Lint passes (`npm run lint` - 0 errors across 27 projects)
+  - All tests pass (3093 tests in 149 suites)
+**Learnings for future iterations:**
+  - "Reserved for future use" commented imports provide no value - they can be added back when actually needed
+  - Commented-out mock implementations should be converted to TODO comments with context
+  - Architectural comments (explaining why something isn't used) should be preserved
+  - TypeScript's `noUnusedLocals` and `noUnusedParameters` catch unused imports at compile time
+

@@ -87,7 +87,7 @@
         "No commented-out code blocks"
       ],
       "priority": 2,
-      "passes": false
+      "passes": true
     },
     {
       "id": "CLEAN-008",

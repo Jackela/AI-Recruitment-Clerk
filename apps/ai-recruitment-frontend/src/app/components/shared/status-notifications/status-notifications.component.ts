@@ -1,13 +1,11 @@
 import type { OnInit, OnDestroy } from '@angular/core';
 import { Component, computed, inject } from '@angular/core';
-// import { signal } from '@angular/core'; // Reserved for future use
 import { CommonModule } from '@angular/common';
 import {
   ProgressFeedbackService,
 } from '../../../services/feedback/progress-feedback.service';
 import type { StatusNotification } from '../../../services/feedback/progress-feedback.service';
 import { Subject } from 'rxjs';
-// import { takeUntil } from 'rxjs/operators'; // Reserved for future use
 
 /**
  * Represents the status notifications component.
