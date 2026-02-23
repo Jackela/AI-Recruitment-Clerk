@@ -175,7 +175,7 @@
       ],
       "priority": 2,
       "dependsOn": ["SPLIT-006A"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "SPLIT-007",

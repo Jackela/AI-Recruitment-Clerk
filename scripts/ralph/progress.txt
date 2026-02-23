@@ -376,3 +376,21 @@ Started: Mon Feb 16 10:45:56 CST 2026
   - SPLIT-006B will handle the remaining 2093-line file which contains overlap, gap, and seniority tests
 
 ---
+
+## 2026-02-23 - SPLIT-006B
+- Split experience-calculator.spec.ts (2,093 lines) into 4 modular files under 500 lines each
+- Created files:
+  - experience-calculator-overlap.spec.ts (248 lines): Overlap detection tests (identical dates, partial overlaps, null dates, date formats)
+  - experience-calculator-gap.spec.ts (462 lines): Gap detection tests (gaps between positions, continuous employment, multiple gaps, duration calculation)
+  - experience-calculator-seniority-entry-mid.spec.ts (99 lines): Entry and Mid level detection tests
+  - experience-calculator-seniority-senior-expert.spec.ts (168 lines): Senior and Expert level detection tests, edge cases
+- Deleted the original large spec file
+- Verified acceptance criteria:
+  - All files under 500 lines (largest is 462 lines - gap.spec.ts)
+  - All 85 tests pass across 5 test suites
+**Learnings for future iterations:**
+  - Test files over 2000 lines should be split by test category (overlap, gap, seniority) rather than arbitrary line counts
+  - Consolidating similar tests using forEach loops reduces file size while maintaining test coverage
+  - Entry/Mid and Senior/Expert seniority tests can be logically grouped
+  - The createWorkExperience helper function needs to be defined in each spec file
+  - All 5 test suites now import from the same experience-calculator module
