@@ -183,7 +183,7 @@
       "description": "Create modular exports for infrastructure-shared",
       "acceptanceCriteria": ["Modular exports", "Tests pass"],
       "priority": 2,
-      "passes": false
+      "passes": true
     },
     {
       "id": "SPLIT-008",

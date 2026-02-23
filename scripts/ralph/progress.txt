@@ -316,3 +316,33 @@ Started: Mon Feb 16 10:45:56 CST 2026
   - Architectural comments (explaining why something isn't used) should be preserved
   - TypeScript's `noUnusedLocals` and `noUnusedParameters` catch unused imports at compile time
 
+---
+
+## 2026-02-23 - SPLIT-007
+- Split infrastructure-shared index.ts (1,090 lines) into 9 modular directories with barrel exports
+- Created files:
+  - `common/enums.ts` (76 lines): All enums (DataSubjectRightType, RequestStatus, IdentityVerificationStatus, DataExportFormat, JobStatus, JobType, EventType, EventStatus, EventCategory, ConsentStatus)
+  - `common/interfaces.ts` (49 lines): Base interfaces (BaseEntity, PaginationOptions, PaginationResult, ExceptionFilterConfig, ExecutionHost)
+  - `filters/exception-filter.ts` (63 lines): StandardizedGlobalExceptionFilter, ExceptionFilterConfigHelper, createGlobalExceptionFilter
+  - `interceptors/interceptor-types.ts` (100 lines): InterceptorOptions, ExecutionContext, CallHandler, Interceptor, ErrorInterceptorFactory
+  - `validation/input-validator.ts` (68 lines): ValidationInput, InputValidator
+  - `encryption/encryption.ts` (71 lines): EncryptableData, UserPIIData, EncryptionService
+  - `contracts/design-by-contract.ts` (303 lines): PredicateFunction, DecoratorTarget, Requires, Ensures, Invariant, ContractValidators, ContractViolationError
+  - `resilience/retry.ts` (80 lines): RetryUtility
+  - `resilience/circuit-breaker.ts` (39 lines): CircuitBreakerConfig, WithCircuitBreaker
+  - `errors/domain-exceptions.ts` (62 lines): ErrorContext, ResumeParserException, JDExtractorException, ReportGeneratorException
+  - `errors/error-correlation.ts` (33 lines): ErrorCorrelationManager
+  - `monitoring/database-monitor.ts` (77 lines): DatabasePerformanceMonitor
+  - Barrel exports (index.ts) for each module
+- Refactored main index.ts (93 lines): Now a pure barrel export that re-exports from modular directories
+- All files under 500 lines (largest is 303 lines - design-by-contract.ts)
+- Verified acceptance criteria:
+  - TypeScript check passes (npx tsc --noEmit)
+  - Lint passes (0 errors across 27 projects)
+  - All tests pass (3093 tests in 149 suites)
+**Learnings for future iterations:**
+  - Large barrel export files should be split by domain, not by arbitrary line count
+  - When re-exporting from existing modules (error-handling, utilities, pipes, bootstrap, logging), keep those re-exports in the main index.ts
+  - Create internal types files for related groups (enums, interfaces) to keep organization clean
+  - Use barrel exports (index.ts) in each subdirectory to simplify the main index.ts
+
