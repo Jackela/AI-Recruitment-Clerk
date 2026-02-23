@@ -152,7 +152,7 @@
       "acceptanceCriteria": ["All files under 500 lines", "Tests pass"],
       "priority": 2,
       "dependsOn": ["CLEAN-002"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "SPLIT-006A",
@@ -163,7 +163,7 @@
         "All tests pass"
       ],
       "priority": 2,
-      "passes": false
+      "passes": true
     },
     {
       "id": "SPLIT-006B",

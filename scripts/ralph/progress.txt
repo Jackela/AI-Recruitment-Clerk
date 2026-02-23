@@ -346,3 +346,33 @@ Started: Mon Feb 16 10:45:56 CST 2026
   - Create internal types files for related groups (enums, interfaces) to keep organization clean
   - Use barrel exports (index.ts) in each subdirectory to simplify the main index.ts
 
+
+## 2026-02-23 - SPLIT-005
+- Verified SPLIT-005 was already complete - usage-limit.controller.ts was already split
+- Files verified:
+  - usage-limit-quota.controller.ts (271 lines)
+  - usage-limit-admin.controller.ts (361 lines)
+  - usage-limit-analytics.controller.ts (270 lines)
+  - usage-limit.types.ts (253 lines)
+  - index.ts (23 lines)
+  - Main controller now re-exports from sub-controllers (29 lines)
+- All files under 500 lines
+
+---
+
+## 2026-02-23 - SPLIT-006A
+- Split experience-calculator.spec.ts (2,577 lines) into two files
+- Created files:
+  - experience-calculator-basic.spec.ts (473 lines): Single position tests, multiple positions tests, empty input tests, month/year conversion tests
+  - experience-calculator.spec.ts (2,093 lines): Overlap detection tests, gap detection tests, seniority level determination tests
+- Refactored original file to focus on advanced/edge case tests
+- Verified acceptance criteria:
+  - Basic tests file under 500 lines (473 lines)
+  - All 125 tests pass (split across 2 test suites)
+**Learnings for future iterations:**
+  - When splitting test files, extract related test categories (basic vs advanced) rather than arbitrary line counts
+  - The createWorkExperience helper function needs to be defined in each spec file that uses it
+  - Test file splitting should maintain logical cohesion - basic calculation tests vs detection/determination tests
+  - SPLIT-006B will handle the remaining 2093-line file which contains overlap, gap, and seniority tests
+
+---
