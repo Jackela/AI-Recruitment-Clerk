@@ -1,47 +1,193 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import type {
   JdDTO,
   LlmExtractionRequest,
   LlmExtractionResponse,
 } from '@ai-recruitment-clerk/job-management-domain';
+import type { GeminiClient } from '@ai-recruitment-clerk/shared-dtos';
 
 /**
- * Provides llm functionality.
+ * Response schema for JD extraction from Gemini API.
+ */
+interface JdExtractionResponse {
+  requirements: {
+    technical: string[];
+    soft: string[];
+    experience: string;
+    education: string;
+  };
+  responsibilities: string[];
+  benefits: string[];
+  company: {
+    name: string | null;
+    industry: string | null;
+    size: string | null;
+  };
+}
+
+/**
+ * JSON schema for structured JD extraction.
+ */
+const JD_EXTRACTION_SCHEMA = `
+{
+  "requirements": {
+    "technical": ["string - list of technical skills required"],
+    "soft": ["string - list of soft skills required"],
+    "experience": "string - experience level requirement",
+    "education": "string - education requirement"
+  },
+  "responsibilities": ["string - list of job responsibilities"],
+  "benefits": ["string - list of benefits offered"],
+  "company": {
+    "name": "string or null - company name if mentioned",
+    "industry": "string or null - industry if mentioned",
+    "size": "string or null - company size if mentioned"
+  }
+}
+`;
+
+/**
+ * Prompt template for JD extraction.
+ */
+const JD_EXTRACTION_PROMPT = `You are an expert job description analyzer. Extract structured information from the following job description.
+
+**Job Title:** {jobTitle}
+
+**Job Description:**
+{jdText}
+
+**Instructions:**
+1. Extract all technical skills mentioned (programming languages, frameworks, tools, platforms)
+2. Extract all soft skills mentioned (communication, leadership, teamwork, etc.)
+3. Determine the experience level requirement (years of experience, seniority level)
+4. Extract the education requirement (degree, field of study)
+5. List all job responsibilities mentioned
+6. List all benefits mentioned
+7. Extract company information if available (name, industry, size)
+
+**Important:**
+- If a field is not mentioned in the JD, use null for company fields or "Not specified" for text fields
+- Always return valid JSON with all fields present
+- Use empty arrays [] if no items are found for a list field
+- Be specific and accurate in your extraction
+- Preserve important details like version numbers or certifications`;
+
+/**
+ * Provides LLM functionality for JD extraction using Gemini API.
+ * Falls back to keyword-based extraction if Gemini is unavailable.
  */
 @Injectable()
 export class LlmService {
   private readonly logger = new Logger(LlmService.name);
 
+  constructor(@Optional() private readonly geminiClient?: GeminiClient) {
+    if (this.geminiClient) {
+      this.logger.log('LlmService initialized with GeminiClient for AI-powered extraction');
+    } else {
+      this.logger.warn('LlmService initialized without GeminiClient - using keyword-based fallback extraction');
+    }
+  }
+
   /**
    * Performs the extract job requirements operation.
+   * Uses Gemini API if available, otherwise falls back to keyword-based extraction.
    * @param jdText - The jd text.
+   * @param jobTitle - Optional job title for context.
    * @returns A promise that resolves to JdDTO.
    */
-  public async extractJobRequirements(jdText: string): Promise<JdDTO> {
+  public async extractJobRequirements(jdText: string, jobTitle?: string): Promise<JdDTO> {
     this.logger.log('Extracting job requirements from JD text');
 
     // Handle null, undefined, or non-string inputs gracefully
     const sanitizedText = this.sanitizeInput(jdText);
 
-    // For now, provide a mock implementation that extracts basic structure
-    // In production, this would integrate with actual LLM APIs (Gemini, OpenAI, etc.)
-    const extractedData: JdDTO = {
+    // Try Gemini API extraction first if client is available
+    if (this.geminiClient) {
+      try {
+        const geminiResult = await this.extractWithGemini(sanitizedText, jobTitle);
+        if (geminiResult) {
+          this.logger.log('Successfully extracted JD data using Gemini API');
+          return geminiResult;
+        }
+      } catch (error) {
+        this.logger.warn(
+          `Gemini extraction failed, falling back to keyword-based extraction: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
+      }
+    }
+
+    // Fallback to keyword-based extraction
+    this.logger.debug('Using keyword-based extraction fallback');
+    return this.extractWithKeywords(sanitizedText);
+  }
+
+  /**
+   * Extracts JD information using Gemini API.
+   */
+  private async extractWithGemini(jdText: string, jobTitle?: string): Promise<JdDTO | null> {
+    if (!this.geminiClient) {
+      return null;
+    }
+
+    const prompt = JD_EXTRACTION_PROMPT
+      .replace('{jobTitle}', jobTitle ?? 'Not specified')
+      .replace('{jdText}', jdText);
+
+    try {
+      const response = await this.geminiClient.generateStructuredResponse<JdExtractionResponse>(
+        prompt,
+        JD_EXTRACTION_SCHEMA,
+        3, // retries
+      );
+
+      // Validate and transform the response
+      const extractedData = response.data;
+
+      // Ensure all required fields are present with defaults
+      const jdDto: JdDTO = {
+        requirements: {
+          technical: extractedData.requirements?.technical ?? [],
+          soft: extractedData.requirements?.soft ?? [],
+          experience: extractedData.requirements?.experience ?? 'Not specified',
+          education: extractedData.requirements?.education ?? 'Not specified',
+        },
+        responsibilities: extractedData.responsibilities ?? ['Key responsibilities to be defined'],
+        benefits: extractedData.benefits ?? [],
+        company: {
+          name: extractedData.company?.name ?? undefined,
+          industry: extractedData.company?.industry ?? undefined,
+          size: extractedData.company?.size ?? undefined,
+        },
+      };
+
+      return jdDto;
+    } catch (error) {
+      this.logger.error(
+        `Gemini API call failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      return null;
+    }
+  }
+
+  /**
+   * Fallback keyword-based extraction (original implementation).
+   */
+  private extractWithKeywords(jdText: string): JdDTO {
+    return {
       requirements: {
-        technical: this.extractTechnicalSkills(sanitizedText),
-        soft: this.extractSoftSkills(sanitizedText),
-        experience: this.extractExperienceLevel(sanitizedText),
-        education: this.extractEducationRequirement(sanitizedText),
+        technical: this.extractTechnicalSkills(jdText),
+        soft: this.extractSoftSkills(jdText),
+        experience: this.extractExperienceLevel(jdText),
+        education: this.extractEducationRequirement(jdText),
       },
-      responsibilities: this.extractResponsibilities(sanitizedText),
-      benefits: this.extractBenefits(sanitizedText),
+      responsibilities: this.extractResponsibilities(jdText),
+      benefits: this.extractBenefits(jdText),
       company: {
-        name: this.extractCompanyName(sanitizedText),
-        industry: this.extractIndustry(sanitizedText),
-        size: this.extractCompanySize(sanitizedText),
+        name: this.extractCompanyName(jdText),
+        industry: this.extractIndustry(jdText),
+        size: this.extractCompanySize(jdText),
       },
     };
-
-    return extractedData;
   }
 
   /**
@@ -74,7 +220,7 @@ export class LlmService {
         `Extracting structured data for job: ${request.jobTitle}`,
       );
 
-      const extractedData = await this.extractJobRequirements(request.jdText);
+      const extractedData = await this.extractJobRequirements(request.jdText, request.jobTitle);
 
       // Validate the extracted data
       const isValid = await this.validateExtractedData(extractedData);
@@ -86,9 +232,13 @@ export class LlmService {
 
       const processingTimeMs = Date.now() - startTime;
 
+      // Higher confidence when using Gemini API, lower for keyword fallback
+      const baseConfidence = this.geminiClient ? 0.85 : 0.65;
+      const confidence = isValid ? baseConfidence : 0.5;
+
       return {
         extractedData,
-        confidence: isValid ? 0.85 : 0.5, // Mock confidence score
+        confidence,
         processingTimeMs,
       };
     } catch (error) {

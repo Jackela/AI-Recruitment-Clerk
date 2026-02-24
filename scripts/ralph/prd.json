@@ -253,8 +253,8 @@
         "Unit tests pass"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Implemented real Gemini API integration in jd-extractor-svc LlmService with fallback to keyword-based extraction when Gemini is unavailable."
     },
     {
       "id": "STUB-002",
@@ -266,8 +266,8 @@
         "Tests pass"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified: jd-extractor-svc uses GeminiClient for real JD extraction via LlmService, and NatsClientModule for event handling (publishAnalysisJdExtracted, publishProcessingError). 165 tests pass."
     },
     {
       "id": "STUB-003",
@@ -279,8 +279,8 @@
         "Tests pass"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified: scoring-engine-svc uses GeminiClient for semantic skill matching and NatsClientModule for event handling. 171 tests pass."
     },
     {
       "id": "STUB-004",
@@ -292,8 +292,8 @@
         "Tests pass"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified: resume-parser-svc uses GeminiClient for resume parsing via VisionLlmService and NatsClientModule for event handling. 407 tests pass."
     },
     {
       "id": "DOC-LIBS",

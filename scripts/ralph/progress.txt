@@ -477,3 +477,27 @@ Started: Mon Feb 16 10:45:56 CST 2026
   - When adding optional external service clients, use a factory provider that gracefully handles missing API keys
   - The GeminiClient pattern from shared-dtos uses SecureConfigValidator for fail-fast validation
   - Global modules (CommonModule with @Global() decorator) are ideal for shared AI service providers
+
+## 2026-02-24 - STUB-001B & STUB-002
+- Implemented real Gemini API integration in jd-extractor-svc LlmService
+- Files changed:
+  - `apps/jd-extractor-svc/src/llm/llm.service.ts`: Added GeminiClient injection with `@Optional()` decorator, implemented `extractWithGemini()` method for real API calls, preserved keyword-based `extractWithKeywords()` as fallback
+  - `apps/jd-extractor-svc/src/app/app.module.ts`: Added GeminiClient provider with factory that uses JdExtractorConfigService for API key
+  - `apps/jd-extractor-svc/src/llm/llm.service.spec.ts`: Added mock GeminiClient factory, new test cases for Gemini API integration, fallback behavior tests
+- Architecture pattern:
+  - LlmService constructor accepts optional GeminiClient
+  - If GeminiClient available → use `generateStructuredResponse<T>()` with JSON schema
+  - If GeminiClient unavailable OR API call fails → fall back to keyword-based extraction
+  - Confidence score: 0.85 with Gemini, 0.65 with keyword fallback
+- Verified acceptance criteria:
+  - Real API calls implemented (Gemini generateStructuredResponse with JD_EXTRACTION_SCHEMA)
+  - Error handling added (try/catch with fallback to keyword extraction)
+  - Unit tests pass (165 tests in jd-extractor-svc)
+  - TypeScript check passes (npx tsc --noEmit)
+  - Lint passes (0 errors across 27 projects)
+**Learnings for future iterations:**
+  - Use `@Optional()` decorator for GeminiClient injection to allow graceful fallback when API key not configured
+  - When editing test files with nested describe blocks, ensure proper brace closure by counting depth
+  - The GeminiClient's `generateStructuredResponse<T>()` accepts a JSON schema string for structured output parsing
+  - Fallback patterns provide resilience while maintaining functionality during API outages or missing configuration
+---

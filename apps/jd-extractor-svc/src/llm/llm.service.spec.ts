@@ -2,14 +2,29 @@ import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { LlmService } from './llm.service';
 import type { JdDTO } from '@ai-recruitment-clerk/job-management-domain';
+import type { GeminiClient, GeminiResponse } from '@ai-recruitment-clerk/shared-dtos';
 import {
   createMockExtractedJdDTO,
   createMockLlmExtractionRequest,
   createLongJdText,
 } from '../testing/test-fixtures';
 
+/**
+ * Creates a mock GeminiClient for testing.
+ */
+function createMockGeminiClient(): jest.Mocked<GeminiClient> {
+  return {
+    generateText: jest.fn(),
+    generateStructuredResponse: jest.fn(),
+    generateWithVision: jest.fn(),
+    generateStructuredVisionResponse: jest.fn(),
+    healthCheck: jest.fn().mockResolvedValue(true),
+  } as unknown as jest.Mocked<GeminiClient>;
+}
+
 describe('LlmService', () => {
   let service: LlmService;
+  let mockGeminiClient: jest.Mocked<GeminiClient>;
 
   const mockJdText = `
     Senior Full Stack Developer
@@ -67,11 +82,7 @@ describe('LlmService', () => {
   };
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [LlmService],
-    }).compile();
-
-    service = module.get<LlmService>(LlmService);
+    mockGeminiClient = createMockGeminiClient();
   });
 
   afterEach(() => {
@@ -79,12 +90,93 @@ describe('LlmService', () => {
   });
 
   describe('Service Initialization', () => {
-    it('should be defined', () => {
+    it('should be defined without GeminiClient (fallback mode)', async () => {
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [LlmService],
+      }).compile();
+
+      service = module.get<LlmService>(LlmService);
+      expect(service).toBeDefined();
+    });
+
+    it('should be defined with GeminiClient (AI mode)', async () => {
+      // Create service with GeminiClient injected directly
+      service = new LlmService(mockGeminiClient);
       expect(service).toBeDefined();
     });
   });
 
-  describe('extractJobRequirements', () => {
+  describe('Gemini API Integration', () => {
+    beforeEach(() => {
+      service = new LlmService(mockGeminiClient);
+    });
+
+    it('should use Gemini API for extraction when available', async () => {
+      const mockGeminiResponse: GeminiResponse = {
+        data: {
+          requirements: {
+            technical: ['JavaScript', 'TypeScript', 'React', 'Node.js'],
+            soft: ['communication', 'leadership'],
+            experience: '5+ years',
+            education: "Bachelor's degree",
+          },
+          responsibilities: ['Develop applications', 'Lead team'],
+          benefits: ['Health insurance', 'Remote work'],
+          company: {
+            name: 'TechCorp',
+            industry: 'Technology',
+            size: 'Medium',
+          },
+        },
+        processingTimeMs: 500,
+        confidence: 0.9,
+      };
+
+      mockGeminiClient.generateStructuredResponse.mockResolvedValueOnce(mockGeminiResponse);
+
+      const result = await service.extractJobRequirements(mockJdText, 'Senior Developer');
+
+      expect(mockGeminiClient.generateStructuredResponse).toHaveBeenCalled();
+      expect(result.requirements.technical).toEqual(['JavaScript', 'TypeScript', 'React', 'Node.js']);
+      expect(result.requirements.soft).toEqual(['communication', 'leadership']);
+    });
+
+    it('should fall back to keyword extraction when Gemini API fails', async () => {
+      mockGeminiClient.generateStructuredResponse.mockRejectedValueOnce(new Error('API Error'));
+
+      const result = await service.extractJobRequirements(mockJdText);
+
+      // Should still return valid results from fallback
+      expect(result).toBeDefined();
+      expect(result.requirements).toBeDefined();
+      expect(result.requirements.technical).toContain('JavaScript');
+    });
+
+    it('should handle Gemini API returning null data', async () => {
+      mockGeminiClient.generateStructuredResponse.mockResolvedValueOnce({
+        data: null as unknown as object,
+        processingTimeMs: 100,
+        confidence: 0.5,
+      });
+
+      const result = await service.extractJobRequirements('JavaScript developer');
+
+      // Should fall back to keyword extraction
+      expect(result).toBeDefined();
+      expect(result.requirements.technical).toEqual(expect.any(Array));
+    });
+  });
+
+  describe('Fallback Keyword Extraction', () => {
+    beforeEach(async () => {
+      // Create service without GeminiClient
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [LlmService],
+      }).compile();
+      service = module.get<LlmService>(LlmService);
+    });
+
+    describe('extractJobRequirements', () => {
     it('should extract structured data from job description', async () => {
       // Act
       const result = await service.extractJobRequirements(mockJdText);
@@ -741,4 +833,5 @@ describe('LlmService', () => {
       expect(completeConfidence).toBeGreaterThanOrEqual(minimalConfidence);
     });
   });
+  }); // Closes 'Fallback Keyword Extraction'
 });
