@@ -240,8 +240,8 @@
         "TypeScript passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Added GEMINI_API_KEY to appGateway env schema and configured GeminiClient in CommonModule with optional API key support."
     },
     {
       "id": "STUB-001B",

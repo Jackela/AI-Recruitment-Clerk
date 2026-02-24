@@ -497,6 +497,8 @@ export const ServiceSchemas = {
     // Performance testing
     { name: 'PERFORMANCE_TEST_TIMEOUT', required: false, defaultValue: '60000', description: 'Performance test timeout' },
     { name: 'LOAD_TEST_CONCURRENCY', required: false, defaultValue: '10', description: 'Load test concurrency' },
+    // AI/LLM configuration
+    { name: 'GEMINI_API_KEY', required: false, description: 'Google Gemini API key for AI processing' },
     // Semantic cache
     { name: 'SEMANTIC_CACHE_ENABLED', required: false, defaultValue: 'false', description: 'Enable semantic caching' },
     { name: 'SEMANTIC_CACHE_SIMILARITY_THRESHOLD', required: false, defaultValue: '0.9', description: 'Semantic cache similarity threshold' },

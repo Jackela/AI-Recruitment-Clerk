@@ -457,3 +457,23 @@ Started: Mon Feb 16 10:45:56 CST 2026
   - Always verify actual file line counts before assuming a task needs work
   - PRD line counts may be outdated or incorrect - verify with `wc -l`
   - A file under 200 lines is already optimal and doesn't need splitting
+
+---
+
+## 2026-02-24 - STUB-001A
+- Configured Gemini API client in app-gateway
+- Changes made:
+  - `libs/configuration/src/env-validator/env-validator.util.ts`: Added GEMINI_API_KEY to appGateway environment schema (optional)
+  - `apps/app-gateway/src/common/common.module.ts`: Added GeminiClient provider with SecureConfigValidator
+- GeminiClient is configured as optional - if GEMINI_API_KEY is not set, the provider returns undefined
+- Provider follows the same pattern as scoring-engine-svc with SecureConfigValidator for fail-fast security
+- Verified acceptance criteria:
+  - GEMINI_API_KEY in environment schema
+  - GeminiClientModule configured in CommonModule
+  - TypeScript check passes
+  - Lint passes
+  - Tests pass (419 tests in 30 suites)
+**Learnings for future iterations:**
+  - When adding optional external service clients, use a factory provider that gracefully handles missing API keys
+  - The GeminiClient pattern from shared-dtos uses SecureConfigValidator for fail-fast validation
+  - Global modules (CommonModule with @Global() decorator) are ideal for shared AI service providers

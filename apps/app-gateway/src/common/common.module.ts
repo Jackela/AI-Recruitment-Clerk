@@ -19,6 +19,9 @@ import { HealthCheckService } from './services/health-check.service';
 import { CrossServiceValidator } from './validators/cross-service.validator';
 import { ConditionalThrottlerGuard } from './guards/conditional-throttler.guard';
 
+// AI Services
+import { GeminiClient, SecureConfigValidator } from '@ai-recruitment-clerk/shared-dtos';
+
 /**
  * Configures the common module.
  */
@@ -86,12 +89,31 @@ import { ConditionalThrottlerGuard } from './guards/conditional-throttler.guard'
     HealthCheckService,
     CrossServiceValidator,
     // ServiceIntegrationInterceptor, // 暂时禁用，有依赖注入问题
+
+    // AI Services - Gemini Client
+    {
+      provide: GeminiClient,
+      useFactory: () => {
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+          return undefined as unknown as GeminiClient;
+        }
+        SecureConfigValidator.validateServiceConfig('GeminiClient', ['GEMINI_API_KEY']);
+        return new GeminiClient({
+          apiKey: SecureConfigValidator.requireEnv('GEMINI_API_KEY'),
+          model: 'gemini-1.5-flash',
+          temperature: 0.3,
+          maxOutputTokens: 8192,
+        });
+      },
+    },
   ],
   exports: [
     HealthCheckService,
     CrossServiceValidator,
     // ServiceIntegrationInterceptor, // 暂时禁用，有依赖注入问题
     CacheModule,
+    GeminiClient,
   ],
 })
 export class CommonModule {}
