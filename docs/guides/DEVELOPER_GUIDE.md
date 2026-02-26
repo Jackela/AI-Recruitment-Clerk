@@ -4,6 +4,7 @@
 > **适用于**: 新加入开发者、代码审查、技术规范
 
 ## 📋 目录
+
 - [开发环境搭建](#开发环境搭建)
 - [项目结构理解](#项目结构理解)
 - [开发工作流](#开发工作流)
@@ -16,13 +17,13 @@
 
 ### 前置要求
 
-| 工具 | 版本要求 | 安装方式 |
-|------|----------|----------|
-| **Node.js** | 18+ | [nodejs.org](https://nodejs.org/) |
-| **pnpm** | 8+ | `npm install -g pnpm` |
-| **MongoDB** | 6.x | [mongodb.com](https://www.mongodb.com/try/download/community) |
-| **NATS Server** | latest | [nats.io](https://nats.io/download/) |
-| **Git** | latest | [git-scm.com](https://git-scm.com/) |
+| 工具            | 版本要求 | 安装方式                                                      |
+| --------------- | -------- | ------------------------------------------------------------- |
+| **Node.js**     | 20.18.0+ | [nodejs.org](https://nodejs.org/)                             |
+| **npm**         | 10+      | Included with Node.js                                         |
+| **MongoDB**     | 7.0+     | [mongodb.com](https://www.mongodb.com/try/download/community) |
+| **NATS Server** | 2.10+    | [nats.io](https://nats.io/download/)                          |
+| **Git**         | latest   | [git-scm.com](https://git-scm.com/)                           |
 
 ### 环境配置
 
@@ -32,7 +33,7 @@ git clone <repository-url>
 cd AI-Recruitment-Clerk
 
 # 2. 安装依赖
-pnpm install
+npm install
 
 # 3. 配置环境变量
 cp .env.example .env
@@ -42,19 +43,20 @@ cp .env.example .env
 # MongoDB (本地)
 mongod --dbpath ./data/db
 
-# NATS Server  
+# NATS Server
 nats-server -js
 
 # 5. 构建项目
-pnpm exec nx run-many --target=build --all
+npx nx run-many --target=build --all
 
 # 6. 运行测试验证
-pnpm exec nx run-many --target=test --all
+npx nx run-many --target=test --all
 ```
 
 ### IDE配置推荐
 
 **VSCode扩展**:
+
 - TypeScript Importer
 - NestJS Files
 - Angular Language Service
@@ -62,6 +64,7 @@ pnpm exec nx run-many --target=test --all
 - MongoDB for VS Code
 
 **设置建议**:
+
 ```json
 {
   "typescript.preferences.importModuleSpecifier": "relative",
@@ -107,11 +110,13 @@ AI-Recruitment-Clerk/
 ### 核心概念理解
 
 **事件驱动架构**:
+
 - 所有服务通过NATS事件通信
 - 松耦合，高扩展性
 - 异步处理，提高性能
 
 **共享库模式**:
+
 - `@ai-recruitment-clerk/shared-dtos`统一数据类型
 - 避免重复定义，确保类型安全
 - 版本化管理，向后兼容
@@ -137,19 +142,19 @@ git checkout -b feature/resume-parser-implementation
 # 2a. 写测试 (Red)
 npm test -- --watch resume-parser-svc
 
-# 2b. 实现功能 (Green)  
+# 2b. 实现功能 (Green)
 # 编写业务逻辑使测试通过
 
 # 2c. 重构优化 (Refactor)
 # 优化代码结构，保持测试通过
 
 # Step 3: 代码检查
-pnpm exec nx lint resume-parser-svc
-pnpm exec nx format:write
+npx nx lint resume-parser-svc
+npx nx format:write
 
 # Step 4: 完整测试
-pnpm exec nx test resume-parser-svc
-pnpm exec nx run-many --target=test --all
+npx nx test resume-parser-svc
+npx nx run-many --target=test --all
 
 # Step 5: 提交代码
 git add .
@@ -164,13 +169,13 @@ git push origin feature/resume-parser-implementation
 
 ```bash
 # 启动单个服务进行开发
-pnpm exec nx serve resume-parser-svc
+npx nx serve resume-parser-svc
 
 # 监听文件变化，自动重启
-pnpm exec nx serve resume-parser-svc --watch
+npx nx serve resume-parser-svc --watch
 
 # 同时启动多个相关服务
-pnpm exec nx run-many --target=serve --projects=app-gateway,resume-parser-svc
+npx nx run-many --target=serve --projects=app-gateway,resume-parser-svc
 ```
 
 ### 3. 调试模式
@@ -182,7 +187,7 @@ node --inspect-brk dist/apps/resume-parser-svc/main.js
 # VSCode调试配置 (.vscode/launch.json)
 {
   "type": "node",
-  "request": "attach", 
+  "request": "attach",
   "name": "Debug Resume Parser",
   "port": 9229,
   "restart": true
@@ -201,7 +206,7 @@ describe('ParsingService', () => {
   it('should process resume and publish event', async () => {
     // Arrange
     const event = { jobId: 'job1', resumeId: 'res1', ... };
-    
+
     // Act & Assert - 期望失败
     await expect(service.handleResumeSubmitted(event))
       .rejects.toThrow('not implemented');
@@ -216,7 +221,7 @@ export class ParsingService {
     const pdfBuffer = await this.gridFs.downloadFile(event.tempGridFsUrl);
     const rawData = await this.visionLlm.parseResumePdf(pdfBuffer);
     const resumeDto = await this.fieldMapper.normalize(rawData);
-    
+
     await this.natsClient.publishAnalysisResumeParsed({
       jobId: event.jobId,
       resumeId: event.resumeId,
@@ -235,13 +240,13 @@ export class ParsingService {
 
 ```bash
 # 单元测试 - 快速反馈
-pnpm exec nx test resume-parser-svc
+npx nx test resume-parser-svc
 
 # 集成测试 - 服务协作
-pnpm exec nx test resume-parser-svc-e2e
+npx nx test resume-parser-svc-e2e
 
 # E2E测试 - 完整流程
-pnpm exec nx e2e app-gateway-e2e
+npx nx e2e app-gateway-e2e
 ```
 
 ### Mock策略
@@ -253,7 +258,7 @@ jest.mock('../gridfs/gridfs.service');
 
 // 方法级Mock
 const mockVisionLlm = {
-  parseResumePdf: jest.fn().mockResolvedValue(mockRawData)
+  parseResumePdf: jest.fn().mockResolvedValue(mockRawData),
 };
 
 // Spy监听
@@ -280,16 +285,21 @@ export class ParsingService {
     private readonly visionLlm: VisionLlmService,
     private readonly fieldMapper: FieldMapperService,
     private readonly natsClient: NatsClient,
-    private readonly logger = new Logger(ParsingService.name)
+    private readonly logger = new Logger(ParsingService.name),
   ) {}
 
   async handleResumeSubmitted(event: ResumeSubmittedEvent): Promise<void> {
-    this.logger.log(`Processing resume ${event.resumeId} for job ${event.jobId}`);
-    
+    this.logger.log(
+      `Processing resume ${event.resumeId} for job ${event.jobId}`,
+    );
+
     try {
       // 业务逻辑
     } catch (error) {
-      this.logger.error(`Failed to process resume: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to process resume: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -298,8 +308,9 @@ export class ParsingService {
 // ❌ 避免的做法
 export class BadService {
   public data: any; // 避免any类型
-  
-  process(input) { // 缺少类型注解
+
+  process(input) {
+    // 缺少类型注解
     // 没有错误处理
     return this.someApi.call(input);
   }
@@ -314,19 +325,17 @@ export class BadService {
   imports: [
     // 按字母顺序排列
     ConfigModule,
-    MongooseModule.forFeature([
-      { name: Resume.name, schema: ResumeSchema }
-    ])
+    MongooseModule.forFeature([{ name: Resume.name, schema: ResumeSchema }]),
   ],
   controllers: [ResumeEventsController],
   providers: [
     ParsingService,
-    VisionLlmService, 
+    VisionLlmService,
     GridFsService,
     FieldMapperService,
-    NatsClient
+    NatsClient,
   ],
-  exports: [ParsingService] // 只导出需要的服务
+  exports: [ParsingService], // 只导出需要的服务
 })
 export class ResumeParserModule {}
 
@@ -338,7 +347,7 @@ export class ResumeEventsController {
   @EventPattern('job.resume.submitted')
   async handleResumeSubmitted(
     @Payload() data: ResumeSubmittedEvent,
-    @Ctx() context: NatsContext
+    @Ctx() context: NatsContext,
   ) {
     await this.parsingService.handleResumeSubmitted(data);
   }
@@ -396,22 +405,24 @@ pnpm exec nx serve resume-parser-svc --inspect
 tail -f logs/resume-parser-svc.log
 
 # 4. 监控事件流
-nats sub "job.resume.*" 
+nats sub "job.resume.*"
 nats sub "analysis.resume.*"
 ```
 
 ### 常见问题排查
 
 **连接问题**:
+
 ```bash
 # 检查MongoDB连接
 mongosh --eval "db.runCommand('ping')"
 
-# 检查NATS连接  
+# 检查NATS连接
 nats-server --signal status
 ```
 
 **事件流调试**:
+
 ```bash
 # 监听所有事件
 nats sub ">"
@@ -421,6 +432,7 @@ nats pub job.resume.submitted '{"jobId":"test","resumeId":"test"}'
 ```
 
 **性能分析**:
+
 ```bash
 # 内存使用分析
 node --inspect --max-old-space-size=4096 dist/apps/resume-parser-svc/main.js
@@ -436,7 +448,7 @@ clinic doctor -- node dist/apps/resume-parser-svc/main.js
 
 ```bash
 # 构建生产版本
-pnpm exec nx run-many --target=build --all --prod
+npx nx run-many --target=build --all --configuration=production
 
 # 创建容器镜像
 docker build -f apps/resume-parser-svc/Dockerfile -t resume-parser-svc .
@@ -454,7 +466,7 @@ MONGODB_URI=mongodb://localhost:27017/ai-recruitment-dev
 NATS_URL=nats://localhost:4222
 VISION_LLM_API_KEY=your-api-key
 
-# 生产环境  
+# 生产环境
 NODE_ENV=production
 MONGODB_URI=mongodb://prod-cluster:27017/ai-recruitment
 NATS_URL=nats://prod-nats-cluster:4222
@@ -474,11 +486,11 @@ export class VisionLlmService {
 
   async parseResumePdf(buffer: Buffer): Promise<any> {
     const hash = createHash('md5').update(buffer).digest('hex');
-    
+
     if (this.cache.has(hash)) {
       return this.cache.get(hash);
     }
-    
+
     const result = await this.callVisionApi(buffer);
     this.cache.set(hash, result);
     return result;
@@ -487,12 +499,12 @@ export class VisionLlmService {
 
 // 并发处理
 async processBatch(events: ResumeSubmittedEvent[]): Promise<void> {
-  const promises = events.map(event => 
-    this.handleResumeSubmitted(event).catch(error => 
+  const promises = events.map(event =>
+    this.handleResumeSubmitted(event).catch(error =>
       this.logger.error(`Failed to process ${event.resumeId}`, error)
     )
   );
-  
+
   await Promise.allSettled(promises);
 }
 ```
@@ -505,12 +517,12 @@ async processBatch(events: ResumeSubmittedEvent[]): Promise<void> {
 export class ParsingService {
   private readonly processingHistogram = new Histogram({
     name: 'resume_processing_duration_seconds',
-    help: 'Resume processing duration'
+    help: 'Resume processing duration',
   });
 
   async handleResumeSubmitted(event: ResumeSubmittedEvent): Promise<void> {
     const timer = this.processingHistogram.startTimer();
-    
+
     try {
       // 业务逻辑
       timer({ status: 'success' });
@@ -545,12 +557,14 @@ async validateFile(buffer: Buffer): Promise<boolean> {
 ## 📚 学习资源
 
 ### 项目相关
+
 - [NestJS官方文档](https://docs.nestjs.com/)
 - [MongoDB官方指南](https://docs.mongodb.com/)
 - [NATS JetStream文档](https://docs.nats.io/nats-concepts/jetstream)
 - [Nx工作区指南](https://nx.dev/getting-started/intro)
 
 ### 最佳实践
+
 - [Node.js最佳实践](https://github.com/goldbergyoni/nodebestpractices)
 - [TypeScript深入理解](https://basarat.gitbook.io/typescript/)
 - [微服务模式](https://microservices.io/patterns/)

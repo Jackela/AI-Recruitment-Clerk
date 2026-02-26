@@ -1,4 +1,3 @@
-// import { BadRequestException } from '@nestjs/common';
 import { createHash } from 'crypto';
 import * as path from 'path';
 
@@ -201,9 +200,15 @@ export class InputValidator {
       const htmlPattern = /<[^>]*>/g;
       if (htmlPattern.test(sanitizedText)) {
         errors.push('HTML tags are not allowed');
-        // Remove HTML tags
-        sanitizedText = sanitizedText.replace(htmlPattern, '');
       }
+      // Encode dangerous characters to prevent HTML injection
+      // This is the safest approach - escape first, then the content is harmless
+      sanitizedText = sanitizedText
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;');
     }
 
     // Special characters validation
@@ -499,9 +504,11 @@ export class InputValidator {
     ];
 
     // Enhanced XSS patterns
+    // Note: Use [\s\S] to match any character including newlines
+    // and \s* to handle any whitespace in closing tags (spaces, tabs, newlines)
     const xssPatterns = [
-      /<script[\s\S]*?<\/script>/gi,
-      /<iframe[\s\S]*?<\/iframe>/gi,
+      /<script\b[\s\S]*?<\/script\b[\s\S]*?>/gi,
+      /<iframe\b[\s\S]*?<\/iframe\b[\s\S]*?>/gi,
       /javascript:/gi,
       /vbscript:/gi,
       /on\w+\s*=/gi,

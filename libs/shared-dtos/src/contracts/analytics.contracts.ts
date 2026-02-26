@@ -617,7 +617,7 @@ export class AnalyticsContracts {
     // 验证数据结构
     const dataValidation = AnalyticsRules.validateEventDataStructure(
       eventType,
-      eventData,
+      eventData as Record<string, unknown>,
     );
     this.require(
       dataValidation.isValid,
@@ -710,16 +710,14 @@ export class AnalyticsContractViolation extends Error {
  * 分析系统设计契约装饰器
  */
 export function requireValidEvent(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  _target: any,
+  _target: object,
   propertyName: string,
   descriptor: PropertyDescriptor,
 ): void {
   const method = descriptor.value;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  descriptor.value = function (...args: any[]) {
-    const event = args[0];
+  descriptor.value = function (...args: unknown[]) {
+    const event = args[0] as AnalyticsEvent | undefined;
     if (!event) {
       throw new AnalyticsContractViolation(
         `Method ${propertyName} requires a valid analytics event as first argument`,
@@ -735,16 +733,14 @@ export function requireValidEvent(
  * 事件处理契约装饰器
  */
 export function requirePendingEvent(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  _target: any,
+  _target: object,
   propertyName: string,
   descriptor: PropertyDescriptor,
 ): void {
   const method = descriptor.value;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  descriptor.value = function (...args: any[]) {
-    const event = args[0];
+  descriptor.value = function (...args: unknown[]) {
+    const event = args[0] as AnalyticsEvent | undefined;
     if (!event || event.getStatus() !== EventStatus.PENDING_PROCESSING) {
       throw new AnalyticsContractViolation(
         `Method ${propertyName} requires a pending analytics event`,
@@ -759,17 +755,15 @@ export function requirePendingEvent(
  * 隐私合规契约装饰器
  */
 export function requirePrivacyCompliance(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  _target: any,
+  _target: object,
   _propertyName: string,
   descriptor: PropertyDescriptor,
 ): void {
   const method = descriptor.value;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  descriptor.value = function (...args: any[]) {
-    const event = args[0];
-    const userSession = args[1];
+  descriptor.value = function (...args: unknown[]) {
+    const event = args[0] as AnalyticsEvent | undefined;
+    const userSession = args[1] as UserSession | undefined;
 
     if (event && userSession) {
       AnalyticsContracts.validatePrivacyCompliance(event, userSession);
@@ -784,19 +778,17 @@ export function requirePrivacyCompliance(
  */
 export function monitorAnalyticsPerformance(maxTimeMs: number) {
   return function (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    _target: any,
+    _target: object,
     propertyName: string,
     descriptor: PropertyDescriptor,
   ) {
     const method = descriptor.value;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    descriptor.value = function (...args: any[]) {
+    descriptor.value = function (...args: unknown[]) {
       return AnalyticsContracts.performanceContract(
         () => method.apply(this, args),
         maxTimeMs,
-        `${_target?.constructor?.name || 'Unknown'}.${propertyName}`,
+        `${(_target as { constructor?: { name?: string } })?.constructor?.name || 'Unknown'}.${propertyName}`,
       );
     };
   };
@@ -806,18 +798,16 @@ export function monitorAnalyticsPerformance(maxTimeMs: number) {
  * 数据质量验证装饰器
  */
 export function validateEventDataQuality(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  _target: any,
+  _target: object,
   _propertyName: string,
   descriptor: PropertyDescriptor,
 ): void {
   const method = descriptor.value;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  descriptor.value = function (...args: any[]) {
+  descriptor.value = function (...args: unknown[]) {
     // 假设第一个参数是eventType，第二个是eventData
     if (args.length >= 2) {
-      const eventType = args[0];
+      const eventType = args[0] as EventType;
       const eventData = args[1];
       AnalyticsContracts.validateDataQuality(eventType, eventData);
     }

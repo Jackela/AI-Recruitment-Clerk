@@ -177,20 +177,20 @@ export class CampaignComponent implements OnInit {
   }
 
   private listenForStatusUpdates(): void {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    window.addEventListener('userStatusRefreshed', (event: any) => {
+    window.addEventListener('userStatusRefreshed', ((event: Event) => {
+      const customEvent = event as CustomEvent<{ message?: string }>;
       // 用户权限已刷新，更新UI
       this.updateUsageStatus();
 
       // 显示成功消息
-      if (event.detail?.message) {
+      if (customEvent.detail?.message) {
         // 这里可以集成toast服务显示消息
-        console.log('🎉 ' + event.detail.message);
+        console.log('🎉 ' + customEvent.detail.message);
 
         // 可选：显示用户友好的提示
-        this.showRefreshNotification(event.detail.message);
+        this.showRefreshNotification(customEvent.detail.message);
       }
-    });
+    }) as EventListener);
   }
 
   private showRefreshNotification(message: string): void {

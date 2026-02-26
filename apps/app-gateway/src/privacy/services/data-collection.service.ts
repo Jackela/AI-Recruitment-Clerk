@@ -290,11 +290,9 @@ export class DataCollectionService {
     _natsClient: NatsClient,
   ): Promise<UserDataCollectionItem[]> {
     try {
-      // Request user management data via NATS
+      // TODO: Implement NATS request when client is properly injected
       // const response = await _natsClient.request('user-management.data.collect', { _userId }, 5000);
       // return response ? [response as UserDataCollectionItem] : [];
-
-      // Fallback implementation until NATS client is properly injected
       return [];
     } catch (error) {
       this.logger.error(

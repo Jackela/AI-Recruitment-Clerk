@@ -8,9 +8,54 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { DashboardCardComponent } from '../../../components/shared/dashboard-card/dashboard-card.component';
 import type { AppState } from '../../../store/app.state';
-import type { JobListItem } from '../../../store/jobs/job.model';
+import type { JobListItem, Job } from '../../../store/jobs/job.model';
 import * as JobActions from '../../../store/jobs/job.actions';
 import * as JobSelectors from '../../../store/jobs/job.selectors';
+
+/**
+ * Defines the shape of job progress value.
+ */
+export interface JobProgressValue {
+  step: string;
+  progress: number;
+  message?: string;
+  estimatedTimeRemaining?: number;
+  timestamp: Date;
+}
+
+/**
+ * Defines the shape of jobs statistics.
+ */
+export interface JobsStatistics {
+  total: number;
+  active: number;
+  draft: number;
+  closed: number;
+  activePercentage: number;
+  totalJobs: number;
+  activeJobs: number;
+  draftJobs: number;
+  closedJobs: number;
+  processingJobs: number;
+  totalApplicants: number;
+  avgTimeToHire: number;
+}
+
+/**
+ * Defines the shape of job management state with WebSocket.
+ */
+export interface JobManagementStateWithWebSocket {
+  jobs: JobListItem[];
+  selectedJob: Job | null;
+  loading: boolean;
+  creating: boolean;
+  error: string | null;
+  canCreateJob: boolean;
+  hasJobs: boolean;
+  webSocketConnected: boolean;
+  webSocketStatus: 'connecting' | 'connected' | 'disconnected' | 'error';
+  jobProgress: Record<string, JobProgressValue | null>;
+}
 
 /**
  * Represents the jobs list component.
@@ -27,19 +72,16 @@ export class JobsListComponent implements OnInit, OnDestroy {
   public jobs$: Observable<JobListItem[]>;
   public loading$: Observable<boolean>;
   public error$: Observable<string | null>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public jobsStatistics$: Observable<any>;
+  public jobsStatistics$: Observable<JobsStatistics>;
   public activeJobs$: Observable<JobListItem[]>;
 
   // WebSocket-related observables
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public jobsWithProgress$: Observable<Array<JobListItem & { progress: any }>>;
+  public jobsWithProgress$: Observable<Array<JobListItem & { progress: JobProgressValue | null }>>;
   public webSocketConnected$: Observable<boolean>;
   public webSocketStatus$: Observable<
     'connecting' | 'connected' | 'disconnected' | 'error'
   >;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public jobManagementStateWithWebSocket$: Observable<any>;
+  public jobManagementStateWithWebSocket$: Observable<JobManagementStateWithWebSocket>;
 
   private readonly destroy$ = new Subject<void>();
   private readonly sessionId = `jobs-list-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;

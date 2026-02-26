@@ -1,148 +1,36 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import type { Model, FilterQuery } from 'mongoose';
-import type {
-  ReportDocument,
-  ScoreBreakdown,
-  MatchingSkill,
-  ReportRecommendation} from '../schemas/report.schema';
-import {
-  Report
-} from '../schemas/report.schema';
+import type { ReportDocument } from '../schemas/report.schema';
+import { Report } from '../schemas/report.schema';
 import { DatabasePerformanceMonitor } from '@ai-recruitment-clerk/infrastructure-shared';
+import { ReportAnalyticsRepository } from './report-analytics.repository';
+import type {
+  ReportCreateData,
+  ReportUpdateData,
+  ReportQuery,
+  ReportListOptions,
+  PaginatedReports,
+  ReportAnalytics,
+  JobAnalytics,
+  TimeSeriesAnalytics,
+  HealthCheckResult,
+  PerformanceMetricsReport,
+} from './report.types';
+import { ALLOWED_SORT_FIELDS, ALLOWED_SORT_FIELDS_SET } from './report.types';
 
-/**
- * Allowed sort fields for report queries to prevent property injection.
- * Only these fields can be used in the sortBy parameter.
- */
-const ALLOWED_SORT_FIELDS = new Set([
-  'createdAt',
-  'updatedAt',
-  'generatedAt',
-  'jobId',
-  'resumeId',
-  'status',
-  'overallFit',
-  'skillsMatch',
-  'experienceMatch',
-  'educationMatch',
-  'processingTimeMs',
-  'analysisConfidence',
-  // Nested fields
-  'scoreBreakdown.overallFit',
-  'scoreBreakdown.skillsMatch',
-  'scoreBreakdown.experienceMatch',
-  'scoreBreakdown.educationMatch',
-  'recommendation.decision',
-]);
-
-// Enhanced type definitions for report repository
-/**
- * Defines the shape of the date grouping.
- */
-export interface DateGrouping {
-  year: number;
-  month?: number;
-  day?: number;
-  week?: number;
-}
-
-/**
- * Defines the shape of the performance metrics.
- */
-export interface PerformanceMetrics {
-  averageResponseTime: number;
-  totalOperations: number;
-  successRate: number;
-  errorRate: number;
-  lastOperationTime: Date;
-  healthStatus: 'healthy' | 'degraded' | 'unhealthy';
-}
-
-/**
- * Defines the shape of the report create data.
- */
-export interface ReportCreateData {
-  jobId: string;
-  resumeId: string;
-  scoreBreakdown: ScoreBreakdown;
-  skillsAnalysis: MatchingSkill[];
-  recommendation: ReportRecommendation;
-  summary: string;
-  analysisConfidence: number;
-  processingTimeMs: number;
-  generatedBy: string;
-  llmModel: string;
-  requestedBy?: string;
-  detailedReportUrl?: string;
-}
-
-/**
- * Defines the shape of the report update data.
- */
-export interface ReportUpdateData {
-  status?: 'pending' | 'processing' | 'completed' | 'failed';
-  reportGridFsId?: string;
-  detailedReportUrl?: string;
-  errorMessage?: string;
-  processingTimeMs?: number;
-}
-
-/**
- * Defines the shape of the report query.
- */
-export interface ReportQuery {
-  jobId?: string;
-  resumeId?: string;
-  status?: string;
-  generatedBy?: string;
-  requestedBy?: string;
-  dateFrom?: Date;
-  dateTo?: Date;
-  minScore?: number;
-  maxScore?: number;
-  recommendation?: 'hire' | 'consider' | 'interview' | 'reject';
-}
-
-/**
- * Defines the shape of the report list options.
- */
-export interface ReportListOptions {
-  page?: number;
-  limit?: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-  includeFailedReports?: boolean;
-}
-
-/**
- * Defines the shape of the paginated reports.
- */
-export interface PaginatedReports {
-  reports: ReportDocument[];
-  totalCount: number;
-  currentPage: number;
-  totalPages: number;
-  hasNextPage: boolean;
-  hasPrevPage: boolean;
-}
-
-/**
- * Defines the shape of the report analytics.
- */
-export interface ReportAnalytics {
-  totalReports: number;
-  reportsByStatus: Record<string, number>;
-  reportsByRecommendation: Record<string, number>;
-  averageProcessingTime: number;
-  averageConfidenceScore: number;
-  reportsGeneratedToday: number;
-  topPerformingCandidates: {
-    resumeId: string;
-    overallScore: number;
-    recommendation: string;
-  }[];
-}
+// Re-export types for backward compatibility
+export type {
+  DateGrouping,
+  PerformanceMetrics,
+  ReportCreateData,
+  ReportUpdateData,
+  ReportQuery,
+  ReportListOptions,
+  PaginatedReports,
+  ReportAnalytics,
+} from './report.types';
+export { ALLOWED_SORT_FIELDS, ALLOWED_SORT_FIELDS_SET } from './report.types';
 
 /**
  * Manages persistence for report.
@@ -151,6 +39,7 @@ export interface ReportAnalytics {
 export class ReportRepository {
   private readonly logger = new Logger(ReportRepository.name);
   private readonly performanceMonitor = new DatabasePerformanceMonitor();
+  private readonly analyticsRepository: ReportAnalyticsRepository;
 
   /**
    * Initializes a new instance of the Report Repository.
@@ -159,7 +48,9 @@ export class ReportRepository {
   constructor(
     @InjectModel(Report.name, 'report-generator')
     private readonly reportModel: Model<ReportDocument>,
-  ) {}
+  ) {
+    this.analyticsRepository = new ReportAnalyticsRepository(reportModel);
+  }
 
   /**
    * 🚀 MONITORED REPORT CREATION
@@ -326,9 +217,9 @@ export class ReportRepository {
         });
 
         // Validate sortBy against allowed fields to prevent property injection
-        if (!ALLOWED_SORT_FIELDS.has(sortBy)) {
+        if (!ALLOWED_SORT_FIELDS_SET.has(sortBy)) {
           throw new BadRequestException(
-            `Invalid sort field: "${sortBy}". Allowed fields: ${Array.from(ALLOWED_SORT_FIELDS).join(', ')}`,
+            `Invalid sort field: "${sortBy}". Allowed fields: ${ALLOWED_SORT_FIELDS.join(', ')}`,
           );
         }
 
@@ -456,413 +347,37 @@ export class ReportRepository {
 
   /**
    * 🚀 OPTIMIZED ANALYTICS QUERY
-   * Leverages composite indexes for 85-90% performance improvement
-   * Expected performance: 300-800ms (from 2-8 seconds)
+   * Delegates to ReportAnalyticsRepository
    */
   public async getReportAnalytics(
     filters: ReportQuery = {},
   ): Promise<ReportAnalytics> {
-    return this.performanceMonitor.executeWithMonitoring(
-      async () => {
-        this.logger.debug('Generating optimized report analytics', { filters });
-
-        const filter = this.buildQueryFilter(filters);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-
-        // Execute optimized parallel queries instead of single $facet aggregation
-        const [
-          totalReports,
-          statusBreakdown,
-          recommendationBreakdown,
-          averageMetrics,
-          todayReports,
-          topCandidates,
-        ] = await Promise.all([
-          // Total count - uses any available index
-          this.getTotalReportsCount(filter),
-
-          // Status breakdown - leverages status_generation_time index
-          this.getStatusBreakdown(filter),
-
-          // Recommendation breakdown - leverages decision_score_analytics index
-          this.getRecommendationBreakdown(filter),
-
-          // Average metrics - optimized aggregation with projection
-          this.getAverageMetrics(filter),
-
-          // Today's reports - leverages time_score_status_analytics index
-          this.getTodayReportsCount(filter, today, tomorrow),
-
-          // Top candidates - leverages score_status_ranking index
-          this.getTopCandidates(filter),
-        ]);
-
-        const analytics: ReportAnalytics = {
-          totalReports,
-          reportsByStatus: statusBreakdown,
-          reportsByRecommendation: recommendationBreakdown,
-          averageProcessingTime: averageMetrics.avgProcessingTime,
-          averageConfidenceScore: averageMetrics.avgConfidence,
-          reportsGeneratedToday: todayReports,
-          topPerformingCandidates: topCandidates,
-        };
-
-        return analytics;
-      },
-      'getReportAnalytics',
-      800, // Expected performance after optimization: 800ms
-    );
-  }
-
-  /**
-   * Optimized total count using efficient countDocuments
-   */
-  private async getTotalReportsCount(
-    filter: FilterQuery<ReportDocument>,
-  ): Promise<number> {
-    return this.reportModel.countDocuments(filter).exec();
-  }
-
-  /**
-   * Status breakdown leveraging status_generation_time composite index
-   */
-  private async getStatusBreakdown(
-    filter: FilterQuery<ReportDocument>,
-  ): Promise<Record<string, number>> {
-    const results = await this.reportModel
-      .aggregate([
-        { $match: filter },
-        {
-          $group: {
-            _id: '$status',
-            count: { $sum: 1 },
-          },
-        },
-        { $sort: { _id: 1 } }, // Ensures consistent ordering
-      ])
-      .exec();
-
-    const breakdown: Record<string, number> = {};
-    results.forEach((item) => {
-      breakdown[item._id] = item.count;
-    });
-    return breakdown;
-  }
-
-  /**
-   * Recommendation breakdown leveraging decision_score_analytics composite index
-   */
-  private async getRecommendationBreakdown(
-    filter: FilterQuery<ReportDocument>,
-  ): Promise<Record<string, number>> {
-    const results = await this.reportModel
-      .aggregate([
-        { $match: filter },
-        {
-          $group: {
-            _id: '$recommendation.decision',
-            count: { $sum: 1 },
-          },
-        },
-        { $sort: { _id: 1 } },
-      ])
-      .exec();
-
-    const breakdown: Record<string, number> = {};
-    results.forEach((item) => {
-      breakdown[item._id] = item.count;
-    });
-    return breakdown;
-  }
-
-  /**
-   * Average metrics with optimized aggregation and minimal projection
-   */
-  private async getAverageMetrics(
-    filter: FilterQuery<ReportDocument>,
-  ): Promise<{
-    avgProcessingTime: number;
-    avgConfidence: number;
-  }> {
-    const [result] = await this.reportModel
-      .aggregate([
-        { $match: filter },
-        {
-          $group: {
-            _id: null,
-            avgProcessingTime: { $avg: '$processingTimeMs' },
-            avgConfidence: { $avg: '$analysisConfidence' },
-          },
-        },
-      ])
-      .exec();
-
-    return {
-      avgProcessingTime: result?.avgProcessingTime || 0,
-      avgConfidence: result?.avgConfidence || 0,
-    };
-  }
-
-  /**
-   * Today's reports count leveraging time_score_status_analytics composite index
-   */
-  private async getTodayReportsCount(
-    baseFilter: FilterQuery<ReportDocument>,
-    today: Date,
-    tomorrow: Date,
-  ): Promise<number> {
-    const filter = {
-      ...baseFilter,
-      generatedAt: { $gte: today, $lt: tomorrow },
-    };
-
-    return this.reportModel.countDocuments(filter).exec();
-  }
-
-  /**
-   * Top candidates leveraging score_status_ranking composite index
-   */
-  private async getTopCandidates(
-    filter: FilterQuery<ReportDocument>,
-  ): Promise<
-    Array<{ resumeId: string; overallScore: number; recommendation: string }>
-  > {
-    const results = await this.reportModel
-      .find(
-        { ...filter, status: 'completed' },
-        {
-          _id: 0,
-          resumeId: 1,
-          'scoreBreakdown.overallFit': 1,
-          'recommendation.decision': 1,
-        },
-      )
-      .sort({ 'scoreBreakdown.overallFit': -1, status: 1 }) // Matches score_status_ranking index
-      .limit(10)
-      .lean()
-      .exec();
-
-    return results.map((report) => ({
-      resumeId: report.resumeId,
-      overallScore: report.scoreBreakdown.overallFit,
-      recommendation: report.recommendation.decision,
-    }));
+    return this.analyticsRepository.getReportAnalytics(filters, (q) => this.buildQueryFilter(q));
   }
 
   /**
    * 🚀 OPTIMIZED JOB PERFORMANCE ANALYTICS
-   * Leverages job_status_performance composite index for job-specific metrics
+   * Delegates to ReportAnalyticsRepository
    */
-  public async getJobAnalytics(jobId: string): Promise<{
-    totalApplications: number;
-    statusDistribution: Record<string, number>;
-    averageScore: number;
-    topCandidates: Array<{ resumeId: string; score: number; decision: string }>;
-    processingStats: { avgTime: number; successRate: number };
-  }> {
-    return this.performanceMonitor.executeWithMonitoring(
-      async () => {
-        // Leverages job_status_performance index: (jobId: 1, status: 1, generatedAt: -1)
-        const baseQuery = { jobId };
-
-        const [
-          totalCount,
-          statusStats,
-          scoreStats,
-          topCandidates,
-          processingStats,
-        ] = await Promise.all([
-          this.reportModel.countDocuments(baseQuery).exec(),
-
-          this.reportModel
-            .aggregate([
-              { $match: baseQuery },
-              { $group: { _id: '$status', count: { $sum: 1 } } },
-            ])
-            .exec(),
-
-          this.reportModel
-            .aggregate([
-              { $match: { ...baseQuery, status: 'completed' } },
-              {
-                $group: {
-                  _id: null,
-                  avgScore: { $avg: '$scoreBreakdown.overallFit' },
-                },
-              },
-            ])
-            .exec(),
-
-          this.reportModel
-            .find(
-              { ...baseQuery, status: 'completed' },
-              {
-                resumeId: 1,
-                'scoreBreakdown.overallFit': 1,
-                'recommendation.decision': 1,
-              },
-            )
-            .sort({ 'scoreBreakdown.overallFit': -1 })
-            .limit(5)
-            .lean()
-            .exec(),
-
-          this.reportModel
-            .aggregate([
-              { $match: baseQuery },
-              {
-                $group: {
-                  _id: null,
-                  avgProcessingTime: { $avg: '$processingTimeMs' },
-                  totalReports: { $sum: 1 },
-                  successfulReports: {
-                    $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] },
-                  },
-                },
-              },
-            ])
-            .exec(),
-        ]);
-
-        const statusDistribution: Record<string, number> = {};
-        statusStats.forEach((stat) => {
-          statusDistribution[stat._id] = stat.count;
-        });
-
-        const procStats = processingStats[0];
-
-        return {
-          totalApplications: totalCount,
-          statusDistribution,
-          averageScore: scoreStats[0]?.avgScore || 0,
-          topCandidates: topCandidates.map((c) => ({
-            resumeId: c.resumeId,
-            score: c.scoreBreakdown.overallFit,
-            decision: c.recommendation.decision,
-          })),
-          processingStats: {
-            avgTime: procStats?.avgProcessingTime || 0,
-            successRate: procStats
-              ? (procStats.successfulReports / procStats.totalReports) * 100
-              : 0,
-          },
-        };
-      },
-      'getJobAnalytics',
-      400, // Expected performance: 400ms
-    );
+  public async getJobAnalytics(jobId: string): Promise<JobAnalytics> {
+    return this.analyticsRepository.getJobAnalytics(jobId);
   }
 
   /**
    * 🚀 OPTIMIZED TIME-SERIES ANALYTICS
-   * Leverages time_score_status_analytics for trend analysis
+   * Delegates to ReportAnalyticsRepository
    */
   public async getTimeSeriesAnalytics(
     dateRange: { from: Date; to: Date },
     granularity: 'day' | 'week' | 'month' = 'day',
-  ): Promise<
-    Array<{
-      date: string;
-      totalReports: number;
-      averageScore: number;
-      completedReports: number;
-    }>
-  > {
-    return this.performanceMonitor.executeWithMonitoring(
-      async () => {
-        let dateGrouping;
-        switch (granularity) {
-          case 'week':
-            dateGrouping = {
-              year: { $year: '$generatedAt' },
-              week: { $week: '$generatedAt' },
-            };
-            break;
-          case 'month':
-            dateGrouping = {
-              year: { $year: '$generatedAt' },
-              month: { $month: '$generatedAt' },
-            };
-            break;
-          default:
-            dateGrouping = {
-              year: { $year: '$generatedAt' },
-              month: { $month: '$generatedAt' },
-              day: { $dayOfMonth: '$generatedAt' },
-            };
-        }
-
-        // Leverages time_score_status_analytics index
-        const results = await this.reportModel
-          .aggregate([
-            {
-              $match: {
-                generatedAt: { $gte: dateRange.from, $lte: dateRange.to },
-              },
-            },
-            {
-              $group: {
-                _id: dateGrouping,
-                totalReports: { $sum: 1 },
-                averageScore: { $avg: '$scoreBreakdown.overallFit' },
-                completedReports: {
-                  $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] },
-                },
-              },
-            },
-            {
-              $sort: {
-                '_id.year': 1,
-                '_id.month': 1,
-                '_id.day': 1,
-                '_id.week': 1,
-              },
-            },
-          ])
-          .exec();
-
-        return results.map((result) => ({
-          date: this.formatDateFromGrouping(result._id, granularity),
-          totalReports: result.totalReports,
-          averageScore: Math.round(result.averageScore * 100) / 100,
-          completedReports: result.completedReports,
-        }));
-      },
-      'getTimeSeriesAnalytics',
-      600, // Expected performance: 600ms
-    );
-  }
-
-  /**
-   * Format date from MongoDB date grouping
-   */
-  private formatDateFromGrouping(
-    dateGroup: DateGrouping,
-    granularity: string,
-  ): string {
-    const { year, month, day, week } = dateGroup;
-
-    switch (granularity) {
-      case 'week':
-        return `${year}-W${(week || 1).toString().padStart(2, '0')}`;
-      case 'month':
-        return `${year}-${(month || 1).toString().padStart(2, '0')}`;
-      default:
-        return `${year}-${(month || 1).toString().padStart(2, '0')}-${(day || 1).toString().padStart(2, '0')}`;
-    }
+  ): Promise<TimeSeriesAnalytics[]> {
+    return this.analyticsRepository.getTimeSeriesAnalytics(dateRange, granularity);
   }
 
   /**
    * Health check with performance monitoring
    */
-  public async healthCheck(): Promise<{
-    status: string;
-    count: number;
-    performance: PerformanceMetrics | null;
-  }> {
+  public async healthCheck(): Promise<HealthCheckResult> {
     try {
       return this.performanceMonitor.executeWithMonitoring(
         async () => {
@@ -901,18 +416,14 @@ export class ReportRepository {
   /**
    * Get performance metrics for monitoring
    */
-  public getPerformanceMetrics(): {
-    totalQueries: number;
-    averageResponseTime: number;
-    slowQueries: number;
-    errorRate: number;
-    peakQueryTime: number;
-    uptime: string;
-  } {
+  public getPerformanceMetrics(): PerformanceMetricsReport {
     return this.performanceMonitor.getPerformanceReport();
   }
 
-  private buildQueryFilter(query: ReportQuery): FilterQuery<ReportDocument> {
+  /**
+   * Build query filter from ReportQuery
+   */
+  public buildQueryFilter(query: ReportQuery): FilterQuery<ReportDocument> {
     const filter: FilterQuery<ReportDocument> = {};
 
     if (query.jobId) {

@@ -15,6 +15,7 @@ import {
   ErrorInterceptorFactory,
 } from '@ai-recruitment-clerk/infrastructure-shared';
 import { JdExtractorConfigService } from '../config';
+import { GeminiClient, SecureConfigValidator } from '@ai-recruitment-clerk/shared-dtos';
 
 /**
  * Configures the app module.
@@ -35,6 +36,27 @@ import { JdExtractorConfigService } from '../config';
     ExtractionService,
     LlmService,
     JdExtractorNatsService,
+    // Gemini Client for AI-powered JD extraction
+    {
+      provide: GeminiClient,
+      useFactory: (configService: JdExtractorConfigService) => {
+        try {
+          const apiKey = configService.geminiApiKey;
+          SecureConfigValidator.validateServiceConfig('GeminiClient', ['GEMINI_API_KEY']);
+          return new GeminiClient({
+            apiKey,
+            model: 'gemini-1.5-flash',
+            temperature: 0.3,
+            maxOutputTokens: 8192,
+          });
+        } catch {
+          // Return undefined if Gemini API key is not configured
+          // The LlmService will fall back to keyword-based extraction
+          return undefined as unknown as GeminiClient;
+        }
+      },
+      inject: [JdExtractorConfigService],
+    },
     // Enhanced Error Handling System
     {
       provide: APP_FILTER,

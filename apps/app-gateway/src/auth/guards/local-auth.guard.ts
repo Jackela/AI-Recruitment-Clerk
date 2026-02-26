@@ -1,6 +1,5 @@
 import type { CanActivate, ExecutionContext } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
-// import { AuthGuard } from '@nestjs/passport';
 
 /**
  * Implements the local auth guard logic.

@@ -46,8 +46,7 @@ export class EncryptionService {
   private static deriveKey(salt: Buffer): Buffer {
     return crypto.pbkdf2Sync(
       this.getMasterKey(),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      salt as any, // Type assertion for Node.js 20 compatibility
+      salt,
       100000, // iterations
       this.config.keyLength,
       'sha256',
@@ -73,15 +72,11 @@ export class EncryptionService {
 
     // Create cipher with Node.js 20 compatible approach
     const cipher = crypto.createCipheriv(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this.config.algorithm as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      key as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      iv as any,
+      this.config.algorithm,
+      key,
+      iv,
     ) as crypto.CipherGCM;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    cipher.setAAD(Buffer.from('ai-recruitment-clerk') as any); // Additional authenticated data
+    cipher.setAAD(Buffer.from('ai-recruitment-clerk')); // Additional authenticated data
 
     // Encrypt the data
     let encrypted = cipher.update(plaintext, 'utf8', 'hex');
@@ -119,17 +114,12 @@ export class EncryptionService {
 
       // Create decipher with Node.js 20 compatible approach
       const decipher = crypto.createDecipheriv(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        this.config.algorithm as any,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        key as any,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        iv as any,
+        this.config.algorithm,
+        key,
+        iv,
       ) as crypto.DecipherGCM;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      decipher.setAAD(Buffer.from('ai-recruitment-clerk') as any); // Same AAD as encryption
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      decipher.setAuthTag(tag as any);
+      decipher.setAAD(Buffer.from('ai-recruitment-clerk')); // Same AAD as encryption
+      decipher.setAuthTag(tag);
 
       // Decrypt the data
       let decrypted = decipher.update(
@@ -153,8 +143,7 @@ export class EncryptionService {
    * @param fieldsToEncrypt - Array of field names to encrypt
    * @returns Object with specified fields encrypted
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static encryptFields<T extends Record<string, any>>(
+  public static encryptFields<T extends Record<string, unknown>>(
     data: T,
     fieldsToEncrypt: (keyof T)[],
   ): T & { _encrypted: { [K in keyof T]?: EncryptedData } } {
@@ -170,10 +159,9 @@ export class EncryptionService {
             ? data[field]
             : JSON.stringify(data[field]);
 
-        result._encrypted[field] = this.encrypt(fieldValue);
+        result._encrypted[field] = this.encrypt(fieldValue as string);
         // Replace original field with placeholder
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result as any)[field] = '[ENCRYPTED]';
+        (result as Record<string, unknown>)[field as string] = '[ENCRYPTED]';
       }
     });
 
@@ -187,14 +175,12 @@ export class EncryptionService {
    * @returns Object with specified fields decrypted
    */
   public static decryptFields<
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    T extends Record<string, any> & {
+    T extends Record<string, unknown> & {
       _encrypted?: Record<string, EncryptedData>;
     },
   >(data: T, fieldsToDecrypt: (keyof T)[]): Omit<T, '_encrypted'> {
-    const result = { ...data };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    delete (result as any)._encrypted;
+    const result = { ...data } as Record<string, unknown>;
+    delete result['_encrypted'];
 
     if (data._encrypted) {
       fieldsToDecrypt.forEach((field) => {
@@ -204,19 +190,16 @@ export class EncryptionService {
             const decryptedValue = this.decrypt(encryptedField);
             // Try to parse as JSON, fallback to string
             try {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (result as any)[field] = JSON.parse(decryptedValue);
+              result[field as string] = JSON.parse(decryptedValue);
             } catch {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (result as any)[field] = decryptedValue;
+              result[field as string] = decryptedValue;
             }
           } catch (error) {
             console.error(
               `Failed to decrypt field ${String(field)}:`,
               error instanceof Error ? error.message : 'Unknown error',
             );
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (result as any)[field] = '[DECRYPTION_FAILED]';
+            result[field as string] = '[DECRYPTION_FAILED]';
           }
         }
       });
@@ -228,29 +211,26 @@ export class EncryptionService {
   /**
    * Encrypts PII (Personally Identifiable Information) in a user object
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static encryptUserPII(user: any): any {
+  public static encryptUserPII(user: Record<string, unknown>): Record<string, unknown> {
     const piiFields = ['firstName', 'lastName', 'email', 'phone', 'address'];
     return this.encryptFields(
       user,
-      piiFields.filter((field) => user[field] != null),
+      piiFields.filter((field) => user[field] != null) as (keyof typeof user)[],
     );
   }
 
   /**
    * Decrypts PII in a user object
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static decryptUserPII(encryptedUser: any): any {
+  public static decryptUserPII(encryptedUser: Record<string, unknown> & { _encrypted?: Record<string, EncryptedData> }): Record<string, unknown> {
     const piiFields = ['firstName', 'lastName', 'email', 'phone', 'address'];
-    return this.decryptFields(encryptedUser, piiFields);
+    return this.decryptFields(encryptedUser, piiFields as (keyof typeof encryptedUser)[]);
   }
 
   /**
    * Encrypts resume content and sensitive data
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static encryptResumeData(resume: any): any {
+  public static encryptResumeData(resume: Record<string, unknown>): Record<string, unknown> {
     const sensitiveFields = [
       'resumeText',
       'personalInfo',
@@ -259,22 +239,21 @@ export class EncryptionService {
     ];
     return this.encryptFields(
       resume,
-      sensitiveFields.filter((field) => resume[field] != null),
+      sensitiveFields.filter((field) => resume[field] != null) as (keyof typeof resume)[],
     );
   }
 
   /**
    * Decrypts resume content and sensitive data
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static decryptResumeData(encryptedResume: any): any {
+  public static decryptResumeData(encryptedResume: Record<string, unknown> & { _encrypted?: Record<string, EncryptedData> }): Record<string, unknown> {
     const sensitiveFields = [
       'resumeText',
       'personalInfo',
       'contactInfo',
       'originalFilename',
     ];
-    return this.decryptFields(encryptedResume, sensitiveFields);
+    return this.decryptFields(encryptedResume, sensitiveFields as (keyof typeof encryptedResume)[]);
   }
 
   /**

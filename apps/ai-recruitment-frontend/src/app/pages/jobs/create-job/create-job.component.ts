@@ -342,8 +342,7 @@ export class CreateJobComponent implements OnInit, OnDestroy {
    * Handles job completion.
    * @param job - The completed job
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private onJobCompleted(job: any): void {
+  private onJobCompleted(job: { id: string }): void {
     console.log(`✅ Job ${job.id} completed successfully`);
     this.showProgressTracking = false;
 
@@ -357,8 +356,7 @@ export class CreateJobComponent implements OnInit, OnDestroy {
    * Handles job failure.
    * @param job - The failed job
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private onJobFailed(job: any): void {
+  private onJobFailed(job: { id: string }): void {
     console.log(`❌ Job ${job.id} failed`);
     this.showProgressTracking = false;
     // Keep user on create page to potentially retry

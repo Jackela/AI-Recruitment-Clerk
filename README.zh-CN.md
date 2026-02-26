@@ -4,7 +4,7 @@
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)](https://www.typescriptlang.org/)
 [![NestJS](https://img.shields.io/badge/NestJS-11-red)](https://nestjs.com/)
-[![Angular](https://img.shields.io/badge/Angular-18-red)](https://angular.io/)
+[![Angular](https://img.shields.io/badge/Angular-20-red)](https://angular.io/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-6.x-green)](https://www.mongodb.com/)
 [![NATS](https://img.shields.io/badge/NATS-JetStream-lightblue)](https://nats.io/)
 [![Nx](https://img.shields.io/badge/Nx-21.3.2-lightblue)](https://nx.dev/)
@@ -16,6 +16,7 @@
 AI Recruitment Clerk 是一个**事件驱动的微服务系统**，旨在通过AI技术自动化简历筛选过程，将人工初筛时间减少70%以上，关键信息提取准确率达到95%以上。
 
 ### 核心功能
+
 - 🤖 **智能简历解析**: 基于Vision LLM的PDF简历结构化提取
 - 📋 **JD智能分析**: 自动提取职位需求和关键技能
 - ⚡ **精准匹配评分**: AI驱动的候选人-职位匹配度计算
@@ -25,22 +26,23 @@ AI Recruitment Clerk 是一个**事件驱动的微服务系统**，旨在通过A
 ## 📚 文档导航
 
 ### 核心文档套件
-| 文档类型 | 文件路径 | 描述 |
-|----------|----------|------|
-| **📋 产品需求文档 (PRD)** | [`docs/PRD.md`](./docs/PRD.md) | **完整产品需求和商业目标** |
-| **🏗️ 高阶设计文档 (HLD)** | [`docs/HLD.md`](./docs/HLD.md) | **系统架构和设计规范** |
-| **📖 运维手册** | [`docs/RUNBOOK.md`](./docs/RUNBOOK.md) | **生产环境运维和故障响应** |
-| **⚙️ 技术架构文档** | [`docs/TECHNICAL_ARCHITECTURE.md`](./docs/TECHNICAL_ARCHITECTURE.md) | **详细技术实现和性能分析** |
 
-### 传统文档
-| 文档类型 | 文件路径 | 描述 |
-|----------|----------|------|
-| 🔖 项目概览 | [`docs/zh-CN/PROJECT_OVERVIEW.zh-CN.md`](./docs/zh-CN/PROJECT_OVERVIEW.zh-CN.md) | 历史项目文档 |
-| 📋 开发状态 | [`docs/zh-CN/DEVELOPMENT_STATUS.zh-CN.md`](./docs/zh-CN/DEVELOPMENT_STATUS.zh-CN.md) | 开发进度跟踪 |
-| 👨‍💻 开发指南 | [`DEVELOPER_GUIDE.md`](./DEVELOPER_GUIDE.md) | 开发环境设置 |
-| 📋 项目使命 | [`specs/PROJECT_MISSION.md`](./specs/PROJECT_MISSION.md) | 项目目标与核心使命 |
-| 🏗 系统上下文 | [`specs/SYSTEM_CONTEXT.mermaid`](./specs/SYSTEM_CONTEXT.mermaid) | 系统边界图 |
-| 🛡 API规范 | [`specs/api_spec.openapi.yml`](./specs/api_spec.openapi.yml) | RESTful API定义 |
+| 文档类型                   | 文件路径                                                                                 | 描述                    |
+| -------------------------- | ---------------------------------------------------------------------------------------- | ----------------------- |
+| **🏗️ Project Phoenix HLD** | [`docs/architecture/PROJECT_PHOENIX_HLD.md`](./docs/architecture/PROJECT_PHOENIX_HLD.md) | **系统架构和设计规范**  |
+| **📖 CI 运维手册**         | [`docs/CI_RUNBOOK.md`](./docs/CI_RUNBOOK.md)                                             | **CI/CD运维和故障响应** |
+| **⚙️ 架构基线**            | [`docs/ARCHITECTURE_BASELINE.md`](./docs/ARCHITECTURE_BASELINE.md)                       | **技术架构文档**        |
+
+### 其他文档
+
+| 文档类型      | 文件路径                                                                             | 描述               |
+| ------------- | ------------------------------------------------------------------------------------ | ------------------ |
+| 🔖 项目概览   | [`docs/zh-CN/PROJECT_OVERVIEW.zh-CN.md`](./docs/zh-CN/PROJECT_OVERVIEW.zh-CN.md)     | 历史项目文档       |
+| 📋 开发状态   | [`docs/zh-CN/DEVELOPMENT_STATUS.zh-CN.md`](./docs/zh-CN/DEVELOPMENT_STATUS.zh-CN.md) | 开发进度跟踪       |
+| 👨‍💻 开发指南   | [`DEVELOPER_GUIDE.md`](./DEVELOPER_GUIDE.md)                                         | 开发环境设置       |
+| 📋 项目使命   | [`specs/PROJECT_MISSION.md`](./specs/PROJECT_MISSION.md)                             | 项目目标与核心使命 |
+| 🏗 系统上下文 | [`specs/SYSTEM_CONTEXT.mermaid`](./specs/SYSTEM_CONTEXT.mermaid)                     | 系统边界图         |
+| 🛡 API规范    | [`specs/api_spec.openapi.yml`](./specs/api_spec.openapi.yml)                         | RESTful API定义    |
 
 ## 🏗 系统架构
 
@@ -49,26 +51,26 @@ graph TD
     subgraph "用户界面层"
         U[用户 SPA]
     end
-    
+
     subgraph "API网关层"
         GW[API Gateway]
     end
-    
+
     subgraph "微服务层"
         JD[JD Extractor Service]
         RP[Resume Parser Service ⭐]
         SC[Scoring Engine Service]
     end
-    
+
     subgraph "消息与数据层"
         NATS[(NATS JetStream)]
         DB[(MongoDB + GridFS)]
     end
-    
+
     subgraph "外部服务"
         LLM[Vision LLM API]
     end
-    
+
     U -->|HTTPS/JSON| GW
     GW -->|事件发布| NATS
     NATS -->|事件分发| JD & RP & SC
@@ -78,16 +80,16 @@ graph TD
 
 ## 🛠 技术栈
 
-| 层级 | 技术选型 | 用途 |
-|------|----------|------|
-| **前端** | Angular 18 + TypeScript | 企业级SPA用户界面 |
-| **后端** | NestJS 11 + Node.js | 微服务框架 |
-| **数据库** | MongoDB 6.x + GridFS | 文档数据库 + 文件存储 |
-| **消息队列** | NATS JetStream | 事件流处理 |
-| **项目管理** | Nx Monorepo | 多服务统一管理 |
-| **包管理** | pnpm | 高效依赖管理 |
-| **测试** | Jest + Supertest | 单元测试 + 集成测试 |
-| **AI服务** | Vision LLM API | PDF解析与结构化提取 |
+| 层级         | 技术选型                | 用途                  |
+| ------------ | ----------------------- | --------------------- |
+| **前端**     | Angular 18 + TypeScript | 企业级SPA用户界面     |
+| **后端**     | NestJS 11 + Node.js     | 微服务框架            |
+| **数据库**   | MongoDB 6.x + GridFS    | 文档数据库 + 文件存储 |
+| **消息队列** | NATS JetStream          | 事件流处理            |
+| **项目管理** | Nx Monorepo             | 多服务统一管理        |
+| **包管理**   | pnpm                    | 高效依赖管理          |
+| **测试**     | Jest + Supertest        | 单元测试 + 集成测试   |
+| **AI服务**   | Vision LLM API          | PDF解析与结构化提取   |
 
 ## 📁 工作区结构
 
@@ -110,14 +112,15 @@ AI-Recruitment-Clerk/
 
 ## ✅ 开发状态
 
-| 服务名称 | 架构设计 | 单元测试 | 业务实现 | 集成测试 | 状态 |
-|----------|----------|----------|----------|----------|------|
-| **resume-parser-svc** | ✅ | ✅ **240+ tests** | 🔄 | 📋 | **TDD就绪** |
-| **jd-extractor-svc** | ✅ | 📋 | 📋 | 📋 | 架构完成 |
-| **scoring-engine-svc** | ✅ | 📋 | 📋 | 📋 | 架构完成 |
-| **app-gateway** | ✅ | 📋 | 🔄 | 📋 | 基础实现 |
+| 服务名称               | 架构设计 | 单元测试          | 业务实现 | 集成测试 | 状态        |
+| ---------------------- | -------- | ----------------- | -------- | -------- | ----------- |
+| **resume-parser-svc**  | ✅       | ✅ **240+ tests** | 🔄       | 📋       | **TDD就绪** |
+| **jd-extractor-svc**   | ✅       | 📋                | 📋       | 📋       | 架构完成    |
+| **scoring-engine-svc** | ✅       | 📋                | 📋       | 📋       | 架构完成    |
+| **app-gateway**        | ✅       | 📋                | 🔄       | 📋       | 基础实现    |
 
 ### Resume Parser Service 亮点 ⭐
+
 - **240+ 全面单元测试套件完成**
 - 完整TDD方法论实施
 - 核心功能：Test 4 - `analysis.resume.parsed`事件载荷验证
@@ -127,8 +130,9 @@ AI-Recruitment-Clerk/
 ## 🚀 快速开始
 
 ### 前置要求
-- Node.js 18+
-- pnpm 8+
+
+- Node.js 20.18.0+
+- npm 10+
 - MongoDB 6+
 - NATS Server
 
@@ -171,17 +175,20 @@ pnpm exec nx run-many --target=build --all --prod
 ## 🎮 核心服务说明
 
 ### Resume Parser Service (核心重点)
+
 **职责**: PDF简历解析与结构化数据提取
 
 **处理流程**:
+
 ```
-job.resume.submitted事件 → GridFS下载 → Vision LLM解析 → 
+job.resume.submitted事件 → GridFS下载 → Vision LLM解析 →
 字段标准化映射 → analysis.resume.parsed事件发布
 ```
 
 **测试成熟度**: ✅ 240+ 单元测试完成，覆盖所有边界条件
 
 ### 其他服务
+
 - **API Gateway**: 统一入口，路由分发，文件上传处理
 - **JD Extractor**: 职位描述智能分析与结构化提取
 - **Scoring Engine**: 简历-职位匹配度AI计算
@@ -191,7 +198,7 @@ job.resume.submitted事件 → GridFS下载 → Vision LLM解析 →
 系统采用事件驱动架构，主要事件流：
 
 ```
-用户上传简历 → job.resume.submitted → Resume Parser → 
+用户上传简历 → job.resume.submitted → Resume Parser →
 analysis.resume.parsed → Scoring Engine → analysis.match.scored
 ```
 

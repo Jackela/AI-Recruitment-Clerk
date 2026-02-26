@@ -734,11 +734,7 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
 
   private async loadStatistics(): Promise<void> {
     try {
-      // TODO: Replace with real API call
-      // const stats = await this.guestApi.getStatistics().toPromise();
-      // this.todayAnalyses.set(stats.todayAnalyses);
-      // this.totalAnalyses.set(stats.totalAnalyses);
-
+      // TODO: Replace with real API call when available
       // For now, using mock data
       this.todayAnalyses.set(42);
       this.totalAnalyses.set(1247);

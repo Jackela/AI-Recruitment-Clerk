@@ -164,15 +164,8 @@ export class QuestionnaireDomainService {
   }
 
   private extractTopPainPoints(_submissions: Questionnaire[]): string[] {
-    // const painPoints: { [key: string]: number } = {};
-
-    // submissions.forEach((q) => {
-    //   const experience = q.getSubmissionSummary();
-    //   // 简化实现，实际应该从提交数据中提取痛点
-    //   // 这里返回模拟数据
-    // });
-
-    // 返回模拟的高频痛点
+    // TODO: Implement actual pain point extraction from submissions
+    // Currently returns mock data
     return [
       'Manual screening is time-consuming',
       'Difficulty finding qualified candidates',

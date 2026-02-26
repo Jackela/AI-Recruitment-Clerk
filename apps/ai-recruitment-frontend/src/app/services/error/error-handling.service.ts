@@ -49,8 +49,7 @@ export interface StandardizedErrorResponse {
     business: string;
     user: string;
   };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  details?: any;
+  details?: Record<string, unknown>;
 }
 
 /**
@@ -64,8 +63,7 @@ export interface ErrorContext {
   url?: string;
   timestamp: Date;
   userAgent: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  additionalContext?: Record<string, any>;
+  additionalContext?: Record<string, unknown>;
 }
 
 /**
@@ -115,8 +113,7 @@ export class ErrorHandlingService implements ErrorHandler {
   /**
    * Angular ErrorHandler implementation
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public handleError(error: any): void {
+  public handleError(error: unknown): void {
     const errorContext = this.createErrorContext();
 
     if (error instanceof HttpErrorResponse) {
@@ -184,8 +181,7 @@ export class ErrorHandlingService implements ErrorHandler {
   /**
    * Handle unknown errors
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public handleUnknownError(error: any, context?: Partial<ErrorContext>): void {
+  public handleUnknownError(error: unknown, context?: Partial<ErrorContext>): void {
     const errorContext = { ...this.createErrorContext(), ...context };
 
     const notification: ErrorNotification = {
@@ -337,7 +333,7 @@ export class ErrorHandlingService implements ErrorHandler {
     errorResponse: StandardizedErrorResponse,
     _context: ErrorContext,
   ): void {
-    const resetTime = errorResponse.details?.resetTime;
+    const resetTime = errorResponse.details?.resetTime as string | undefined;
     if (resetTime) {
       this.showRateLimitMessage(new Date(resetTime));
     }
@@ -405,14 +401,15 @@ export class ErrorHandlingService implements ErrorHandler {
 
   // Private helper methods
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private isStandardizedError(error: any): error is StandardizedErrorResponse {
+  private isStandardizedError(error: unknown): error is StandardizedErrorResponse {
+    if (!error || typeof error !== 'object') return false;
+    const errorObj = error as Record<string, unknown>;
     return (
-      error &&
-      error.success === false &&
-      error.error &&
-      typeof error.error.type === 'string' &&
-      typeof error.error.code === 'string'
+      errorObj.success === false &&
+      errorObj.error !== null &&
+      typeof errorObj.error === 'object' &&
+      typeof (errorObj.error as Record<string, unknown>).type === 'string' &&
+      typeof (errorObj.error as Record<string, unknown>).code === 'string'
     );
   }
 
@@ -556,8 +553,7 @@ export class ErrorHandlingService implements ErrorHandler {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private logError(error: any, context: ErrorContext): void {
+  private logError(error: unknown, context: ErrorContext): void {
     // In production, send to logging service
     if (this.isProduction()) {
       this.sendToLoggingService(error, context);
@@ -566,8 +562,7 @@ export class ErrorHandlingService implements ErrorHandler {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private sendToLoggingService(_error: any, _context: ErrorContext): void {
+  private sendToLoggingService(_error: unknown, _context: ErrorContext): void {
     // Implementation for sending errors to logging service
     // This could be an HTTP call to your logging endpoint
   }

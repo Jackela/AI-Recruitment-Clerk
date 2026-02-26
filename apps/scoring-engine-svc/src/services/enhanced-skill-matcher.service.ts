@@ -56,6 +56,33 @@ export interface JobSkillRequirement {
 }
 
 /**
+ * Response schema for semantic skill matching from Gemini API.
+ */
+interface SemanticMatchResponse {
+  hasMatch: boolean;
+  matchedSkill: string | null;
+  matchScore: number;
+  confidence: number;
+  explanation: string;
+}
+
+/**
+ * Individual skill improvement suggestion from Gemini API.
+ */
+interface SkillImprovementSuggestion {
+  skill: string;
+  priority: 'high' | 'medium' | 'low';
+  reason: string;
+}
+
+/**
+ * Response schema for skill improvement suggestions from Gemini API.
+ */
+interface ImprovementSuggestionsResponse {
+  suggestions: SkillImprovementSuggestion[];
+}
+
+/**
  * Provides enhanced skill matcher functionality.
  */
 @Injectable()
@@ -84,10 +111,8 @@ export class EnhancedSkillMatcherService {
         .map((skill) => SkillsTaxonomy.normalizeSkill(skill))
         .filter((skill) => skill.length > 0);
 
-      // Group skills by category for better analysis
-      // const resumeSkillsByCategory = SkillsTaxonomy.groupSkillsByCategory(
-      //   normalizedResumeSkills,
-      // );
+      // TODO: Consider grouping skills by category for enhanced analysis
+      // const resumeSkillsByCategory = SkillsTaxonomy.groupSkillsByCategory(normalizedResumeSkills);
 
       const matches: SkillMatchResult[] = [];
       const breakdown = {
@@ -266,17 +291,17 @@ export class EnhancedSkillMatcherService {
         }
       `;
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const response: any = await this.geminiClient.generateStructuredResponse(
-        prompt,
-        `{
+      const response =
+        await this.geminiClient.generateStructuredResponse<SemanticMatchResponse>(
+          prompt,
+          `{
           "hasMatch": "boolean",
           "matchedSkill": "string or null",
           "matchScore": "number between 0.0 and 1.0",
           "confidence": "number between 0.0 and 1.0",
           "explanation": "string explaining the reasoning"
         }`,
-      );
+        );
 
       if (
         response?.data?.hasMatch &&
@@ -284,12 +309,12 @@ export class EnhancedSkillMatcherService {
         response?.data?.matchScore >= 0.6
       ) {
         return {
-          skill: response.data.matchedSkill as string,
+          skill: response.data.matchedSkill,
           matchedJobSkill: jobSkill.name,
-          matchScore: response.data.matchScore as number,
+          matchScore: response.data.matchScore,
           matchType: 'semantic',
-          confidence: response.data.confidence as number,
-          explanation: response.data.explanation as string,
+          confidence: response.data.confidence,
+          explanation: response.data.explanation,
         };
       }
 
@@ -380,9 +405,10 @@ export class EnhancedSkillMatcherService {
         }
       `;
 
-      const response = await this.geminiClient.generateStructuredResponse(
-        prompt,
-        `{
+      const response =
+        await this.geminiClient.generateStructuredResponse<ImprovementSuggestionsResponse>(
+          prompt,
+          `{
           "suggestions": [
             {
               "skill": "string",
@@ -391,10 +417,9 @@ export class EnhancedSkillMatcherService {
             }
           ]
         }`,
-      );
+        );
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return (response.data as any).suggestions || [];
+      return response.data.suggestions || [];
     } catch (error) {
       this.logger.warn('Failed to generate improvement suggestions', error);
       return missingCritical.map((skill) => ({

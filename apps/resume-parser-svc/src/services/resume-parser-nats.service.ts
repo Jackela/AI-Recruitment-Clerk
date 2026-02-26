@@ -3,6 +3,7 @@ import type { ConfigService } from '@nestjs/config';
 import type { NatsConnectionManager, NatsStreamManager } from '@ai-recruitment-clerk/shared-nats-client';
 import type { NatsPublishResult } from '@ai-recruitment-clerk/shared-nats-client';
 import { BaseMicroserviceService } from '@ai-recruitment-clerk/service-base';
+import type { ResumeSubmittedEventData } from '../types/parsing.types';
 
 /**
  * Event payload for resume parsing completion
@@ -117,8 +118,7 @@ export class ResumeParserNatsService extends BaseMicroserviceService {
    * Subscribe to job.resume.submitted events
    */
   public async subscribeToResumeSubmissions(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    handler: (event: any) => Promise<void>,
+    handler: (event: ResumeSubmittedEventData) => Promise<void>,
   ): Promise<void> {
     const subject = 'job.resume.submitted';
 

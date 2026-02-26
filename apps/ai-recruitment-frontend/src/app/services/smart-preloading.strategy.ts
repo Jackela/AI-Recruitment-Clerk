@@ -39,10 +39,9 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
    * Performs the preload operation.
    * @param route - The route.
    * @param load - The load.
-   * @returns The Observable<any>.
+   * @returns The Observable<unknown>.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public preload(route: Route, load: () => Observable<any>): Observable<any> {
+  public preload(route: Route, load: () => Observable<unknown>): Observable<unknown> {
     const routePath = route.path || 'unknown';
 
     // Skip if already preloaded
@@ -132,12 +131,12 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
 
   private detectNetworkCondition(): void {
     // Use Navigator.connection API if available
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    const connection =
-      (navigator as any).connection ||
-      (navigator as any).mozConnection ||
-      (navigator as any).webkitConnection;
-    /* eslint-enable @typescript-eslint/no-explicit-any */
+    const nav = navigator as Navigator & {
+      connection?: { effectiveType: string; addEventListener: (event: string, handler: () => void) => void };
+      mozConnection?: { effectiveType: string; addEventListener: (event: string, handler: () => void) => void };
+      webkitConnection?: { effectiveType: string; addEventListener: (event: string, handler: () => void) => void };
+    };
+    const connection = nav.connection || nav.mozConnection || nav.webkitConnection;
 
     if (connection) {
       // Consider effective connection type
@@ -184,8 +183,7 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
   }
 
   private trackUserEngagement(): void {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let idleTimer: any;
+    let idleTimer: ReturnType<typeof setTimeout>;
 
     const resetIdleTimer = (): void => {
       clearTimeout(idleTimer);

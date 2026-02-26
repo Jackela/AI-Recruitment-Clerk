@@ -408,8 +408,7 @@ export class RedisClient implements OnModuleDestroy {
   /**
    * 执行Lua脚本
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async eval(script: string, keys: string[], args: string[]): Promise<any> {
+  public async eval(script: string, keys: string[], args: string[]): Promise<unknown> {
     await this.ensureConnection();
     if (this.useInMemoryStore) {
       // Not implemented for in-memory mode

@@ -28,8 +28,7 @@ export interface StructuredError {
   category: 'network' | 'validation' | 'runtime' | 'security' | 'business';
   context: ErrorCorrelationContext;
   stack?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   userAction?: string;
   recoverable: boolean;
 }
@@ -89,8 +88,7 @@ export class ErrorCorrelationService {
    * Create structured error with correlation
    */
   public createStructuredError(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    error: Error | any,
+    error: Error | unknown,
     category: StructuredError['category'] = 'runtime',
     severity: StructuredError['severity'] = 'medium',
     userAction?: string,
@@ -105,7 +103,7 @@ export class ErrorCorrelationService {
       severity,
       category,
       context,
-      stack: error?.stack,
+      stack: error instanceof Error ? error.stack : undefined,
       metadata: this.extractMetadata(error),
       userAction,
       recoverable: this.isRecoverable(error, category),
@@ -186,8 +184,8 @@ export class ErrorCorrelationService {
 
     return {
       total: this.errorHistory.length,
-      bySeverity: this.groupBy(this.errorHistory, 'severity'),
-      byCategory: this.groupBy(this.errorHistory, 'category'),
+      bySeverity: this.groupBy(this.errorHistory as unknown as Record<string, unknown>[], 'severity') as Record<StructuredError['severity'], number>,
+      byCategory: this.groupBy(this.errorHistory as unknown as Record<string, unknown>[], 'category') as Record<StructuredError['category'], number>,
       errorRate: recentErrors.length,
       lastErrorTime:
         this.errorHistory.length > 0
@@ -273,47 +271,50 @@ export class ErrorCorrelationService {
     return sessionId;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private generateErrorCode(error: any, category: string): string {
-    if (error?.name) {
+  private generateErrorCode(error: unknown, category: string): string {
+    if (error instanceof Error && error.name) {
       return `${category.toUpperCase()}_${error.name.toUpperCase()}`;
     }
-    if (error?.status) {
-      return `HTTP_${error.status}`;
+    const errorObj = error as { status?: number } | undefined;
+    if (errorObj?.status !== undefined) {
+      return `HTTP_${errorObj.status}`;
     }
     return `${category.toUpperCase()}_UNKNOWN`;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private extractErrorMessage(error: any): string {
+  private extractErrorMessage(error: unknown): string {
     if (typeof error === 'string') return error;
-    if (error?.message) return error.message;
-    if (error?.error?.message) return error.error.message;
+    if (error instanceof Error && error.message) return error.message;
+    const errorObj = error as { message?: string; error?: { message?: string } } | undefined;
+    if (errorObj?.message) return errorObj.message;
+    if (errorObj?.error?.message) return errorObj.error.message;
     return 'Unknown error occurred';
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private extractMetadata(error: any): Record<string, any> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const metadata: Record<string, any> = {};
+  private extractMetadata(error: unknown): Record<string, unknown> {
+    const metadata: Record<string, unknown> = {};
 
-    if (error?.status) metadata.httpStatus = error.status;
-    if (error?.url) metadata.requestUrl = error.url;
-    if (error?.name) metadata.errorName = error.name;
-    if (error?.code) metadata.errorCode = error.code;
+    if (error instanceof Error) {
+      metadata.errorName = error.name;
+    }
+
+    const errorObj = error as { status?: number; url?: string; code?: string } | undefined;
+    if (errorObj?.status !== undefined) metadata.httpStatus = errorObj.status;
+    if (errorObj?.url !== undefined) metadata.requestUrl = errorObj.url;
+    if (errorObj?.code !== undefined) metadata.errorCode = errorObj.code;
 
     return metadata;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private isRecoverable(error: any, category: string): boolean {
+  private isRecoverable(error: unknown, category: string): boolean {
     // Network errors are usually recoverable
     if (category === 'network') return true;
 
     // HTTP errors - most are recoverable except 4xx client errors
-    if (error?.status) {
+    const errorObj = error as { status?: number } | undefined;
+    if (errorObj?.status !== undefined) {
       return (
-        error.status >= 500 || error.status === 408 || error.status === 429
+        errorObj.status >= 500 || errorObj.status === 408 || errorObj.status === 429
       );
     }
 
@@ -400,8 +401,7 @@ export class ErrorCorrelationService {
     return '1.0.0'; // Get from environment or package.json
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private getBrowserInfo(): Record<string, any> {
+  private getBrowserInfo(): Record<string, unknown> {
     return {
       userAgent: navigator.userAgent,
       language: navigator.language,
@@ -413,8 +413,7 @@ export class ErrorCorrelationService {
     };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private getPerformanceMetrics(): Record<string, any> {
+  private getPerformanceMetrics(): Record<string, unknown> {
     if (!window.performance) return {};
 
     const navigation = performance.getEntriesByType(
@@ -448,8 +447,8 @@ export class ErrorCorrelationService {
     totalJSHeapSize?: number;
     jsHeapSizeLimit?: number;
   } | null {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const performanceWithMemory = (window as any)?.performance?.memory;
+    const win = window as Window & { performance?: { memory?: { usedJSHeapSize?: number; totalJSHeapSize?: number; jsHeapSizeLimit?: number } } };
+    const performanceWithMemory = win?.performance?.memory;
 
     return performanceWithMemory
       ? {
@@ -460,8 +459,7 @@ export class ErrorCorrelationService {
       : null;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private groupBy<T extends Record<string, any>>(
+  private groupBy<T extends Record<string, unknown>>(
     array: T[],
     key: keyof T,
   ): Record<string, number> {
