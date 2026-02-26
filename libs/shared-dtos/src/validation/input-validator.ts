@@ -200,9 +200,13 @@ export class InputValidator {
       const htmlPattern = /<[^>]*>/g;
       if (htmlPattern.test(sanitizedText)) {
         errors.push('HTML tags are not allowed');
-        // Remove HTML tags
-        sanitizedText = sanitizedText.replace(htmlPattern, '');
       }
+      // Remove HTML tags and encode dangerous characters to prevent injection
+      sanitizedText = sanitizedText
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script\s*>/gi, '')
+        .replace(/<[^>]*>/g, '')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
     }
 
     // Special characters validation
@@ -498,9 +502,10 @@ export class InputValidator {
     ];
 
     // Enhanced XSS patterns
+    // Note: Patterns handle whitespace in closing tags (e.g., </script >)
     const xssPatterns = [
-      /<script[\s\S]*?<\/script>/gi,
-      /<iframe[\s\S]*?<\/iframe>/gi,
+      /<script\b[^<]*(?:(?!<\/script\s*>)<[^<]*)*<\/script\s*>/gi,
+      /<iframe\b[^<]*(?:(?!<\/iframe\s*>)<[^<]*)*<\/iframe\s*>/gi,
       /javascript:/gi,
       /vbscript:/gi,
       /on\w+\s*=/gi,
