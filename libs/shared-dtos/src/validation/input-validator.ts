@@ -201,12 +201,14 @@ export class InputValidator {
       if (htmlPattern.test(sanitizedText)) {
         errors.push('HTML tags are not allowed');
       }
-      // Remove HTML tags and encode dangerous characters to prevent injection
+      // Encode dangerous characters to prevent HTML injection
+      // This is the safest approach - escape first, then the content is harmless
       sanitizedText = sanitizedText
-        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script\s*>/gi, '')
-        .replace(/<[^>]*>/g, '')
+        .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;');
     }
 
     // Special characters validation
@@ -502,10 +504,11 @@ export class InputValidator {
     ];
 
     // Enhanced XSS patterns
-    // Note: Patterns handle whitespace in closing tags (e.g., </script >)
+    // Note: Use [\s\S] to match any character including newlines
+    // and \s* to handle any whitespace in closing tags (spaces, tabs, newlines)
     const xssPatterns = [
-      /<script\b[^<]*(?:(?!<\/script\s*>)<[^<]*)*<\/script\s*>/gi,
-      /<iframe\b[^<]*(?:(?!<\/iframe\s*>)<[^<]*)*<\/iframe\s*>/gi,
+      /<script\b[\s\S]*?<\/script\b[\s\S]*?>/gi,
+      /<iframe\b[\s\S]*?<\/iframe\b[\s\S]*?>/gi,
       /javascript:/gi,
       /vbscript:/gi,
       /on\w+\s*=/gi,
