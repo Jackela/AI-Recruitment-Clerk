@@ -1,4 +1,4 @@
-import { ValueObject } from './base/value-object.js';
+import { ValueObject, type RestoreData } from './base/value-object.js';
 
 /**
  * Defines the shape of the question section.
@@ -63,8 +63,13 @@ export class QuestionnaireTemplate extends ValueObject<{
    * @param data - The data.
    * @returns The QuestionnaireTemplate.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): QuestionnaireTemplate {
+  public static restore(data: RestoreData<{
+    id: string;
+    version: string;
+    sections: QuestionSection[];
+    requiredQuestions: string[];
+    qualityThresholds: QualityThreshold[];
+  }>): QuestionnaireTemplate {
     return new QuestionnaireTemplate(data);
   }
 }

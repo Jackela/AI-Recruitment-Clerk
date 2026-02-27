@@ -1,11 +1,16 @@
 // 进程和子进程清理工具
-import { spawn, ChildProcess } from 'child_process';
+import type { ChildProcess, SpawnOptions } from 'child_process';
+import { spawn } from 'child_process';
 import { registerCleanup } from './cleanup';
 
 /**
  * 启动可清理的子进程
  */
-export const startCleanableProcess = (command: string, args: string[] = [], options: any = {}): ChildProcess => {
+export const startCleanableProcess = (
+  command: string,
+  args: string[] = [],
+  options: SpawnOptions = {},
+): ChildProcess => {
   const childProcess = spawn(command, args, {
     stdio: 'pipe',
     detached: false, // 确保子进程会随父进程退出
@@ -45,7 +50,7 @@ export const startCleanableProcess = (command: string, args: string[] = [], opti
 /**
  * 杀死进程树（包括所有子进程）
  */
-export const killProcessTree = async (pid: number, signal: string = 'SIGTERM'): Promise<void> => {
+export const killProcessTree = async (pid: number, signal = 'SIGTERM'): Promise<void> => {
   return new Promise((resolve) => {
     try {
       // 在Windows上使用taskkill，在Unix系统上使用kill

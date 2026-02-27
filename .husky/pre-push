@@ -22,10 +22,10 @@ echo ""
 # Start time
 START_TIME=$(date +%s)
 
-# 1. Lint all
-echo "📋 Step 1/6: Linting ALL projects..."
+# 1. Lint all (includes any-type check via @typescript-eslint/no-explicit-any)
+echo "📋 Step 1/6: Linting ALL projects (including any-type check)..."
 npm run lint
-echo "✅ Lint passed"
+echo "✅ Lint passed (no any types found)"
 echo ""
 
 # 2. Typecheck all

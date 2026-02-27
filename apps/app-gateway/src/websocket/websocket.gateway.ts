@@ -26,11 +26,20 @@ interface ProgressUpdate {
   estimatedTimeRemaining?: number;
 }
 
+/** Result data from analysis completion */
+interface AnalysisCompletionResult {
+  score?: number;
+  summary?: string;
+  recommendations?: string[];
+  matchedSkills?: string[];
+  missingSkills?: string[];
+  [key: string]: unknown;
+}
+
 interface CompletionData {
   sessionId: string;
   analysisId: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- result can have various shapes
-  result: any;
+  result: AnalysisCompletionResult;
   processingTime: number;
 }
 

@@ -1,4 +1,4 @@
-import { ValueObject } from './base/value-object.js';
+import { ValueObject, type RestoreData } from './base/value-object.js';
 
 /**
  * Represents the usage limit policy.
@@ -27,8 +27,12 @@ export class UsageLimitPolicy extends ValueObject<{
    * @param data - The data.
    * @returns The UsageLimitPolicy.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): UsageLimitPolicy {
+  public static restore(data: RestoreData<{
+    dailyLimit: number;
+    bonusEnabled: boolean;
+    maxBonusQuota: number;
+    resetTimeUTC: number;
+  }>): UsageLimitPolicy {
     return new UsageLimitPolicy(data);
   }
 

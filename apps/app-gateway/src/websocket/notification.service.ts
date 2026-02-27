@@ -60,6 +60,18 @@ export interface BroadcastMessage {
   expiresAt?: Date;
 }
 
+/** Notification template configuration */
+export interface NotificationTemplate {
+  type: 'info' | 'success' | 'warning' | 'error' | 'system';
+  title: string;
+  message: string;
+  priority: 'low' | 'normal' | 'high' | 'urgent';
+  persistent: boolean;
+  actionUrl?: string;
+  actionText?: string;
+  expiresIn?: number;
+}
+
 /**
  * Provides notification functionality.
  */
@@ -466,10 +478,8 @@ export class NotificationService {
   /**
    * Get notification template
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- template structure varies
-  private getNotificationTemplate(templateType: string): any {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- template structure varies
-    const templates: Record<string, any> = {
+  private getNotificationTemplate(templateType: string): NotificationTemplate {
+    const templates: Record<string, NotificationTemplate> = {
       analysis_complete: {
         type: 'success',
         title: 'Analysis Complete',

@@ -16,6 +16,53 @@ import type { Request } from 'express';
 import { createHash } from 'crypto';
 
 /**
+ * User payload attached to the request after JWT authentication.
+ */
+interface JwtUserPayload {
+  id: string;
+  sub: string;
+  email: string;
+  organizationId: string;
+  role: string;
+  rawRole?: string;
+}
+
+/**
+ * Extended request interface that includes the user payload and test flags.
+ */
+interface RequestWithUser extends Request {
+  user?: JwtUserPayload;
+  /** Internal flag for testing rate limiting behavior */
+  __testRateLimit?: boolean;
+}
+
+/**
+ * JWT error types that can be thrown during token validation.
+ */
+interface JwtError extends Error {
+  name: 'TokenExpiredError' | 'JsonWebTokenError' | 'NotBeforeError';
+}
+
+/**
+ * Type guard to check if an error is a JWT error.
+ * Reserved for future use when integrating with passport-jwt validation.
+ * @param error - The error to check.
+ * @returns True if the error is a JWT error type.
+ */
+ 
+function isJwtError(error: unknown): error is JwtError {
+  return (
+    error instanceof Error &&
+    (error.name === 'TokenExpiredError' ||
+      error.name === 'JsonWebTokenError' ||
+      error.name === 'NotBeforeError')
+  );
+}
+
+// Export for use in handleRequest and future passport-jwt integration
+export { isJwtError };
+
+/**
  * Implements the jwt auth guard logic.
  */
 @Injectable()
@@ -64,8 +111,8 @@ export class JwtAuthGuard implements CanActivate {
     if (process.env.NODE_ENV !== 'test') {
       const force = process.env.FORCE_RATE_LIMIT === 'true';
       // Only enforce rate limit when explicitly requested or forced by env
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if (force || (request as any).__testRateLimit === true) {
+      const requestWithUserForRateLimit = request as RequestWithUser;
+      if (force || requestWithUserForRateLimit.__testRateLimit === true) {
         const clientId = this.getClientIdentifier(request);
         if (!this.checkRateLimit(clientId, request.path)) {
           this.logger.warn(
@@ -82,8 +129,7 @@ export class JwtAuthGuard implements CanActivate {
     // For simplified UAT and to avoid class transpile issues with AuthGuard mixins,
     // treat requests as authenticated if a bearer exists; otherwise allow as guest.
     const authHeader = request.headers['authorization'] || '';
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const requestWithUser = request as any;
+    const requestWithUser = request as RequestWithUser;
     if (typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
       const tokenValue = authHeader.slice('Bearer '.length).trim();
 
@@ -126,8 +172,12 @@ export class JwtAuthGuard implements CanActivate {
    * @param context - The context.
    * @returns The result of the operation.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public handleRequest(err: any, user: any, _info: any, context: ExecutionContext): any {
+  public handleRequest(
+    err: JwtError | null,
+    user: JwtUserPayload | null,
+    _info: unknown,
+    context: ExecutionContext,
+  ): JwtUserPayload {
     const request = context.switchToHttp().getRequest<Request>();
 
     if (err) {
@@ -159,8 +209,7 @@ export class JwtAuthGuard implements CanActivate {
     if (user?.id) response.setHeader('X-Auth-User-Id', String(user.id));
     if (user?.role) {
       const normalizedRole = String(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (user as any)?.rawRole ?? user.role ?? '',
+        user?.rawRole ?? user.role ?? '',
       ).toLowerCase();
       response.setHeader('X-Auth-Role', normalizedRole);
     }

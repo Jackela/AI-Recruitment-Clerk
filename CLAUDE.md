@@ -26,10 +26,15 @@
 
 ### RULE 3: TYPESCRIPT STRICT MODE ENFORCED
 
-- **NO 'ANY' TYPES**: All variables must have explicit types
+- **NO 'ANY' TYPES**: All variables must have explicit types - `"@typescript-eslint/no-explicit-any": "error"`
 - **STRICT MODE**: All tsconfig files must have `"strict": true`
 - **ERROR ON UNUSED**: `"noUnusedLocals": true, "noUnusedParameters": true`
 - **COMPILATION MUST SUCCEED**: Zero tolerance for TypeScript errors
+- **TYPE SAFETY ENFORCEMENT**:
+  - Use `unknown` instead of `any` when type is truly unknown
+  - Use type guards and type predicates for runtime type checking
+  - Prefer union types over `any` for flexible typing
+  - All function parameters and return types must be explicitly typed
 
 ### RULE 4: CONCURRENT EXECUTION PATTERNS
 
@@ -89,6 +94,23 @@
 - Service schemas: `appGateway`, `resumeParser`, `jdExtractor`, `scoringEngine`, `reportGenerator`, `frontend`
 - Type-safe access: `env.getString()`, `env.getNumber()`, `env.getBoolean()`, `env.getArray()`, `env.getUrl()`
 
+### Controller Organization (Split Controller Pattern)
+
+- **Single Responsibility**: Separate HTTP and NATS controllers when endpoints exceed 500 lines
+- **Naming Convention**: `*.http.controller.ts` for REST endpoints, `*.nats.controller.ts` for NATS handlers
+- **Barrel Exports**: Use `index.ts` to export all controllers from a module
+- **Shared Services**: Controllers should delegate to shared services, not duplicate logic
+- Example: `report.controller.ts` split into `report.http.controller.ts` and `report.nats.controller.ts`
+
+### Report Generation Dependencies
+
+- **puppeteer**: PDF generation from HTML templates
+- **exceljs**: Excel spreadsheet generation with formatting support
+- **Usage Pattern**:
+  - HTML reports: Render templates and convert to PDF via puppeteer
+  - Excel reports: Use exceljs for programmatic cell formatting and data export
+  - Both dependencies handle binary output streams efficiently
+
 ## Project Overview
 
 AI Recruitment Clerk - 智能简历筛选和分析系统，使用Angular + NestJS + 微服务架构。
@@ -97,6 +119,7 @@ AI Recruitment Clerk - 智能简历筛选和分析系统，使用Angular + NestJ
 
 - `npm run build` - Build project
 - `npm run test` - Run tests
+- `npm run test:cov` - Run tests with coverage report (80% minimum for microservices)
 - `npm run lint` - Linting
 - `npm run typecheck` - Type checking
 
@@ -120,14 +143,22 @@ AI Recruitment Clerk - 智能简历筛选和分析系统，使用Angular + NestJ
 - **Backend**: NestJS, TypeScript, MongoDB, Redis
 - **Message Queue**: NATS JetStream
 - **Deployment**: Docker, Railway
+- **Report Generation**: puppeteer (PDF), exceljs (Excel exports)
 
 ## RULE 6: CODE QUALITY STANDARDS
 
 - **MODULAR DESIGN**: Files under 500 lines maximum
+  - Controllers over 500 lines must be split using split controller pattern
+  - Extract related endpoints into separate controller files (e.g., `*.http.controller.ts`, `*.nats.controller.ts`)
+  - Use barrel exports (`index.ts`) to maintain clean public API
 - **ENVIRONMENT SAFETY**: Never hardcode secrets or credentials
 - **TEST-FIRST DEVELOPMENT**: Write tests before implementation
 - **CLEAN ARCHITECTURE**: Strict separation of concerns
 - **BENTO GRID UI**: Consistent modern card-based interface design
+- **TEST COVERAGE**: Minimum 80% coverage required for all microservices
+  - Use `npm run test:cov` to verify coverage
+  - Focus on branch coverage, not just line coverage
+  - Mock external dependencies (NATS, MongoDB, external APIs)
 
 ## RULE 7: DEPLOYMENT & PRODUCTION STANDARDS
 
@@ -150,6 +181,7 @@ AI Recruitment Clerk - 智能简历筛选和分析系统，使用Angular + NestJ
 3. **TYPE SAFETY** > runtime flexibility
 4. **ROOT CAUSE FIXES** > temporary workarounds
 5. **IMMEDIATE FEEDBACK** > delayed error discovery
+6. **TEST COVERAGE** > feature velocity (maintain 80% minimum)
 
 ## RULE 9: PARALLEL EXECUTION WITH SUBAGENTS
 

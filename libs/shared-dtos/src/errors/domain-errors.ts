@@ -1,6 +1,23 @@
 /**
- * Domain-Specific Error Classes for All Microservices
- * Provides service-specific error types with enhanced context and recovery strategies
+ * @fileoverview Domain-Specific Error Classes for All Microservices
+ * @description Provides service-specific error types with enhanced context and recovery strategies.
+ * Each microservice has its own set of error codes and exceptions for precise error handling.
+ * @module errors/domain-errors
+ *
+ * @example
+ * // Resume Parser error
+ * throw new ResumeParserException(
+ *   ResumeParserErrorCode.FILE_PARSE_FAILED,
+ *   { fileName: 'resume.pdf', fileType: 'pdf' },
+ *   { resumeId: 'resume-123', candidateId: 'candidate-456' }
+ * );
+ *
+ * // Scoring Engine error
+ * throw new ScoringEngineException(
+ *   ScoringEngineErrorCode.INSUFFICIENT_DATA,
+ *   { algorithm: 'weighted-average', confidenceLevel: 0.5 },
+ *   { resumeId: 'resume-123', jobId: 'job-456' }
+ * );
  */
 
 import { HttpStatus } from '@nestjs/common';
@@ -11,7 +28,298 @@ import {
 import { ErrorType } from '../common/error-handling.patterns';
 
 /**
- * Resume Parser Service Error Codes
+ * Base interface for error details across all domain errors.
+ * Provides common fields for error tracking and debugging.
+ *
+ * @example
+ * const details: DomainErrorDetails = {
+ *   originalError: 'Connection refused',
+ *   timestamp: '2024-02-28T10:30:00.000Z',
+ *   customField: 'custom value'
+ * };
+ */
+export interface DomainErrorDetails {
+  /** Original error message if wrapping another error */
+  originalError?: string;
+  /** ISO 8601 timestamp when the error occurred */
+  timestamp?: string;
+  /** Additional service-specific details */
+  [key: string]: unknown;
+}
+
+/**
+ * Base interface for error context across all domain errors.
+ * Provides request tracing and user identification for debugging.
+ *
+ * @example
+ * const context: DomainErrorContext = {
+ *   service: 'resume-parser-svc',
+ *   component: 'pdf-parser',
+ *   operation: 'extractText',
+ *   requestId: 'req-123',
+ *   userId: 'user-456'
+ * };
+ */
+export interface DomainErrorContext {
+  /** Service where the error originated */
+  service?: string;
+  /** Component within the service (e.g., 'pdf-parser', 'ocr-processor') */
+  component?: string;
+  /** Operation that was being performed (e.g., 'extractText', 'detectSkills') */
+  operation?: string;
+  /** Request or trace ID for correlation across services */
+  requestId?: string;
+  /** User ID if available from authenticated request */
+  userId?: string;
+  /** Additional context-specific properties */
+  [key: string]: unknown;
+}
+
+/**
+ * Resume Parser service-specific error details.
+ * Contains file processing information for debugging parse failures.
+ *
+ * @example
+ * const details: ResumeParserErrorDetails = {
+ *   fileName: 'john_doe_resume.pdf',
+ *   fileType: 'pdf',
+ *   fileSize: 102400,
+ *   parserType: 'pdf-text-extractor'
+ * };
+ */
+export interface ResumeParserErrorDetails extends DomainErrorDetails {
+  /** File name being processed */
+  fileName?: string;
+  /** File type/format (pdf, docx, txt, etc.) */
+  fileType?: string;
+  /** File size in bytes */
+  fileSize?: number;
+  /** Parser type used (pdf-text, ocr, gemini, etc.) */
+  parserType?: string;
+}
+
+/**
+ * Resume Parser service-specific error context.
+ * Contains identifiers for tracking resume processing operations.
+ *
+ * @example
+ * const context: ResumeParserErrorContext = {
+ *   resumeId: 'resume-123',
+ *   candidateId: 'candidate-456',
+ *   service: 'resume-parser-svc',
+ *   operation: 'parseResume'
+ * };
+ */
+export interface ResumeParserErrorContext extends DomainErrorContext {
+  /** Resume ID if available */
+  resumeId?: string;
+  /** Candidate ID if available */
+  candidateId?: string;
+}
+
+/**
+ * Report Generator service-specific error details.
+ * Contains report generation information for debugging.
+ *
+ * @example
+ * const details: ReportGeneratorErrorDetails = {
+ *   reportType: 'individual',
+ *   templateName: 'standard-template',
+ *   exportFormat: 'pdf'
+ * };
+ */
+export interface ReportGeneratorErrorDetails extends DomainErrorDetails {
+  /** Report type being generated (individual, comparison, batch, etc.) */
+  reportType?: string;
+  /** Template name used for generation */
+  templateName?: string;
+  /** Export format (pdf, excel, html, markdown, json) */
+  exportFormat?: string;
+}
+
+/**
+ * Report Generator service-specific error context.
+ * Contains identifiers for tracking report generation operations.
+ *
+ * @example
+ * const context: ReportGeneratorErrorContext = {
+ *   reportId: 'report-789',
+ *   jobId: 'job-456',
+ *   service: 'report-generator-svc'
+ * };
+ */
+export interface ReportGeneratorErrorContext extends DomainErrorContext {
+  /** Report ID if available */
+  reportId?: string;
+  /** Job ID associated with report */
+  jobId?: string;
+}
+
+/**
+ * JD (Job Description) Extractor service-specific error details.
+ * Contains job description processing information for debugging.
+ *
+ * @example
+ * const details: JDExtractorErrorDetails = {
+ *   source: 'linkedin',
+ *   format: 'html'
+ * };
+ */
+export interface JDExtractorErrorDetails extends DomainErrorDetails {
+  /** Job description source (linkedin, indeed, manual, etc.) */
+  source?: string;
+  /** Format of the JD (html, text, pdf) */
+  format?: string;
+}
+
+/**
+ * JD Extractor service-specific error context.
+ * Contains identifiers for tracking JD extraction operations.
+ *
+ * @example
+ * const context: JDExtractorErrorContext = {
+ *   jobId: 'job-456',
+ *   companyId: 'company-789'
+ * };
+ */
+export interface JDExtractorErrorContext extends DomainErrorContext {
+  /** Job ID */
+  jobId?: string;
+  /** Company ID */
+  companyId?: string;
+}
+
+/**
+ * Scoring Engine service-specific error details.
+ * Contains scoring algorithm information for debugging.
+ *
+ * @example
+ * const details: ScoringEngineErrorDetails = {
+ *   algorithm: 'weighted-average',
+ *   modelName: 'skill-match-v2',
+ *   confidenceLevel: 0.85
+ * };
+ */
+export interface ScoringEngineErrorDetails extends DomainErrorDetails {
+  /** Scoring algorithm used (weighted-average, ml-based, rule-based) */
+  algorithm?: string;
+  /** Model name if ML-based scoring */
+  modelName?: string;
+  /** Confidence level attempted (0-1) */
+  confidenceLevel?: number;
+}
+
+/**
+ * Scoring Engine service-specific error context.
+ * Contains identifiers for tracking scoring operations.
+ *
+ * @example
+ * const context: ScoringEngineContext = {
+ *   resumeId: 'resume-123',
+ *   jobId: 'job-456',
+ *   scoreId: 'score-789'
+ * };
+ */
+export interface ScoringEngineContext extends DomainErrorContext {
+  /** Resume ID being scored */
+  resumeId?: string;
+  /** Job ID for matching */
+  jobId?: string;
+  /** Score ID if partially generated */
+  scoreId?: string;
+}
+
+/**
+ * App Gateway service-specific error details.
+ * Contains API gateway request information for debugging.
+ *
+ * @example
+ * const details: AppGatewayErrorDetails = {
+ *   targetService: 'resume-parser-svc',
+ *   method: 'POST',
+ *   path: '/api/resumes/upload',
+ *   statusCode: 503
+ * };
+ */
+export interface AppGatewayErrorDetails extends DomainErrorDetails {
+  /** Target service name */
+  targetService?: string;
+  /** HTTP method */
+  method?: string;
+  /** Endpoint path */
+  path?: string;
+  /** Response status code if available */
+  statusCode?: number;
+}
+
+/**
+ * App Gateway service-specific error context.
+ * Contains identifiers for tracking gateway operations.
+ *
+ * @example
+ * const context: AppGatewayErrorContext = {
+ *   gatewayRequestId: 'gw-123',
+ *   clientIp: '192.168.1.100'
+ * };
+ */
+export interface AppGatewayErrorContext extends DomainErrorContext {
+  /** Gateway request ID */
+  gatewayRequestId?: string;
+  /** Client IP address */
+  clientIp?: string;
+}
+
+/**
+ * Database-specific error details.
+ * Contains database operation information for debugging.
+ *
+ * @example
+ * const details: DatabaseErrorDetails = {
+ *   operation: 'insert',
+ *   table: 'resumes',
+ *   query: 'INSERT INTO resumes...',
+ *   dbErrorCode: 11000
+ * };
+ */
+export interface DatabaseErrorDetails extends DomainErrorDetails {
+  /** Database operation type (insert, update, delete, find) */
+  operation?: string;
+  /** Table or collection name */
+  table?: string;
+  /** Query that failed (sanitized for security) */
+  query?: string;
+  /** Error code from database (MongoDB error code, SQL state, etc.) */
+  dbErrorCode?: string | number;
+}
+
+/**
+ * Database-specific error context.
+ * Contains database connection information for debugging.
+ *
+ * @example
+ * const context: DatabaseErrorContext = {
+ *   database: 'recruitment_db',
+ *   poolInfo: '5/10 connections in use'
+ * };
+ */
+export interface DatabaseErrorContext extends DomainErrorContext {
+  /** Database name */
+  database?: string;
+  /** Connection pool info */
+  poolInfo?: string;
+}
+
+/**
+ * Resume Parser Service Error Codes.
+ * Defines all possible error conditions during resume parsing operations.
+ *
+ * @example
+ * if (parseFailed) {
+ *   throw new ResumeParserException(
+ *     ResumeParserErrorCode.FILE_PARSE_FAILED,
+ *     { fileName: 'resume.pdf' }
+ *   );
+ * }
  */
 export enum ResumeParserErrorCode {
   FILE_PARSE_FAILED = 'RESUME_PARSE_FAILED',
@@ -61,7 +369,26 @@ export const ResumeParserErrorMessages: Record<ResumeParserErrorCode, string> =
   };
 
 /**
- * Resume Parser Service Exception
+ * Resume Parser Service Exception.
+ * Thrown when resume parsing operations fail due to file issues, format problems,
+ * or extraction failures.
+ *
+ * @extends EnhancedAppException
+ *
+ * @example
+ * // File parsing failure
+ * throw new ResumeParserException(
+ *   ResumeParserErrorCode.FILE_PARSE_FAILED,
+ *   { fileName: 'resume.pdf', fileType: 'pdf', fileSize: 102400 },
+ *   { resumeId: 'resume-123', candidateId: 'candidate-456' }
+ * );
+ *
+ * @example
+ * // Unsupported format
+ * throw new ResumeParserException(
+ *   ResumeParserErrorCode.UNSUPPORTED_FORMAT,
+ *   { fileName: 'resume.xyz', fileType: 'xyz' }
+ * );
  */
 export class ResumeParserException extends EnhancedAppException {
   /**
@@ -72,10 +399,8 @@ export class ResumeParserException extends EnhancedAppException {
    */
   constructor(
     code: ResumeParserErrorCode,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    details?: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    context?: Record<string, any>,
+    details?: ResumeParserErrorDetails,
+    context?: ResumeParserErrorContext,
   ) {
     super(
       ExtendedErrorType.PARSING_ERROR,
@@ -135,7 +460,16 @@ export class ResumeParserException extends EnhancedAppException {
 }
 
 /**
- * Report Generator Service Error Codes
+ * Report Generator Service Error Codes.
+ * Defines all possible error conditions during report generation operations.
+ *
+ * @example
+ * if (templateNotFound) {
+ *   throw new ReportGeneratorException(
+ *     ReportGeneratorErrorCode.TEMPLATE_NOT_FOUND,
+ *     { templateName: 'custom-template' }
+ *   );
+ * }
  */
 export enum ReportGeneratorErrorCode {
   REPORT_GENERATION_FAILED = 'REPORT_GENERATION_FAILED',
@@ -151,7 +485,26 @@ export enum ReportGeneratorErrorCode {
 }
 
 /**
- * Report Generator Service Exception
+ * Report Generator Service Exception.
+ * Thrown when report generation operations fail due to template issues,
+ * data aggregation problems, or export failures.
+ *
+ * @extends EnhancedAppException
+ *
+ * @example
+ * // Template not found
+ * throw new ReportGeneratorException(
+ *   ReportGeneratorErrorCode.TEMPLATE_NOT_FOUND,
+ *   { templateName: 'executive-summary-v2' },
+ *   { reportId: 'report-123', jobId: 'job-456' }
+ * );
+ *
+ * @example
+ * // PDF generation failure
+ * throw new ReportGeneratorException(
+ *   ReportGeneratorErrorCode.PDF_GENERATION_FAILED,
+ *   { exportFormat: 'pdf' }
+ * );
  */
 export class ReportGeneratorException extends EnhancedAppException {
   /**
@@ -162,10 +515,8 @@ export class ReportGeneratorException extends EnhancedAppException {
    */
   constructor(
     code: ReportGeneratorErrorCode,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    details?: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    context?: Record<string, any>,
+    details?: ReportGeneratorErrorDetails,
+    context?: ReportGeneratorErrorContext,
   ) {
     const messages: Record<ReportGeneratorErrorCode, string> = {
       [ReportGeneratorErrorCode.REPORT_GENERATION_FAILED]:
@@ -216,7 +567,16 @@ export class ReportGeneratorException extends EnhancedAppException {
 }
 
 /**
- * JD Extractor Service Error Codes
+ * JD (Job Description) Extractor Service Error Codes.
+ * Defines all possible error conditions during job description extraction.
+ *
+ * @example
+ * if (extractionFailed) {
+ *   throw new JDExtractorException(
+ *     JDExtractorErrorCode.JD_PARSE_FAILED,
+ *     { source: 'linkedin' }
+ *   );
+ * }
  */
 export enum JDExtractorErrorCode {
   JD_PARSE_FAILED = 'JD_PARSING_FAILED',
@@ -231,7 +591,26 @@ export enum JDExtractorErrorCode {
 }
 
 /**
- * JD Extractor Service Exception
+ * JD Extractor Service Exception.
+ * Thrown when job description extraction operations fail due to parsing issues,
+ * missing data, or AI service failures.
+ *
+ * @extends EnhancedAppException
+ *
+ * @example
+ * // Parsing failure
+ * throw new JDExtractorException(
+ *   JDExtractorErrorCode.JD_PARSE_FAILED,
+ *   { source: 'linkedin', format: 'html' },
+ *   { jobId: 'job-456', companyId: 'company-789' }
+ * );
+ *
+ * @example
+ * // Skill mapping failure
+ * throw new JDExtractorException(
+ *   JDExtractorErrorCode.SKILL_MAPPING_FAILED,
+ *   { source: 'manual' }
+ * );
  */
 export class JDExtractorException extends EnhancedAppException {
   /**
@@ -242,10 +621,8 @@ export class JDExtractorException extends EnhancedAppException {
    */
   constructor(
     code: JDExtractorErrorCode,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    details?: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    context?: Record<string, any>,
+    details?: JDExtractorErrorDetails,
+    context?: JDExtractorErrorContext,
   ) {
     const messages: Record<JDExtractorErrorCode, string> = {
       [JDExtractorErrorCode.JD_PARSE_FAILED]: 'Job description parsing failed',
@@ -293,7 +670,16 @@ export class JDExtractorException extends EnhancedAppException {
 }
 
 /**
- * Scoring Engine Service Error Codes
+ * Scoring Engine Service Error Codes.
+ * Defines all possible error conditions during candidate scoring operations.
+ *
+ * @example
+ * if (scoringFailed) {
+ *   throw new ScoringEngineException(
+ *     ScoringEngineErrorCode.SCORING_ALGORITHM_FAILED,
+ *     { algorithm: 'weighted-average' }
+ *   );
+ * }
  */
 export enum ScoringEngineErrorCode {
   SCORING_ALGORITHM_FAILED = 'SCORING_ALGORITHM_FAILED',
@@ -308,7 +694,26 @@ export enum ScoringEngineErrorCode {
 }
 
 /**
- * Scoring Engine Service Exception
+ * Scoring Engine Service Exception.
+ * Thrown when scoring operations fail due to algorithm errors,
+ * insufficient data, or calculation failures.
+ *
+ * @extends EnhancedAppException
+ *
+ * @example
+ * // Insufficient data for scoring
+ * throw new ScoringEngineException(
+ *   ScoringEngineErrorCode.INSUFFICIENT_DATA,
+ *   { algorithm: 'ml-based', confidenceLevel: 0.5 },
+ *   { resumeId: 'resume-123', jobId: 'job-456' }
+ * );
+ *
+ * @example
+ * // ML model prediction failure
+ * throw new ScoringEngineException(
+ *   ScoringEngineErrorCode.MODEL_PREDICTION_FAILED,
+ *   { modelName: 'skill-match-v2' }
+ * );
  */
 export class ScoringEngineException extends EnhancedAppException {
   /**
@@ -319,10 +724,8 @@ export class ScoringEngineException extends EnhancedAppException {
    */
   constructor(
     code: ScoringEngineErrorCode,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    details?: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    context?: Record<string, any>,
+    details?: ScoringEngineErrorDetails,
+    context?: ScoringEngineContext,
   ) {
     const messages: Record<ScoringEngineErrorCode, string> = {
       [ScoringEngineErrorCode.SCORING_ALGORITHM_FAILED]:
@@ -372,7 +775,16 @@ export class ScoringEngineException extends EnhancedAppException {
 }
 
 /**
- * App Gateway Service Error Codes
+ * App Gateway Service Error Codes.
+ * Defines all possible error conditions at the API gateway level.
+ *
+ * @example
+ * if (serviceUnavailable) {
+ *   throw new AppGatewayException(
+ *     AppGatewayErrorCode.SERVICE_UNAVAILABLE,
+ *     { targetService: 'resume-parser-svc' }
+ *   );
+ * }
  */
 export enum AppGatewayErrorCode {
   SERVICE_UNAVAILABLE = 'DOWNSTREAM_SERVICE_UNAVAILABLE',
@@ -387,7 +799,26 @@ export enum AppGatewayErrorCode {
 }
 
 /**
- * App Gateway Service Exception
+ * App Gateway Service Exception.
+ * Thrown when gateway operations fail due to routing issues,
+ * authentication problems, or downstream service failures.
+ *
+ * @extends EnhancedAppException
+ *
+ * @example
+ * // Service unavailable
+ * throw new AppGatewayException(
+ *   AppGatewayErrorCode.SERVICE_UNAVAILABLE,
+ *   { targetService: 'resume-parser-svc', method: 'POST', path: '/api/resumes' },
+ *   { gatewayRequestId: 'gw-123', clientIp: '192.168.1.100' }
+ * );
+ *
+ * @example
+ * // Rate limit exceeded
+ * throw new AppGatewayException(
+ *   AppGatewayErrorCode.RATE_LIMIT_EXCEEDED,
+ *   { statusCode: 429 }
+ * );
  */
 export class AppGatewayException extends EnhancedAppException {
   /**
@@ -398,10 +829,8 @@ export class AppGatewayException extends EnhancedAppException {
    */
   constructor(
     code: AppGatewayErrorCode,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    details?: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    context?: Record<string, any>,
+    details?: AppGatewayErrorDetails,
+    context?: AppGatewayErrorContext,
   ) {
     const messages: Record<AppGatewayErrorCode, string> = {
       [AppGatewayErrorCode.SERVICE_UNAVAILABLE]:
@@ -457,7 +886,17 @@ export class AppGatewayException extends EnhancedAppException {
 }
 
 /**
- * Database-specific enhanced errors
+ * Database-specific error codes.
+ * Defines all possible error conditions for database operations.
+ *
+ * @example
+ * if (connectionFailed) {
+ *   throw new DatabaseException(
+ *     DatabaseErrorCode.CONNECTION_FAILED,
+ *     'connect',
+ *     'resumes'
+ *   );
+ * }
  */
 export enum DatabaseErrorCode {
   CONNECTION_FAILED = 'DB_CONNECTION_FAILED',
@@ -472,7 +911,30 @@ export enum DatabaseErrorCode {
 }
 
 /**
- * Database Exception
+ * Database Exception.
+ * Thrown when database operations fail due to connection issues,
+ * constraint violations, or query errors.
+ *
+ * @extends EnhancedAppException
+ *
+ * @example
+ * // Connection failure
+ * throw new DatabaseException(
+ *   DatabaseErrorCode.CONNECTION_FAILED,
+ *   'connect',
+ *   undefined,
+ *   { originalError: 'Connection refused' },
+ *   { database: 'recruitment_db' }
+ * );
+ *
+ * @example
+ * // Duplicate key error
+ * throw new DatabaseException(
+ *   DatabaseErrorCode.DUPLICATE_KEY,
+ *   'insert',
+ *   'users',
+ *   { dbErrorCode: 11000, query: 'INSERT INTO users...' }
+ * );
  */
 export class DatabaseException extends EnhancedAppException {
   /**
@@ -487,10 +949,8 @@ export class DatabaseException extends EnhancedAppException {
     code: DatabaseErrorCode,
     operation: string,
     table?: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    details?: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    context?: Record<string, any>,
+    details?: DatabaseErrorDetails,
+    context?: DatabaseErrorContext,
   ) {
     const messages: Record<DatabaseErrorCode, string> = {
       [DatabaseErrorCode.CONNECTION_FAILED]: 'Database connection failed',
@@ -534,111 +994,166 @@ export class DatabaseException extends EnhancedAppException {
 }
 
 /**
- * Error factory for creating service-specific errors
+ * Factory class for creating service-specific errors.
+ * Provides static factory methods for creating domain-specific exceptions
+ * with proper error codes and context.
+ *
+ * @example
+ * // Create resume parser error
+ * const error = DomainErrorFactory.resumeParserError(
+ *   ResumeParserErrorCode.FILE_PARSE_FAILED,
+ *   { fileName: 'resume.pdf' },
+ *   { resumeId: 'resume-123' }
+ * );
+ *
+ * // Create scoring engine error
+ * const error = DomainErrorFactory.scoringEngineError(
+ *   ScoringEngineErrorCode.INSUFFICIENT_DATA,
+ *   { algorithm: 'weighted-average' },
+ *   { resumeId: 'resume-123', jobId: 'job-456' }
+ * );
  */
 export class DomainErrorFactory {
   /**
-   * Performs the resume parser error operation.
-   * @param code - The code.
-   * @param details - The details.
-   * @param context - The context.
-   * @returns The ResumeParserException.
+   * Creates a ResumeParserException with the specified parameters.
+   *
+   * @param code - The error code identifying the type of failure
+   * @param details - Optional details about the file and parsing operation
+   * @param context - Optional context with resume and candidate IDs
+   * @returns A new ResumeParserException instance
+   *
+   * @example
+   * throw DomainErrorFactory.resumeParserError(
+   *   ResumeParserErrorCode.FILE_PARSE_FAILED,
+   *   { fileName: 'resume.pdf', fileType: 'pdf' },
+   *   { resumeId: 'resume-123' }
+   * );
    */
   public static resumeParserError(
     code: ResumeParserErrorCode,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    details?: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    context?: Record<string, any>,
+    details?: ResumeParserErrorDetails,
+    context?: ResumeParserErrorContext,
   ): ResumeParserException {
     return new ResumeParserException(code, details, context);
   }
 
   /**
-   * Performs the report generator error operation.
-   * @param code - The code.
-   * @param details - The details.
-   * @param context - The context.
-   * @returns The ReportGeneratorException.
+   * Creates a ReportGeneratorException with the specified parameters.
+   *
+   * @param code - The error code identifying the type of failure
+   * @param details - Optional details about the report type and format
+   * @param context - Optional context with report and job IDs
+   * @returns A new ReportGeneratorException instance
+   *
+   * @example
+   * throw DomainErrorFactory.reportGeneratorError(
+   *   ReportGeneratorErrorCode.TEMPLATE_NOT_FOUND,
+   *   { templateName: 'custom-template' },
+   *   { reportId: 'report-123' }
+   * );
    */
   public static reportGeneratorError(
     code: ReportGeneratorErrorCode,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    details?: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    context?: Record<string, any>,
+    details?: ReportGeneratorErrorDetails,
+    context?: ReportGeneratorErrorContext,
   ): ReportGeneratorException {
     return new ReportGeneratorException(code, details, context);
   }
 
   /**
-   * Performs the jd extractor error operation.
-   * @param code - The code.
-   * @param details - The details.
-   * @param context - The context.
-   * @returns The JDExtractorException.
+   * Creates a JDExtractorException with the specified parameters.
+   *
+   * @param code - The error code identifying the type of failure
+   * @param details - Optional details about the JD source and format
+   * @param context - Optional context with job and company IDs
+   * @returns A new JDExtractorException instance
+   *
+   * @example
+   * throw DomainErrorFactory.jdExtractorError(
+   *   JDExtractorErrorCode.JD_PARSE_FAILED,
+   *   { source: 'linkedin', format: 'html' },
+   *   { jobId: 'job-456' }
+   * );
    */
   public static jdExtractorError(
     code: JDExtractorErrorCode,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    details?: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    context?: Record<string, any>,
+    details?: JDExtractorErrorDetails,
+    context?: JDExtractorErrorContext,
   ): JDExtractorException {
     return new JDExtractorException(code, details, context);
   }
 
   /**
-   * Performs the scoring engine error operation.
-   * @param code - The code.
-   * @param details - The details.
-   * @param context - The context.
-   * @returns The ScoringEngineException.
+   * Creates a ScoringEngineException with the specified parameters.
+   *
+   * @param code - The error code identifying the type of failure
+   * @param details - Optional details about the scoring algorithm
+   * @param context - Optional context with resume, job, and score IDs
+   * @returns A new ScoringEngineException instance
+   *
+   * @example
+   * throw DomainErrorFactory.scoringEngineError(
+   *   ScoringEngineErrorCode.INSUFFICIENT_DATA,
+   *   { algorithm: 'weighted-average', confidenceLevel: 0.5 },
+   *   { resumeId: 'resume-123', jobId: 'job-456' }
+   * );
    */
   public static scoringEngineError(
     code: ScoringEngineErrorCode,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    details?: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    context?: Record<string, any>,
+    details?: ScoringEngineErrorDetails,
+    context?: ScoringEngineContext,
   ): ScoringEngineException {
     return new ScoringEngineException(code, details, context);
   }
 
   /**
-   * Performs the app gateway error operation.
-   * @param code - The code.
-   * @param details - The details.
-   * @param context - The context.
-   * @returns The AppGatewayException.
+   * Creates an AppGatewayException with the specified parameters.
+   *
+   * @param code - The error code identifying the type of failure
+   * @param details - Optional details about the target service and request
+   * @param context - Optional context with gateway request ID and client IP
+   * @returns A new AppGatewayException instance
+   *
+   * @example
+   * throw DomainErrorFactory.appGatewayError(
+   *   AppGatewayErrorCode.SERVICE_UNAVAILABLE,
+   *   { targetService: 'resume-parser-svc', method: 'POST' },
+   *   { gatewayRequestId: 'gw-123' }
+   * );
    */
   public static appGatewayError(
     code: AppGatewayErrorCode,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    details?: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    context?: Record<string, any>,
+    details?: AppGatewayErrorDetails,
+    context?: AppGatewayErrorContext,
   ): AppGatewayException {
     return new AppGatewayException(code, details, context);
   }
 
   /**
-   * Performs the database error operation.
-   * @param code - The code.
-   * @param operation - The operation.
-   * @param table - The table.
-   * @param details - The details.
-   * @param context - The context.
-   * @returns The DatabaseException.
+   * Creates a DatabaseException with the specified parameters.
+   *
+   * @param code - The error code identifying the type of failure
+   * @param operation - The database operation that failed (e.g., 'insert', 'find')
+   * @param table - Optional table/collection name involved in the operation
+   * @param details - Optional details about the query and error code
+   * @param context - Optional context with database and pool information
+   * @returns A new DatabaseException instance
+   *
+   * @example
+   * throw DomainErrorFactory.databaseError(
+   *   DatabaseErrorCode.CONSTRAINT_VIOLATION,
+   *   'insert',
+   *   'users',
+   *   { dbErrorCode: 11000 },
+   *   { database: 'recruitment_db' }
+   * );
    */
   public static databaseError(
     code: DatabaseErrorCode,
     operation: string,
     table?: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    details?: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    context?: Record<string, any>,
+    details?: DatabaseErrorDetails,
+    context?: DatabaseErrorContext,
   ): DatabaseException {
     return new DatabaseException(code, operation, table, details, context);
   }

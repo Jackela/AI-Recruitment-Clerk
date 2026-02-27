@@ -1,4 +1,4 @@
-import { AnalyticsController } from './analytics.controller';
+import { MetricsController } from './metrics.controller';
 import type { AnalyticsIntegrationService } from './analytics-integration.service';
 import { Permission } from '@ai-recruitment-clerk/user-management-domain';
 
@@ -6,10 +6,8 @@ const createServiceMock = () => ({
   trackEvent: jest.fn(),
   recordMetric: jest.fn(),
   getDashboard: jest.fn(),
-  getReports: jest.fn(),
-  getReport: jest.fn(),
-  deleteReport: jest.fn(),
   getRealtimeData: jest.fn(),
+  getHealthStatus: jest.fn(),
 }) as unknown as jest.Mocked<AnalyticsIntegrationService>;
 
 const createRequest = (overrides: Record<string, unknown> = {}) =>
@@ -24,14 +22,14 @@ const createRequest = (overrides: Record<string, unknown> = {}) =>
     ...overrides,
   } as any);
 
-describe('AnalyticsController (mocked service)', () => {
-  let controller: AnalyticsController;
+describe('MetricsController (mocked service)', () => {
+  let controller: MetricsController;
   let service: jest.Mocked<AnalyticsIntegrationService>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     service = createServiceMock();
-    controller = new AnalyticsController(service);
+    controller = new MetricsController(service);
   });
 
   describe('trackEvent', () => {
@@ -76,7 +74,9 @@ describe('AnalyticsController (mocked service)', () => {
     it('delegates metric recording to service', async () => {
       service.recordMetric.mockResolvedValue({
         metricId: 'metric-1',
-        status: 'PROCESSED',
+        metricName: 'latency',
+        value: 120,
+        timestamp: new Date(),
       } as any);
 
       const response = await controller.recordPerformanceMetric(
@@ -96,6 +96,31 @@ describe('AnalyticsController (mocked service)', () => {
     });
   });
 
+  describe('recordBusinessMetric', () => {
+    it('delegates business metric recording to service', async () => {
+      service.recordMetric.mockResolvedValue({
+        metricId: 'metric-2',
+        metricName: 'conversion_rate',
+        value: 0.15,
+        category: 'business',
+        timestamp: new Date(),
+      } as any);
+
+      const response = await controller.recordBusinessMetric(
+        createRequest(),
+        {
+          metricName: 'conversion_rate',
+          value: 0.15,
+          unit: 'percentage',
+          category: 'sales',
+        },
+      );
+
+      expect(service.recordMetric).toHaveBeenCalled();
+      expect(response.success).toBe(true);
+    });
+  });
+
   describe('getDashboard', () => {
     it('returns dashboard data from service', async () => {
       service.getDashboard.mockResolvedValue({
@@ -107,6 +132,38 @@ describe('AnalyticsController (mocked service)', () => {
       expect(service.getDashboard).toHaveBeenCalledWith('org-1', '7d', undefined);
       expect(result.success).toBe(true);
       expect((result.data as any).summary.events).toBe(5);
+    });
+  });
+
+  describe('getRealtimeData', () => {
+    it('returns realtime data from service', async () => {
+      service.getRealtimeData.mockResolvedValue({
+        activeUsers: 10,
+        eventsPerMinute: 50,
+      } as any);
+
+      const result = await controller.getRealtimeData(createRequest());
+
+      expect(service.getRealtimeData).toHaveBeenCalledWith('org-1', []);
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe('healthCheck', () => {
+    it('returns health status from service', async () => {
+      service.getHealthStatus.mockResolvedValue({
+        overall: 'healthy',
+        database: 'connected',
+        eventProcessing: 'active',
+        reportGeneration: 'available',
+        realtimeData: 'available',
+        dataRetention: 'configured',
+      } as any);
+
+      const result = await controller.healthCheck();
+
+      expect(result.status).toBe('healthy');
+      expect(result.service).toBe('analytics-reporting');
     });
   });
 });

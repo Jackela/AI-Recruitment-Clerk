@@ -164,7 +164,7 @@ export class ReportEventsController implements OnModuleInit, OnModuleDestroy {
         error,
       );
       await this.handleReportGenerationError(
-        error,
+        error as Error,
         jobId,
         resumeId,
         'match-analysis',
@@ -246,7 +246,7 @@ export class ReportEventsController implements OnModuleInit, OnModuleDestroy {
     } catch (error) {
       this.logger.error(`Error generating report for ${reportKey}`, error);
       await this.handleReportGenerationError(
-        error,
+        error as Error,
         jobId,
         resumeId,
         reportType,

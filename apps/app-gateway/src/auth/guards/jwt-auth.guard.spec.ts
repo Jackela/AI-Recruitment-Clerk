@@ -164,7 +164,7 @@ describe('JwtAuthGuard', () => {
         { setHeader: jest.fn() },
       );
 
-      const user = { id: 'user-1', role: 'admin', organizationId: 'org-1' };
+      const user = { id: 'user-1', sub: 'user-1', email: 'user1@test.com', role: 'admin', organizationId: 'org-1' };
       const result = guard.handleRequest(null, user, null, ctx);
 
       expect(result).toBe(user);
@@ -304,12 +304,12 @@ describe('JwtAuthGuard', () => {
 
       expect(() =>
         guard.handleRequest(
-          { name: 'UnknownJWTError', message: 'something went wrong' },
+          { name: 'JsonWebTokenError', message: 'something went wrong' } as { name: 'JsonWebTokenError'; message: string },
           null,
           null,
           ctx,
         ),
-      ).toThrow('something went wrong');
+      ).toThrow('Invalid token. Please log in again.');
     });
   });
 
@@ -391,6 +391,7 @@ describe('JwtAuthGuard', () => {
 
       const user = {
         id: 'user-123',
+        sub: 'user-123',
         role: 'hr_manager',
         organizationId: 'org-456',
         email: 'test@example.com',
@@ -411,7 +412,7 @@ describe('JwtAuthGuard', () => {
         { setHeader: mockSetHeader },
       );
 
-      const user = { id: 'user-1', role: 'admin' };
+      const user = { id: 'user-1', sub: 'user-1', email: 'user1@test.com', role: 'admin', organizationId: '' };
       guard.handleRequest(null, user, null, ctx);
 
       expect(mockSetHeader).toHaveBeenCalledWith('X-Auth-User-Id', 'user-1');

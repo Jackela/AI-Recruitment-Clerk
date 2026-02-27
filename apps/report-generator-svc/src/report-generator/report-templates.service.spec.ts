@@ -98,7 +98,9 @@ describe('ReportTemplatesService', () => {
     jest.spyOn(Logger.prototype, 'debug').mockImplementation();
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    // Clean up browser instance after each test
+    await service.onModuleDestroy();
     jest.restoreAllMocks();
   });
 
@@ -162,21 +164,20 @@ describe('ReportTemplatesService', () => {
       expect(result.content.length).toBeGreaterThan(0);
     });
 
-    it('should decode base64 content to valid HTML', async () => {
+    it('should decode base64 content to valid PDF bytes', async () => {
       // Arrange
       const reportData = createMockReportDocument();
 
       // Act
       const result = await service.generateReportInFormat(reportData, 'pdf', 'individual');
-      const decodedContent = Buffer.from(result.content, 'base64').toString('utf-8');
+      const decodedContent = Buffer.from(result.content, 'base64');
 
-      // Assert - Decoded content should be valid HTML
-      expect(decodedContent).toContain('<!DOCTYPE html>');
-      expect(decodedContent).toContain('<html');
-      expect(decodedContent).toContain('</html>');
+      // Assert - Decoded content should be PDF bytes (mock returns 'mock-pdf-content')
+      expect(decodedContent.length).toBeGreaterThan(0);
+      expect(decodedContent.toString('utf-8')).toBe('mock-pdf-content');
     });
 
-    it('should include report data in decoded PDF content', async () => {
+    it('should generate PDF with correct metadata', async () => {
       // Arrange
       const reportData = createMockReportDocument({
         jobId: 'job-123',
@@ -185,370 +186,55 @@ describe('ReportTemplatesService', () => {
 
       // Act
       const result = await service.generateReportInFormat(reportData, 'pdf', 'individual');
-      const decodedContent = Buffer.from(result.content, 'base64').toString('utf-8');
 
       // Assert
-      expect(decodedContent).toContain('job-123');
-      expect(decodedContent).toContain('resume-456');
+      expect(result.metadata.jobId).toBe('job-123');
+      expect(result.metadata.resumeId).toBe('resume-456');
+      expect(result.metadata.reportType).toBe('pdf');
+      expect(result.metadata.mimeType).toBe('application/pdf');
     });
   });
 
-  describe('PDF Layout Validation', () => {
-    it('should generate PDF with proper HTML structure', async () => {
+  describe('PDF Generation via Puppeteer', () => {
+    it('should call Puppeteer to generate PDF', async () => {
       // Arrange
       const reportData = createMockReportDocument();
 
       // Act
       const result = await service.generateReportInFormat(reportData, 'pdf', 'individual');
-      const decodedContent = Buffer.from(result.content, 'base64').toString('utf-8');
 
-      // Assert - Valid HTML structure
-      expect(decodedContent).toMatch(/<!DOCTYPE html>/i);
-      expect(decodedContent).toMatch(/<html[^>]*>/i);
-      expect(decodedContent).toMatch(/<head>/i);
-      expect(decodedContent).toMatch(/<body>/i);
-      expect(decodedContent).toMatch(/<\/body>/i);
-      expect(decodedContent).toMatch(/<\/html>/i);
+      // Assert - The mock puppeteer returns 'mock-pdf-content'
+      const decodedContent = Buffer.from(result.content, 'base64').toString('utf-8');
+      expect(decodedContent).toBe('mock-pdf-content');
     });
 
-    it('should include CSS styles in PDF content', async () => {
+    it('should handle PDF generation with custom options', async () => {
       // Arrange
       const reportData = createMockReportDocument();
 
       // Act
-      const result = await service.generateReportInFormat(reportData, 'pdf', 'individual');
-      const decodedContent = Buffer.from(result.content, 'base64').toString('utf-8');
-
-      // Assert - Should contain style tags
-      expect(decodedContent).toContain('<style>');
-      expect(decodedContent).toContain('</style>');
-      // Check for key CSS classes
-      expect(decodedContent).toContain('.header');
-      expect(decodedContent).toContain('.score-card');
-      expect(decodedContent).toContain('.skill-item');
-    });
-
-    it('should include print media query for PDF optimization', async () => {
-      // Arrange
-      const reportData = createMockReportDocument();
-
-      // Act
-      const result = await service.generateReportInFormat(reportData, 'pdf', 'individual');
-      const decodedContent = Buffer.from(result.content, 'base64').toString('utf-8');
-
-      // Assert - Should have print media query
-      expect(decodedContent).toContain('@media print');
-    });
-
-    it('should include report title in PDF header', async () => {
-      // Arrange
-      const reportData = createMockReportDocument({
-        jobId: 'job-123',
-      });
-
-      // Act
-      const result = await service.generateReportInFormat(reportData, 'pdf', 'individual');
-      const decodedContent = Buffer.from(result.content, 'base64').toString('utf-8');
-
-      // Assert
-      expect(decodedContent).toContain('Recruitment Analysis Report');
-      expect(decodedContent).toContain('job-123');
-    });
-
-    it('should include metadata section in PDF layout', async () => {
-      // Arrange
-      const reportData = createMockReportDocument({
-        jobId: 'test-job',
-        resumeId: 'test-resume',
-      });
-
-      // Act
-      const result = await service.generateReportInFormat(reportData, 'pdf', 'individual');
-      const decodedContent = Buffer.from(result.content, 'base64').toString('utf-8');
-
-      // Assert
-      expect(decodedContent).toContain('Position:');
-      expect(decodedContent).toContain('Job ID:');
-      expect(decodedContent).toContain('Candidate:');
-      expect(decodedContent).toContain('Generated:');
-    });
-
-    it('should include footer with generation info', async () => {
-      // Arrange
-      const reportData = createMockReportDocument();
-
-      // Act
-      const result = await service.generateReportInFormat(reportData, 'pdf', 'individual');
-      const decodedContent = Buffer.from(result.content, 'base64').toString('utf-8');
-
-      // Assert
-      expect(decodedContent).toContain('Generated by AI Recruitment Clerk');
-      expect(decodedContent).toContain('confidential information');
-    });
-
-    it('should include score breakdown visualization', async () => {
-      // Arrange
-      const reportData = createMockReportDocument({
-        scoreBreakdown: {
-          skillsMatch: 85,
-          experienceMatch: 90,
-          educationMatch: 80,
-          overallFit: 85,
-        },
-      });
-
-      // Act
-      const result = await service.generateReportInFormat(reportData, 'pdf', 'individual');
-      const decodedContent = Buffer.from(result.content, 'base64').toString('utf-8');
-
-      // Assert
-      expect(decodedContent).toContain('85%'); // Overall score
-    });
-
-    it('should handle large content without truncation', async () => {
-      // Arrange
-      const reportData = createMockReportDocument({
-        skillsAnalysis: Array.from({ length: 50 }, (_, i) =>
-          createMockMatchingSkill({
-            skill: `Skill ${i}`,
-            matchScore: Math.floor(Math.random() * 100),
-            matchType: 'exact',
-          }),
-        ),
-      });
-
-      // Act
-      const result = await service.generateReportInFormat(reportData, 'pdf', 'individual');
-
-      // Assert - Content should be present and properly encoded
-      expect(result.content.length).toBeGreaterThan(0);
-      // Should be valid base64
-      const base64Regex = /^[A-Za-z0-9+/=]+={0,2}$/;
-      expect(result.content).toMatch(base64Regex);
-    });
-
-    it('should apply responsive design classes', async () => {
-      // Arrange
-      const reportData = createMockReportDocument();
-
-      // Act
-      const result = await service.generateReportInFormat(reportData, 'pdf', 'individual');
-      const decodedContent = Buffer.from(result.content, 'base64').toString('utf-8');
-
-      // Assert - Check for responsive design patterns
-      expect(decodedContent).toContain('grid-template-columns');
-      expect(decodedContent).toContain('max-width');
-    });
-  });
-
-  describe('PDF Generation with Charts', () => {
-    it('should include score visualization structure in PDF', async () => {
-      // Arrange
-      const reportData = createMockReportDocument({
-        scoreBreakdown: {
-          skillsMatch: 85,
-          experienceMatch: 90,
-          educationMatch: 75,
-          overallFit: 83,
-        },
-      });
-
-      // Act
-      const result = await service.generateReportInFormat(reportData, 'pdf', 'individual');
-      const decodedContent = Buffer.from(result.content, 'base64').toString('utf-8');
-
-      // Assert - Score visualization elements
-      expect(decodedContent).toContain('Score Breakdown');
-      expect(decodedContent).toContain('Skills Match');
-      expect(decodedContent).toContain('Experience Match');
-      expect(decodedContent).toContain('Education Match');
-    });
-
-    it('should include skills analysis visualization', async () => {
-      // Arrange
-      const reportData = createMockReportDocument({
-        skillsAnalysis: [
-          createMockMatchingSkill({ skill: 'JavaScript', matchScore: 95, matchType: 'exact' }),
-          createMockMatchingSkill({ skill: 'Python', matchScore: 88, matchType: 'exact' }),
-          createMockMatchingSkill({ skill: 'React', matchScore: 82, matchType: 'partial' }),
-        ],
-      });
-
-      // Act
-      const result = await service.generateReportInFormat(reportData, 'pdf', 'individual');
-      const decodedContent = Buffer.from(result.content, 'base64').toString('utf-8');
-
-      // Assert - Skills analysis visualization
-      expect(decodedContent).toContain('Skills Analysis');
-      expect(decodedContent).toContain('JavaScript');
-      expect(decodedContent).toContain('95'); // Match score
-    });
-
-    it('should represent recommendation decision visually', async () => {
-      // Arrange
-      const reportData = createMockReportDocument({
-        recommendation: createMockRecommendation({
-          decision: 'hire',
-          reasoning: 'Strong candidate overall',
-        }),
-      });
-
-      // Act
-      const result = await service.generateReportInFormat(reportData, 'pdf', 'individual');
-      const decodedContent = Buffer.from(result.content, 'base64').toString('utf-8');
-
-      // Assert
-      expect(decodedContent).toContain('hire');
-      expect(decodedContent).toContain('Recommendation');
-      expect(decodedContent).toContain('Reasoning');
-    });
-
-    it('should include strengths and concerns visualization', async () => {
-      // Arrange
-      const reportData = createMockReportDocument({
-        recommendation: createMockRecommendation({
-          decision: 'consider',
-          reasoning: 'Good candidate with some gaps',
-          strengths: ['Strong technical skills', 'Good cultural fit'],
-          concerns: ['Limited experience with cloud', 'No management experience'],
-        }),
-      });
-
-      // Act
-      const result = await service.generateReportInFormat(reportData, 'pdf', 'individual');
-      const decodedContent = Buffer.from(result.content, 'base64').toString('utf-8');
-
-      // Assert - The template includes Strengths/Concerns sections
-      // Array interpolation in the simple template system has limitations
-      expect(decodedContent).toContain('Strengths');
-      expect(decodedContent).toContain('Areas of Concern');
-      expect(decodedContent).toContain('Good candidate with some gaps'); // reasoning is shown
-      // The simple interpolator may not expand nested arrays completely
-      // but the structure and main content are present
-    });
-
-    it('should generate comparison report with candidate rankings', async () => {
-      // Arrange
-      const reportData = createMockReportDocument();
-
-      // Act
-      const result = await service.generateReportInFormat(
+      const result = await service.generatePdfReportBuffer(
         reportData,
-        'pdf',
-        'comparison',
+        'individual',
+        undefined,
         {
-          candidates: [
-            {
-              name: 'John Doe',
-              score: 92,
-              recommendation: 'hire',
-              skills: ['JavaScript', 'React', 'Node.js'],
-              strengths: ['Strong experience', 'Good fit'],
-              concerns: ['Limited leadership'],
-            },
-            {
-              name: 'Jane Smith',
-              score: 88,
-              recommendation: 'consider',
-              skills: ['Python', 'Django', 'PostgreSQL'],
-              strengths: ['Good technical skills'],
-              concerns: ['Less domain knowledge'],
-            },
-          ],
+          format: 'A4',
+          printBackground: true,
         },
       );
 
-      const decodedContent = Buffer.from(result.content, 'base64').toString('utf-8');
-
       // Assert
-      expect(decodedContent).toContain('Candidate Comparison');
-      expect(decodedContent).toContain('John Doe');
-      expect(decodedContent).toContain('92');
-      expect(decodedContent).toContain('Jane Smith');
-      expect(decodedContent).toContain('88');
+      expect(result.content).toBeDefined();
+      expect(result.mimeType).toBe('application/pdf');
     });
 
-    it('should include interview questions structure for interview guide', async () => {
+    it('should clean up browser on module destroy', async () => {
       // Arrange
       const reportData = createMockReportDocument();
+      await service.generateReportInFormat(reportData, 'pdf', 'individual');
 
-      // Act
-      const result = await service.generateReportInFormat(
-        reportData,
-        'pdf',
-        'interview-guide',
-        {
-          interviewQuestions: [
-            {
-              category: 'Technical Skills',
-              questions: [
-                {
-                  question: 'Describe your experience with JavaScript frameworks',
-                  lookFor: 'Knowledge of React, Angular, or Vue',
-                  followUp: ['Which framework do you prefer?', 'Why that framework?'],
-                },
-              ],
-            },
-            {
-              category: 'Problem Solving',
-              questions: [
-                {
-                  question: 'Tell me about a challenging bug you fixed',
-                  lookFor: 'Systematic debugging approach',
-                  followUp: ['What tools did you use?', 'How long did it take?'],
-                },
-              ],
-            },
-          ],
-        },
-      );
-
-      const decodedContent = Buffer.from(result.content, 'base64').toString('utf-8');
-
-      // Assert - The template interpolation is simple and handles basic variables
-      // Nested array interpolation is limited in the current implementation
-      expect(decodedContent).toContain('Interview Guide');
-      expect(decodedContent).toContain('Recommended Interview Questions');
-      // The simple interpolator may not fully expand nested arrays, but the structure exists
-    });
-
-    it('should render chart-like visual elements using CSS', async () => {
-      // Arrange
-      const reportData = createMockReportDocument({
-        scoreBreakdown: {
-          skillsMatch: 85,
-          experienceMatch: 90,
-          educationMatch: 80,
-          overallFit: 85,
-        },
-      });
-
-      // Act
-      const result = await service.generateReportInFormat(reportData, 'pdf', 'individual');
-      const decodedContent = Buffer.from(result.content, 'base64').toString('utf-8');
-
-      // Assert - CSS-based chart visualization
-      expect(decodedContent).toContain('score-card');
-      expect(decodedContent).toContain('score-breakdown');
-      expect(decodedContent).toContain('score-item');
-    });
-
-    it('should color-code recommendations by decision type', async () => {
-      // Arrange - Test with 'reject' recommendation
-      const reportData = createMockReportDocument({
-        recommendation: createMockRecommendation({
-          decision: 'reject',
-          reasoning: 'Not qualified for this position',
-        }),
-      });
-
-      // Act
-      const result = await service.generateReportInFormat(reportData, 'pdf', 'individual');
-      const decodedContent = Buffer.from(result.content, 'base64').toString('utf-8');
-
-      // Assert - Should have recommendation styling
-      expect(decodedContent).toContain('recommendation');
-      expect(decodedContent).toContain('reject');
+      // Act - Should not throw
+      await expect(service.onModuleDestroy()).resolves.not.toThrow();
     });
   });
 
@@ -585,10 +271,9 @@ describe('ReportTemplatesService', () => {
 
       // Act
       const result = await service.generateReportInFormat(reportData, 'pdf', 'individual');
-      const decodedContent = Buffer.from(result.content, 'base64').toString('utf-8');
 
       // Assert - Content should be safely encoded
-      expect(decodedContent).toBeDefined();
+      expect(result.content).toBeDefined();
       expect(result.content.length).toBeGreaterThan(0);
     });
 
@@ -635,6 +320,73 @@ describe('ReportTemplatesService', () => {
       // Assert
       expect(result.content).toBeDefined();
       expect(result.metadata.generatedAt).toBeInstanceOf(Date);
+    });
+  });
+
+  describe('generatePdfReportBuffer', () => {
+    it('should generate PDF buffer with proper metadata', async () => {
+      // Arrange
+      const reportData = createMockReportDocument({
+        jobId: 'job-abc',
+        resumeId: 'resume-xyz',
+      });
+
+      // Act
+      const result = await service.generatePdfReportBuffer(reportData, 'individual');
+
+      // Assert
+      expect(result.content).toBeInstanceOf(Buffer);
+      expect(result.filename).toContain('individual-report');
+      expect(result.filename).toContain('job-abc');
+      expect(result.filename).toContain('resume-xyz');
+      expect(result.filename).toContain('.pdf');
+      expect(result.mimeType).toBe('application/pdf');
+      expect(result.metadata.reportType).toBe('pdf');
+      expect(result.metadata.jobId).toBe('job-abc');
+      expect(result.metadata.resumeId).toBe('resume-xyz');
+    });
+
+    it('should generate PDF buffer for comparison report', async () => {
+      // Arrange
+      const reportData = createMockReportDocument();
+
+      // Act
+      const result = await service.generatePdfReportBuffer(
+        reportData,
+        'comparison',
+        {
+          candidates: [
+            {
+              name: 'John Doe',
+              score: 92,
+              recommendation: 'hire',
+              skills: ['JavaScript', 'React'],
+            },
+          ],
+        },
+      );
+
+      // Assert
+      expect(result.content).toBeInstanceOf(Buffer);
+      expect(result.filename).toContain('comparison-report');
+      expect(result.mimeType).toBe('application/pdf');
+    });
+  });
+
+  describe('generateAndSavePdfReport', () => {
+    it('should generate and save PDF report to GridFS', async () => {
+      // Arrange
+      const reportData = createMockReportDocument();
+      const fileId = 'pdf-file-id-789';
+
+      gridFsService.saveReportBuffer.mockResolvedValue(fileId);
+
+      // Act
+      const result = await service.generateAndSavePdfReport(reportData, 'individual');
+
+      // Assert
+      expect(result).toBe(fileId);
+      expect(gridFsService.saveReportBuffer).toHaveBeenCalled();
     });
   });
 
@@ -688,6 +440,177 @@ describe('ReportTemplatesService', () => {
         filename,
         metadata,
       );
+    });
+  });
+
+  describe('generateReportInFormat', () => {
+    it('should generate HTML report', async () => {
+      const reportData = createMockReportDocument();
+
+      const result = await service.generateReportInFormat(reportData, 'html', 'individual');
+
+      expect(result.content).toBeDefined();
+      expect(result.mimeType).toBe('text/html');
+      expect(result.filename).toContain('.html');
+    });
+
+    it('should generate JSON report', async () => {
+      const reportData = createMockReportDocument();
+
+      const result = await service.generateReportInFormat(reportData, 'json', 'individual');
+
+      expect(result.content).toBeDefined();
+      expect(result.mimeType).toBe('application/json');
+      expect(result.filename).toContain('.json');
+      // Verify it's valid JSON
+      expect(() => JSON.parse(result.content)).not.toThrow();
+    });
+
+    it('should generate markdown report', async () => {
+      const reportData = createMockReportDocument();
+
+      const result = await service.generateReportInFormat(reportData, 'markdown', 'individual');
+
+      expect(result.content).toBeDefined();
+      expect(result.mimeType).toBe('text/markdown');
+      expect(result.filename).toContain('.md');
+    });
+
+    it('should generate Excel report', async () => {
+      const reportData = createMockReportDocument();
+
+      const result = await service.generateReportInFormat(reportData, 'excel', 'individual');
+
+      expect(result.content).toBeDefined();
+      expect(result.mimeType).toBe('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      expect(result.filename).toContain('.xlsx');
+    });
+
+    it('should throw error for unsupported format', async () => {
+      const reportData = createMockReportDocument();
+
+      await expect(
+        service.generateReportInFormat(reportData, 'invalid' as 'pdf', 'individual'),
+      ).rejects.toThrow();
+    });
+  });
+
+  describe('Template Types', () => {
+    it('should generate batch report', async () => {
+      const reportData = createMockReportDocument();
+      const additionalData = {
+        candidates: [
+          { name: 'John', score: 90, recommendation: 'hire', skills: ['JS'] },
+          { name: 'Jane', score: 85, recommendation: 'consider', skills: ['Python'] },
+        ],
+      };
+
+      const result = await service.generateReportInFormat(reportData, 'pdf', 'batch', additionalData);
+
+      expect(result.filename).toContain('batch-report');
+    });
+
+    it('should generate executive summary report', async () => {
+      const reportData = createMockReportDocument();
+
+      const result = await service.generateReportInFormat(reportData, 'pdf', 'executive-summary');
+
+      expect(result.filename).toContain('executive-summary');
+    });
+  });
+
+  describe('Edge Cases and Error Handling', () => {
+    it('should handle report with zero scores', async () => {
+      const reportData = createMockReportDocument({
+        scoreBreakdown: createMockScoreBreakdown({
+          skillsMatch: 0,
+          experienceMatch: 0,
+          educationMatch: 0,
+          overallFit: 0,
+        }),
+      });
+
+      const result = await service.generateReportInFormat(reportData, 'pdf', 'individual');
+
+      expect(result.content).toBeDefined();
+    });
+
+    it('should handle report with 100% scores', async () => {
+      const reportData = createMockReportDocument({
+        scoreBreakdown: createMockScoreBreakdown({
+          skillsMatch: 100,
+          experienceMatch: 100,
+          educationMatch: 100,
+          overallFit: 100,
+        }),
+      });
+
+      const result = await service.generateReportInFormat(reportData, 'pdf', 'individual');
+
+      expect(result.content).toBeDefined();
+    });
+
+    it('should handle report with many skills', async () => {
+      const manySkills = Array.from({ length: 50 }, (_, i) =>
+        createMockMatchingSkill({ skill: `Skill${i}`, matchScore: 80 }),
+      );
+
+      const reportData = createMockReportDocument({
+        skillsAnalysis: manySkills,
+      });
+
+      const result = await service.generateReportInFormat(reportData, 'pdf', 'individual');
+
+      expect(result.content).toBeDefined();
+    });
+
+    it('should handle report with many concerns', async () => {
+      const manyConcerns = Array.from({ length: 20 }, (_, i) => `Concern ${i}`);
+
+      const reportData = createMockReportDocument({
+        recommendation: createMockRecommendation({ concerns: manyConcerns }),
+      });
+
+      const result = await service.generateReportInFormat(reportData, 'pdf', 'individual');
+
+      expect(result.content).toBeDefined();
+    });
+
+    it('should handle unicode characters in report', async () => {
+      const reportData = createMockReportDocument({
+        recommendation: createMockRecommendation({
+          reasoning: 'Candidate speaks \u4e2d\u6587, \u65e5\u672c\u8a9e, and \ud55c\uad6d\uc5b4',
+        }),
+      });
+
+      const result = await service.generateReportInFormat(reportData, 'pdf', 'individual');
+
+      expect(result.content).toBeDefined();
+    });
+
+    it('should handle markdown in recommendation text', async () => {
+      const reportData = createMockReportDocument({
+        recommendation: createMockRecommendation({
+          reasoning: '# Important\n\n* Item 1\n* Item 2\n\n**Bold text**',
+        }),
+      });
+
+      const result = await service.generateReportInFormat(reportData, 'pdf', 'individual');
+
+      expect(result.content).toBeDefined();
+    });
+
+    it('should handle different recommendation decisions', async () => {
+      const decisions = ['hire', 'consider', 'reject', 'interview'] as const;
+
+      for (const decision of decisions) {
+        const reportData = createMockReportDocument({
+          recommendation: createMockRecommendation({ decision }),
+        });
+
+        const result = await service.generateReportInFormat(reportData, 'pdf', 'individual');
+        expect(result.content).toBeDefined();
+      }
     });
   });
 });

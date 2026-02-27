@@ -3,6 +3,15 @@ import { ContactInfo } from './contact-info.value-object.js';
 import { VerificationStatus } from '../aggregates/incentive.aggregate.js';
 
 /**
+ * Restore data interface for IncentiveRecipient.
+ */
+export interface IncentiveRecipientRestoreData {
+  ip: string;
+  contactInfo: { email?: string; phone?: string; wechat?: string; alipay?: string };
+  verificationStatus: VerificationStatus;
+}
+
+/**
  * Represents the incentive recipient.
  */
 export class IncentiveRecipient extends ValueObject<{
@@ -29,8 +38,7 @@ export class IncentiveRecipient extends ValueObject<{
    * @param data - The data.
    * @returns The IncentiveRecipient.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): IncentiveRecipient {
+  public static restore(data: IncentiveRecipientRestoreData): IncentiveRecipient {
     return new IncentiveRecipient({
       ip: data.ip,
       contactInfo: ContactInfo.restore(data.contactInfo),

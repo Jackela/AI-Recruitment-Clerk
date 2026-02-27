@@ -86,7 +86,7 @@ export default [
       // Setting as 'warn' initially to allow incremental fixes
 
       // No 'any' types - all variables must have explicit types
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'error',
 
       // No unused variables/parameters (with underscore prefix exception)
       '@typescript-eslint/no-unused-vars': [

@@ -1,4 +1,4 @@
-import { ValueObject } from './base/value-object.js';
+import { ValueObject, type RestoreData } from './base/value-object.js';
 import type { BonusType } from '../../application/dtos/usage-limit.dto.js';
 
 /**
@@ -27,8 +27,11 @@ export class QuotaAllocation extends ValueObject<{
    * @param data - The data.
    * @returns The QuotaAllocation.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): QuotaAllocation {
+  public static restore(data: RestoreData<{
+    baseQuota: number;
+    bonusQuota: number;
+    bonusBreakdown: Iterable<[BonusType, number]>;
+  }>): QuotaAllocation {
     return new QuotaAllocation({
       baseQuota: data.baseQuota,
       bonusQuota: data.bonusQuota,

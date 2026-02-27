@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
-import { IncentiveController } from './incentive.controller';
+import { RewardsController } from './rewards.controller';
+import { ReferralsController } from './referrals.controller';
 import { IncentiveIntegrationService } from './incentive-integration.service';
 
 /**
  * Configures the incentive module.
  */
 @Module({
-  controllers: [IncentiveController],
+  controllers: [RewardsController, ReferralsController],
   providers: [IncentiveIntegrationService],
   exports: [IncentiveIntegrationService],
 })

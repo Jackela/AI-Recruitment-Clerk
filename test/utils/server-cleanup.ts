@@ -1,12 +1,20 @@
 // 服务器和HTTP测试清理工具
-import { Server } from 'http';
+import type { Server } from 'http';
 import { registerCleanup } from './cleanup';
+
+/**
+ * Express/NestJS application interface with listen method
+ */
+interface AppWithListen {
+  listen: (port: number, callback?: (err?: Error) => void) => Server;
+  on?: (event: string, callback: (error: Error) => void) => void;
+}
 
 /**
  * 创建可清理的HTTP服务器
  * 不要使用 app.listen，使用此工具确保正确清理
  */
-export const createTestServer = (app: any, port = 0): Promise<Server> => {
+export const createTestServer = (app: AppWithListen, port = 0): Promise<Server> => {
   return new Promise((resolve, reject) => {
     const server = app.listen(port, (err?: Error) => {
       if (err) {

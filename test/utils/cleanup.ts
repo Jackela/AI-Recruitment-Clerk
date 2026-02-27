@@ -4,6 +4,9 @@
  * 根治路径是两层防线：测试内部严格 teardown，外部会话级一键回收
  */
 
+import type { Server } from 'http';
+import type { ChildProcess } from 'child_process';
+
 type Cleanup = () => Promise<void> | void;
 
 /**
@@ -59,23 +62,31 @@ export const clearCleanups = (): void => {
 export const getCleanupCount = (): number => cleaners.length;
 
 /**
+ * Server interface with optional destroy method
+ */
+interface ServerWithDestroy extends Server {
+  destroy?: () => void;
+  listening: boolean;
+}
+
+/**
  * HTTP Server Cleanup Helper
  * Properly closes HTTP/HTTPS servers with timeout
  * 不要 app.listen 进行单元测试，使用 supertest(app)
  */
-export const registerServerCleanup = (server: any): void => {
+export const registerServerCleanup = (server: ServerWithDestroy | null | undefined): void => {
   registerCleanup(() => new Promise<void>((resolve) => {
     if (!server || !server.listening) {
       resolve();
       return;
     }
-    
+
     const timeout = setTimeout(() => {
       console.warn('⚠️  Server cleanup timeout - forcing close');
       server.destroy?.();
       resolve();
     }, 5000);
-    
+
     server.close(() => {
       clearTimeout(timeout);
       resolve();
@@ -84,42 +95,57 @@ export const registerServerCleanup = (server: any): void => {
 };
 
 /**
+ * Database connection interface with common cleanup methods
+ */
+interface DatabaseConnection {
+  $disconnect?: () => Promise<void>;
+  destroy?: () => Promise<void>;
+  close?: () => Promise<void>;
+  end?: () => Promise<void>;
+  quit?: () => Promise<void>;
+  isInitialized?: boolean;
+}
+
+/**
  * Database Connection Cleanup Helper
  * Handles common database connection patterns
  */
-export const registerDatabaseCleanup = (connection: any): void => {
+export const registerDatabaseCleanup = (connection: DatabaseConnection | null | undefined): void => {
   registerCleanup(async () => {
+    if (!connection) {
+      return;
+    }
     try {
       // Prisma
       if (connection.$disconnect) {
         await connection.$disconnect();
         return;
       }
-      
+
       // TypeORM DataSource
       if (connection.destroy) {
         await connection.destroy();
         return;
       }
-      
+
       // MongoDB/Mongoose
       if (connection.close) {
         await connection.close();
         return;
       }
-      
+
       // Generic pool
       if (connection.end) {
         await connection.end();
         return;
       }
-      
+
       // Redis
       if (connection.quit) {
         await connection.quit();
         return;
       }
-      
+
       console.warn('⚠️  Unknown database connection type for cleanup');
     } catch (error) {
       console.warn('⚠️  Database cleanup error:', error);
@@ -131,29 +157,29 @@ export const registerDatabaseCleanup = (connection: any): void => {
  * Process Cleanup Helper - 子进程创建与杀树
  * Safely terminates child processes with timeout
  */
-export const registerProcessCleanup = (process: any): void => {
+export const registerProcessCleanup = (proc: ChildProcess | null | undefined): void => {
   registerCleanup(async () => {
-    if (!process || !process.pid) return;
-    
+    if (!proc || !proc.pid) return;
+
     return new Promise<void>((resolve) => {
       const timeout = setTimeout(() => {
-        console.warn(`⚠️  Process ${process.pid} cleanup timeout - forcing kill`);
+        console.warn(`⚠️  Process ${proc.pid} cleanup timeout - forcing kill`);
         try {
-          process.kill('SIGKILL');
-        } catch (e) {
+          proc.kill('SIGKILL');
+        } catch {
           // Process might already be dead
         }
         resolve();
       }, 5000);
-      
-      process.on('exit', () => {
+
+      proc.on('exit', () => {
         clearTimeout(timeout);
         resolve();
       });
-      
+
       try {
-        process.kill('SIGTERM');
-      } catch (error) {
+        proc.kill('SIGTERM');
+      } catch {
         clearTimeout(timeout);
         resolve();
       }
@@ -162,10 +188,27 @@ export const registerProcessCleanup = (process: any): void => {
 };
 
 /**
+ * Browser interface with cleanup methods
+ */
+interface BrowserLike {
+  close?: () => Promise<void>;
+}
+
+/**
+ * Browser context interface with cleanup methods
+ */
+interface BrowserContextLike {
+  close?: () => Promise<void>;
+}
+
+/**
  * Browser Cleanup Helper
  * Handles Playwright/Puppeteer browser instances
  */
-export const registerBrowserCleanup = (browser: any, context?: any): void => {
+export const registerBrowserCleanup = (
+  browser: BrowserLike | null | undefined,
+  context?: BrowserContextLike | null | undefined,
+): void => {
   registerCleanup(async () => {
     try {
       if (context?.close) {
@@ -203,15 +246,23 @@ export const registerTimerCleanup = (timers: NodeJS.Timeout[]): void => {
 };
 
 /**
+ * File watcher interface with cleanup methods
+ */
+interface FileWatcher {
+  close?: () => Promise<void> | void;
+  unwatch?: () => void;
+}
+
+/**
  * File Watcher Cleanup Helper - fs.watch 与 chokidar 必须 close
  * Closes fs.watch and chokidar watchers
  */
-export const registerWatcherCleanup = (watcher: any): void => {
+export const registerWatcherCleanup = (watcher: FileWatcher | null | undefined): void => {
   registerCleanup(async () => {
     try {
-      if (watcher.close) {
+      if (watcher?.close) {
         await watcher.close();
-      } else if (watcher.unwatch) {
+      } else if (watcher?.unwatch) {
         watcher.unwatch();
       }
     } catch (error) {
@@ -224,38 +275,50 @@ export const registerWatcherCleanup = (watcher: any): void => {
  * AbortController Cleanup Helper - 为任何长 I/O 设上限
  * Aborts ongoing operations
  */
-export const registerAbortCleanup = (controller: AbortController): void => {
+export const registerAbortCleanup = (controller: AbortController | null | undefined): void => {
   registerCleanup(() => {
-    if (!controller.signal.aborted) {
+    if (controller && !controller.signal.aborted) {
       controller.abort();
     }
   });
 };
 
 /**
+ * Queue/Worker interface with cleanup methods
+ */
+interface QueueWorker {
+  pause?: () => Promise<void>;
+  close?: () => Promise<void>;
+  terminate?: () => Promise<void>;
+  connection?: {
+    close?: () => Promise<void>;
+  };
+}
+
+/**
  * Queue/Worker Cleanup Helper - 禁用默认重连或在 teardown 前先 pause
  * Handles BullMQ, worker threads, etc.
  */
-export const registerQueueCleanup = (queue: any): void => {
+export const registerQueueCleanup = (queue: QueueWorker | null | undefined): void => {
   registerCleanup(async () => {
     try {
       // Pause queue first to stop processing
-      if (queue.pause) {
+      if (queue?.pause) {
         await queue.pause();
       }
-      
+
       // BullMQ
-      if (queue.close) {
+      if (queue?.close) {
         await queue.close();
       }
-      
+
       // Worker threads
-      if (queue.terminate) {
+      if (queue?.terminate) {
         await queue.terminate();
       }
-      
+
       // AMQP channel/connection
-      if (queue.connection?.close) {
+      if (queue?.connection?.close) {
         await queue.connection.close();
       }
     } catch (error) {

@@ -1,4 +1,31 @@
 /**
+ * Generic type for restore data used by ValueObject.restore() methods.
+ * This is a type alias that represents the raw data structure needed
+ * to reconstruct a ValueObject from persistence.
+ *
+ * @template T - The props type of the ValueObject
+ *
+ * @example
+ * // For a ValueObject with props { value: string }
+ * type MyIdRestoreData = RestoreData<{ value: string }>;
+ *
+ * // For complex ValueObjects with nested objects
+ * interface UserProps { name: string; email: string; }
+ * type UserRestoreData = RestoreData<UserProps>;
+ */
+export type RestoreData<T> = T;
+
+/**
+ * Generic type for restore data that may contain serialized Date strings
+ * instead of Date objects. Useful for data coming from JSON persistence.
+ *
+ * @template T - The props type of the ValueObject
+ */
+export type SerializedRestoreData<T> = {
+  [K in keyof T]: T[K] extends Date ? string | Date : T[K];
+};
+
+/**
  * Represents the value value object.
  */
 export abstract class ValueObject<T> {

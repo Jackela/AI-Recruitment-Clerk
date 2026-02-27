@@ -35,6 +35,23 @@ export interface CursorPosition {
   elementId?: string;
 }
 
+/** Data payload for edit action */
+export interface EditActionData {
+  content: string;
+  position: number;
+  operation: 'insert' | 'delete' | 'replace';
+}
+
+/** Data payload for comment action */
+export interface CommentActionData {
+  commentId: string;
+  text: string;
+  position?: { x: number; y: number };
+}
+
+/** Union type for collaboration action data */
+export type CollaborationActionData = EditActionData | CommentActionData | CursorPosition | Record<string, unknown>;
+
 /**
  * Defines the shape of the collaboration action.
  */
@@ -42,8 +59,7 @@ export interface CollaborationAction {
   type: 'join' | 'leave' | '_edit' | 'comment' | 'cursor_move';
   userId: string;
   roomId: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- action data can be any shape
-  data?: any;
+  data?: CollaborationActionData;
   timestamp: Date;
 }
 

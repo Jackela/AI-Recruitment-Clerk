@@ -61,30 +61,31 @@ export class ContractViolationError extends Error {
  *
  * @since 1.0.0
  */
-export function Requires(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  condition: (...args: any[]) => boolean,
+export function Requires<Args extends unknown[]>(
+  condition: (...args: Args) => boolean,
   message: string,
-) {
-  return function (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    _target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor,
-  ) {
-    const originalMethod = descriptor.value;
+): <T>(
+  _target: object,
+  propertyKey: string | symbol,
+  descriptor: TypedPropertyDescriptor<T>,
+) => TypedPropertyDescriptor<T> {
+  return function <T>(
+    _target: object,
+    propertyKey: string | symbol,
+    descriptor: TypedPropertyDescriptor<T>,
+  ): TypedPropertyDescriptor<T> {
+    const originalMethod = descriptor.value as ((...args: unknown[]) => Promise<unknown>) | undefined;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    descriptor.value = async function (...args: any[]) {
-      if (!condition.apply(this, args)) {
+    descriptor.value = async function (this: unknown, ...args: unknown[]): Promise<unknown> {
+      if (!condition.apply(this, args as Args)) {
         throw new ContractViolationError(
           message,
           'PRE',
-          `${_target.constructor.name}.${propertyKey}`,
+          `${(_target as { constructor: { name: string } }).constructor.name}.${String(propertyKey)}`,
         );
       }
-      return await originalMethod.apply(this, args);
-    };
+      return await originalMethod?.apply(this, args);
+    } as T;
 
     return descriptor;
   };
@@ -109,30 +110,34 @@ export function Requires(
  *
  * @since 1.0.0
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function Ensures(condition: (result: any) => boolean, message: string) {
-  return function (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    _target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor,
-  ) {
-    const originalMethod = descriptor.value;
+export function Ensures<TResult>(
+  condition: (result: TResult) => boolean,
+  message: string,
+): <T>(
+  _target: object,
+  propertyKey: string | symbol,
+  descriptor: TypedPropertyDescriptor<T>,
+) => TypedPropertyDescriptor<T> {
+  return function <T>(
+    _target: object,
+    propertyKey: string | symbol,
+    descriptor: TypedPropertyDescriptor<T>,
+  ): TypedPropertyDescriptor<T> {
+    const originalMethod = descriptor.value as ((...args: unknown[]) => Promise<TResult>) | undefined;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    descriptor.value = async function (...args: any[]) {
-      const result = await originalMethod.apply(this, args);
+    descriptor.value = async function (this: unknown, ...args: unknown[]): Promise<TResult> {
+      const result = (await originalMethod?.apply(this, args)) as TResult;
 
       if (!condition(result)) {
         throw new ContractViolationError(
           message,
           'POST',
-          `${_target.constructor.name}.${propertyKey}`,
+          `${(_target as { constructor: { name: string } }).constructor.name}.${String(propertyKey)}`,
         );
       }
 
       return result;
-    };
+    } as T;
 
     return descriptor;
   };
@@ -155,13 +160,14 @@ export function Ensures(condition: (result: any) => boolean, message: string) {
  *
  * @since 1.0.0
  */
-export function Invariant(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  condition: (instance: any) => boolean,
+export function Invariant<TInstance extends object>(
+  condition: (instance: TInstance) => boolean,
   message: string,
-) {
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-explicit-any
-  return function <T extends { new (...args: any[]): {} }>(constructor: T) {
+): <T extends { new (...args: unknown[]): object }>(constructor: T) => T {
+  return function <T extends { new (...args: unknown[]): object }>(constructor: T): T {
+    // TypeScript requires mixin class constructors to use 'any[]' type for rest parameters.
+    // This is a known language design constraint for class mixins (TS2545).
+    // @ts-expect-error - Mixin class constructor requires any[] per TypeScript spec
     return class extends constructor {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       constructor(...args: any[]) {
@@ -170,7 +176,7 @@ export function Invariant(
       }
 
       public checkInvariant(): void {
-        if (!condition(this)) {
+        if (!condition(this as unknown as TInstance)) {
           throw new ContractViolationError(message, 'INV', constructor.name);
         }
       }
@@ -200,8 +206,7 @@ export namespace ContractValidators {
    *
    * @since 1.0.0
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  export function isValidEmail(email: any): boolean {
+  export function isValidEmail(email: unknown): boolean {
     return (
       typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
     );
@@ -211,7 +216,7 @@ export namespace ContractValidators {
    * Validates non-empty string
    *
    * @function isNonEmptyString
-   * @param {any} value - Value to validate
+   * @param {unknown} value - Value to validate
    * @returns {boolean} True if non-empty string
    *
    * @example
@@ -221,8 +226,7 @@ export namespace ContractValidators {
    *
    * @since 1.0.0
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  export function isNonEmptyString(value: any): boolean {
+  export function isNonEmptyString(value: unknown): boolean {
     return typeof value === 'string' && value.trim().length > 0;
   }
 
@@ -247,18 +251,20 @@ export namespace ContractValidators {
    * Validates PDF file type
    *
    * @function isPdfFile
-   * @param {any} file - File object to validate
+   * @param {unknown} file - File object to validate
    * @returns {boolean} True if PDF file
    *
    * @since 1.0.0
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  export function isPdfFile(file: any): boolean {
+  export function isPdfFile(file: unknown): boolean {
+    if (!file || typeof file !== 'object') {
+      return false;
+    }
+    const obj = file as Record<string, unknown>;
     return !!(
-      file &&
-      file.mimetype === 'application/pdf' &&
-      file.originalname &&
-      file.originalname.toLowerCase().endsWith('.pdf')
+      obj.mimetype === 'application/pdf' &&
+      typeof obj.originalname === 'string' &&
+      obj.originalname.toLowerCase().endsWith('.pdf')
     );
   }
 
@@ -266,13 +272,12 @@ export namespace ContractValidators {
    * Validates array has elements
    *
    * @function hasElements
-   * @param {any} array - Array to validate
+   * @param {unknown} array - Array to validate
    * @returns {boolean} True if array has elements
    *
    * @since 1.0.0
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  export function hasElements(array: any): boolean {
+  export function hasElements(array: unknown): boolean {
     return Array.isArray(array) && array.length > 0;
   }
 
@@ -280,7 +285,7 @@ export namespace ContractValidators {
    * Validates job description object
    *
    * @function isValidJD
-   * @param {any} jd - Job description to validate
+   * @param {unknown} jd - Job description to validate
    * @returns {boolean} True if valid JD structure
    *
    * @example
@@ -290,19 +295,29 @@ export namespace ContractValidators {
    *
    * @since 1.0.0
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  export function isValidJD(jd: any): boolean {
+  export function isValidJD(jd: unknown): boolean {
+    if (!jd || typeof jd !== 'object') {
+      return false;
+    }
+    const obj = jd as Record<string, unknown>;
+    const experienceYears = obj.experienceYears as Record<string, unknown> | undefined;
+
+    if (!experienceYears) {
+      return false;
+    }
+
+    const min = experienceYears.min;
+    const max = experienceYears.max;
+
     return !!(
-      jd &&
-      Array.isArray(jd.requiredSkills) &&
-      jd.requiredSkills.length > 0 &&
-      jd.experienceYears &&
-      typeof jd.experienceYears.min === 'number' &&
-      typeof jd.experienceYears.max === 'number' &&
-      jd.experienceYears.min >= 0 &&
-      jd.experienceYears.max >= jd.experienceYears.min &&
-      ['bachelor', 'master', 'phd', 'any'].includes(jd.educationLevel) &&
-      ['junior', 'mid', 'senior', 'lead', 'executive'].includes(jd.seniority)
+      Array.isArray(obj.requiredSkills) &&
+      obj.requiredSkills.length > 0 &&
+      typeof min === 'number' &&
+      typeof max === 'number' &&
+      min >= 0 &&
+      max >= min &&
+      ['bachelor', 'master', 'phd', 'any'].includes(obj.educationLevel as string) &&
+      ['junior', 'mid', 'senior', 'lead', 'executive'].includes(obj.seniority as string)
     );
   }
 
@@ -310,7 +325,7 @@ export namespace ContractValidators {
    * Validates resume object
    *
    * @function isValidResume
-   * @param {any} resume - Resume to validate
+   * @param {unknown} resume - Resume to validate
    * @returns {boolean} True if valid resume structure
    *
    * @example
@@ -320,15 +335,17 @@ export namespace ContractValidators {
    *
    * @since 1.0.0
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  export function isValidResume(resume: any): boolean {
+  export function isValidResume(resume: unknown): boolean {
+    if (!resume || typeof resume !== 'object') {
+      return false;
+    }
+    const obj = resume as Record<string, unknown>;
     return !!(
-      resume &&
-      Array.isArray(resume.skills) &&
-      resume.skills.length > 0 &&
-      Array.isArray(resume.workExperience) &&
-      resume.education &&
-      isNonEmptyString(resume.contactInfo?.name)
+      Array.isArray(obj.skills) &&
+      obj.skills.length > 0 &&
+      Array.isArray(obj.workExperience) &&
+      obj.education &&
+      isNonEmptyString((obj.contactInfo as Record<string, unknown> | undefined)?.name)
     );
   }
 
@@ -336,7 +353,7 @@ export namespace ContractValidators {
    * Validates score range (0-100)
    *
    * @function isValidScoreRange
-   * @param {number} score - Score to validate
+   * @param {unknown} score - Score to validate
    * @returns {boolean} True if score is between 0-100
    *
    * @example
@@ -346,8 +363,7 @@ export namespace ContractValidators {
    *
    * @since 1.0.0
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  export function isValidScoreRange(score: any): boolean {
+  export function isValidScoreRange(score: unknown): boolean {
     return typeof score === 'number' && score >= 0 && score <= 100;
   }
 
@@ -355,7 +371,7 @@ export namespace ContractValidators {
    * Validates score DTO structure
    *
    * @function isValidScoreDTO
-   * @param {any} scoreDto - Score DTO to validate
+   * @param {unknown} scoreDto - Score DTO to validate
    * @returns {boolean} True if valid score DTO
    *
    * @example
@@ -365,18 +381,24 @@ export namespace ContractValidators {
    *
    * @since 1.0.0
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  export function isValidScoreDTO(scoreDto: any): boolean {
+  export function isValidScoreDTO(scoreDto: unknown): boolean {
+    if (!scoreDto || typeof scoreDto !== 'object') {
+      return false;
+    }
+    const obj = scoreDto as Record<string, unknown>;
+    const skillScore = obj.skillScore as Record<string, unknown> | undefined;
+    const experienceScore = obj.experienceScore as Record<string, unknown> | undefined;
+    const educationScore = obj.educationScore as Record<string, unknown> | undefined;
+
     return !!(
-      scoreDto &&
-      isValidScoreRange(scoreDto.overallScore) &&
-      scoreDto.skillScore &&
-      isValidScoreRange(scoreDto.skillScore.score) &&
-      isNonEmptyString(scoreDto.skillScore.details) &&
-      scoreDto.experienceScore &&
-      isValidScoreRange(scoreDto.experienceScore.score) &&
-      scoreDto.educationScore &&
-      isValidScoreRange(scoreDto.educationScore.score)
+      isValidScoreRange(obj.overallScore) &&
+      skillScore &&
+      isValidScoreRange(skillScore.score) &&
+      isNonEmptyString(skillScore.details) &&
+      experienceScore &&
+      isValidScoreRange(experienceScore.score) &&
+      educationScore &&
+      isValidScoreRange(educationScore.score)
     );
   }
 
@@ -384,20 +406,22 @@ export namespace ContractValidators {
    * Validates experience years range
    *
    * @function isValidExperienceRange
-   * @param {any} experienceYears - Experience years object
+   * @param {unknown} experienceYears - Experience years object
    * @returns {boolean} True if valid experience range
    *
    * @since 1.0.0
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  export function isValidExperienceRange(experienceYears: any): boolean {
+  export function isValidExperienceRange(experienceYears: unknown): boolean {
+    if (!experienceYears || typeof experienceYears !== 'object') {
+      return false;
+    }
+    const obj = experienceYears as Record<string, unknown>;
     return !!(
-      experienceYears &&
-      typeof experienceYears.min === 'number' &&
-      typeof experienceYears.max === 'number' &&
-      experienceYears.min >= 0 &&
-      experienceYears.max >= experienceYears.min &&
-      experienceYears.max <= 50
+      typeof obj.min === 'number' &&
+      typeof obj.max === 'number' &&
+      obj.min >= 0 &&
+      obj.max >= obj.min &&
+      obj.max <= 50
     ); // 合理上限
   }
 
@@ -405,21 +429,25 @@ export namespace ContractValidators {
    * Validates candidate information for report generation
    *
    * @function isValidCandidateInfo
-   * @param {any} candidateInfo - Candidate information object
+   * @param {unknown} candidateInfo - Candidate information object
    * @returns {boolean} True if valid candidate info
    *
    * @since 1.0.0
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  export function isValidCandidateInfo(candidateInfo: any): boolean {
+  export function isValidCandidateInfo(candidateInfo: unknown): boolean {
+    if (!candidateInfo || typeof candidateInfo !== 'object') {
+      return false;
+    }
+    const obj = candidateInfo as Record<string, unknown>;
+    const personalInfo = obj.personalInfo as Record<string, unknown> | undefined;
+
     return !!(
-      candidateInfo &&
-      isNonEmptyString(candidateInfo.candidateName) &&
-      candidateInfo.personalInfo &&
-      isValidEmail(candidateInfo.personalInfo.email) &&
-      Array.isArray(candidateInfo.workExperience) &&
-      Array.isArray(candidateInfo.skills) &&
-      candidateInfo.skills.length > 0
+      isNonEmptyString(obj.candidateName) &&
+      personalInfo &&
+      isValidEmail(personalInfo.email) &&
+      Array.isArray(obj.workExperience) &&
+      Array.isArray(obj.skills) &&
+      obj.skills.length > 0
     );
   }
 
@@ -427,20 +455,23 @@ export namespace ContractValidators {
    * Validates report generation result
    *
    * @function isValidReportResult
-   * @param {any} reportResult - Report generation result
+   * @param {unknown} reportResult - Report generation result
    * @returns {boolean} True if valid report result
    *
    * @since 1.0.0
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  export function isValidReportResult(reportResult: any): boolean {
+  export function isValidReportResult(reportResult: unknown): boolean {
+    if (!reportResult || typeof reportResult !== 'object') {
+      return false;
+    }
+    const obj = reportResult as Record<string, unknown>;
+
     return !!(
-      reportResult &&
-      isNonEmptyString(reportResult.reportId) &&
-      isNonEmptyString(reportResult.pdfUrl) &&
-      reportResult.generatedAt instanceof Date &&
-      typeof reportResult.pageCount === 'number' &&
-      reportResult.pageCount > 0
+      isNonEmptyString(obj.reportId) &&
+      isNonEmptyString(obj.pdfUrl) &&
+      obj.generatedAt instanceof Date &&
+      typeof obj.pageCount === 'number' &&
+      obj.pageCount > 0
     );
   }
 
@@ -448,20 +479,24 @@ export namespace ContractValidators {
    * Validates job information for report generation
    *
    * @function isValidJobInfo
-   * @param {any} jobInfo - Job information object
+   * @param {unknown} jobInfo - Job information object
    * @returns {boolean} True if valid job info
    *
    * @since 1.0.0
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  export function isValidJobInfo(jobInfo: any): boolean {
+  export function isValidJobInfo(jobInfo: unknown): boolean {
+    if (!jobInfo || typeof jobInfo !== 'object') {
+      return false;
+    }
+    const obj = jobInfo as Record<string, unknown>;
+    const requirements = obj.requirements as Record<string, unknown> | undefined;
+
     return !!(
-      jobInfo &&
-      isNonEmptyString(jobInfo.title) &&
-      isNonEmptyString(jobInfo.description) &&
-      jobInfo.requirements &&
-      Array.isArray(jobInfo.requirements.requiredSkills) &&
-      jobInfo.requirements.requiredSkills.length > 0
+      isNonEmptyString(obj.title) &&
+      isNonEmptyString(obj.description) &&
+      requirements &&
+      Array.isArray(requirements.requiredSkills) &&
+      requirements.requiredSkills.length > 0
     );
   }
 
@@ -469,20 +504,24 @@ export namespace ContractValidators {
    * Validates extraction result structure
    *
    * @function isValidExtractionResult
-   * @param {any} extractionResult - JD extraction result
+   * @param {unknown} extractionResult - JD extraction result
    * @returns {boolean} True if valid extraction result
    *
    * @since 1.0.0
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  export function isValidExtractionResult(extractionResult: any): boolean {
+  export function isValidExtractionResult(extractionResult: unknown): boolean {
+    if (!extractionResult || typeof extractionResult !== 'object') {
+      return false;
+    }
+    const obj = extractionResult as Record<string, unknown>;
+
     return !!(
-      extractionResult &&
-      hasElements(extractionResult.requiredSkills) &&
-      isNonEmptyString(extractionResult.jobTitle) &&
-      extractionResult.confidence >= 0.0 &&
-      extractionResult.confidence <= 1.0 &&
-      isValidExperienceRange(extractionResult.experienceYears)
+      hasElements(obj.requiredSkills) &&
+      isNonEmptyString(obj.jobTitle) &&
+      typeof obj.confidence === 'number' &&
+      obj.confidence >= 0.0 &&
+      obj.confidence <= 1.0 &&
+      isValidExperienceRange(obj.experienceYears)
     );
   }
 
@@ -511,13 +550,12 @@ export namespace ContractValidators {
    * Validates confidence level is within 0-1 range
    *
    * @function isValidConfidenceLevel
-   * @param {number} confidence - Confidence level
+   * @param {unknown} confidence - Confidence level
    * @returns {boolean} True if confidence is valid
    *
    * @since 1.0.0
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  export function isValidConfidenceLevel(confidence: any): boolean {
+  export function isValidConfidenceLevel(confidence: unknown): boolean {
     return (
       typeof confidence === 'number' && confidence >= 0.0 && confidence <= 1.0
     );

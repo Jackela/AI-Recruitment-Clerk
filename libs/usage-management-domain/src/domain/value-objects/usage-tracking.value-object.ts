@@ -1,4 +1,4 @@
-import { ValueObject } from './base/value-object.js';
+import { ValueObject, type SerializedRestoreData } from './base/value-object.js';
 import { UsageRecord } from './usage-record.value-object.js';
 
 /**
@@ -26,12 +26,17 @@ export class UsageTracking extends ValueObject<{
    * @param data - The data.
    * @returns The UsageTracking.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): UsageTracking {
+  public static restore(data: SerializedRestoreData<{
+    currentCount: number;
+    usageHistory: Array<{ timestamp: Date | string; count: number }>;
+    lastUsageAt?: Date | string;
+  }>): UsageTracking {
     return new UsageTracking({
       currentCount: data.currentCount,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      usageHistory: data.usageHistory.map((r: any) => new UsageRecord(r)),
+      usageHistory: data.usageHistory.map((r) => new UsageRecord({
+        timestamp: typeof r.timestamp === 'string' ? new Date(r.timestamp) : r.timestamp,
+        count: r.count,
+      })),
       lastUsageAt: data.lastUsageAt ? new Date(data.lastUsageAt) : undefined,
     });
   }
