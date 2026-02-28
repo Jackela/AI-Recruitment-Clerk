@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
-import type { Router } from '@angular/router';
-import type { ToastService } from '../../../services/toast.service';
+import { Router } from '@angular/router'; // eslint-disable-line @typescript-eslint/consistent-type-imports
+import { ToastService } from '../../../services/toast.service'; // eslint-disable-line @typescript-eslint/consistent-type-imports
 import type { ErrorInfo } from './error-boundary.component';
 
 /**
