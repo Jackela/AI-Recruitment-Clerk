@@ -327,7 +327,7 @@ export class AuthService {
     };
 
     const accessToken = this.jwtService.sign(payload, {
-      expiresIn: this.configService.get<string>('JWT_EXPIRES_IN') || '15m', // Shorter access token lifetime
+      expiresIn: (this.configService.get<string>('JWT_EXPIRES_IN') || '15m') as unknown as number, // Shorter access token lifetime
     });
 
     const refreshToken = this.jwtService.sign(
@@ -339,8 +339,7 @@ export class AuthService {
         secret:
           this.configService.get<string>('JWT_REFRESH_SECRET') ||
           'ai-recruitment-refresh-secret',
-        expiresIn:
-          this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d',
+        expiresIn: (this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d') as unknown as number,
       },
     );
 

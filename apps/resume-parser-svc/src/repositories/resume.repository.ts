@@ -318,7 +318,7 @@ export class ResumeRepository {
           });
         }
 
-        return queryBuilder.lean().exec();
+        return queryBuilder.lean().exec() as unknown as Promise<ResumeDocument[]>;
       },
       'findWithSkills',
       150, // Expected performance after optimization: 150ms

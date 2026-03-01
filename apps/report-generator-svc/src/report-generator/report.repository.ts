@@ -148,7 +148,7 @@ export class ReportRepository {
           this.logger.warn(`No report found with ID: ${reportId}`);
         }
 
-        return updatedReport;
+        return updatedReport as unknown as ReportDocument | null;
       },
       'updateReport',
       150, // Expected performance: 150ms
@@ -186,7 +186,8 @@ export class ReportRepository {
       async () => {
         this.logger.debug(`Finding report by ID: ${reportId}`);
 
-        return this.reportModel.findById(reportId).lean().exec();
+        const result = await this.reportModel.findById(reportId).lean().exec();
+        return result as unknown as ReportDocument | null;
       },
       'findReportById',
       50, // Expected performance: 50ms with _id index
