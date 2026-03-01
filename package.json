@@ -138,7 +138,7 @@
     "mongodb-memory-server": "^10.2.0",
     "mqtt": "^5.14.1",
     "msw": "^2.10.4",
-    "multer": "^2.0.2",
+    "multer": "^2.1.0",
     "nx": "21.5.2",
     "prettier": "^3.6.2",
     "ralph": "^1.4.0",
@@ -228,6 +228,7 @@
     "@module-federation/node": "2.7.21",
     "@module-federation/rspack": "0.21.2",
     "koa": "^3.1.1",
-    "lodash": "^4.17.23"
+    "lodash": "^4.17.23",
+    "multer": "^2.1.0"
   }
 }
