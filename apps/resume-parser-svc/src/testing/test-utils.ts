@@ -9,20 +9,17 @@ import {
 } from '@app/shared-nats-client';
 import { getModelToken } from '@nestjs/mongoose';
 import { Logger } from '@nestjs/common';
+import type { DynamicModule, Type, ForwardReference, Provider } from '@nestjs/common';
 
 /**
  * Defines the shape of the test module options.
  */
 export interface TestModuleOptions {
   useDocker?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  imports?: any[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  providers?: any[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  controllers?: any[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  exports?: any[];
+  imports?: Array<DynamicModule | Type<unknown> | ForwardReference<unknown> | Promise<DynamicModule>>;
+  providers?: Provider[];
+  controllers?: Array<Type<unknown>>;
+  exports?: Array<Type<unknown> | DynamicModule>;
 }
 
 /**
@@ -67,6 +64,11 @@ export async function createTestModule(
 }
 
 /**
+ * Config value type for mock config service
+ */
+type MockConfigValue = string | number | boolean | undefined;
+
+/**
  * Create mock providers for common services
  */
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -74,9 +76,8 @@ export const createMockProviders = () => ({
   configService: {
     provide: ConfigService,
     useValue: {
-      get: jest.fn((key: string) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const config: Record<string, any> = {
+      get: jest.fn((key: string): MockConfigValue => {
+        const config: Record<string, MockConfigValue> = {
           MONGODB_URI:
             'mongodb://testuser:testpass@localhost:27018/resume-parser-test',
           NATS_SERVERS: 'nats://testuser:testpass@localhost:4223',
@@ -117,12 +118,38 @@ export const createMockProviders = () => ({
 });
 
 /**
+ * Mock document returned by MongoDB operations
+ */
+interface MockMongoDocument {
+  _id: string;
+  save: jest.Mock;
+  toObject: jest.Mock;
+  [key: string]: unknown;
+}
+
+/**
+ * Mock MongoDB model with static methods
+ */
+interface MockMongoModel {
+  (data: Record<string, unknown>): MockMongoDocument;
+  find: jest.Mock;
+  findOne: jest.Mock;
+  findById: jest.Mock;
+  findByIdAndUpdate: jest.Mock;
+  findByIdAndDelete: jest.Mock;
+  countDocuments: jest.Mock;
+  deleteMany: jest.Mock;
+  updateMany: jest.Mock;
+  aggregate: jest.Mock;
+  create: jest.Mock;
+}
+
+/**
  * Create a mock MongoDB model
  */
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const createMockMongoModel = (modelName: string) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const mockModel: any = jest.fn().mockImplementation((data) => ({
+  const mockFn = jest.fn().mockImplementation((data: Record<string, unknown>): MockMongoDocument => ({
     ...data,
     _id: '507f1f77bcf86cd799439011',
     save: jest.fn().mockResolvedValue({
@@ -139,42 +166,38 @@ export const createMockMongoModel = (modelName: string) => {
     }),
   }));
 
-  // Add static methods
-  mockModel.find = jest.fn().mockReturnValue({
-    exec: jest.fn().mockResolvedValue([]),
-    limit: jest.fn().mockReturnThis(),
-    skip: jest.fn().mockReturnThis(),
-    sort: jest.fn().mockReturnThis(),
-    select: jest.fn().mockReturnThis(),
-  });
-
-  mockModel.findOne = jest.fn().mockReturnValue({
-    exec: jest.fn().mockResolvedValue(null),
-  });
-
-  mockModel.findById = jest.fn().mockReturnValue({
-    exec: jest.fn().mockResolvedValue(null),
-  });
-
-  mockModel.findByIdAndUpdate = jest.fn().mockReturnValue({
-    exec: jest.fn().mockResolvedValue(null),
-  });
-
-  mockModel.findByIdAndDelete = jest.fn().mockReturnValue({
-    exec: jest.fn().mockResolvedValue(null),
-  });
-
-  mockModel.countDocuments = jest.fn().mockReturnValue({
-    exec: jest.fn().mockResolvedValue(0),
-  });
-
-  mockModel.deleteMany = jest.fn().mockResolvedValue({ deletedCount: 0 });
-  mockModel.updateMany = jest.fn().mockResolvedValue({ modifiedCount: 0 });
-  mockModel.aggregate = jest.fn().mockResolvedValue([]);
-  mockModel.create = jest.fn().mockResolvedValue({
-    _id: '507f1f77bcf86cd799439011',
-    toObject: jest.fn().mockReturnValue({}),
-  });
+  // Create the model object with static methods
+  const mockModel = Object.assign(mockFn, {
+    find: jest.fn().mockReturnValue({
+      exec: jest.fn().mockResolvedValue([]),
+      limit: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      sort: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
+    }),
+    findOne: jest.fn().mockReturnValue({
+      exec: jest.fn().mockResolvedValue(null),
+    }),
+    findById: jest.fn().mockReturnValue({
+      exec: jest.fn().mockResolvedValue(null),
+    }),
+    findByIdAndUpdate: jest.fn().mockReturnValue({
+      exec: jest.fn().mockResolvedValue(null),
+    }),
+    findByIdAndDelete: jest.fn().mockReturnValue({
+      exec: jest.fn().mockResolvedValue(null),
+    }),
+    countDocuments: jest.fn().mockReturnValue({
+      exec: jest.fn().mockResolvedValue(0),
+    }),
+    deleteMany: jest.fn().mockResolvedValue({ deletedCount: 0 }),
+    updateMany: jest.fn().mockResolvedValue({ modifiedCount: 0 }),
+    aggregate: jest.fn().mockResolvedValue([]),
+    create: jest.fn().mockResolvedValue({
+      _id: '507f1f77bcf86cd799439011',
+      toObject: jest.fn().mockReturnValue({}),
+    }),
+  }) as MockMongoModel;
 
   return {
     provide: getModelToken(modelName, 'resume-parser'),
@@ -240,10 +263,21 @@ export const createMockGridFSConnection = () => {
 export const flushPromises = (): Promise<void> => new Promise(setImmediate);
 
 /**
+ * Test job object type
+ */
+export interface TestJob {
+  jobId: string;
+  title: string;
+  description: string;
+  requirements: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
  * Create a test job object
  */
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export const createTestJob = (overrides = {}) => ({
+export const createTestJob = (overrides: Partial<TestJob> = {}): TestJob => ({
   jobId: 'job-123',
   title: 'Senior Software Engineer',
   description: 'Test job description',
@@ -254,10 +288,50 @@ export const createTestJob = (overrides = {}) => ({
 });
 
 /**
+ * Test resume contact info type
+ */
+interface TestResumeContactInfo {
+  name: string;
+  email: string;
+  phone: string;
+}
+
+/**
+ * Test resume experience type
+ */
+interface TestResumeExperience {
+  company: string;
+  position: string;
+  startDate: string;
+  endDate: string;
+  description: string;
+}
+
+/**
+ * Test resume education type
+ */
+interface TestResumeEducation {
+  institution: string;
+  degree: string;
+  field: string;
+  graduationDate: string;
+}
+
+/**
+ * Test resume object type
+ */
+export interface TestResume {
+  resumeId: string;
+  contactInfo: TestResumeContactInfo;
+  skills: string[];
+  experience: TestResumeExperience[];
+  education: TestResumeEducation[];
+}
+
+/**
  * Create a test resume object
  */
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export const createTestResume = (overrides = {}) => ({
+export const createTestResume = (overrides: Partial<TestResume> = {}): TestResume => ({
   resumeId: 'resume-456',
   contactInfo: {
     name: 'John Doe',

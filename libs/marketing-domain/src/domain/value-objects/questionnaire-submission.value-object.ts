@@ -7,6 +7,34 @@ import { OptionalInfo } from './optional-info.value-object.js';
 import { SubmissionSummary } from './submission-summary.value-object.js';
 import { Answer } from './answer.value-object.js';
 import type { RawSubmissionData } from '../../application/dtos/questionnaire.dto.js';
+import type { QuestionnaireUserRole, CompanySize, ScreeningMethod, Rating } from '../../application/dtos/questionnaire.dto.js';
+
+/**
+ * Restore data interface for QuestionnaireSubmission.
+ */
+export interface QuestionnaireSubmissionRestoreData {
+  userProfile: { role: QuestionnaireUserRole; industry: string; companySize: CompanySize; location: string };
+  userExperience: {
+    overallSatisfaction: Rating;
+    accuracyRating: Rating;
+    speedRating: Rating;
+    uiRating: Rating;
+    mostUsefulFeature: string;
+    mainPainPoint?: string;
+    improvementSuggestion?: string;
+  };
+  businessValue: {
+    currentScreeningMethod: ScreeningMethod;
+    timeSpentPerResume: number;
+    resumesPerWeek: number;
+    timeSavingPercentage: number;
+    willingnessToPayMonthly: number;
+    recommendLikelihood: Rating;
+  };
+  featureNeeds: { priorityFeatures: string[]; integrationNeeds: string[] };
+  optional: { additionalFeedback?: string; contactPreference?: string };
+  submittedAt: string | Date;
+}
 
 /**
  * Represents the questionnaire submission.
@@ -68,10 +96,13 @@ export class QuestionnaireSubmission extends ValueObject<{
    * @param data - The data.
    * @returns The QuestionnaireSubmission.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): QuestionnaireSubmission {
+  public static restore(data: QuestionnaireSubmissionRestoreData): QuestionnaireSubmission {
     return new QuestionnaireSubmission({
-      ...data,
+      userProfile: new UserProfile(data.userProfile),
+      userExperience: new UserExperience(data.userExperience),
+      businessValue: new BusinessValue(data.businessValue),
+      featureNeeds: new FeatureNeeds(data.featureNeeds),
+      optional: new OptionalInfo(data.optional),
       submittedAt: new Date(data.submittedAt),
     });
   }

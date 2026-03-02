@@ -20,6 +20,7 @@ import {
 } from '@ai-recruitment-clerk/infrastructure-shared';
 import { ReportDataService } from '../report-helpers/report-data.service';
 import { LlmReportMapperService } from '../report-helpers/llm-report-mapper.service';
+import { ReportTemplatesService } from './report-templates.service';
 import type { MatchingSkill, ScoreBreakdown } from '../schemas/report.schema';
 
 // Mock ErrorCorrelationManager
@@ -226,6 +227,7 @@ describe('ReportGeneratorService', () => {
 
     const mockGridFsService = {
       saveReport: jest.fn(),
+      saveReportBuffer: jest.fn(),
       healthCheck: jest.fn(),
     };
 
@@ -284,6 +286,53 @@ describe('ReportGeneratorService', () => {
       }),
       generateBatchSummary: jest.fn().mockReturnValue('Test summary'),
       calculateAverageConfidence: jest.fn().mockReturnValue(0.85),
+      healthCheck: jest.fn(),
+    };
+
+    const mockReportTemplatesService = {
+      generatePdfReportBuffer: jest.fn().mockResolvedValue({
+        content: Buffer.from('mock-pdf-content'),
+        filename: 'mock-report.pdf',
+        mimeType: 'application/pdf',
+        metadata: {
+          reportType: 'pdf',
+          jobId: 'test-job-id',
+          resumeId: 'test-resume-id',
+          generatedBy: 'report-templates-service',
+          generatedAt: new Date(),
+          mimeType: 'application/pdf',
+          encoding: 'binary',
+        },
+      }),
+      generateExcelReportBuffer: jest.fn().mockResolvedValue({
+        content: Buffer.from('mock-excel-content'),
+        filename: 'mock-report.xlsx',
+        mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        metadata: {
+          reportType: 'excel',
+          jobId: 'test-job-id',
+          resumeId: 'test-resume-id',
+          generatedBy: 'report-templates-service',
+          generatedAt: new Date(),
+          mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          encoding: 'binary',
+        },
+      }),
+      generateReportInFormat: jest.fn().mockResolvedValue({
+        content: 'mock-markdown-content',
+        filename: 'mock-report.md',
+        mimeType: 'text/markdown',
+        metadata: {
+          reportType: 'markdown',
+          jobId: 'test-job-id',
+          resumeId: 'test-resume-id',
+          generatedBy: 'report-templates-service',
+          generatedAt: new Date(),
+          mimeType: 'text/markdown',
+          encoding: 'utf-8',
+        },
+      }),
+      healthCheck: jest.fn(),
     };
 
     const mockLlmReportMapperService = {
@@ -367,6 +416,7 @@ describe('ReportGeneratorService', () => {
               mockReportRepository as unknown as ReportRepository,
               mockReportDataService as unknown as ReportDataService,
               mockLlmReportMapperService as unknown as LlmReportMapperService,
+              mockReportTemplatesService as unknown as ReportTemplatesService,
             ),
         },
         { provide: LlmService, useValue: mockLlmService },
@@ -374,6 +424,7 @@ describe('ReportGeneratorService', () => {
         { provide: ReportRepository, useValue: mockReportRepository },
         { provide: ReportDataService, useValue: mockReportDataService },
         { provide: LlmReportMapperService, useValue: mockLlmReportMapperService },
+        { provide: ReportTemplatesService, useValue: mockReportTemplatesService },
       ],
     }).compile();
 
@@ -595,6 +646,11 @@ describe('ReportGeneratorService', () => {
           _id: mockReportId,
         }) as never,
       );
+      reportRepository.findReport.mockResolvedValue(
+        createMockReportDocument() as never,
+      );
+      gridFsService.saveReport.mockResolvedValue('mock-file-id');
+      gridFsService.saveReportBuffer.mockResolvedValue('mock-buffer-file-id');
 
       // Act
       const result = await service.generateReport(request);
@@ -663,6 +719,10 @@ describe('ReportGeneratorService', () => {
       reportRepository.createReport.mockResolvedValue(
         createMockReportDocument() as never,
       );
+      reportRepository.findReport.mockResolvedValue(
+        createMockReportDocument() as never,
+      );
+      gridFsService.saveReport.mockResolvedValue('mock-file-id');
 
       // Act
       const result = await service.generateReport(singleResumeRequest);
@@ -684,6 +744,11 @@ describe('ReportGeneratorService', () => {
       reportRepository.createReport.mockResolvedValue(
         createMockReportDocument() as never,
       );
+      reportRepository.findReport.mockResolvedValue(
+        createMockReportDocument() as never,
+      );
+      gridFsService.saveReport.mockResolvedValue('mock-file-id');
+      gridFsService.saveReportBuffer.mockResolvedValue('mock-buffer-file-id');
 
       // Act
       const result = await service.generateReport(multiFormatRequest);
@@ -1189,6 +1254,10 @@ describe('ReportGeneratorService', () => {
           _id: mockReportId,
         }) as never,
       );
+      reportRepository.findReport.mockResolvedValue(
+        createMockReportDocument() as never,
+      );
+      gridFsService.saveReportBuffer.mockResolvedValue('mock-buffer-file-id');
 
       // Act
       const result = await service.generateReport(request);
@@ -1207,18 +1276,21 @@ describe('ReportGeneratorService', () => {
         outputFormats: ['pdf'],
       };
 
-      const stringId = 'string-report-id-123';
       reportRepository.createReport.mockResolvedValue(
         createMockReportDocument({
-          _id: stringId,
+          _id: 'string-id-123',
         }) as never,
       );
+      reportRepository.findReport.mockResolvedValue(
+        createMockReportDocument() as never,
+      );
+      gridFsService.saveReportBuffer.mockResolvedValue('mock-buffer-file-id');
 
       // Act
       const result = await service.generateReport(request);
 
       // Assert
-      expect(result.reportId).toBe(stringId);
+      expect(result.reportId).toBe('string-id-123');
     });
   });
 

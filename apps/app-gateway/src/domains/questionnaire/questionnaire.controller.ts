@@ -26,20 +26,18 @@ import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
 import {
   QuestionnaireDto,
-  QuestionnaireTemplateDto,
   QuestionnaireStatus,
 } from '@ai-recruitment-clerk/shared-dtos';
 import { Permission } from '@ai-recruitment-clerk/user-management-domain';
-import type { QuestionnaireSubmissionDto,
+import type {
   CreateQuestionnaireDto,
-  UpdateQuestionnaireDto} from '@ai-recruitment-clerk/shared-dtos';
+  UpdateQuestionnaireDto,
+} from '@ai-recruitment-clerk/shared-dtos';
 import type { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
 import type { QuestionnaireIntegrationService } from './questionnaire-integration.service';
 
-// Use imported interface instead of local definition
-
 /**
- * Exposes endpoints for questionnaire.
+ * Exposes endpoints for questionnaire management.
  */
 @ApiTags('questionnaire')
 @ApiBearerAuth()
@@ -91,25 +89,23 @@ export class QuestionnaireController {
     @Request() req: AuthenticatedRequest,
     @Body() createDto: CreateQuestionnaireDto,
   ): Promise<{
-      success: boolean;
-      message?: string;
-      data?: {
-        questionnaireId: string;
-        title: string;
-        status: string;
-        totalQuestions: number;
-        createdAt: string;
-      };
-      error?: string;
-    }> {
+    success: boolean;
+    message?: string;
+    data?: {
+      questionnaireId: string;
+      title: string;
+      status: string;
+      totalQuestions: number;
+      createdAt: string;
+    };
+    error?: string;
+  }> {
     try {
-      const questionnaire = await this.questionnaireService.createQuestionnaire(
-        {
-          ...createDto,
-          createdBy: req.user.id,
-          organizationId: req.user.organizationId,
-        },
-      );
+      const questionnaire = await this.questionnaireService.createQuestionnaire({
+        ...createDto,
+        createdBy: req.user.id,
+        organizationId: req.user.organizationId,
+      });
 
       return {
         success: true,
@@ -119,7 +115,7 @@ export class QuestionnaireController {
           title: questionnaire.title,
           status: questionnaire.status,
           totalQuestions: questionnaire.questions?.length || 0,
-          createdAt: questionnaire.createdAt,
+          createdAt: questionnaire.createdAt instanceof Date ? questionnaire.createdAt.toISOString() : String(questionnaire.createdAt),
         },
       };
     } catch (error) {
@@ -165,13 +161,12 @@ export class QuestionnaireController {
     @Query('limit') limit = 20,
     @Query('status') status?: QuestionnaireStatus,
     @Query('search') search?: string,
-     
   ): Promise<{
-      success: boolean;
-      message?: string;
-      data?: unknown;
-      error?: string;
-    }> {
+    success: boolean;
+    message?: string;
+    data?: unknown;
+    error?: string;
+  }> {
     try {
       const questionnaires = await this.questionnaireService.getQuestionnaires(
         req.user.organizationId,
@@ -224,13 +219,12 @@ export class QuestionnaireController {
   public async getQuestionnaire(
     @Request() req: AuthenticatedRequest,
     @Param('questionnaireId') questionnaireId: string,
-     
   ): Promise<{
-      success: boolean;
-      message?: string;
-      data?: unknown;
-      error?: string;
-    }> {
+    success: boolean;
+    message?: string;
+    data?: unknown;
+    error?: string;
+  }> {
     try {
       const questionnaire = await this.questionnaireService.getQuestionnaire(
         questionnaireId,
@@ -269,7 +263,6 @@ export class QuestionnaireController {
   @ApiResponse({ status: 404, description: '问卷未找到' })
   @ApiParam({ name: 'questionnaireId', description: '问卷ID' })
   @UseGuards(RolesGuard)
-   
   @Permissions(Permission.UPDATE_QUESTIONNAIRE)
   @Put(':questionnaireId')
   @HttpCode(HttpStatus.OK)
@@ -277,18 +270,17 @@ export class QuestionnaireController {
     @Request() req: AuthenticatedRequest,
     @Param('questionnaireId') questionnaireId: string,
     @Body() updateDto: UpdateQuestionnaireDto,
-     
   ): Promise<{
-      success: boolean;
-      message?: string;
-      data?: unknown;
-      error?: string;
-    }> {
+    success: boolean;
+    message?: string;
+    data?: unknown;
+    error?: string;
+  }> {
     try {
       const updatedQuestionnaire =
         await this.questionnaireService.updateQuestionnaire(
           questionnaireId,
-          updateDto,
+          updateDto as Record<string, unknown>,
           req.user.id,
         );
 
@@ -325,7 +317,6 @@ export class QuestionnaireController {
   @ApiResponse({ status: 200, description: '问卷发布成功' })
   @ApiParam({ name: 'questionnaireId', description: '问卷ID' })
   @UseGuards(RolesGuard)
-   
   @Permissions(Permission.PUBLISH_QUESTIONNAIRE)
   @Post(':questionnaireId/publish')
   @HttpCode(HttpStatus.OK)
@@ -339,19 +330,18 @@ export class QuestionnaireController {
       targetAudience?: string[];
       notifyUsers?: boolean;
     },
-     
   ): Promise<{
-      success: boolean;
-      message?: string;
-      data?: unknown;
-      error?: string;
-    }> {
+    success: boolean;
+    message?: string;
+    data?: unknown;
+    error?: string;
+  }> {
     try {
       const publishResult =
         await this.questionnaireService.publishQuestionnaire(
           questionnaireId,
           req.user.id,
-          publishOptions,
+          publishOptions ?? {},
         );
 
       return {
@@ -375,206 +365,6 @@ export class QuestionnaireController {
   }
 
   /**
-   * Performs the submit questionnaire operation.
-   * @param req - The req.
-   * @param questionnaireId - The questionnaire id.
-   * @param submission - The submission.
-   * @returns The result of the operation.
-   */
-  @ApiOperation({
-    summary: '提交问卷回答',
-    description: '用户提交问卷的回答和响应',
-  })
-  @ApiResponse({
-    status: 201,
-    description: '问卷提交成功',
-    schema: {
-      properties: {
-        success: { type: 'boolean' },
-        data: {
-          type: 'object',
-          properties: {
-            submissionId: { type: 'string' },
-            questionnaireId: { type: 'string' },
-            submittedAt: { type: 'string' },
-            qualityScore: { type: 'number' },
-            completionTime: { type: 'number' },
-          },
-        },
-      },
-    },
-  })
-  @ApiParam({ name: 'questionnaireId', description: '问卷ID' })
-  @Post(':questionnaireId/submit')
-  @HttpCode(HttpStatus.CREATED)
-  public async submitQuestionnaire(
-    @Request() req: AuthenticatedRequest,
-    @Param('questionnaireId') questionnaireId: string,
-    @Body() submission: QuestionnaireSubmissionDto,
-     
-  ): Promise<{
-      success: boolean;
-      message?: string;
-      data?: unknown;
-      error?: string;
-    }> {
-    try {
-      const submissionResult =
-        await this.questionnaireService.submitQuestionnaire(questionnaireId, {
-          ...submission,
-          submittedBy: req.user.id,
-          userIP:
-            req.socket?.remoteAddress ||
-            req.headers['x-forwarded-for'] ||
-            'unknown',
-          userAgent: req.headers['user-agent'],
-        });
-
-      return {
-        success: true,
-        message: 'Questionnaire submitted successfully',
-        data: {
-          submissionId: submissionResult.submissionId,
-          questionnaireId,
-          submittedAt: submissionResult.submittedAt,
-          qualityScore: submissionResult.qualityScore,
-          completionTime: submissionResult.completionTime,
-          incentiveEligible: submissionResult.incentiveEligible,
-        },
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: 'Failed to submit questionnaire',
-        message: error instanceof Error ? error.message : String(error),
-      };
-    }
-  }
-
-  /**
-   * Retrieves questionnaire submissions.
-   * @param req - The req.
-   * @param questionnaireId - The questionnaire id.
-   * @param page - The page.
-   * @param limit - The limit.
-   * @param startDate - The start date.
-   * @param endDate - The end date.
-   * @returns The result of the operation.
-   */
-  @ApiOperation({
-    summary: '获取问卷提交记录',
-    description: '获取指定问卷的所有提交记录',
-  })
-  @ApiResponse({
-    status: 200,
-    description: '提交记录获取成功',
-  })
-  @ApiParam({ name: 'questionnaireId', description: '问卷ID' })
-  @ApiQuery({ name: 'page', required: false, description: '页码' })
-  @ApiQuery({ name: 'limit', required: false, description: '每页数量' })
-  @ApiQuery({ name: 'startDate', required: false, description: '开始日期' })
-  @ApiQuery({ name: 'endDate', required: false, description: '结束日期' })
-  @UseGuards(RolesGuard)
-   
-  @Permissions(Permission.READ_QUESTIONNAIRE_RESPONSES)
-  @Get(':questionnaireId/submissions')
-  public async getQuestionnaireSubmissions(
-    @Request() req: AuthenticatedRequest,
-    @Param('questionnaireId') questionnaireId: string,
-    @Query('page') page = 1,
-    @Query('limit') limit = 20,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
-     
-  ): Promise<{
-      success: boolean;
-      message?: string;
-      data?: unknown;
-      error?: string;
-    }> {
-    try {
-      const submissions =
-        await this.questionnaireService.getQuestionnaireSubmissions(
-          questionnaireId,
-          req.user.organizationId,
-          {
-            page: Math.max(page, 1),
-            limit: Math.min(limit, 100),
-            startDate: startDate ? new Date(startDate) : undefined,
-            endDate: endDate ? new Date(endDate) : undefined,
-          },
-        );
-
-      return {
-        success: true,
-        data: {
-          submissions: submissions.items,
-          totalCount: submissions.totalCount,
-          averageQualityScore: submissions.averageQualityScore,
-          averageCompletionTime: submissions.averageCompletionTime,
-          page: page,
-          totalPages: Math.ceil(submissions.totalCount / limit),
-        },
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: 'Failed to retrieve submissions',
-        message: error instanceof Error ? error.message : String(error),
-      };
-    }
-  }
-
-  /**
-   * Retrieves questionnaire analytics.
-   * @param req - The req.
-   * @param questionnaireId - The questionnaire id.
-   * @returns The result of the operation.
-   */
-  @ApiOperation({
-    summary: '获取问卷分析报告',
-    description: '获取问卷的分析报告，包括回答统计、质量分析等',
-  })
-  @ApiResponse({
-    status: 200,
-    description: '分析报告获取成功',
-  })
-  @ApiParam({ name: 'questionnaireId', description: '问卷ID' })
-  @UseGuards(RolesGuard)
-   
-  @Permissions(Permission.READ_QUESTIONNAIRE_ANALYTICS)
-  @Get(':questionnaireId/analytics')
-  public async getQuestionnaireAnalytics(
-    @Request() req: AuthenticatedRequest,
-    @Param('questionnaireId') questionnaireId: string,
-     
-  ): Promise<{
-      success: boolean;
-      message?: string;
-      data?: unknown;
-      error?: string;
-    }> {
-    try {
-      const analytics =
-        await this.questionnaireService.getQuestionnaireAnalytics(
-          questionnaireId,
-          req.user.organizationId,
-        );
-
-      return {
-        success: true,
-        data: analytics,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: 'Failed to retrieve analytics',
-        message: error instanceof Error ? error.message : String(error),
-      };
-    }
-  }
-
-  /**
    * Performs the duplicate questionnaire operation.
    * @param req - The req.
    * @param questionnaireId - The questionnaire id.
@@ -588,7 +378,6 @@ export class QuestionnaireController {
   @ApiResponse({ status: 201, description: '问卷复制成功' })
   @ApiParam({ name: 'questionnaireId', description: '原问卷ID' })
   @UseGuards(RolesGuard)
-   
   @Permissions(Permission.CREATE_QUESTIONNAIRE)
   @Post(':questionnaireId/duplicate')
   @HttpCode(HttpStatus.CREATED)
@@ -599,16 +388,18 @@ export class QuestionnaireController {
     duplicateOptions: {
       title?: string;
       includeSubmissions?: boolean;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      modifyQuestions?: any;
+      modifyQuestions?: {
+        exclude?: string[];
+        include?: string[];
+        reorder?: string[];
+      };
     },
-     
   ): Promise<{
-      success: boolean;
-      message?: string;
-      data?: unknown;
-      error?: string;
-    }> {
+    success: boolean;
+    message?: string;
+    data?: unknown;
+    error?: string;
+  }> {
     try {
       const duplicatedQuestionnaire =
         await this.questionnaireService.duplicateQuestionnaire(
@@ -650,7 +441,6 @@ export class QuestionnaireController {
   @ApiResponse({ status: 200, description: '问卷删除成功' })
   @ApiParam({ name: 'questionnaireId', description: '问卷ID' })
   @UseGuards(RolesGuard)
-   
   @Permissions(Permission.DELETE_QUESTIONNAIRE)
   @Delete(':questionnaireId')
   @HttpCode(HttpStatus.OK)
@@ -658,13 +448,12 @@ export class QuestionnaireController {
     @Request() req: AuthenticatedRequest,
     @Param('questionnaireId') questionnaireId: string,
     @Body() deleteRequest: { reason?: string; hardDelete?: boolean },
-     
   ): Promise<{
-      success: boolean;
-      message?: string;
-      data?: unknown;
-      error?: string;
-    }> {
+    success: boolean;
+    message?: string;
+    data?: unknown;
+    error?: string;
+  }> {
     try {
       await this.questionnaireService.deleteQuestionnaire(
         questionnaireId,
@@ -693,187 +482,6 @@ export class QuestionnaireController {
   }
 
   /**
-   * Retrieves questionnaire templates.
-   * @param req - The req.
-   * @param category - The category.
-   * @returns The result of the operation.
-   */
-  @ApiOperation({
-    summary: '获取问卷模板',
-    description: '获取可用的问卷模板列表',
-  })
-  @ApiResponse({
-    status: 200,
-    description: '模板列表获取成功',
-    type: [QuestionnaireTemplateDto],
-  })
-  @ApiQuery({ name: 'category', required: false, description: '模板分类' })
-  @Get('templates/list')
-  public async getQuestionnaireTemplates(
-    @Request() req: AuthenticatedRequest,
-    @Query('category') category?: string,
-     
-  ): Promise<{
-      success: boolean;
-      message?: string;
-      data?: unknown;
-      error?: string;
-    }> {
-    try {
-      const templates =
-        await this.questionnaireService.getQuestionnaireTemplates(
-          category ?? '',
-          req.user.organizationId,
-        );
-
-      return {
-        success: true,
-        data: templates,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: 'Failed to retrieve templates',
-        message: error instanceof Error ? error.message : String(error),
-      };
-    }
-  }
-
-  /**
-   * Creates from template.
-   * @param req - The req.
-   * @param templateId - The template id.
-   * @param createOptions - The create options.
-   * @returns The result of the operation.
-   */
-  @ApiOperation({
-    summary: '从模板创建问卷',
-    description: '基于指定模板创建新问卷',
-  })
-  @ApiResponse({ status: 201, description: '从模板创建成功' })
-  @ApiParam({ name: 'templateId', description: '模板ID' })
-  @UseGuards(RolesGuard)
-   
-  @Permissions(Permission.CREATE_QUESTIONNAIRE)
-  @Post('templates/:templateId/create')
-  @HttpCode(HttpStatus.CREATED)
-  public async createFromTemplate(
-    @Request() req: AuthenticatedRequest,
-    @Param('templateId') templateId: string,
-    @Body()
-    createOptions: {
-      title: string;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      customizations?: any;
-      organizationId?: string;
-    },
-     
-  ): Promise<{
-      success: boolean;
-      message?: string;
-      data?: unknown;
-      error?: string;
-    }> {
-    try {
-      const questionnaire = await this.questionnaireService.createFromTemplate(
-        templateId,
-        {
-          ...createOptions,
-          createdBy: req.user.id,
-          organizationId: req.user.organizationId,
-        },
-      );
-
-      return {
-        success: true,
-        message: 'Questionnaire created from template successfully',
-        data: {
-          questionnaireId: questionnaire.id,
-          templateId,
-          title: questionnaire.title,
-          totalQuestions: questionnaire.questions?.length || 0,
-        },
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: 'Failed to create questionnaire from template',
-        message: error instanceof Error ? error.message : String(error),
-      };
-    }
-  }
-
-  /**
-   * Performs the export questionnaire data operation.
-   * @param req - The req.
-   * @param questionnaireId - The questionnaire id.
-   * @param format - The format.
-   * @param exportOptions - The export options.
-   * @returns The result of the operation.
-   */
-  @ApiOperation({
-    summary: '导出问卷数据',
-    description: '导出问卷及其提交数据为CSV/Excel格式',
-  })
-  @ApiResponse({ status: 200, description: '数据导出成功' })
-  @ApiParam({ name: 'questionnaireId', description: '问卷ID' })
-  @ApiQuery({
-    name: 'format',
-    required: false,
-    enum: ['csv', 'excel'],
-    description: '导出格式',
-  })
-  @UseGuards(RolesGuard)
-   
-  @Permissions(Permission.EXPORT_QUESTIONNAIRE_DATA)
-  @Post(':questionnaireId/export')
-  @HttpCode(HttpStatus.OK)
-  public async exportQuestionnaireData(
-    @Request() req: AuthenticatedRequest,
-    @Param('questionnaireId') questionnaireId: string,
-    @Query('format') format: 'csv' | 'excel' = 'csv',
-    @Body()
-    exportOptions?: {
-      includeResponses?: boolean;
-      includeAnalytics?: boolean;
-      dateRange?: { startDate: string; endDate: string };
-    },
-     
-  ): Promise<{
-      success: boolean;
-      message?: string;
-      data?: unknown;
-      error?: string;
-    }> {
-    try {
-      const exportResult =
-        await this.questionnaireService.exportQuestionnaireData(
-          questionnaireId,
-          format,
-          req.user.id,
-          exportOptions,
-        );
-
-      return {
-        success: true,
-        message: 'Data export started successfully',
-        data: {
-          exportId: exportResult.exportId,
-          estimatedTime: exportResult.estimatedTime,
-          downloadUrl: exportResult.downloadUrl,
-          format: format,
-        },
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: 'Failed to export data',
-        message: error instanceof Error ? error.message : String(error),
-      };
-    }
-  }
-
-  /**
    * Performs the health check operation.
    * @returns The result of the operation.
    */
@@ -883,18 +491,17 @@ export class QuestionnaireController {
   })
   @ApiResponse({ status: 200, description: '服务状态' })
   @Get('health')
-   
   public async healthCheck(): Promise<{
-      status: string;
-      timestamp: string;
-      service: string;
-      details?: {
-        database: string;
-        templates: string;
-        submissions: string;
-      };
-      error?: string;
-    }> {
+    status: string;
+    timestamp: string;
+    service: string;
+    details?: {
+      database: string;
+      templates: string;
+      submissions: string;
+    };
+    error?: string;
+  }> {
     try {
       const health = await this.questionnaireService.getHealthStatus();
 
@@ -903,9 +510,9 @@ export class QuestionnaireController {
         timestamp: new Date().toISOString(),
         service: 'questionnaire-management',
         details: {
-          database: health.database,
-          templates: health.templates,
-          submissions: health.submissions,
+          database: health.database ?? 'unknown',
+          templates: health.templates ?? 'unknown',
+          submissions: health.submissions ?? 'unknown',
         },
       };
     } catch (error) {

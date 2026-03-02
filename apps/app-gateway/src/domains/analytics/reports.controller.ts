@@ -27,10 +27,9 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
 import type {
-  UserDto} from '@ai-recruitment-clerk/user-management-domain';
-import {
-  Permission
+  UserDto,
 } from '@ai-recruitment-clerk/user-management-domain';
+import { Permission } from '@ai-recruitment-clerk/user-management-domain';
 import type { AnalyticsIntegrationService } from './analytics-integration.service';
 
 interface AuthenticatedRequest extends ExpressRequest {
@@ -38,282 +37,18 @@ interface AuthenticatedRequest extends ExpressRequest {
 }
 
 /**
- * Exposes endpoints for analytics.
+ * Reports Controller - Handles analytics reports generation and management
  */
 @ApiTags('analytics-reporting')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('analytics')
-export class AnalyticsController {
+export class ReportsController {
   /**
-   * Initializes a new instance of the Analytics Controller.
+   * Initializes a new instance of the Reports Controller.
    * @param analyticsService - The analytics service.
    */
   constructor(private readonly analyticsService: AnalyticsIntegrationService) {}
-
-  /**
-   * Performs the track event operation.
-   * @param req - The req.
-   * @param eventData - The event data.
-   * @returns The result of the operation.
-   */
-  @ApiOperation({
-    summary: '记录用户行为事件',
-    description: '记录用户在系统中的各种行为事件，用于用户体验分析和系统优化',
-  })
-  @ApiResponse({
-    status: 201,
-    description: '事件记录成功',
-    schema: {
-      properties: {
-        success: { type: 'boolean' },
-        data: {
-          type: 'object',
-          properties: {
-            eventId: { type: 'string' },
-            timestamp: { type: 'string' },
-            eventType: { type: 'string' },
-            processed: { type: 'boolean' },
-          },
-        },
-      },
-    },
-  })
-  @ApiResponse({ status: 400, description: '请求参数错误' })
-  @UseGuards(RolesGuard)
-  @Permissions(Permission.READ_ANALYSIS)
-  @Post('events')
-  @HttpCode(HttpStatus.CREATED)
-  public async trackEvent(
-    @Request() req: AuthenticatedRequest,
-    @Body()
-    eventData: {
-      eventType: string;
-      category: string;
-      action: string;
-      label?: string;
-      value?: number;
-      metadata?: Record<string, unknown>;
-      sessionId?: string;
-    },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
-    try {
-      if (!req.user.organizationId) {
-        throw new BadRequestException('Organization ID is required');
-      }
-
-      const event = await this.analyticsService.trackEvent({
-        ...eventData,
-        userId: req.user.id,
-        organizationId: req.user.organizationId,
-        timestamp: new Date(),
-        userAgent: req.headers['user-agent'],
-        ipAddress: req.ip,
-      });
-
-      return {
-        success: true,
-        message: 'Event tracked successfully',
-        data: {
-          eventId: event.eventId,
-          timestamp: event.timestamp,
-          eventType: event.eventType,
-          processed: event.processed,
-        },
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: 'Failed to track event',
-        message: error instanceof Error ? error.message : String(error),
-      };
-    }
-  }
-
-  /**
-   * Performs the record performance metric operation.
-   * @param req - The req.
-   * @param metricData - The metric data.
-   * @returns The result of the operation.
-   */
-  @ApiOperation({
-    summary: '记录系统性能指标',
-    description: '记录系统关键操作的性能数据，包括响应时间、错误率、吞吐量等',
-  })
-  @ApiResponse({ status: 201, description: '性能指标记录成功' })
-  @UseGuards(RolesGuard)
-  @Permissions(Permission.TRACK_METRICS)
-  @Post('metrics/performance')
-  @HttpCode(HttpStatus.CREATED)
-  public async recordPerformanceMetric(
-    @Request() req: AuthenticatedRequest,
-    @Body()
-    metricData: {
-      metricName: string;
-      value: number;
-      unit: string;
-      operation: string;
-      service: string;
-      status: 'success' | 'error' | 'timeout';
-      duration?: number;
-      metadata?: Record<string, unknown>;
-    },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
-    try {
-      if (!req.user.organizationId) {
-        throw new BadRequestException('Organization ID is required');
-      }
-
-      const metric = await this.analyticsService.recordMetric({
-        ...metricData,
-        organizationId: req.user.organizationId,
-        recordedBy: req.user.id,
-        timestamp: new Date(),
-        category: 'performance',
-      });
-
-      return {
-        success: true,
-        message: 'Performance metric recorded successfully',
-        data: {
-          metricId: metric.metricId,
-          metricName: metric.metricName,
-          value: metric.value,
-          timestamp: metric.timestamp,
-        },
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: 'Failed to record performance metric',
-        message: error instanceof Error ? error.message : String(error),
-      };
-    }
-  }
-
-  /**
-   * Performs the record business metric operation.
-   * @param req - The req.
-   * @param metricData - The metric data.
-   * @returns The result of the operation.
-   */
-  @ApiOperation({
-    summary: '记录业务指标',
-    description: '记录关键业务KPI，如用户转化率、留存率、收入指标等',
-  })
-  @ApiResponse({ status: 201, description: '业务指标记录成功' })
-  @UseGuards(RolesGuard)
-  @Permissions(Permission.TRACK_METRICS)
-  @Post('metrics/business')
-  @HttpCode(HttpStatus.CREATED)
-  public async recordBusinessMetric(
-    @Request() req: AuthenticatedRequest,
-    @Body()
-    metricData: {
-      metricName: string;
-      value: number;
-      unit: string;
-      category: string;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      dimensions?: Record<string, any>;
-      tags?: string[];
-    },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
-    try {
-      if (!req.user.organizationId) {
-        throw new BadRequestException('Organization ID is required');
-      }
-
-      const metric = await this.analyticsService.recordMetric({
-        ...metricData,
-        organizationId: req.user.organizationId,
-        recordedBy: req.user.id,
-        timestamp: new Date(),
-        category: 'business',
-      });
-
-      return {
-        success: true,
-        message: 'Business metric recorded successfully',
-        data: {
-          metricId: metric.metricId,
-          metricName: metric.metricName,
-          value: metric.value,
-          category: metric.category,
-          timestamp: metric.timestamp,
-        },
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: 'Failed to record business metric',
-        message: error instanceof Error ? error.message : String(error),
-      };
-    }
-  }
-
-  /**
-   * Retrieves dashboard.
-   * @param req - The req.
-   * @param timeRange - The time range.
-   * @param metrics - The metrics.
-   * @returns The result of the operation.
-   */
-  @ApiOperation({
-    summary: '获取分析仪表板数据',
-    description: '获取组织的核心分析数据仪表板，包括关键指标和趋势',
-  })
-  @ApiResponse({
-    status: 200,
-    description: '仪表板数据获取成功',
-  })
-  @ApiQuery({
-    name: 'timeRange',
-    required: false,
-    enum: ['24h', '7d', '30d', '90d'],
-    description: '时间范围',
-  })
-  @ApiQuery({
-    name: 'metrics',
-    required: false,
-    description: '指定的指标列表（逗号分隔）',
-  })
-  @UseGuards(RolesGuard)
-  @Permissions(Permission.VIEW_ANALYTICS)
-  @Get('dashboard')
-  public async getDashboard(
-    @Request() req: AuthenticatedRequest,
-    @Query('timeRange') timeRange = '7d',
-    @Query('metrics') metrics?: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
-    try {
-      if (!req.user.organizationId) {
-        throw new BadRequestException('Organization ID is required');
-      }
-
-      const metricsArray = metrics ? metrics.split(',') : undefined;
-      const dashboard = await this.analyticsService.getDashboard(
-        req.user.organizationId,
-        timeRange,
-        metricsArray,
-      );
-
-      return {
-        success: true,
-        data: dashboard,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: 'Failed to retrieve dashboard data',
-        message: error instanceof Error ? error.message : String(error),
-      };
-    }
-  }
 
   /**
    * Retrieves user behavior analysis.
@@ -325,14 +60,15 @@ export class AnalyticsController {
    * @returns The result of the operation.
    */
   @ApiOperation({
-    summary: '获取用户行为分析',
-    description: '获取指定用户或用户群体的行为分析数据和模式',
+    summary: 'Get user behavior analysis',
+    description:
+      'Get behavior analysis data and patterns for specified users or user groups',
   })
-  @ApiResponse({ status: 200, description: '用户行为分析获取成功' })
-  @ApiQuery({ name: 'userId', required: false, description: '特定用户ID' })
-  @ApiQuery({ name: 'startDate', required: false, description: '开始日期' })
-  @ApiQuery({ name: 'endDate', required: false, description: '结束日期' })
-  @ApiQuery({ name: 'segmentBy', required: false, description: '分段维度' })
+  @ApiResponse({ status: 200, description: 'User behavior analysis retrieved successfully' })
+  @ApiQuery({ name: 'userId', required: false, description: 'Specific user ID' })
+  @ApiQuery({ name: 'startDate', required: false, description: 'Start date' })
+  @ApiQuery({ name: 'endDate', required: false, description: 'End date' })
+  @ApiQuery({ name: 'segmentBy', required: false, description: 'Segmentation dimension' })
   @UseGuards(RolesGuard)
   @Permissions(Permission.VIEW_ANALYTICS)
   @Get('users/behavior')
@@ -382,18 +118,19 @@ export class AnalyticsController {
    * @returns The result of the operation.
    */
   @ApiOperation({
-    summary: '获取系统使用统计',
-    description: '获取系统各模块的使用统计数据，包括活跃用户、功能使用频率等',
+    summary: 'Get system usage statistics',
+    description:
+      'Get usage statistics for each system module, including active users and feature usage frequency',
   })
-  @ApiResponse({ status: 200, description: '使用统计获取成功' })
-  @ApiQuery({ name: 'module', required: false, description: '特定模块' })
-  @ApiQuery({ name: 'startDate', required: false, description: '开始日期' })
-  @ApiQuery({ name: 'endDate', required: false, description: '结束日期' })
+  @ApiResponse({ status: 200, description: 'Usage statistics retrieved successfully' })
+  @ApiQuery({ name: 'module', required: false, description: 'Specific module' })
+  @ApiQuery({ name: 'startDate', required: false, description: 'Start date' })
+  @ApiQuery({ name: 'endDate', required: false, description: 'End date' })
   @ApiQuery({
     name: 'granularity',
     required: false,
     enum: ['hour', 'day', 'week', 'month'],
-    description: '数据粒度',
+    description: 'Data granularity',
   })
   @UseGuards(RolesGuard)
   @Permissions(Permission.VIEW_ANALYTICS)
@@ -441,12 +178,12 @@ export class AnalyticsController {
    * @returns The result of the operation.
    */
   @ApiOperation({
-    summary: '生成分析报告',
-    description: '生成指定类型的分析报告，支持多种格式输出',
+    summary: 'Generate analytics report',
+    description: 'Generate specified type of analytics report, supporting multiple output formats',
   })
   @ApiResponse({
     status: 201,
-    description: '报告生成任务创建成功',
+    description: 'Report generation task created successfully',
     schema: {
       properties: {
         success: { type: 'boolean' },
@@ -531,17 +268,17 @@ export class AnalyticsController {
    * @returns The result of the operation.
    */
   @ApiOperation({
-    summary: '获取报告状态和历史',
-    description: '获取报告生成状态和历史记录',
+    summary: 'Get report status and history',
+    description: 'Get report generation status and historical records',
   })
-  @ApiResponse({ status: 200, description: '报告列表获取成功' })
-  @ApiQuery({ name: 'page', required: false, description: '页码' })
-  @ApiQuery({ name: 'limit', required: false, description: '每页数量' })
-  @ApiQuery({ name: 'status', required: false, description: '报告状态筛选' })
+  @ApiResponse({ status: 200, description: 'Report list retrieved successfully' })
+  @ApiQuery({ name: 'page', required: false, description: 'Page number' })
+  @ApiQuery({ name: 'limit', required: false, description: 'Items per page' })
+  @ApiQuery({ name: 'status', required: false, description: 'Report status filter' })
   @ApiQuery({
     name: 'reportType',
     required: false,
-    description: '报告类型筛选',
+    description: 'Report type filter',
   })
   @UseGuards(RolesGuard)
   @Permissions(Permission.READ_ANALYSIS)
@@ -596,12 +333,12 @@ export class AnalyticsController {
    * @returns The result of the operation.
    */
   @ApiOperation({
-    summary: '获取指定报告详情',
-    description: '获取指定报告的详细信息和下载链接',
+    summary: 'Get specified report details',
+    description: 'Get detailed information and download link for the specified report',
   })
-  @ApiResponse({ status: 200, description: '报告详情获取成功' })
-  @ApiResponse({ status: 404, description: '报告未找到' })
-  @ApiParam({ name: 'reportId', description: '报告ID' })
+  @ApiResponse({ status: 200, description: 'Report details retrieved successfully' })
+  @ApiResponse({ status: 404, description: 'Report not found' })
+  @ApiParam({ name: 'reportId', description: 'Report ID' })
   @UseGuards(RolesGuard)
   @Permissions(Permission.READ_ANALYSIS)
   @Get('reports/:reportId')
@@ -645,12 +382,12 @@ export class AnalyticsController {
    * @returns The result of the operation.
    */
   @ApiOperation({
-    summary: '删除报告',
-    description: '删除指定的分析报告及其关联文件',
+    summary: 'Delete report',
+    description: 'Delete the specified analytics report and associated files',
   })
-  @ApiResponse({ status: 200, description: '报告删除成功' })
-  @ApiResponse({ status: 404, description: '报告未找到' })
-  @ApiParam({ name: 'reportId', description: '报告ID' })
+  @ApiResponse({ status: 200, description: 'Report deleted successfully' })
+  @ApiResponse({ status: 404, description: 'Report not found' })
+  @ApiParam({ name: 'reportId', description: 'Report ID' })
   @UseGuards(RolesGuard)
   @Permissions(Permission.DELETE_RESUME)
   @Delete('reports/:reportId')
@@ -694,61 +431,16 @@ export class AnalyticsController {
   }
 
   /**
-   * Retrieves realtime data.
-   * @param req - The req.
-   * @param metrics - The metrics.
-   * @returns The result of the operation.
-   */
-  @ApiOperation({
-    summary: '获取实时分析数据',
-    description: '获取实时系统指标和用户活动数据',
-  })
-  @ApiResponse({ status: 200, description: '实时数据获取成功' })
-  @ApiQuery({ name: 'metrics', required: false, description: '指定的实时指标' })
-  @UseGuards(RolesGuard)
-  @Permissions(Permission.VIEW_ANALYTICS)
-  @Get('realtime')
-  public async getRealtimeData(
-    @Request() req: AuthenticatedRequest,
-    @Query('metrics') metrics?: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
-    try {
-      if (!req.user.organizationId) {
-        throw new BadRequestException('Organization ID is required');
-      }
-
-      const metricsArray = metrics ? metrics.split(',') : [];
-      const realtimeData = await this.analyticsService.getRealtimeData(
-        req.user.organizationId,
-        metricsArray,
-      );
-
-      return {
-        success: true,
-        data: realtimeData,
-        timestamp: new Date().toISOString(),
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: 'Failed to retrieve realtime data',
-        message: error instanceof Error ? error.message : String(error),
-      };
-    }
-  }
-
-  /**
    * Performs the configure data retention operation.
    * @param req - The req.
    * @param retentionConfig - The retention config.
    * @returns The result of the operation.
    */
   @ApiOperation({
-    summary: '配置分析数据保留策略',
-    description: '配置分析数据的保留时间和清理策略',
+    summary: 'Configure analytics data retention policy',
+    description: 'Configure retention time and cleanup policy for analytics data',
   })
-  @ApiResponse({ status: 200, description: '保留策略配置成功' })
+  @ApiResponse({ status: 200, description: 'Retention policy configured successfully' })
   @UseGuards(RolesGuard)
   @Permissions(Permission.SYSTEM_CONFIG)
   @Put('data-retention')
@@ -798,15 +490,15 @@ export class AnalyticsController {
    * @returns The result of the operation.
    */
   @ApiOperation({
-    summary: '导出分析数据',
-    description: '导出指定时间范围的分析数据为各种格式',
+    summary: 'Export analytics data',
+    description: 'Export analytics data for specified time range in various formats',
   })
-  @ApiResponse({ status: 200, description: '数据导出成功' })
+  @ApiResponse({ status: 200, description: 'Data export started successfully' })
   @ApiQuery({
     name: 'format',
     required: false,
     enum: ['csv', 'json', 'excel'],
-    description: '导出格式',
+    description: 'Export format',
   })
   @UseGuards(RolesGuard)
   @Permissions(Permission.GENERATE_REPORT)
@@ -859,43 +551,6 @@ export class AnalyticsController {
         success: false,
         error: 'Failed to export analytics data',
         message: error instanceof Error ? error.message : String(error),
-      };
-    }
-  }
-
-  /**
-   * Performs the health check operation.
-   * @returns The result of the operation.
-   */
-  @ApiOperation({
-    summary: '服务健康检查',
-    description: '检查分析服务的健康状态和系统指标',
-  })
-  @ApiResponse({ status: 200, description: '服务状态' })
-  @Get('health')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async healthCheck(): Promise<any> {
-    try {
-      const health = await this.analyticsService.getHealthStatus();
-
-      return {
-        status: health.overall,
-        timestamp: new Date().toISOString(),
-        service: 'analytics-reporting',
-        details: {
-          database: health.database,
-          eventProcessing: health.eventProcessing,
-          reportGeneration: health.reportGeneration,
-          realtimeData: health.realtimeData,
-          dataRetention: health.dataRetention,
-        },
-      };
-    } catch (error) {
-      return {
-        status: 'unhealthy',
-        timestamp: new Date().toISOString(),
-        service: 'analytics-reporting',
-        error: error instanceof Error ? error.message : String(error),
       };
     }
   }

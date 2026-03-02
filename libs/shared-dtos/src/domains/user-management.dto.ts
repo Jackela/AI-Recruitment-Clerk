@@ -1,4 +1,4 @@
-import { ValueObject } from '../base/value-object';
+import { ValueObject, type RestoreData } from '../base/value-object';
 import type { DomainEvent } from '../base/domain-event';
 
 // 用户会话聚合根
@@ -276,7 +276,12 @@ export class UsageQuota extends ValueObject<{
    * @param data - The data.
    * @returns The UsageQuota.
    */
-  public static restore(data: UsageQuotaData): UsageQuota {
+  public static restore(data: RestoreData<{
+    daily: number;
+    used: number;
+    questionnaireBonuses: number;
+    paymentBonuses: number;
+  }>): UsageQuota {
     return new UsageQuota(data);
   }
 

@@ -252,3 +252,6 @@ export * from './common/nats-client.pattern';
 // Note: mobile-component.patterns depends on Angular and breaks Node test envs.
 // It is intentionally not re-exported from the root barrel to keep backend tests working.
 export * from './common/error-handling.patterns';
+
+// Testing Utilities - Mock Factories for Test Fixtures
+export * from './testing/mock-factories';

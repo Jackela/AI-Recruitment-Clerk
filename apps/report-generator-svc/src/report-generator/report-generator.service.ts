@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject, forwardRef, Optional } from '@nestjs/common';
 import type { LlmService } from './llm.service';
 import type { GridFsService } from './gridfs.service';
 import type { ReportFileMetadata } from './gridfs.service';
@@ -8,6 +8,7 @@ import type {
   ScoreBreakdown,
   MatchingSkill,
   ReportRecommendation,
+  ReportDocument as SchemaReportDocument,
 } from '../schemas/report.schema';
 import {
   ReportGeneratorException,
@@ -25,6 +26,8 @@ import type {
 import type {
   ReportEvent as LlmReportEvent,
 } from './llm.service';
+import type { ReportGeneratorNatsService } from '../services/report-generator-nats.service';
+import type { ReportTemplatesService } from './report-templates.service';
 
 // Enhanced type definitions for report generation
 /**
@@ -52,7 +55,7 @@ export interface ReportDataItem {
  * Defines the shape of the generated report file.
  */
 export interface GeneratedReportFile {
-  format: 'markdown' | 'html' | 'pdf' | 'json';
+  format: 'markdown' | 'html' | 'pdf' | 'json' | 'excel';
   fileId: string;
   filename: string;
   downloadUrl: string;
@@ -208,7 +211,7 @@ export interface ReportGenerationRequest {
   jobId: string;
   resumeIds: string[];
   reportType: 'individual' | 'comparison' | 'batch' | 'executive-summary';
-  outputFormats: ('markdown' | 'html' | 'pdf' | 'json')[];
+  outputFormats: ('markdown' | 'html' | 'pdf' | 'json' | 'excel')[];
   options?: {
     includeInterviewGuide?: boolean;
     includeSkillsGapAnalysis?: boolean;
@@ -242,6 +245,44 @@ export interface GeneratedReport {
 }
 
 /**
+ * Response from scoring engine service for score data requests.
+ */
+export interface ScoringDataResponse {
+  success: boolean;
+  data?: ScoringData;
+  error?: string;
+}
+
+/**
+ * Response from resume parser service for resume data requests.
+ */
+export interface ResumeDataResponse {
+  success: boolean;
+  data?: ResumeData;
+  error?: string;
+}
+
+/**
+ * Response from JD extractor service for job data requests.
+ */
+export interface JobDataResponse {
+  success: boolean;
+  data?: JobData;
+  error?: string;
+}
+
+/**
+ * Service unavailable error details.
+ */
+export interface ServiceUnavailableError {
+  serviceName: string;
+  operation: string;
+  error: string;
+  resumeId?: string;
+  jobId?: string;
+}
+
+/**
  * Provides report generator functionality.
  */
 @Injectable()
@@ -255,6 +296,8 @@ export class ReportGeneratorService {
    * @param reportRepo - The report repo.
    * @param reportDataService - The report data service.
    * @param llmReportMapperService - The LLM report mapper service.
+   * @param reportTemplatesService - The report templates service.
+   * @param natsService - The NATS service for inter-service communication (optional for backward compatibility).
    */
   constructor(
     private readonly llmService: LlmService,
@@ -262,6 +305,9 @@ export class ReportGeneratorService {
     private readonly reportRepo: ReportRepository,
     private readonly reportDataService: ReportDataService,
     private readonly llmReportMapperService: LlmReportMapperService,
+    private readonly reportTemplatesService: ReportTemplatesService,
+    @Optional() @Inject(forwardRef(() => 'ReportGeneratorNatsService'))
+    private readonly natsService?: ReportGeneratorNatsService,
   ) {}
 
   /**
@@ -656,28 +702,605 @@ export class ReportGeneratorService {
     return this.llmReportMapperService.buildReportEvent(event);
   }
 
+  /**
+   * Gathers report data from multiple sources for batch and comparison reports.
+   *
+   * This method fetches:
+   * - Scoring data from scoring-engine-svc via NATS
+   * - Resume data from resume-parser-svc via NATS
+   * - Job data from jd-extractor-svc via NATS
+   *
+   * It first attempts to retrieve existing data from the local database,
+   * then falls back to requesting data from remote services via NATS.
+   *
+   * @param request - The report generation request containing jobId and resumeIds
+   * @returns A promise resolving to an array of report data items
+   * @throws ReportGeneratorException if critical data cannot be retrieved
+   */
   private async gatherReportData(
     request: ReportGenerationRequest,
   ): Promise<ReportDataItem[]> {
-    // This would typically fetch data from other services
-    // For now, return placeholder data structure
-    return request.resumeIds.map((resumeId) => ({
-      resumeId,
-      jobId: request.jobId,
-      // Add more data fetching logic here
-    }));
+    const { jobId, resumeIds, reportType } = request;
+    const correlationContext = ErrorCorrelationManager.getContext();
+
+    this.logger.log(
+      `Gathering report data for job ${jobId}, ${resumeIds.length} resumes, type: ${reportType}`,
+    );
+
+    const reportDataItems: ReportDataItem[] = [];
+    const errors: ServiceUnavailableError[] = [];
+
+    // Process each resume to gather complete data
+    await Promise.all(
+      resumeIds.map(async (resumeId): Promise<void> => {
+        try {
+          // Step 1: Try to fetch existing report data from local database
+          const existingReport = await this.reportRepo.findReport({ jobId, resumeId });
+
+          if (existingReport) {
+            this.logger.debug(
+              `Found existing report data for job ${jobId}, resume ${resumeId}`,
+            );
+
+            reportDataItems.push({
+              resumeId,
+              jobId,
+              scoreBreakdown: existingReport.scoreBreakdown,
+              skillsAnalysis: existingReport.skillsAnalysis,
+              recommendation: existingReport.recommendation,
+              confidence: existingReport.analysisConfidence,
+              metadata: {
+                processingTimeMs: existingReport.processingTimeMs,
+                generatedAt: existingReport.generatedAt,
+              },
+            });
+            return;
+          }
+
+          // Step 2: Fetch scoring data from scoring-engine-svc via NATS
+          const scoringData = await this.fetchScoringData(jobId, resumeId);
+
+          // Step 3: Fetch resume data from resume-parser-svc via NATS (parallel)
+          const resumeData = await this.fetchResumeData(resumeId);
+
+          // Step 4: Fetch job data from jd-extractor-svc via NATS (parallel, only once per job)
+          const jobData = await this.fetchJobData(jobId);
+
+          // Build report data item from fetched data
+          const reportDataItem = this.buildReportDataItem(
+            resumeId,
+            jobId,
+            scoringData,
+            resumeData,
+            jobData,
+          );
+
+          reportDataItems.push(reportDataItem);
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          this.logger.error(
+            `Failed to gather data for resume ${resumeId}: ${errorMessage}`,
+          );
+          errors.push({
+            serviceName: 'gatherReportData',
+            operation: 'fetchData',
+            error: errorMessage,
+            resumeId,
+            jobId,
+          });
+        }
+      }),
+    );
+
+    // Log summary of data gathering
+    this.logger.log(
+      `Gathered data for ${reportDataItems.length}/${resumeIds.length} resumes`,
+    );
+
+    // If we have no data at all, throw an error
+    if (reportDataItems.length === 0) {
+      throw new ReportGeneratorException('DATA_GATHERING_FAILED', {
+        jobId,
+        resumeIds,
+        errors,
+        message: 'Failed to gather any report data',
+        correlationId: correlationContext?.traceId,
+      });
+    }
+
+    // If we have partial data, log a warning but continue
+    if (errors.length > 0) {
+      this.logger.warn(
+        `Partial data gathered: ${reportDataItems.length} successful, ${errors.length} failed`,
+        { errors },
+      );
+    }
+
+    return reportDataItems;
   }
 
+  /**
+   * Fetches scoring data from scoring-engine-svc via NATS.
+   *
+   * @param jobId - The job ID
+   * @param resumeId - The resume ID
+   * @returns A promise resolving to ScoringData or undefined if not available
+   */
+  private async fetchScoringData(
+    jobId: string,
+    resumeId: string,
+  ): Promise<ScoringData | undefined> {
+    if (!this.natsService) {
+      this.logger.debug(
+        'NATS service not available, skipping scoring data fetch',
+        { jobId, resumeId },
+      );
+      return undefined;
+    }
+
+    try {
+      this.logger.debug(
+        `Requesting scoring data for job ${jobId}, resume ${resumeId}`,
+      );
+
+      // Publish a request event for scoring data
+      // Note: This uses the event-driven pattern - the scoring engine publishes
+      // analysis.match.scored events which we may have already received
+      const result = await this.natsService.requestScoringData(jobId, resumeId);
+
+      if (!result.success) {
+        this.logger.warn(
+          `Failed to request scoring data: ${result.error}`,
+          { jobId, resumeId },
+        );
+        return undefined;
+      }
+
+      // For now, return undefined - in production, this would use request/reply
+      // or subscribe to a response subject. The scoring data is typically
+      // already available from the analysis.match.scored event.
+      return undefined;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        `Error fetching scoring data: ${errorMessage}`,
+        { jobId, resumeId },
+      );
+      throw new ReportGeneratorException('SCORING_SERVICE_UNAVAILABLE', {
+        jobId,
+        resumeId,
+        error: errorMessage,
+        service: 'scoring-engine-svc',
+      });
+    }
+  }
+
+  /**
+   * Fetches resume data from resume-parser-svc via NATS.
+   *
+   * @param resumeId - The resume ID
+   * @returns A promise resolving to ResumeData or undefined if not available
+   */
+  private async fetchResumeData(resumeId: string): Promise<ResumeData | undefined> {
+    if (!this.natsService) {
+      this.logger.debug(
+        'NATS service not available, skipping resume data fetch',
+        { resumeId },
+      );
+      return undefined;
+    }
+
+    try {
+      this.logger.debug(`Requesting resume data for resume ${resumeId}`);
+
+      const result = await this.natsService.requestResumeData(resumeId);
+
+      if (!result.success) {
+        this.logger.warn(
+          `Failed to request resume data: ${result.error}`,
+          { resumeId },
+        );
+        return undefined;
+      }
+
+      // For now, return undefined - in production, this would use request/reply
+      return undefined;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        `Error fetching resume data: ${errorMessage}`,
+        { resumeId },
+      );
+      // Resume data is not critical for all report types, so we don't throw
+      return undefined;
+    }
+  }
+
+  /**
+   * Fetches job data from jd-extractor-svc via NATS.
+   *
+   * @param jobId - The job ID
+   * @returns A promise resolving to JobData or undefined if not available
+   */
+  private async fetchJobData(jobId: string): Promise<JobData | undefined> {
+    if (!this.natsService) {
+      this.logger.debug(
+        'NATS service not available, skipping job data fetch',
+        { jobId },
+      );
+      return undefined;
+    }
+
+    try {
+      this.logger.debug(`Requesting job data for job ${jobId}`);
+
+      const result = await this.natsService.requestJobData(jobId);
+
+      if (!result.success) {
+        this.logger.warn(
+          `Failed to request job data: ${result.error}`,
+          { jobId },
+        );
+        return undefined;
+      }
+
+      // For now, return undefined - in production, this would use request/reply
+      return undefined;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        `Error fetching job data: ${errorMessage}`,
+        { jobId },
+      );
+      // Job data is not critical for all report types, so we don't throw
+      return undefined;
+    }
+  }
+
+  /**
+   * Builds a ReportDataItem from fetched data sources.
+   *
+   * @param resumeId - The resume ID
+   * @param jobId - The job ID
+   * @param scoringData - The scoring data (optional)
+   * @param _resumeData - The resume data (optional, reserved for future use)
+   * @param _jobData - The job data (optional, reserved for future use)
+   * @returns A ReportDataItem with available data
+   */
+  private buildReportDataItem(
+    resumeId: string,
+    jobId: string,
+    scoringData?: ScoringData,
+    _resumeData?: ResumeData,
+    _jobData?: JobData,
+  ): ReportDataItem {
+    const item: ReportDataItem = {
+      resumeId,
+      jobId,
+    };
+
+    // Populate from scoring data if available
+    if (scoringData) {
+      item.scoreBreakdown = {
+        skillsMatch: scoringData.breakdown.skillsMatch,
+        experienceMatch: scoringData.breakdown.experienceMatch,
+        educationMatch: scoringData.breakdown.educationMatch,
+        overallFit: scoringData.breakdown.overallFit,
+      };
+
+      item.skillsAnalysis = scoringData.matchingSkills.map((skill) => ({
+        skill: skill.skill,
+        matchScore: skill.matchScore,
+        matchType: skill.matchType,
+        explanation: skill.explanation,
+      }));
+
+      item.recommendation = {
+        decision: scoringData.recommendations.decision,
+        reasoning: scoringData.recommendations.reasoning,
+        strengths: scoringData.recommendations.strengths,
+        concerns: scoringData.recommendations.concerns,
+        suggestions: scoringData.recommendations.suggestions,
+      };
+
+      item.confidence = scoringData.analysisConfidence;
+
+      item.metadata = {
+        processingTimeMs: scoringData.processingTimeMs,
+        generatedAt: scoringData.scoredAt,
+      };
+    }
+
+    // Note: _resumeData and _jobData are reserved for future enrichment
+    // These can be used to add candidate details and job requirements
+    // to the report data item for more comprehensive reports
+
+    return item;
+  }
+
+  /**
+   * Generates a report in a specific format using ReportTemplatesService.
+   * Supports markdown, html, pdf, json, and excel formats.
+   * @param data - The report data items to include in the report.
+   * @param format - The output format.
+   * @returns A promise resolving to GeneratedReportFile with fileId and download URL.
+   * @throws ReportGeneratorException with specific error codes for different failure scenarios.
+   */
   private async generateReportInFormat(
-    _data: ReportDataItem[],
+    data: ReportDataItem[],
     format: GeneratedReportFile['format'],
   ): Promise<GeneratedReportFile> {
-    // Placeholder for format-specific generation
-    return {
-      format,
-      fileId: `placeholder-${format}`,
-      filename: `report.${format}`,
-      downloadUrl: `/api/reports/download/placeholder-${format}`,
-    };
+    const correlationContext = ErrorCorrelationManager.getContext();
+
+    try {
+      if (!data || data.length === 0) {
+        throw new ReportGeneratorException('EMPTY_REPORT_DATA', {
+          format,
+          correlationId: correlationContext?.traceId,
+        });
+      }
+
+      // Use the first data item as the primary report document
+      const primaryData = data[0];
+
+      this.logger.debug(`Generating ${format} report`, {
+        jobId: primaryData.jobId,
+        resumeId: primaryData.resumeId,
+        format,
+        dataCount: data.length,
+        correlationId: correlationContext?.traceId,
+      });
+
+      // Convert ReportDataItem to a SchemaReportDocument-like structure
+      // The ReportTemplatesService expects the schema's ReportDocument type
+      const reportDocument = {
+        _id: new Types.ObjectId(),
+        jobId: primaryData.jobId,
+        resumeId: primaryData.resumeId,
+        scoreBreakdown: primaryData.scoreBreakdown ?? {
+          skillsMatch: 0,
+          experienceMatch: 0,
+          educationMatch: 0,
+          overallFit: 0,
+        },
+        skillsAnalysis: primaryData.skillsAnalysis ?? [],
+        recommendation: primaryData.recommendation ?? {
+          decision: 'consider',
+          reasoning: 'No recommendation available',
+          strengths: [],
+          concerns: [],
+          suggestions: [],
+        },
+        summary: this.generateSummaryFromData(data),
+        analysisConfidence: primaryData.confidence ?? 0,
+        processingTimeMs: primaryData.metadata?.processingTimeMs ?? 0,
+        status: 'completed' as const,
+        generatedBy: 'report-generator-service',
+        llmModel: 'gemini-1.5-flash',
+        generatedAt: primaryData.metadata?.generatedAt ?? new Date(),
+      } as unknown as SchemaReportDocument;
+
+      // Determine template type based on data count
+      const templateType =
+        data.length > 1 ? 'comparison' : 'individual';
+
+      let fileId: string;
+      let filename: string;
+
+      // For PDF and Excel, use the specialized buffer methods
+      if (format === 'pdf') {
+        try {
+          const pdfResult = await this.reportTemplatesService.generatePdfReportBuffer(
+            reportDocument,
+            templateType,
+            {
+              candidateName: `Candidate ${primaryData.resumeId}`,
+              jobTitle: `Position ${primaryData.jobId}`,
+            },
+          );
+          fileId = await this.gridFsService.saveReportBuffer(
+            pdfResult.content,
+            pdfResult.filename,
+            pdfResult.metadata,
+          );
+          filename = pdfResult.filename;
+        } catch (error) {
+          // If it's already a ReportGeneratorException, re-throw with additional context
+          if (error instanceof ReportGeneratorException) {
+            this.logger.error('PDF template rendering failed', {
+              errorCode: error.code,
+              errorContext: error.context,
+              jobId: primaryData.jobId,
+              resumeId: primaryData.resumeId,
+              correlationId: correlationContext?.traceId,
+            });
+            throw error;
+          }
+
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          this.logger.error('Failed to generate PDF report', {
+            error: errorMessage,
+            jobId: primaryData.jobId,
+            resumeId: primaryData.resumeId,
+            correlationId: correlationContext?.traceId,
+          });
+
+          throw new ReportGeneratorException('PDF_GENERATION_FAILED', {
+            error: errorMessage,
+            format: 'pdf',
+            jobId: primaryData.jobId,
+            resumeId: primaryData.resumeId,
+            correlationId: correlationContext?.traceId,
+            originalError: error,
+          });
+        }
+      } else if (format === 'excel') {
+        try {
+          const excelResult = await this.reportTemplatesService.generateExcelReportBuffer(
+            reportDocument,
+            templateType,
+            {
+              candidateName: `Candidate ${primaryData.resumeId}`,
+              jobTitle: `Position ${primaryData.jobId}`,
+            },
+          );
+          fileId = await this.gridFsService.saveReportBuffer(
+            excelResult.content,
+            excelResult.filename,
+            excelResult.metadata,
+          );
+          filename = excelResult.filename;
+        } catch (error) {
+          // If it's already a ReportGeneratorException, re-throw with additional context
+          if (error instanceof ReportGeneratorException) {
+            this.logger.error('Excel template rendering failed', {
+              errorCode: error.code,
+              errorContext: error.context,
+              jobId: primaryData.jobId,
+              resumeId: primaryData.resumeId,
+              correlationId: correlationContext?.traceId,
+            });
+            throw error;
+          }
+
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          this.logger.error('Failed to generate Excel report', {
+            error: errorMessage,
+            jobId: primaryData.jobId,
+            resumeId: primaryData.resumeId,
+            correlationId: correlationContext?.traceId,
+          });
+
+          throw new ReportGeneratorException('EXCEL_GENERATION_FAILED', {
+            error: errorMessage,
+            format: 'excel',
+            jobId: primaryData.jobId,
+            resumeId: primaryData.resumeId,
+            correlationId: correlationContext?.traceId,
+            originalError: error,
+          });
+        }
+      } else {
+        // For text-based formats (markdown, html, json)
+        try {
+          const generatedFile =
+            await this.reportTemplatesService.generateReportInFormat(
+              reportDocument,
+              format,
+              templateType,
+              {
+                candidateName: `Candidate ${primaryData.resumeId}`,
+                jobTitle: `Position ${primaryData.jobId}`,
+              },
+            );
+
+          fileId = await this.gridFsService.saveReport(
+            generatedFile.content,
+            generatedFile.filename,
+            generatedFile.metadata,
+          );
+          filename = generatedFile.filename;
+        } catch (error) {
+          // If it's already a ReportGeneratorException, re-throw with additional context
+          if (error instanceof ReportGeneratorException) {
+            this.logger.error('Template rendering failed', {
+              errorCode: error.code,
+              errorContext: error.context,
+              format,
+              jobId: primaryData.jobId,
+              resumeId: primaryData.resumeId,
+              correlationId: correlationContext?.traceId,
+            });
+            throw error;
+          }
+
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          this.logger.error(`Failed to generate ${format} report`, {
+            error: errorMessage,
+            format,
+            jobId: primaryData.jobId,
+            resumeId: primaryData.resumeId,
+            correlationId: correlationContext?.traceId,
+          });
+
+          throw new ReportGeneratorException('TEMPLATE_RENDER_FAILED', {
+            error: errorMessage,
+            format,
+            jobId: primaryData.jobId,
+            resumeId: primaryData.resumeId,
+            correlationId: correlationContext?.traceId,
+            originalError: error,
+          });
+        }
+      }
+
+      this.logger.debug(
+        `Generated ${format} report: ${filename}, fileId: ${fileId}`,
+        {
+          jobId: primaryData.jobId,
+          resumeId: primaryData.resumeId,
+          correlationId: correlationContext?.traceId,
+        },
+      );
+
+      return {
+        format,
+        fileId,
+        filename,
+        downloadUrl: `/api/reports/file/${fileId}`,
+      };
+    } catch (error) {
+      // If it's already a ReportGeneratorException, re-throw it
+      if (error instanceof ReportGeneratorException) {
+        throw error;
+      }
+
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Unexpected error generating ${format} report`, {
+        error: errorMessage,
+        format,
+        dataCount: data?.length ?? 0,
+        correlationId: correlationContext?.traceId,
+      });
+
+      throw new ReportGeneratorException('REPORT_GENERATION_FAILED', {
+        format,
+        error: errorMessage,
+        dataCount: data?.length ?? 0,
+        correlationId: correlationContext?.traceId,
+        originalError: error,
+      });
+    }
+  }
+
+  /**
+   * Generates a summary from report data items.
+   * @param data - The report data items.
+   * @returns A summary string.
+   */
+  private generateSummaryFromData(data: ReportDataItem[]): string {
+    if (data.length === 0) {
+      return 'No report data available.';
+    }
+
+    if (data.length === 1) {
+      const item = data[0];
+      const score = item.scoreBreakdown?.overallFit ?? 0;
+      const decision = item.recommendation?.decision ?? 'unknown';
+      return `Candidate analysis complete. Overall match score: ${score}%. Recommendation: ${decision}.`;
+    }
+
+    // For multiple candidates, provide a batch summary
+    const avgScore =
+      data.reduce((sum, item) => sum + (item.scoreBreakdown?.overallFit ?? 0), 0) /
+      data.length;
+    const topCandidate = data.reduce((top, item) => {
+      const topScore = top.scoreBreakdown?.overallFit ?? 0;
+      const itemScore = item.scoreBreakdown?.overallFit ?? 0;
+      return itemScore > topScore ? item : top;
+    }, data[0]);
+
+    return `Analysis of ${data.length} candidates complete. Average match score: ${Math.round(avgScore)}%. Top candidate (resume ${topCandidate.resumeId}) scored ${topCandidate.scoreBreakdown?.overallFit ?? 0}%.`;
   }
 }

@@ -1,13 +1,21 @@
-import { ValueObject } from '../base/value-object.js';
+import { ValueObject, type SerializedRestoreData } from '../base/value-object.js';
 import { TriggerType } from '../aggregates/incentive.aggregate.js';
+
+/**
+ * Represents trigger data for incentive.
+ */
+export interface IncentiveTriggerData {
+  questionnaireId?: string;
+  qualityScore?: number;
+  referredIP?: string;
+}
 
 /**
  * Represents the incentive trigger.
  */
 export class IncentiveTrigger extends ValueObject<{
   triggerType: TriggerType;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  triggerData: any;
+  triggerData: IncentiveTriggerData;
   qualifiedAt: Date;
 }> {
   /**
@@ -45,10 +53,14 @@ export class IncentiveTrigger extends ValueObject<{
    * @param data - The data.
    * @returns The IncentiveTrigger.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): IncentiveTrigger {
+  public static restore(data: SerializedRestoreData<{
+    triggerType: TriggerType;
+    triggerData: IncentiveTriggerData;
+    qualifiedAt: Date;
+  }>): IncentiveTrigger {
     return new IncentiveTrigger({
-      ...data,
+      triggerType: data.triggerType,
+      triggerData: data.triggerData,
       qualifiedAt: new Date(data.qualifiedAt),
     });
   }

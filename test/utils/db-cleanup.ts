@@ -2,9 +2,16 @@
 import { registerCleanup } from './cleanup';
 
 /**
+ * MongoDB client interface with cleanup method
+ */
+interface MongoClientLike {
+  close: () => Promise<void>;
+}
+
+/**
  * MongoDB连接清理
  */
-export const setupMongoCleanup = (mongoClient: any): void => {
+export const setupMongoCleanup = (mongoClient: MongoClientLike | null | undefined): void => {
   registerCleanup(async () => {
     if (mongoClient) {
       try {
@@ -17,9 +24,17 @@ export const setupMongoCleanup = (mongoClient: any): void => {
 };
 
 /**
+ * Redis client interface with cleanup methods
+ */
+interface RedisClientLike {
+  quit?: () => Promise<void>;
+  disconnect?: () => Promise<void>;
+}
+
+/**
  * Redis连接清理
  */
-export const setupRedisCleanup = (redisClient: any): void => {
+export const setupRedisCleanup = (redisClient: RedisClientLike | null | undefined): void => {
   registerCleanup(async () => {
     if (redisClient) {
       try {
@@ -36,9 +51,17 @@ export const setupRedisCleanup = (redisClient: any): void => {
 };
 
 /**
+ * TypeORM DataSource interface with cleanup methods
+ */
+interface DataSourceLike {
+  isInitialized: boolean;
+  destroy: () => Promise<void>;
+}
+
+/**
  * 数据源清理（TypeORM等）
  */
-export const setupDataSourceCleanup = (dataSource: any): void => {
+export const setupDataSourceCleanup = (dataSource: DataSourceLike | null | undefined): void => {
   registerCleanup(async () => {
     if (dataSource && dataSource.isInitialized) {
       try {
@@ -51,9 +74,16 @@ export const setupDataSourceCleanup = (dataSource: any): void => {
 };
 
 /**
+ * Prisma client interface with cleanup method
+ */
+interface PrismaClientLike {
+  $disconnect: () => Promise<void>;
+}
+
+/**
  * Prisma客户端清理
  */
-export const setupPrismaCleanup = (prisma: any): void => {
+export const setupPrismaCleanup = (prisma: PrismaClientLike | null | undefined): void => {
   registerCleanup(async () => {
     if (prisma) {
       try {
@@ -66,9 +96,17 @@ export const setupPrismaCleanup = (prisma: any): void => {
 };
 
 /**
+ * Connection pool interface with cleanup methods
+ */
+interface PoolLike {
+  end?: () => Promise<void>;
+  close?: () => Promise<void>;
+}
+
+/**
  * 连接池清理
  */
-export const setupPoolCleanup = (pool: any): void => {
+export const setupPoolCleanup = (pool: PoolLike | null | undefined): void => {
   registerCleanup(async () => {
     if (pool) {
       try {

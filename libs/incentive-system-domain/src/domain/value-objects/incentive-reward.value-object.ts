@@ -1,4 +1,4 @@
-import { ValueObject } from '../base/value-object.js';
+import { ValueObject, type RestoreData } from '../base/value-object.js';
 import { Currency, RewardType } from '../aggregates/incentive.aggregate.js';
 
 /**
@@ -59,8 +59,12 @@ export class IncentiveReward extends ValueObject<{
    * @param data - The data.
    * @returns The IncentiveReward.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): IncentiveReward {
+  public static restore(data: RestoreData<{
+    amount: number;
+    currency: Currency;
+    rewardType: RewardType;
+    calculationMethod: string;
+  }>): IncentiveReward {
     return new IncentiveReward(data);
   }
 

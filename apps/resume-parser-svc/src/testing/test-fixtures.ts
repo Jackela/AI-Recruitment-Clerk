@@ -2,8 +2,15 @@
  * Test fixtures and mock data for Resume Parser Service testing
  */
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const createMockResumeSubmittedEvent = (overrides?: any): Record<string, unknown> => ({
+import type { ResumeSubmittedEventData } from '../types/parsing.types';
+import type { AnalysisResumeParsedEvent, JobResumeFailedEvent } from '../services/resume-parser-nats.service';
+
+/**
+ * Mock factory for ResumeSubmittedEventData
+ */
+export const createMockResumeSubmittedEvent = (
+  overrides?: Partial<ResumeSubmittedEventData>,
+): ResumeSubmittedEventData => ({
   jobId: 'job-uuid-123',
   resumeId: 'resume-uuid-456',
   originalFilename: 'john-doe-resume.pdf',
@@ -11,8 +18,12 @@ export const createMockResumeSubmittedEvent = (overrides?: any): Record<string, 
   ...overrides,
 });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const createMockAnalysisResumeParsedEvent = (overrides?: any): Record<string, unknown> => ({
+/**
+ * Mock factory for AnalysisResumeParsedEvent
+ */
+export const createMockAnalysisResumeParsedEvent = (
+  overrides?: Partial<AnalysisResumeParsedEvent>,
+): AnalysisResumeParsedEvent => ({
   jobId: 'job-uuid-123',
   resumeId: 'resume-uuid-456',
   resumeDto: {
@@ -39,25 +50,63 @@ export const createMockAnalysisResumeParsedEvent = (overrides?: any): Record<str
       },
     ],
   },
-  timestamp: '2024-01-01T12:05:00.000Z',
   processingTimeMs: 3500,
+  confidence: 0.85,
+  parsingMethod: 'ai-vision-llm',
   ...overrides,
 });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const createMockJobResumeFailedEvent = (overrides?: any): Record<string, unknown> => ({
+/**
+ * Mock factory for JobResumeFailedEvent
+ */
+export const createMockJobResumeFailedEvent = (
+  overrides?: Partial<JobResumeFailedEvent>,
+): JobResumeFailedEvent => ({
   jobId: 'job-uuid-123',
   resumeId: 'resume-uuid-456',
-  originalFilename: 'john-doe-resume.pdf',
-  error: 'Vision LLM processing failed after 3 retries',
-  timestamp: '2024-01-01T12:10:00.000Z',
-  processingTimeMs: 8000,
-  retryAttempts: 3,
+  error: new Error('Vision LLM processing failed after 3 retries'),
+  stage: 'parsing',
+  retryAttempt: 3,
   ...overrides,
 });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const createMockParsedResumeDto = (overrides?: any): Record<string, unknown> => ({
+/**
+ * Parsed resume DTO type for test fixtures
+ */
+interface MockParsedResumeDto {
+  contactInfo: {
+    name: string;
+    email: string;
+    phone: string;
+    location?: string;
+  };
+  skills: string[];
+  workExperience: Array<{
+    company: string;
+    position: string;
+    startDate: string;
+    endDate: string;
+    summary: string;
+  }>;
+  education: Array<{
+    school: string;
+    degree: string;
+    major: string;
+    graduationYear?: string;
+  }>;
+  certifications?: Array<{
+    name: string;
+    issuer: string;
+    issueDate: string;
+  }>;
+}
+
+/**
+ * Mock factory for ParsedResumeDto
+ */
+export const createMockParsedResumeDto = (
+  overrides?: Partial<MockParsedResumeDto>,
+): MockParsedResumeDto => ({
   contactInfo: {
     name: 'Jane Smith',
     email: 'jane.smith@example.com',
@@ -107,9 +156,12 @@ export const createMockNatsPublishResult = (
 
 /**
  * Test data validation helpers
+ * These functions use Jest's expect and should only be called in test files
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const validateEventStructure = (event: any, expectedType: string): void => {
+export const validateEventStructure = (
+  event: Record<string, unknown>,
+  expectedType: 'parsed' | 'failed',
+): void => {
   expect(event).toBeDefined();
   expect(event.jobId).toBeDefined();
   expect(event.resumeId).toBeDefined();

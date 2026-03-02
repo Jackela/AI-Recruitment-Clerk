@@ -4,8 +4,16 @@
  * @module questionnaire-submission.dto
  */
 
-import { ValueObject } from '../base/value-object';
-import type { QuestionSection, QualityThreshold, RawSubmissionData } from './questionnaire-types.dto';
+import { ValueObject, type RestoreData, type SerializedRestoreData } from '../base/value-object';
+import type {
+  QuestionSection,
+  QualityThreshold,
+  RawSubmissionData,
+  QuestionnaireUserRole,
+  CompanySize,
+  ScreeningMethod,
+  Rating,
+} from './questionnaire-types.dto';
 import {
   UserProfile,
   UserExperience,
@@ -54,8 +62,13 @@ export class QuestionnaireTemplate extends ValueObject<{
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): QuestionnaireTemplate {
+  public static restore(data: RestoreData<{
+    id: string;
+    version: string;
+    sections: QuestionSection[];
+    requiredQuestions: string[];
+    qualityThresholds: QualityThreshold[];
+  }>): QuestionnaireTemplate {
     return new QuestionnaireTemplate(data);
   }
 }
@@ -110,10 +123,35 @@ export class QuestionnaireSubmission extends ValueObject<{
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): QuestionnaireSubmission {
+  public static restore(data: SerializedRestoreData<{
+    userProfile: { role: QuestionnaireUserRole; industry: string; companySize: CompanySize; location: string };
+    userExperience: {
+      overallSatisfaction: Rating;
+      accuracyRating: Rating;
+      speedRating: Rating;
+      uiRating: Rating;
+      mostUsefulFeature: string;
+      mainPainPoint?: string;
+      improvementSuggestion?: string;
+    };
+    businessValue: {
+      currentScreeningMethod: ScreeningMethod;
+      timeSpentPerResume: number;
+      resumesPerWeek: number;
+      timeSavingPercentage: number;
+      willingnessToPayMonthly: number;
+      recommendLikelihood: Rating;
+    };
+    featureNeeds: { priorityFeatures: string[]; integrationNeeds: string[] };
+    optional: { additionalFeedback?: string; contactPreference?: string };
+    submittedAt: Date;
+  }>): QuestionnaireSubmission {
     return new QuestionnaireSubmission({
-      ...data,
+      userProfile: new UserProfile(data.userProfile),
+      userExperience: new UserExperience(data.userExperience),
+      businessValue: new BusinessValue(data.businessValue),
+      featureNeeds: new FeatureNeeds(data.featureNeeds),
+      optional: new OptionalInfo(data.optional),
       submittedAt: new Date(data.submittedAt),
     });
   }
@@ -237,8 +275,14 @@ export class SubmissionQuality extends ValueObject<{
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): SubmissionQuality {
+  public static restore(data: RestoreData<{
+    totalTextLength: number;
+    detailedAnswers: number;
+    completionRate: number;
+    qualityScore: number;
+    bonusEligible: boolean;
+    qualityReasons: string[];
+  }>): SubmissionQuality {
     return new SubmissionQuality(data);
   }
 

@@ -1,4 +1,4 @@
-import { ValueObject } from '../base/value-object.js';
+import { ValueObject, type RestoreData } from '../base/value-object.js';
 
 /**
  * Represents the contact info.
@@ -14,8 +14,12 @@ export class ContactInfo extends ValueObject<{
    * @param data - The data.
    * @returns The ContactInfo.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): ContactInfo {
+  public static restore(data: RestoreData<{
+    email?: string;
+    phone?: string;
+    wechat?: string;
+    alipay?: string;
+  }>): ContactInfo {
     return new ContactInfo(data);
   }
 

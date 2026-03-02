@@ -56,7 +56,7 @@ import { SecurityModule } from '../security/security.module';
             return jwtSecret;
           })(),
           signOptions: {
-            expiresIn: configService.get<string>('JWT_EXPIRES_IN') || '1h',
+            expiresIn: (configService.get<string>('JWT_EXPIRES_IN') || '1h') as unknown as number,
             issuer: 'ai-recruitment-clerk',
             audience: 'ai-recruitment-users',
           },

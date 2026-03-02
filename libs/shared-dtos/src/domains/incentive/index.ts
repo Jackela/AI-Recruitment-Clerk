@@ -13,8 +13,8 @@ export {
   PaymentMethod,
 } from './incentive-enums';
 
-// Interfaces
-export {
+// Interfaces (type-only exports)
+export type {
   ContactInfoData,
   IncentiveRewardData,
   IncentiveTriggerData,

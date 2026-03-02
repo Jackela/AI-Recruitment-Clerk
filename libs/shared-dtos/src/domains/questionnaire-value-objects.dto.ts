@@ -3,7 +3,7 @@
  * @module questionnaire-value-objects.dto
  */
 
-import { ValueObject } from '../base/value-object';
+import { ValueObject, type SerializedRestoreData } from '../base/value-object';
 import type {
   QuestionnaireUserRole,
   CompanySize,
@@ -139,8 +139,12 @@ export class SubmissionMetadata extends ValueObject<{
   userAgent: string;
   timestamp: Date;
 }> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): SubmissionMetadata {
+   
+  public static restore(data: SerializedRestoreData<{
+    ip: string;
+    userAgent: string;
+    timestamp: Date;
+  }>): SubmissionMetadata {
     return new SubmissionMetadata({
       ...data,
       timestamp: new Date(data.timestamp),

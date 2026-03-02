@@ -28,8 +28,9 @@ import type {
   UserDto,
   UserStatus,
   UpdateUserDto,
+  AuthenticatedRequest,
   UserPreferencesDto,
-  AuthenticatedRequest} from '@ai-recruitment-clerk/user-management-domain';
+} from '@ai-recruitment-clerk/user-management-domain';
 import {
   Permission,
   UserRole
@@ -37,8 +38,7 @@ import {
 import type { UserManagementService } from './user-management.service';
 
 interface UserProfileResponse extends UserDto {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  preferences?: any;
+  preferences?: UserPreferencesDto;
   lastActivity?: Date;
   profileCompleteness?: number;
 }
@@ -89,8 +89,28 @@ export class UserManagementController {
     },
   })
   @Get('profile')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async getUserProfile(@Request() req: AuthenticatedRequest): Promise<any> {
+  public async getUserProfile(@Request() req: AuthenticatedRequest): Promise<{
+    success: boolean;
+    data?: {
+      userId: string;
+      email: string;
+      name: string;
+      role: string;
+      organizationId: string;
+      preferences: UserPreferencesDto;
+      activitySummary: {
+        totalSessions: number;
+        lastLoginDate: Date | null;
+        profileCompleteness: number;
+        totalActions: number;
+      };
+      lastActivity?: Date;
+      createdAt?: Date;
+      updatedAt?: Date;
+    };
+    error?: string;
+    message?: string;
+  }> {
     try {
       const userId = req.user.id ?? '';
       const profile = await this.userManagementService.getUserProfile(
@@ -98,6 +118,12 @@ export class UserManagementController {
       );
       const activitySummary =
         await this.userManagementService.getUserActivitySummary(userId);
+
+      const profilePrefs = (profile as UserProfileResponse).preferences;
+      const preferences: UserPreferencesDto = {
+        userId,
+        ...profilePrefs,
+      };
 
       return {
         success: true,
@@ -107,7 +133,7 @@ export class UserManagementController {
           name: req.user.name,
           role: req.user.role,
           organizationId: req.user.organizationId,
-          preferences: (profile as UserProfileResponse).preferences || {},
+          preferences,
           activitySummary: {
             totalSessions: activitySummary.totalSessions,
             lastLoginDate: activitySummary.lastLoginDate,
@@ -115,8 +141,8 @@ export class UserManagementController {
             totalActions: activitySummary.totalActions,
           },
           lastActivity: (profile as UserProfileResponse).lastActivity,
-          createdAt: profile.createdAt,
-          updatedAt: profile.updatedAt,
+          createdAt: profile.createdAt ?? undefined,
+          updatedAt: profile.updatedAt ?? undefined,
         },
       };
     } catch (error) {
@@ -145,8 +171,16 @@ export class UserManagementController {
   public async updateUserProfile(
     @Request() req: AuthenticatedRequest,
     @Body() updateData: UpdateUserDto,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+    success: boolean;
+    message?: string;
+    data?: {
+      userId: string;
+      updatedFields: string[];
+      profileCompleteness?: number;
+    };
+    error?: string;
+  }> {
     try {
       const userId = req.user.id ?? '';
       const updatedProfile = await this.userManagementService.updateUserProfile(
@@ -189,8 +223,15 @@ export class UserManagementController {
   public async updateUserPreferences(
     @Request() req: AuthenticatedRequest,
     @Body() preferences: UserPreferencesDto,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+    success: boolean;
+    message?: string;
+    data?: {
+      userId: string;
+      updatedPreferences: string[];
+    };
+    error?: string;
+  }> {
     try {
       const userId = req.user.id ?? '';
       await this.userManagementService.updateUserPreferences(
@@ -240,8 +281,25 @@ export class UserManagementController {
     @Query('offset') offset = 0,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+    success: boolean;
+    data?: {
+      activities: Array<{
+        id: string;
+        userId: string;
+        type: string;
+        description: string;
+        timestamp: Date;
+        ipAddress?: string;
+        userAgent?: string;
+      }>;
+      totalCount: number;
+      hasMore: boolean;
+      summary?: Record<string, unknown>;
+    };
+    error?: string;
+    message?: string;
+  }> {
     try {
       const userId = req.user.id ?? '';
       const activityData = await this.userManagementService.getUserActivity(
@@ -289,8 +347,15 @@ export class UserManagementController {
   public async deleteUserAccount(
     @Request() req: AuthenticatedRequest,
     @Body() deleteRequest: { confirmationPassword: string; reason?: string },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+    success: boolean;
+    message?: string;
+    data?: {
+      userId: string | undefined;
+      deletedAt: string;
+    };
+    error?: string;
+  }> {
     try {
       const userId = req.user.id ?? '';
       // Verify password for account deletion
@@ -351,12 +416,21 @@ export class UserManagementController {
     @Query('limit') limit = 20,
     @Query('role') role?: UserRole,
     @Query('status') status?: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+    success: boolean;
+    data?: { items: UserDto[]; totalCount: number };
+    pagination?: {
+      currentPage: number;
+      totalPages: number;
+      totalCount: number;
+      hasNext: boolean;
+    };
+    error?: string;
+    message?: string;
+  }> {
     try {
       const requesterRole = String(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (req.user as any)?.rawRole ?? req.user.role ?? '',
+        (req.user as { rawRole?: string })?.rawRole ?? req.user.role ?? '',
       ).toLowerCase();
 
       const organizationId =
@@ -376,7 +450,7 @@ export class UserManagementController {
 
       return {
         success: true,
-        data: users,
+        data: { items: users.users, totalCount: users.totalCount },
         pagination: {
           currentPage: page,
           totalPages: Math.ceil(users.totalCount / limit),
@@ -418,8 +492,17 @@ export class UserManagementController {
       status: 'active' | 'inactive' | 'suspended';
       reason?: string;
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+    success: boolean;
+    message?: string;
+    data?: {
+      userId: string;
+      newStatus: string;
+      updatedBy: string;
+      timestamp: string;
+    };
+    error?: string;
+  }> {
     try {
       // Prevent self-status modification
       if (userId === req.user.id) {
@@ -461,8 +544,13 @@ export class UserManagementController {
   })
   @ApiResponse({ status: 200, description: '服务健康状态' })
   @Get('health')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async healthCheck(): Promise<any> {
+  public async healthCheck(): Promise<{
+    status: string;
+    timestamp: string;
+    service: string;
+    details?: Record<string, unknown>;
+    error?: string;
+  }> {
     try {
       const healthStatus = await this.userManagementService.getHealthStatus();
 

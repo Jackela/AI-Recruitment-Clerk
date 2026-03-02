@@ -4,16 +4,19 @@
 type Cleanup = () => Promise<void> | void;
 const cleaners: Cleanup[] = [];
 
-export const registerCleanup = (fn: Cleanup) => cleaners.push(fn);
+export const registerCleanup = (fn: Cleanup): void => {
+  cleaners.push(fn);
+};
 
-export const runCleanups = async () => {
+export const runCleanups = async (): Promise<void> => {
   console.log(`🧹 Running ${cleaners.length} cleanup functions...`);
 
   for (const fn of cleaners.splice(0)) {
     try {
       await fn();
     } catch (error) {
-      console.warn('Cleanup function failed:', error.message);
+      const message = error instanceof Error ? error.message : String(error);
+      console.warn('Cleanup function failed:', message);
     }
   }
 

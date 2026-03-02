@@ -16,6 +16,28 @@ env:
   CI: true
 
 jobs:
+  file_size_check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Check file sizes
+        run: |
+          echo "Checking for files over 500 lines..."
+          FOUND=0
+          while IFS= read -r line; do
+            if [ -n "$line" ]; then
+              echo "::warning file=$(echo "$line" | awk '{print $2}')::$(echo "$line" | awk '{print $2}') has $(echo "$line" | awk '{print $1}') lines (max 500)"
+              FOUND=1
+            fi
+          done < <(find apps libs -name "*.ts" -not -path "*/node_modules/*" -exec wc -l {} \; 2>/dev/null | awk '$1 > 500 {print $0}')
+          if [ "$FOUND" -eq 1 ]; then
+            echo ""
+            echo "Warning: Some files exceed the 500 line limit. Consider refactoring for better maintainability."
+          else
+            echo "All files are within the 500 line limit."
+          fi
+
   lint:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -196,3 +218,47 @@ jobs:
       - run: npm ci
       - name: PII Scan
         run: node tools/ci/pii-scan.mjs
+
+  todo_counter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Count TODO/FIXME comments
+        run: |
+          echo "========================================"
+          echo "TODO/FIXME Comment Counter"
+          echo "========================================"
+          echo ""
+
+          # Count total TODO/FIXME comments
+          TODO_COUNT=$(grep -r "TODO\|FIXME" apps libs --include="*.ts" 2>/dev/null | wc -l || echo "0")
+          echo "Total TODO/FIXME comments: $TODO_COUNT"
+          echo ""
+
+          # List files with TODOs (limited to 20 for readability)
+          echo "Files with TODO/FIXME comments (max 20):"
+          echo "----------------------------------------"
+          grep -rl "TODO\|FIXME" apps libs --include="*.ts" 2>/dev/null | head -20 || echo "No files found"
+          echo ""
+
+          # Show detailed breakdown by type
+          echo "Breakdown by type:"
+          echo "----------------------------------------"
+          TODO_ONLY=$(grep -r "TODO" apps libs --include="*.ts" 2>/dev/null | wc -l || echo "0")
+          FIXME_ONLY=$(grep -r "FIXME" apps libs --include="*.ts" 2>/dev/null | wc -l || echo "0")
+          echo "  TODO comments: $TODO_ONLY"
+          echo "  FIXME comments: $FIXME_ONLY"
+          echo ""
+
+          # Show first 10 actual TODO lines as examples
+          if [ "$TODO_COUNT" -gt 0 ]; then
+            echo "Sample TODO/FIXME entries (first 10):"
+            echo "----------------------------------------"
+            grep -rn "TODO\|FIXME" apps libs --include="*.ts" 2>/dev/null | head -10
+          fi
+
+          echo ""
+          echo "========================================"
+          echo "This is informational only - build will not fail"
+          echo "========================================"

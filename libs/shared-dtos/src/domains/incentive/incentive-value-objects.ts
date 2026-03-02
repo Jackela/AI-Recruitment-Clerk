@@ -3,7 +3,7 @@
  * Defines IncentiveId, IncentiveRecipient, ContactInfo, IncentiveReward, and IncentiveTrigger.
  */
 
-import { ValueObject } from '../../base/value-object';
+import { ValueObject, type SerializedRestoreData } from '../../base/value-object';
 import {
   Currency,
   RewardType,
@@ -392,11 +392,11 @@ export class IncentiveTrigger extends ValueObject<{
    * @param data - The data.
    * @returns The IncentiveTrigger.
    */
-  public static restore(data: {
+  public static restore(data: SerializedRestoreData<{
     triggerType: TriggerType;
     triggerData: IncentiveTriggerData;
-    qualifiedAt: string | Date;
-  }): IncentiveTrigger {
+    qualifiedAt: Date;
+  }>): IncentiveTrigger {
     return new IncentiveTrigger({
       triggerType: data.triggerType,
       triggerData: data.triggerData,

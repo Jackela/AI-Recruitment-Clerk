@@ -177,4 +177,56 @@ export class ReportGeneratorNatsService extends BaseMicroserviceService {
       };
     }
   }
+
+  /**
+   * Request scoring data from scoring-engine-svc
+   * Publishes a request event for scoring data retrieval
+   */
+  public async requestScoringData(
+    jobId: string,
+    resumeId: string,
+  ): Promise<NatsPublishResult> {
+    return this.publishEvent(
+      'report.scoring.data.request',
+      { jobId, resumeId } as unknown as Record<string, unknown>,
+      {
+        headers: {
+          'job-id': jobId,
+          'resume-id': resumeId,
+        },
+      },
+    );
+  }
+
+  /**
+   * Request resume data from resume-parser-svc
+   * Publishes a request event for resume data retrieval
+   */
+  public async requestResumeData(resumeId: string): Promise<NatsPublishResult> {
+    return this.publishEvent(
+      'report.resume.data.request',
+      { resumeId } as unknown as Record<string, unknown>,
+      {
+        headers: {
+          'resume-id': resumeId,
+        },
+      },
+    );
+  }
+
+  /**
+   * Request job data from jd-extractor-svc
+   * Publishes a request event for job data retrieval
+   */
+  public async requestJobData(jobId: string): Promise<NatsPublishResult> {
+    return this.publishEvent(
+      'report.job.data.request',
+      { jobId } as unknown as Record<string, unknown>,
+      {
+        headers: {
+          'job-id': jobId,
+        },
+      },
+    );
+  }
 }

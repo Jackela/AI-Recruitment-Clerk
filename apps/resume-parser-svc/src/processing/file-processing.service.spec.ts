@@ -1,4 +1,20 @@
+import { Logger } from '@nestjs/common';
 import { FileProcessingService } from './file-processing.service';
+
+// Mock infrastructure-shared before importing
+jest.mock('@ai-recruitment-clerk/infrastructure-shared', () => ({
+  InputValidator: {
+    validateResumeFile: jest.fn().mockReturnValue({ isValid: true, errors: [] }),
+  },
+  ResumeParserException: class ResumeParserException extends Error {
+    constructor(public code: string, public details: unknown) {
+      super(`ResumeParserException: ${code}`);
+      this.name = 'ResumeParserException';
+    }
+  },
+}));
+
+// Import after mocking
 import { ResumeParserException } from '@ai-recruitment-clerk/infrastructure-shared';
 
 describe('FileProcessingService', () => {
@@ -6,6 +22,8 @@ describe('FileProcessingService', () => {
 
   beforeEach(() => {
     service = new FileProcessingService();
+    jest.spyOn(Logger.prototype, 'log').mockImplementation();
+    jest.spyOn(Logger.prototype, 'error').mockImplementation();
   });
 
   describe('validateFileBuffer', () => {

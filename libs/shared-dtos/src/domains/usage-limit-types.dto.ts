@@ -1,4 +1,4 @@
-import { ValueObject } from '../base/value-object';
+import { ValueObject, type RestoreData, type SerializedRestoreData } from '../base/value-object';
 
 /**
  * Represents a usage limit ID.
@@ -80,14 +80,13 @@ export class UsageLimitPolicy extends ValueObject<{
    * @param data - The data.
    * @returns The UsageLimitPolicy.
    */
-  public static restore(data: unknown): UsageLimitPolicy {
-    const parsed = data as {
-      dailyLimit: number;
-      bonusEnabled: boolean;
-      maxBonusQuota: number;
-      resetTimeUTC: number;
-    };
-    return new UsageLimitPolicy(parsed);
+  public static restore(data: RestoreData<{
+    dailyLimit: number;
+    bonusEnabled: boolean;
+    maxBonusQuota: number;
+    resetTimeUTC: number;
+  }>): UsageLimitPolicy {
+    return new UsageLimitPolicy(data);
   }
 
   /**
@@ -149,11 +148,15 @@ export class QuotaAllocation extends ValueObject<{
    * @param data - The data.
    * @returns The QuotaAllocation.
    */
-  public static restore(data: unknown): QuotaAllocation {
+  public static restore(data: RestoreData<{
+    baseQuota: number;
+    bonusQuota: number;
+    bonusBreakdown: Iterable<[BonusType, number]>;
+  }>): QuotaAllocation {
     return new QuotaAllocation({
-      baseQuota: (data as { baseQuota: number }).baseQuota,
-      bonusQuota: (data as { bonusQuota: number }).bonusQuota,
-      bonusBreakdown: new Map((data as { bonusBreakdown: Iterable<[BonusType, number]> }).bonusBreakdown || []),
+      baseQuota: data.baseQuota,
+      bonusQuota: data.bonusQuota,
+      bonusBreakdown: new Map(data.bonusBreakdown || []),
     });
   }
 
@@ -225,20 +228,19 @@ export class UsageTracking extends ValueObject<{
    * @param data - The data.
    * @returns The UsageTracking.
    */
-  public static restore(data: unknown): UsageTracking {
-    const dataObj = data as {
-      currentCount: number;
-      usageHistory: { timestamp: Date | string; count: number }[];
-      lastUsageAt?: Date | string;
-    };
+  public static restore(data: SerializedRestoreData<{
+    currentCount: number;
+    usageHistory: { timestamp: Date | string; count: number }[];
+    lastUsageAt?: Date | string;
+  }>): UsageTracking {
     return new UsageTracking({
-      currentCount: dataObj.currentCount,
-      usageHistory: dataObj.usageHistory.map((r) => new UsageRecord({
+      currentCount: data.currentCount,
+      usageHistory: data.usageHistory.map((r) => new UsageRecord({
         timestamp: typeof r.timestamp === 'string' ? new Date(r.timestamp) : r.timestamp,
         count: r.count,
       })),
-      lastUsageAt: dataObj.lastUsageAt
-        ? (typeof dataObj.lastUsageAt === 'string' ? new Date(dataObj.lastUsageAt) : dataObj.lastUsageAt)
+      lastUsageAt: data.lastUsageAt
+        ? (typeof data.lastUsageAt === 'string' ? new Date(data.lastUsageAt) : data.lastUsageAt)
         : undefined,
     });
   }
@@ -325,8 +327,21 @@ export enum BonusType {
 export interface UsageLimitData {
   id: string;
   ip: string;
-  policy: unknown;
-  quotaAllocation: unknown;
-  usageTracking: unknown;
+  policy: {
+    dailyLimit: number;
+    bonusEnabled: boolean;
+    maxBonusQuota: number;
+    resetTimeUTC: number;
+  };
+  quotaAllocation: {
+    baseQuota: number;
+    bonusQuota: number;
+    bonusBreakdown: Iterable<[BonusType, number]>;
+  };
+  usageTracking: {
+    currentCount: number;
+    usageHistory: { timestamp: string | Date; count: number }[];
+    lastUsageAt?: string | Date;
+  };
   lastResetAt: string;
 }

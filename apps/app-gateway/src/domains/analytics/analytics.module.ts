@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { AnalyticsController } from './analytics.controller';
+import { MetricsController } from './metrics.controller';
+import { ReportsController } from './reports.controller';
 import { AnalyticsIntegrationService } from './analytics-integration.service';
 import { AnalyticsEventRepository } from './analytics-event.repository';
 import {
@@ -11,8 +12,8 @@ import { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
 import { AppCacheModule } from '../../cache/cache.module';
 
 /**
- * Analytics模块 - 用户行为分析和数据收集
- * 集成AnalyticsDomainService与基础设施层
+ * Analytics Module - User behavior analytics and data collection
+ * Integrates AnalyticsDomainService with infrastructure layer
  */
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { AppCacheModule } from '../../cache/cache.module';
       { name: AnalyticsEvent.name, schema: AnalyticsEventSchema },
     ]),
   ],
-  controllers: [AnalyticsController],
+  controllers: [MetricsController, ReportsController],
   providers: [
     AnalyticsIntegrationService,
     AnalyticsEventRepository,

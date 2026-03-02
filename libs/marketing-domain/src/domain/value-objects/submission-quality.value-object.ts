@@ -1,4 +1,4 @@
-import { ValueObject } from './base/value-object.js';
+import { ValueObject, type RestoreData } from './base/value-object.js';
 import type { QuestionnaireSubmission } from './questionnaire-submission.value-object.js';
 import { QualityScore } from './quality-score.value-object.js';
 import { QualityMetrics } from './quality-metrics.value-object.js';
@@ -68,8 +68,14 @@ export class SubmissionQuality extends ValueObject<{
    * @param data - The data.
    * @returns The SubmissionQuality.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): SubmissionQuality {
+  public static restore(data: RestoreData<{
+    totalTextLength: number;
+    detailedAnswers: number;
+    completionRate: number;
+    qualityScore: number;
+    bonusEligible: boolean;
+    qualityReasons: string[];
+  }>): SubmissionQuality {
     return new SubmissionQuality(data);
   }
 

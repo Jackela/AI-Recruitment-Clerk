@@ -24,7 +24,8 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
 import type {
-  PaymentMethod} from '@ai-recruitment-clerk/shared-dtos';
+  PaymentMethod,
+} from '@ai-recruitment-clerk/shared-dtos';
 import {
   IncentiveStatus,
   RewardType,
@@ -33,18 +34,16 @@ import {
 import type { AuthenticatedRequest } from '@ai-recruitment-clerk/user-management-domain';
 import type { IncentiveIntegrationService } from './incentive-integration.service';
 
-// Use shared AuthenticatedRequest type with required user.id and user.organizationId
-
 /**
- * Exposes endpoints for incentive.
+ * Exposes endpoints for rewards/incentive management.
  */
 @ApiTags('incentive-system')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('incentives')
-export class IncentiveController {
+export class RewardsController {
   /**
-   * Initializes a new instance of the Incentive Controller.
+   * Initializes a new instance of the Rewards Controller.
    * @param incentiveService - The incentive service.
    */
   constructor(private readonly incentiveService: IncentiveIntegrationService) {}
@@ -97,22 +96,30 @@ export class IncentiveController {
         alipay?: string;
       };
       userIP?: string;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      businessValue?: any;
+      businessValue?: Record<string, unknown>;
       incentiveType?: string;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      metadata?: any;
+      metadata?: Record<string, unknown>;
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+    success: boolean;
+    message?: string;
+    data?: {
+      incentiveId: string;
+      rewardAmount: number;
+      currency: string;
+      status: string;
+      canBePaid: boolean;
+      createdAt: Date;
+    };
+    error?: string;
+  }> {
     try {
       const fwd = req.headers['x-forwarded-for'];
       const normalizedIP = Array.isArray(fwd) ? fwd[0] : fwd;
       const userIP = String(
         incentiveData.userIP ||
           normalizedIP ||
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (req.socket as any)?.remoteAddress ||
+          (req.socket as { remoteAddress?: string })?.remoteAddress ||
           'unknown',
       );
       const contactInfo = new ContactInfo(incentiveData.contactInfo);
@@ -163,83 +170,6 @@ export class IncentiveController {
   }
 
   /**
-   * Creates referral incentive.
-   * @param req - The req.
-   * @param referralData - The referral data.
-   * @returns The result of the operation.
-   */
-  @ApiOperation({
-    summary: '创建推荐激励',
-    description: '为成功推荐新用户的推荐人创建激励奖励',
-  })
-  @ApiResponse({ status: 201, description: '推荐激励创建成功' })
-  @UseGuards(RolesGuard)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @Permissions('create_job' as any)
-  @Post('referral')
-  @HttpCode(HttpStatus.CREATED)
-  public async createReferralIncentive(
-    @Request() req: AuthenticatedRequest,
-    @Body()
-    referralData: {
-      referrerIP: string;
-      referredIP: string;
-      contactInfo: {
-        email?: string;
-        phone?: string;
-        wechat?: string;
-        alipay?: string;
-      };
-      referralType?: string;
-      expectedValue?: number;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      metadata?: any;
-    },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
-    try {
-      const contactInfo = new ContactInfo(referralData.contactInfo);
-
-      const incentive = await this.incentiveService.createReferralIncentive(
-        referralData.referrerIP,
-        referralData.referredIP,
-        contactInfo,
-        referralData.referralType || 'general',
-        referralData.expectedValue || 0,
-        { organizationId: req.user.organizationId, ...referralData.metadata },
-      );
-
-      const summary = {
-        id: incentive.id,
-        type: incentive.type,
-        status: incentive.status,
-        createdAt: incentive.createdAt,
-        rewardAmount: incentive.expectedValue || 0,
-        rewardCurrency: 'USD',
-        canBePaid: false,
-      };
-
-      return {
-        success: true,
-        message: 'Referral incentive created successfully',
-        data: {
-          incentiveId: summary.id,
-          rewardAmount: summary.rewardAmount,
-          currency: summary.rewardCurrency,
-          status: summary.status,
-          canBePaid: summary.canBePaid,
-        },
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: 'Failed to create referral incentive',
-        message: error instanceof Error ? error.message : String(error),
-      };
-    }
-  }
-
-  /**
    * Retrieves incentives.
    * @param req - The req.
    * @param page - The page.
@@ -283,8 +213,24 @@ export class IncentiveController {
     @Query('rewardType') rewardType?: RewardType,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+    success: boolean;
+    data?: {
+      incentives: unknown[];
+      totalCount: number;
+      totalRewardAmount: number;
+      page: number;
+      totalPages: number;
+      hasNext: boolean;
+      summary: {
+        byStatus: Record<string, number>;
+        byRewardType: Record<string, number>;
+        avgRewardAmount: number;
+      };
+    };
+    error?: string;
+    message?: string;
+  }> {
     try {
       const incentives = await this.incentiveService.getIncentives(
         req.user.organizationId,
@@ -298,24 +244,30 @@ export class IncentiveController {
         },
       );
 
+      const incentivesWithExtras = incentives as {
+        items: unknown[];
+        totalCount: number;
+        totalRewardAmount: number;
+        statusDistribution?: Record<string, number>;
+        rewardTypeDistribution?: Record<string, number>;
+        avgRewardAmount?: number;
+      };
+
       return {
         success: true,
         data: {
-          incentives: incentives.items,
-          totalCount: incentives.totalCount,
-          totalRewardAmount: incentives.totalRewardAmount,
+          incentives: incentivesWithExtras.items,
+          totalCount: incentivesWithExtras.totalCount,
+          totalRewardAmount: incentivesWithExtras.totalRewardAmount,
           page: page,
-          totalPages: Math.ceil(incentives.totalCount / limit),
-          hasNext: page * limit < incentives.totalCount,
+          totalPages: Math.ceil(incentivesWithExtras.totalCount / limit),
+          hasNext: page * limit < incentivesWithExtras.totalCount,
           summary: {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            byStatus: (incentives as any).statusDistribution || {},
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            byRewardType: (incentives as any).rewardTypeDistribution || {},
+            byStatus: incentivesWithExtras.statusDistribution || {},
+            byRewardType: incentivesWithExtras.rewardTypeDistribution || {},
             avgRewardAmount:
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (incentives as any).avgRewardAmount ||
-              incentives.totalRewardAmount / (incentives.totalCount || 1),
+              incentivesWithExtras.avgRewardAmount ||
+              incentivesWithExtras.totalRewardAmount / (incentivesWithExtras.totalCount || 1),
           },
         },
       };
@@ -348,8 +300,12 @@ export class IncentiveController {
   public async getIncentive(
     @Request() req: AuthenticatedRequest,
     @Param('incentiveId') incentiveId: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+    success: boolean;
+    data?: unknown;
+    error?: string;
+    message?: string;
+  }> {
     try {
       const incentive = await this.incentiveService.getIncentive(
         incentiveId,
@@ -393,8 +349,19 @@ export class IncentiveController {
   public async validateIncentive(
     @Request() req: AuthenticatedRequest,
     @Param('incentiveId') incentiveId: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+    success: boolean;
+    data?: {
+      incentiveId: string;
+      isValid: boolean;
+      errors: unknown[];
+      canProceedToPayment: boolean;
+      validatedAt: string;
+      validatedBy: string;
+    };
+    error?: string;
+    message?: string;
+  }> {
     try {
       const validationResult = await this.incentiveService.validateIncentive(
         incentiveId,
@@ -447,8 +414,17 @@ export class IncentiveController {
       reason: string;
       notes?: string;
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+    success: boolean;
+    data?: {
+      incentiveId: string;
+      approvedAt: string;
+      approvedBy: string;
+      reason: string;
+    };
+    error?: string;
+    message?: string;
+  }> {
     try {
       await this.incentiveService.approveIncentive(incentiveId, {
         reason: approvalData.reason,
@@ -502,8 +478,17 @@ export class IncentiveController {
       reason: string;
       notes?: string;
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+    success: boolean;
+    message?: string;
+    data?: {
+      incentiveId: string;
+      rejectedAt: string;
+      rejectedBy: string;
+      reason: string;
+    };
+    error?: string;
+  }> {
     try {
       await this.incentiveService.rejectIncentive(
         incentiveId,
@@ -578,8 +563,20 @@ export class IncentiveController {
       transactionRef?: string;
       notes?: string;
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+    success: boolean;
+    message?: string;
+    data?: {
+      incentiveId: string;
+      transactionId: string;
+      amount: number;
+      currency: string;
+      paymentMethod: PaymentMethod;
+      paidAt: string;
+      processedBy: string;
+    };
+    error?: string;
+  }> {
     try {
       const paymentResult = await this.incentiveService.processPayment(
         incentiveId,
@@ -645,8 +642,19 @@ export class IncentiveController {
       paymentMethod?: PaymentMethod;
       notes?: string;
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+    success: boolean;
+    data?: {
+      totalProcessed: number;
+      successful: number;
+      failed: number;
+      results: unknown[];
+      action: string;
+      processedBy: string;
+    };
+    error?: string;
+    message?: string;
+  }> {
     try {
       const batchResult = await this.incentiveService.batchProcessIncentives(
         batchRequest.incentiveIds,
@@ -713,8 +721,24 @@ export class IncentiveController {
     @Request() req: AuthenticatedRequest,
     @Query('timeRange') timeRange = '30d',
     @Query('groupBy') groupBy = 'day',
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+    success: boolean;
+    data?: {
+      overview: {
+        totalIncentives: number;
+        totalRewardAmount: number;
+        avgRewardAmount: number;
+        conversionRate: number;
+      };
+      statusDistribution: Record<string, number>;
+      rewardTypeDistribution: Record<string, number>;
+      paymentMethodDistribution: Record<string, number>;
+      trends: unknown[];
+      topPerformers: unknown[];
+    };
+    error?: string;
+    message?: string;
+  }> {
     try {
       const statistics = await this.incentiveService.getIncentiveStatistics(
         req.user.organizationId,
@@ -780,8 +804,18 @@ export class IncentiveController {
       rewardTypes?: RewardType[];
       includeContactInfo?: boolean;
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+    success: boolean;
+    data?: {
+      exportId: string;
+      format: string;
+      estimatedTime: string;
+      downloadUrl: string;
+      expiresAt: Date;
+    };
+    error?: string;
+    message?: string;
+  }> {
     try {
       const exportResult = await this.incentiveService.exportIncentiveData(
         req.user.organizationId,
@@ -857,8 +891,17 @@ export class IncentiveController {
       };
       enabled: boolean;
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+    success: boolean;
+    data?: {
+      configId: string;
+      rules: unknown;
+      updatedBy: string;
+      updatedAt: Date;
+    };
+    error?: string;
+    message?: string;
+  }> {
     try {
       const config = await this.incentiveService.configureIncentiveRules(
         req.user.organizationId,
@@ -895,8 +938,18 @@ export class IncentiveController {
   })
   @ApiResponse({ status: 200, description: '服务状态' })
   @Get('health')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async healthCheck(): Promise<any> {
+  public async healthCheck(): Promise<{
+    status: string;
+    timestamp: string;
+    service: string;
+    details?: {
+      database: string;
+      paymentProcessor: string;
+      ruleEngine: string;
+      eventProcessing: string;
+    };
+    error?: string;
+  }> {
     try {
       const health = await this.incentiveService.getHealthStatus();
 

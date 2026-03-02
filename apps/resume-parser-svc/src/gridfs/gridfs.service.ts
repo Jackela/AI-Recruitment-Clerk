@@ -318,7 +318,8 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
         throw new Error('MongoDB database connection not available');
       }
 
-      this.gridFSBucket = new GridFSBucket(this.connection.db, {
+      // Cast mongoose Db to mongodb Db to resolve type mismatch between direct mongodb and mongoose's bundled version
+      this.gridFSBucket = new GridFSBucket(this.connection.db as unknown as import('mongodb').Db, {
         bucketName: this.bucketName,
         chunkSizeBytes: 255 * 1024, // 255 KB chunks for optimal performance
       });

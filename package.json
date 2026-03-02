@@ -31,7 +31,7 @@
     "typecheck": "tsc --noEmit --project tsconfig.ci.json",
     "ci:local": "npm run lint && npm run typecheck && npm run test:coverage && npm run audit && npm run build",
     "ci:full": "npm run ci:local && npm run test:e2e",
-    "audit": "npm audit --omit=dev --registry https://registry.npmjs.org/",
+    "audit": "npm audit --omit=dev --registry https://registry.npmjs.org/ --audit-level=moderate",
     "dependency-scan": "act -j dependency-scan -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest",
     "test:e2e": "npx nx run ai-recruitment-frontend-e2e:e2e",
     "test:e2e:setup": "cd e2e && npm run setup",
@@ -138,7 +138,7 @@
     "mongodb-memory-server": "^10.2.0",
     "mqtt": "^5.14.1",
     "msw": "^2.10.4",
-    "multer": "^2.0.2",
+    "multer": "^2.1.0",
     "nx": "21.5.2",
     "prettier": "^3.6.2",
     "ralph": "^1.4.0",
@@ -196,6 +196,7 @@
     "compression": "^1.8.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
+    "exceljs": "^4.4.0",
     "express": "^5.1.0",
     "ioredis": "^5.7.0",
     "marked": "^15.0.12",
@@ -207,6 +208,7 @@
     "passport-jwt": "^4.0.1",
     "pdf-parse": "^2.1.1",
     "pdf-parse-fork": "^1.2.0",
+    "puppeteer": "^23.0.0",
     "qrcode": "^1.5.4",
     "redis": "^4.7.0",
     "reflect-metadata": "^0.1.13",
@@ -226,6 +228,8 @@
     "@module-federation/node": "2.7.21",
     "@module-federation/rspack": "0.21.2",
     "koa": "^3.1.1",
-    "lodash": "^4.17.23"
+    "lodash": "^4.17.23",
+    "mongodb": "^6.12.0",
+    "multer": "^2.1.0"
   }
 }

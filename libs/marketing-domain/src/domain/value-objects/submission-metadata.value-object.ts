@@ -1,4 +1,4 @@
-import { ValueObject } from './base/value-object.js';
+import { ValueObject, type SerializedRestoreData } from './base/value-object.js';
 
 /**
  * Represents the submission metadata.
@@ -13,10 +13,14 @@ export class SubmissionMetadata extends ValueObject<{
    * @param data - The data.
    * @returns The SubmissionMetadata.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): SubmissionMetadata {
+  public static restore(data: SerializedRestoreData<{
+    ip: string;
+    userAgent: string;
+    timestamp: Date;
+  }>): SubmissionMetadata {
     return new SubmissionMetadata({
-      ...data,
+      ip: data.ip,
+      userAgent: data.userAgent,
       timestamp: new Date(data.timestamp),
     });
   }

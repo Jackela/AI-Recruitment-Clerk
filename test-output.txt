@@ -1,0 +1,1411 @@
+
+> ai-recruitment-clerk@1.0.1 test
+> jest --config jest.config.mjs --passWithNoTests
+
+PASS app-gateway apps/app-gateway/src/auth/auth.controller.spec.ts (66.728 s)
+PASS app-gateway apps/app-gateway/src/jobs/jobs.controller.spec.ts (68.492 s)
+PASS resume-parser-svc apps/resume-parser-svc/src/app/app.controller.spec.ts (76.366 s)
+PASS jd-extractor-svc apps/jd-extractor-svc/src/app/jd-events.controller.spec.ts (53.411 s)
+PASS resume-parser-svc apps/resume-parser-svc/src/parsing/parsing.service.contracts.spec.ts (96.502 s)
+PASS app-gateway apps/app-gateway/src/domains/domains.unit.spec.ts (45.899 s)
+PASS shared-dtos libs/shared-dtos/src/domains/incentive.test.ts (60.145 s)
+[31m[Nest] 7547  - [39m02/27/2026, 9:18:06 AM [31m  ERROR[39m [38;5;3m[ReportEventsController] [39m[31mError processing match.scored event for job-err_resume-err[39m
+[31m[Nest] 7547  - [39m02/27/2026, 9:18:06 AM [31m  ERROR[39m [38;5;3m[ReportEventsController] [39mError: db down
+    at Object.<anonymous> [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/report-generator-svc/src/integration/report-events.nats.spec.ts:135:7[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+PASS report-generator-svc apps/report-generator-svc/src/integration/report-events.nats.spec.ts (37.225 s)
+PASS shared-dtos libs/shared-dtos/src/domains/incentive.service.spec.ts (61.828 s)
+  ● Console
+
+    console.error
+      Error creating questionnaire incentive: Error: Database error
+          at Object.<anonymous> (/mnt/d/Code/AI-Recruitment-Clerk/libs/shared-dtos/src/domains/incentive.service.spec.ts:124:61)
+          at Promise.finally.completed (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1559:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1499:10)
+          at _callCircusTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1009:40)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at _runTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:949:3)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+          at run (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+          at runAndTransformResultsToJestFormat (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1920:21)
+          at jestAdapter (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/runner.js:101:19)
+          at runTestInternal (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-runner/build/testWorker.js:275:16)
+          at runTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-runner/build/testWorker.js:343:7)
+          at Object.worker (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-runner/build/testWorker.js:497:12)
+
+      215 |     return;
+      216 |   }
+    > 217 |   originalConsoleError.apply(console, args);
+          |                        ^
+      218 | };
+      219 |
+      220 | if (!process.env.CI) {
+
+      at console.error (../../jest.setup.ts:217:24)
+      at IncentiveDomainService.createQuestionnaireIncentive (src/domains/incentive.service.ts:132:15)
+      at Object.<anonymous> (src/domains/incentive.service.spec.ts:126:22)
+
+    console.error
+      Error creating referral incentive: Error: DB error
+          at Object.<anonymous> (/mnt/d/Code/AI-Recruitment-Clerk/libs/shared-dtos/src/domains/incentive.service.spec.ts:196:61)
+          at Promise.finally.completed (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1559:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1499:10)
+          at _callCircusTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1009:40)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at _runTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:949:3)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+          at run (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+          at runAndTransformResultsToJestFormat (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1920:21)
+          at jestAdapter (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/runner.js:101:19)
+          at runTestInternal (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-runner/build/testWorker.js:275:16)
+          at runTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-runner/build/testWorker.js:343:7)
+          at Object.worker (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-runner/build/testWorker.js:497:12)
+
+      215 |     return;
+      216 |   }
+    > 217 |   originalConsoleError.apply(console, args);
+          |                        ^
+      218 | };
+      219 |
+      220 | if (!process.env.CI) {
+
+      at console.error (../../jest.setup.ts:217:24)
+      at IncentiveDomainService.createReferralIncentive (src/domains/incentive.service.ts:192:15)
+      at Object.<anonymous> (src/domains/incentive.service.spec.ts:198:22)
+
+    console.error
+      Error approving incentive: Error: DB error
+          at Object.<anonymous> (/mnt/d/Code/AI-Recruitment-Clerk/libs/shared-dtos/src/domains/incentive.service.spec.ts:283:49)
+          at Promise.finally.completed (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1559:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1499:10)
+          at _callCircusTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1009:40)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at _runTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:949:3)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+          at run (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+          at runAndTransformResultsToJestFormat (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1920:21)
+          at jestAdapter (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/runner.js:101:19)
+          at runTestInternal (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-runner/build/testWorker.js:275:16)
+          at runTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-runner/build/testWorker.js:343:7)
+          at Object.worker (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-runner/build/testWorker.js:497:12)
+
+      215 |     return;
+      216 |   }
+    > 217 |   originalConsoleError.apply(console, args);
+          |                        ^
+      218 | };
+      219 |
+      220 | if (!process.env.CI) {
+
+      at console.error (../../jest.setup.ts:217:24)
+      at IncentiveDomainService.approveIncentive (src/domains/incentive.service.ts:290:15)
+      at Object.<anonymous> (src/domains/incentive.service.spec.ts:285:22)
+
+    console.error
+      Error processing payment: Error: Gateway error
+          at Object.<anonymous> (/mnt/d/Code/AI-Recruitment-Clerk/libs/shared-dtos/src/domains/incentive.service.spec.ts:368:59)
+          at Promise.finally.completed (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1559:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1499:10)
+          at _callCircusTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1009:40)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at _runTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:949:3)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+          at run (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+          at runAndTransformResultsToJestFormat (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1920:21)
+          at jestAdapter (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/runner.js:101:19)
+          at runTestInternal (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-runner/build/testWorker.js:275:16)
+          at runTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-runner/build/testWorker.js:343:7)
+          at Object.worker (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-runner/build/testWorker.js:497:12)
+
+      215 |     return;
+      216 |   }
+    > 217 |   originalConsoleError.apply(console, args);
+          |                        ^
+      218 | };
+      219 |
+      220 | if (!process.env.CI) {
+
+      at console.error (../../jest.setup.ts:217:24)
+      at IncentivePaymentService.processPayment (src/domains/incentive-payment.service.ts:126:15)
+      at Object.<anonymous> (src/domains/incentive.service.spec.ts:370:22)
+
+    console.error
+      Error getting incentive statistics: Error: DB error
+          at Object.<anonymous> (/mnt/d/Code/AI-Recruitment-Clerk/libs/shared-dtos/src/domains/incentive.service.spec.ts:477:49)
+          at Promise.finally.completed (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1559:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1499:10)
+          at _callCircusTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1009:40)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at _runTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:949:3)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+          at run (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+          at runAndTransformResultsToJestFormat (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1920:21)
+          at jestAdapter (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/runner.js:101:19)
+          at runTestInternal (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-runner/build/testWorker.js:275:16)
+          at runTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-runner/build/testWorker.js:343:7)
+          at Object.worker (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-runner/build/testWorker.js:497:12)
+
+      215 |     return;
+      216 |   }
+    > 217 |   originalConsoleError.apply(console, args);
+          |                        ^
+      218 | };
+      219 |
+      220 | if (!process.env.CI) {
+
+      at console.error (../../jest.setup.ts:217:24)
+      at IncentiveDomainService.getIncentiveStatistics (src/domains/incentive.service.ts:419:15)
+      at Object.<anonymous> (src/domains/incentive.service.spec.ts:479:22)
+
+    console.error
+      Error getting pending incentives: Error: DB error
+          at Object.<anonymous> (/mnt/d/Code/AI-Recruitment-Clerk/libs/shared-dtos/src/domains/incentive.service.spec.ts:506:62)
+          at Promise.finally.completed (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1559:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1499:10)
+          at _callCircusTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1009:40)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at _runTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:949:3)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+          at run (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+          at runAndTransformResultsToJestFormat (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1920:21)
+          at jestAdapter (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/runner.js:101:19)
+          at runTestInternal (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-runner/build/testWorker.js:275:16)
+          at runTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-runner/build/testWorker.js:343:7)
+          at Object.worker (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-runner/build/testWorker.js:497:12)
+
+      215 |     return;
+      216 |   }
+    > 217 |   originalConsoleError.apply(console, args);
+          |                        ^
+      218 | };
+      219 |
+      220 | if (!process.env.CI) {
+
+      at console.error (../../jest.setup.ts:217:24)
+      at IncentiveDomainService.getPendingIncentives (src/domains/incentive.service.ts:457:15)
+      at Object.<anonymous> (src/domains/incentive.service.spec.ts:508:22)
+
+PASS report-generator-svc apps/report-generator-svc/src/report-generator/report-generator.service.spec.ts (34.956 s)
+PASS shared-dtos libs/shared-dtos/src/domains/analytics-domain-service.test.ts (67.605 s)
+PASS resume-parser-svc apps/resume-parser-svc/src/app/resume-events.controller.spec.ts (20.777 s)
+[31m[Nest] 7522  - [39m02/27/2026, 9:18:43 AM [31m  ERROR[39m [38;5;3m[ScoringEventsController] [39m[31m[SCORING-ENGINE] Error processing analysis.jd.extracted for jobId: undefined:[39m
+[31m[Nest] 7522  - [39m02/27/2026, 9:18:44 AM [31m  ERROR[39m [38;5;3m[ScoringEventsController] [39mScoringEngineException: Insufficient data for accurate scoring
+    at ScoringEventsController.handleJdExtracted [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/app/scoring-events.controller.ts:73:15[90m)[39m
+    at Object.<anonymous> [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/app/scoring-events.controller.spec.ts:149:31[90m)[39m
+    at Promise.finally.completed [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1559:28[90m)[39m
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1499:10[90m)[39m
+    at _callCircusTest [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1009:40[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at _runTest [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:949:3[90m)[39m
+    at _runTestsForDescribeBlock [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:839:13[90m)[39m
+    at _runTestsForDescribeBlock [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:829:11[90m)[39m
+    at _runTestsForDescribeBlock [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:829:11[90m)[39m
+    at run [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:757:3[90m)[39m
+    at runAndTransformResultsToJestFormat [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1920:21[90m)[39m
+    at jestAdapter [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/runner.js:101:19[90m)[39m
+    at runTestInternal [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-runner[24m/build/testWorker.js:275:16[90m)[39m
+    at runTest [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-runner[24m/build/testWorker.js:343:7[90m)[39m
+    at Object.worker [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-runner[24m/build/testWorker.js:497:12[90m)[39m {
+  response: [32m'Insufficient data for accurate scoring'[39m,
+  status: [33m422[39m,
+  options: [90mundefined[39m,
+  errorDetails: {
+    type: [32m'SCORING_ERROR'[39m,
+    code: [32m'INSUFFICIENT_MATCHING_DATA'[39m,
+    message: [32m'Insufficient data for accurate scoring'[39m,
+    details: {
+      provided: {
+        jobId: [33mfalse[39m,
+        extractedData: [33mtrue[39m
+      },
+      correlationId: [32m'test-trace-id'[39m
+    },
+    timestamp: [32m'2026-02-27T01:18:43.950Z'[39m,
+    severity: [32m'medium'[39m,
+    context: [90mundefined[39m
+  },
+  enhancedDetails: {
+    type: [32m'SCORING_ERROR'[39m,
+    code: [32m'INSUFFICIENT_MATCHING_DATA'[39m,
+    message: [32m'Insufficient data for accurate scoring'[39m,
+    details: {
+      provided: {
+        jobId: [33mfalse[39m,
+        extractedData: [33mtrue[39m
+      },
+      correlationId: [32m'test-trace-id'[39m
+    },
+    timestamp: [32m'2026-02-27T01:18:43.950Z'[39m,
+    severity: [32m'medium'[39m,
+    context: [90mundefined[39m,
+    correlationContext: [90mundefined[39m,
+    recoveryStrategies: [
+      [32m'Use fallback scoring algorithm'[39m,
+      [32m'Apply rule-based scoring'[39m,
+      [32m'Use default weights'[39m,
+      [32m'Request additional data'[39m,
+      [32m'Generate partial scores'[39m
+    ],
+    affectedOperations: [],
+    relatedErrors: [],
+    businessImpact: [32m'high'[39m,
+    userImpact: [32m'moderate'[39m,
+    monitoringTags: {
+      service: [32m'scoring-engine'[39m,
+      [32m'error.code'[39m: [32m'INSUFFICIENT_MATCHING_DATA'[39m,
+      component: [32m'scoring-processing'[39m
+    }
+  }
+}
+[31m[Nest] 7522  - [39m02/27/2026, 9:18:44 AM [31m  ERROR[39m [38;5;3m[ScoringEventsController] [39m[31m[SCORING-ENGINE] Error processing analysis.jd.extracted for jobId: job-1:[39m
+[31m[Nest] 7522  - [39m02/27/2026, 9:18:44 AM [31m  ERROR[39m [38;5;3m[ScoringEventsController] [39mScoringEngineException: Insufficient data for accurate scoring
+    at ScoringEventsController.handleJdExtracted [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/app/scoring-events.controller.ts:73:15[90m)[39m
+    at Object.<anonymous> [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/app/scoring-events.controller.spec.ts:160:31[90m)[39m
+    at Promise.finally.completed [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1559:28[90m)[39m
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1499:10[90m)[39m
+    at _callCircusTest [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1009:40[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at _runTest [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:949:3[90m)[39m
+    at _runTestsForDescribeBlock [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:839:13[90m)[39m
+    at _runTestsForDescribeBlock [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:829:11[90m)[39m
+    at _runTestsForDescribeBlock [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:829:11[90m)[39m
+    at run [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:757:3[90m)[39m
+    at runAndTransformResultsToJestFormat [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1920:21[90m)[39m
+    at jestAdapter [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/runner.js:101:19[90m)[39m
+    at runTestInternal [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-runner[24m/build/testWorker.js:275:16[90m)[39m
+    at runTest [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-runner[24m/build/testWorker.js:343:7[90m)[39m
+    at Object.worker [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-runner[24m/build/testWorker.js:497:12[90m)[39m {
+  response: [32m'Insufficient data for accurate scoring'[39m,
+  status: [33m422[39m,
+  options: [90mundefined[39m,
+  errorDetails: {
+    type: [32m'SCORING_ERROR'[39m,
+    code: [32m'INSUFFICIENT_MATCHING_DATA'[39m,
+    message: [32m'Insufficient data for accurate scoring'[39m,
+    details: {
+      provided: {
+        jobId: [33mtrue[39m,
+        extractedData: [33mfalse[39m
+      },
+      correlationId: [32m'test-trace-id'[39m
+    },
+    timestamp: [32m'2026-02-27T01:18:44.015Z'[39m,
+    severity: [32m'medium'[39m,
+    context: [90mundefined[39m
+  },
+  enhancedDetails: {
+    type: [32m'SCORING_ERROR'[39m,
+    code: [32m'INSUFFICIENT_MATCHING_DATA'[39m,
+    message: [32m'Insufficient data for accurate scoring'[39m,
+    details: {
+      provided: {
+        jobId: [33mtrue[39m,
+        extractedData: [33mfalse[39m
+      },
+      correlationId: [32m'test-trace-id'[39m
+    },
+    timestamp: [32m'2026-02-27T01:18:44.015Z'[39m,
+    severity: [32m'medium'[39m,
+    context: [90mundefined[39m,
+    correlationContext: [90mundefined[39m,
+    recoveryStrategies: [
+      [32m'Use fallback scoring algorithm'[39m,
+      [32m'Apply rule-based scoring'[39m,
+      [32m'Use default weights'[39m,
+      [32m'Request additional data'[39m,
+      [32m'Generate partial scores'[39m
+    ],
+    affectedOperations: [],
+    relatedErrors: [],
+    businessImpact: [32m'high'[39m,
+    userImpact: [32m'moderate'[39m,
+    monitoringTags: {
+      service: [32m'scoring-engine'[39m,
+      [32m'error.code'[39m: [32m'INSUFFICIENT_MATCHING_DATA'[39m,
+      component: [32m'scoring-processing'[39m
+    }
+  }
+}
+[31m[Nest] 7522  - [39m02/27/2026, 9:18:44 AM [31m  ERROR[39m [38;5;3m[ScoringEventsController] [39m[31m[SCORING-ENGINE] Error processing analysis.resume.parsed for resumeId: resume-1:[39m
+[31m[Nest] 7522  - [39m02/27/2026, 9:18:44 AM [31m  ERROR[39m [38;5;3m[ScoringEventsController] [39mScoringEngineException: Insufficient data for accurate scoring
+    at ScoringEventsController.handleResumeParsed [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/app/scoring-events.controller.ts:122:15[90m)[39m
+    at Object.<anonymous> [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/app/scoring-events.controller.spec.ts:263:31[90m)[39m
+    at Promise.finally.completed [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1559:28[90m)[39m
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1499:10[90m)[39m
+    at _callCircusTest [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1009:40[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at _runTest [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:949:3[90m)[39m
+    at _runTestsForDescribeBlock [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:839:13[90m)[39m
+    at _runTestsForDescribeBlock [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:829:11[90m)[39m
+    at _runTestsForDescribeBlock [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:829:11[90m)[39m
+    at run [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:757:3[90m)[39m
+    at runAndTransformResultsToJestFormat [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1920:21[90m)[39m
+    at jestAdapter [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/runner.js:101:19[90m)[39m
+    at runTestInternal [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-runner[24m/build/testWorker.js:275:16[90m)[39m
+    at runTest [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-runner[24m/build/testWorker.js:343:7[90m)[39m
+    at Object.worker [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-runner[24m/build/testWorker.js:497:12[90m)[39m {
+  response: [32m'Insufficient data for accurate scoring'[39m,
+  status: [33m422[39m,
+  options: [90mundefined[39m,
+  errorDetails: {
+    type: [32m'SCORING_ERROR'[39m,
+    code: [32m'INSUFFICIENT_MATCHING_DATA'[39m,
+    message: [32m'Insufficient data for accurate scoring'[39m,
+    details: {
+      provided: {
+        jobId: [33mfalse[39m,
+        resumeId: [33mtrue[39m,
+        resumeDto: [33mtrue[39m
+      },
+      correlationId: [32m'test-trace-id'[39m
+    },
+    timestamp: [32m'2026-02-27T01:18:44.028Z'[39m,
+    severity: [32m'medium'[39m,
+    context: [90mundefined[39m
+  },
+  enhancedDetails: {
+    type: [32m'SCORING_ERROR'[39m,
+    code: [32m'INSUFFICIENT_MATCHING_DATA'[39m,
+    message: [32m'Insufficient data for accurate scoring'[39m,
+    details: {
+      provided: {
+        jobId: [33mfalse[39m,
+        resumeId: [33mtrue[39m,
+        resumeDto: [33mtrue[39m
+      },
+      correlationId: [32m'test-trace-id'[39m
+    },
+    timestamp: [32m'2026-02-27T01:18:44.028Z'[39m,
+    severity: [32m'medium'[39m,
+    context: [90mundefined[39m,
+    correlationContext: [90mundefined[39m,
+    recoveryStrategies: [
+      [32m'Use fallback scoring algorithm'[39m,
+      [32m'Apply rule-based scoring'[39m,
+      [32m'Use default weights'[39m,
+      [32m'Request additional data'[39m,
+      [32m'Generate partial scores'[39m
+    ],
+    affectedOperations: [],
+    relatedErrors: [],
+    businessImpact: [32m'high'[39m,
+    userImpact: [32m'moderate'[39m,
+    monitoringTags: {
+      service: [32m'scoring-engine'[39m,
+      [32m'error.code'[39m: [32m'INSUFFICIENT_MATCHING_DATA'[39m,
+      component: [32m'scoring-processing'[39m
+    }
+  }
+}
+[31m[Nest] 7522  - [39m02/27/2026, 9:18:44 AM [31m  ERROR[39m [38;5;3m[ScoringEventsController] [39m[31m[SCORING-ENGINE] Error processing analysis.resume.parsed for resumeId: undefined:[39m
+[31m[Nest] 7522  - [39m02/27/2026, 9:18:44 AM [31m  ERROR[39m [38;5;3m[ScoringEventsController] [39mScoringEngineException: Insufficient data for accurate scoring
+    at ScoringEventsController.handleResumeParsed [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/app/scoring-events.controller.ts:122:15[90m)[39m
+    at Object.<anonymous> [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/app/scoring-events.controller.spec.ts:274:31[90m)[39m
+    at Promise.finally.completed [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1559:28[90m)[39m
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1499:10[90m)[39m
+    at _callCircusTest [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1009:40[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at _runTest [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:949:3[90m)[39m
+    at _runTestsForDescribeBlock [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:839:13[90m)[39m
+    at _runTestsForDescribeBlock [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:829:11[90m)[39m
+    at _runTestsForDescribeBlock [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:829:11[90m)[39m
+    at run [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:757:3[90m)[39m
+    at runAndTransformResultsToJestFormat [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1920:21[90m)[39m
+    at jestAdapter [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/runner.js:101:19[90m)[39m
+    at runTestInternal [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-runner[24m/build/testWorker.js:275:16[90m)[39m
+    at runTest [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-runner[24m/build/testWorker.js:343:7[90m)[39m
+    at Object.worker [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-runner[24m/build/testWorker.js:497:12[90m)[39m {
+  response: [32m'Insufficient data for accurate scoring'[39m,
+  status: [33m422[39m,
+  options: [90mundefined[39m,
+  errorDetails: {
+    type: [32m'SCORING_ERROR'[39m,
+    code: [32m'INSUFFICIENT_MATCHING_DATA'[39m,
+    message: [32m'Insufficient data for accurate scoring'[39m,
+    details: {
+      provided: {
+        jobId: [33mtrue[39m,
+        resumeId: [33mfalse[39m,
+        resumeDto: [33mtrue[39m
+      },
+      correlationId: [32m'test-trace-id'[39m
+    },
+    timestamp: [32m'2026-02-27T01:18:44.030Z'[39m,
+    severity: [32m'medium'[39m,
+    context: [90mundefined[39m
+  },
+  enhancedDetails: {
+    type: [32m'SCORING_ERROR'[39m,
+    code: [32m'INSUFFICIENT_MATCHING_DATA'[39m,
+    message: [32m'Insufficient data for accurate scoring'[39m,
+    details: {
+      provided: {
+        jobId: [33mtrue[39m,
+        resumeId: [33mfalse[39m,
+        resumeDto: [33mtrue[39m
+      },
+      correlationId: [32m'test-trace-id'[39m
+    },
+    timestamp: [32m'2026-02-27T01:18:44.030Z'[39m,
+    severity: [32m'medium'[39m,
+    context: [90mundefined[39m,
+    correlationContext: [90mundefined[39m,
+    recoveryStrategies: [
+      [32m'Use fallback scoring algorithm'[39m,
+      [32m'Apply rule-based scoring'[39m,
+      [32m'Use default weights'[39m,
+      [32m'Request additional data'[39m,
+      [32m'Generate partial scores'[39m
+    ],
+    affectedOperations: [],
+    relatedErrors: [],
+    businessImpact: [32m'high'[39m,
+    userImpact: [32m'moderate'[39m,
+    monitoringTags: {
+      service: [32m'scoring-engine'[39m,
+      [32m'error.code'[39m: [32m'INSUFFICIENT_MATCHING_DATA'[39m,
+      component: [32m'scoring-processing'[39m
+    }
+  }
+}
+[31m[Nest] 7522  - [39m02/27/2026, 9:18:44 AM [31m  ERROR[39m [38;5;3m[ScoringEventsController] [39m[31m[SCORING-ENGINE] Error processing analysis.resume.parsed for resumeId: resume-1:[39m
+[31m[Nest] 7522  - [39m02/27/2026, 9:18:44 AM [31m  ERROR[39m [38;5;3m[ScoringEventsController] [39mScoringEngineException: Insufficient data for accurate scoring
+    at ScoringEventsController.handleResumeParsed [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/app/scoring-events.controller.ts:122:15[90m)[39m
+    at Object.<anonymous> [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/app/scoring-events.controller.spec.ts:285:31[90m)[39m
+    at Promise.finally.completed [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1559:28[90m)[39m
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1499:10[90m)[39m
+    at _callCircusTest [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1009:40[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at _runTest [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:949:3[90m)[39m
+    at _runTestsForDescribeBlock [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:839:13[90m)[39m
+    at _runTestsForDescribeBlock [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:829:11[90m)[39m
+    at _runTestsForDescribeBlock [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:829:11[90m)[39m
+    at run [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:757:3[90m)[39m
+    at runAndTransformResultsToJestFormat [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1920:21[90m)[39m
+    at jestAdapter [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/runner.js:101:19[90m)[39m
+    at runTestInternal [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-runner[24m/build/testWorker.js:275:16[90m)[39m
+    at runTest [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-runner[24m/build/testWorker.js:343:7[90m)[39m
+    at Object.worker [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-runner[24m/build/testWorker.js:497:12[90m)[39m {
+  response: [32m'Insufficient data for accurate scoring'[39m,
+  status: [33m422[39m,
+  options: [90mundefined[39m,
+  errorDetails: {
+    type: [32m'SCORING_ERROR'[39m,
+    code: [32m'INSUFFICIENT_MATCHING_DATA'[39m,
+    message: [32m'Insufficient data for accurate scoring'[39m,
+    details: {
+      provided: {
+        jobId: [33mtrue[39m,
+        resumeId: [33mtrue[39m,
+        resumeDto: [33mfalse[39m
+      },
+      correlationId: [32m'test-trace-id'[39m
+    },
+    timestamp: [32m'2026-02-27T01:18:44.033Z'[39m,
+    severity: [32m'medium'[39m,
+    context: [90mundefined[39m
+  },
+  enhancedDetails: {
+    type: [32m'SCORING_ERROR'[39m,
+    code: [32m'INSUFFICIENT_MATCHING_DATA'[39m,
+    message: [32m'Insufficient data for accurate scoring'[39m,
+    details: {
+      provided: {
+        jobId: [33mtrue[39m,
+        resumeId: [33mtrue[39m,
+        resumeDto: [33mfalse[39m
+      },
+      correlationId: [32m'test-trace-id'[39m
+    },
+    timestamp: [32m'2026-02-27T01:18:44.033Z'[39m,
+    severity: [32m'medium'[39m,
+    context: [90mundefined[39m,
+    correlationContext: [90mundefined[39m,
+    recoveryStrategies: [
+      [32m'Use fallback scoring algorithm'[39m,
+      [32m'Apply rule-based scoring'[39m,
+      [32m'Use default weights'[39m,
+      [32m'Request additional data'[39m,
+      [32m'Generate partial scores'[39m
+    ],
+    affectedOperations: [],
+    relatedErrors: [],
+    businessImpact: [32m'high'[39m,
+    userImpact: [32m'moderate'[39m,
+    monitoringTags: {
+      service: [32m'scoring-engine'[39m,
+      [32m'error.code'[39m: [32m'INSUFFICIENT_MATCHING_DATA'[39m,
+      component: [32m'scoring-processing'[39m
+    }
+  }
+}
+[31m[Nest] 7522  - [39m02/27/2026, 9:18:44 AM [31m  ERROR[39m [38;5;3m[ScoringEventsController] [39m[31m[SCORING-ENGINE] Error processing analysis.jd.extracted for jobId: undefined:[39m
+[31m[Nest] 7522  - [39m02/27/2026, 9:18:44 AM [31m  ERROR[39m [38;5;3m[ScoringEventsController] [39mScoringEngineException: Insufficient data for accurate scoring
+    at ScoringEventsController.handleJdExtracted [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/app/scoring-events.controller.ts:73:15[90m)[39m
+    at Object.<anonymous> [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/app/scoring-events.controller.spec.ts:668:26[90m)[39m
+    at Promise.finally.completed [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1559:28[90m)[39m
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1499:10[90m)[39m
+    at _callCircusTest [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1009:40[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at _runTest [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:949:3[90m)[39m
+    at _runTestsForDescribeBlock [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:839:13[90m)[39m
+    at _runTestsForDescribeBlock [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:829:11[90m)[39m
+    at _runTestsForDescribeBlock [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:829:11[90m)[39m
+    at run [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:757:3[90m)[39m
+    at runAndTransformResultsToJestFormat [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1920:21[90m)[39m
+    at jestAdapter [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/runner.js:101:19[90m)[39m
+    at runTestInternal [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-runner[24m/build/testWorker.js:275:16[90m)[39m
+    at runTest [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-runner[24m/build/testWorker.js:343:7[90m)[39m
+    at Object.worker [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-runner[24m/build/testWorker.js:497:12[90m)[39m {
+  response: [32m'Insufficient data for accurate scoring'[39m,
+  status: [33m422[39m,
+  options: [90mundefined[39m,
+  errorDetails: {
+    type: [32m'SCORING_ERROR'[39m,
+    code: [32m'INSUFFICIENT_MATCHING_DATA'[39m,
+    message: [32m'Insufficient data for accurate scoring'[39m,
+    details: {
+      provided: {
+        jobId: [33mfalse[39m,
+        extractedData: [33mfalse[39m
+      },
+      correlationId: [32m'correlation-123'[39m
+    },
+    timestamp: [32m'2026-02-27T01:18:44.060Z'[39m,
+    severity: [32m'medium'[39m,
+    context: [90mundefined[39m
+  },
+  enhancedDetails: {
+    type: [32m'SCORING_ERROR'[39m,
+    code: [32m'INSUFFICIENT_MATCHING_DATA'[39m,
+    message: [32m'Insufficient data for accurate scoring'[39m,
+    details: {
+      provided: {
+        jobId: [33mfalse[39m,
+        extractedData: [33mfalse[39m
+      },
+      correlationId: [32m'correlation-123'[39m
+    },
+    timestamp: [32m'2026-02-27T01:18:44.060Z'[39m,
+    severity: [32m'medium'[39m,
+    context: [90mundefined[39m,
+    correlationContext: [90mundefined[39m,
+    recoveryStrategies: [
+      [32m'Use fallback scoring algorithm'[39m,
+      [32m'Apply rule-based scoring'[39m,
+      [32m'Use default weights'[39m,
+      [32m'Request additional data'[39m,
+      [32m'Generate partial scores'[39m
+    ],
+    affectedOperations: [],
+    relatedErrors: [],
+    businessImpact: [32m'high'[39m,
+    userImpact: [32m'moderate'[39m,
+    monitoringTags: {
+      service: [32m'scoring-engine'[39m,
+      [32m'error.code'[39m: [32m'INSUFFICIENT_MATCHING_DATA'[39m,
+      component: [32m'scoring-processing'[39m
+    }
+  }
+}
+[31m[Nest] 7522  - [39m02/27/2026, 9:18:44 AM [31m  ERROR[39m [38;5;3m[ScoringEventsController] [39m[31m[SCORING-ENGINE] Error processing analysis.jd.extracted for jobId: undefined:[39m
+[31m[Nest] 7522  - [39m02/27/2026, 9:18:44 AM [31m  ERROR[39m [38;5;3m[ScoringEventsController] [39mScoringEngineException: Insufficient data for accurate scoring
+    at ScoringEventsController.handleJdExtracted [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/app/scoring-events.controller.ts:73:15[90m)[39m
+    at Object.<anonymous> [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/app/scoring-events.controller.spec.ts:686:26[90m)[39m
+    at Promise.finally.completed [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1559:28[90m)[39m
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1499:10[90m)[39m
+    at _callCircusTest [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1009:40[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at _runTest [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:949:3[90m)[39m
+    at _runTestsForDescribeBlock [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:839:13[90m)[39m
+    at _runTestsForDescribeBlock [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:829:11[90m)[39m
+    at _runTestsForDescribeBlock [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:829:11[90m)[39m
+    at run [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:757:3[90m)[39m
+    at runAndTransformResultsToJestFormat [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1920:21[90m)[39m
+    at jestAdapter [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/runner.js:101:19[90m)[39m
+    at runTestInternal [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-runner[24m/build/testWorker.js:275:16[90m)[39m
+    at runTest [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-runner[24m/build/testWorker.js:343:7[90m)[39m
+    at Object.worker [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-runner[24m/build/testWorker.js:497:12[90m)[39m {
+  response: [32m'Insufficient data for accurate scoring'[39m,
+  status: [33m422[39m,
+  options: [90mundefined[39m,
+  errorDetails: {
+    type: [32m'SCORING_ERROR'[39m,
+    code: [32m'INSUFFICIENT_MATCHING_DATA'[39m,
+    message: [32m'Insufficient data for accurate scoring'[39m,
+    details: {
+      provided: {
+        jobId: [33mfalse[39m,
+        extractedData: [33mfalse[39m
+      },
+      correlationId: [90mundefined[39m
+    },
+    timestamp: [32m'2026-02-27T01:18:44.063Z'[39m,
+    severity: [32m'medium'[39m,
+    context: [90mundefined[39m
+  },
+  enhancedDetails: {
+    type: [32m'SCORING_ERROR'[39m,
+    code: [32m'INSUFFICIENT_MATCHING_DATA'[39m,
+    message: [32m'Insufficient data for accurate scoring'[39m,
+    details: {
+      provided: {
+        jobId: [33mfalse[39m,
+        extractedData: [33mfalse[39m
+      },
+      correlationId: [90mundefined[39m
+    },
+    timestamp: [32m'2026-02-27T01:18:44.063Z'[39m,
+    severity: [32m'medium'[39m,
+    context: [90mundefined[39m,
+    correlationContext: [90mundefined[39m,
+    recoveryStrategies: [
+      [32m'Use fallback scoring algorithm'[39m,
+      [32m'Apply rule-based scoring'[39m,
+      [32m'Use default weights'[39m,
+      [32m'Request additional data'[39m,
+      [32m'Generate partial scores'[39m
+    ],
+    affectedOperations: [],
+    relatedErrors: [],
+    businessImpact: [32m'high'[39m,
+    userImpact: [32m'moderate'[39m,
+    monitoringTags: {
+      service: [32m'scoring-engine'[39m,
+      [32m'error.code'[39m: [32m'INSUFFICIENT_MATCHING_DATA'[39m,
+      component: [32m'scoring-processing'[39m
+    }
+  }
+}
+PASS scoring-engine-svc apps/scoring-engine-svc/src/app/scoring-events.controller.spec.ts (47.648 s)
+[31m[Nest] 7547  - [39m02/27/2026, 9:18:50 AM [31m  ERROR[39m [38;5;3m[ScoringEngineService] [39m[31mEnhanced scoring failed, falling back to basic scoring [enhancedScoring][39m
+[31m[Nest] 7547  - [39m02/27/2026, 9:18:50 AM [31m  ERROR[39m [38;5;3m[ScoringEngineService] [39mScoringEngineException: ML model prediction failed
+    at ScoringEngineService._calculateEnhancedMatchScore [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/scoring.service.ts:395:13[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at ScoringEngineService.handleResumeParsedEvent [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/scoring.service.ts:160:21[90m)[39m
+    at Object.<anonymous> [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/scoring.service.spec.ts:492:7[90m)[39m {
+  response: [32m'ML model prediction failed'[39m,
+  status: [33m422[39m,
+  options: [90mundefined[39m,
+  errorDetails: {
+    type: [32m'SCORING_ERROR'[39m,
+    code: [32m'ML_MODEL_PREDICTION_FAILED'[39m,
+    message: [32m'ML model prediction failed'[39m,
+    details: {
+      originalError: [32m'AI service unavailable'[39m,
+      processingTimeMs: [33m1[39m,
+      fallbackTriggered: [33mtrue[39m,
+      correlationId: [90mundefined[39m
+    },
+    timestamp: [32m'2026-02-27T01:18:50.127Z'[39m,
+    severity: [32m'medium'[39m,
+    context: [90mundefined[39m
+  },
+  enhancedDetails: {
+    type: [32m'SCORING_ERROR'[39m,
+    code: [32m'ML_MODEL_PREDICTION_FAILED'[39m,
+    message: [32m'ML model prediction failed'[39m,
+    details: {
+      originalError: [32m'AI service unavailable'[39m,
+      processingTimeMs: [33m1[39m,
+      fallbackTriggered: [33mtrue[39m,
+      correlationId: [90mundefined[39m
+    },
+    timestamp: [32m'2026-02-27T01:18:50.127Z'[39m,
+    severity: [32m'medium'[39m,
+    context: [90mundefined[39m,
+    correlationContext: [90mundefined[39m,
+    recoveryStrategies: [
+      [32m'Use fallback scoring algorithm'[39m,
+      [32m'Apply rule-based scoring'[39m,
+      [32m'Use default weights'[39m,
+      [32m'Request additional data'[39m,
+      [32m'Generate partial scores'[39m
+    ],
+    affectedOperations: [],
+    relatedErrors: [],
+    businessImpact: [32m'high'[39m,
+    userImpact: [32m'moderate'[39m,
+    monitoringTags: {
+      service: [32m'scoring-engine'[39m,
+      [32m'error.code'[39m: [32m'ML_MODEL_PREDICTION_FAILED'[39m,
+      component: [32m'scoring-processing'[39m
+    }
+  }
+}
+[31m[Nest] 7547  - [39m02/27/2026, 9:18:50 AM [31m  ERROR[39m [38;5;3m[ScoringEngineService] [39m[31mEnhanced scoring failed, falling back to basic scoring [enhancedScoring][39m
+[31m[Nest] 7547  - [39m02/27/2026, 9:18:50 AM [31m  ERROR[39m [38;5;3m[ScoringEngineService] [39mScoringEngineException: ML model prediction failed
+    at ScoringEngineService._calculateEnhancedMatchScore [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/scoring.service.ts:395:13[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at ScoringEngineService.handleResumeParsedEvent [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/scoring.service.ts:160:21[90m)[39m
+    at Object.<anonymous> [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/scoring.service.spec.ts:512:7[90m)[39m {
+  response: [32m'ML model prediction failed'[39m,
+  status: [33m422[39m,
+  options: [90mundefined[39m,
+  errorDetails: {
+    type: [32m'SCORING_ERROR'[39m,
+    code: [32m'ML_MODEL_PREDICTION_FAILED'[39m,
+    message: [32m'ML model prediction failed'[39m,
+    details: {
+      originalError: [32m'Enhanced scoring failed'[39m,
+      processingTimeMs: [33m0[39m,
+      fallbackTriggered: [33mtrue[39m,
+      correlationId: [90mundefined[39m
+    },
+    timestamp: [32m'2026-02-27T01:18:50.134Z'[39m,
+    severity: [32m'medium'[39m,
+    context: [90mundefined[39m
+  },
+  enhancedDetails: {
+    type: [32m'SCORING_ERROR'[39m,
+    code: [32m'ML_MODEL_PREDICTION_FAILED'[39m,
+    message: [32m'ML model prediction failed'[39m,
+    details: {
+      originalError: [32m'Enhanced scoring failed'[39m,
+      processingTimeMs: [33m0[39m,
+      fallbackTriggered: [33mtrue[39m,
+      correlationId: [90mundefined[39m
+    },
+    timestamp: [32m'2026-02-27T01:18:50.134Z'[39m,
+    severity: [32m'medium'[39m,
+    context: [90mundefined[39m,
+    correlationContext: [90mundefined[39m,
+    recoveryStrategies: [
+      [32m'Use fallback scoring algorithm'[39m,
+      [32m'Apply rule-based scoring'[39m,
+      [32m'Use default weights'[39m,
+      [32m'Request additional data'[39m,
+      [32m'Generate partial scores'[39m
+    ],
+    affectedOperations: [],
+    relatedErrors: [],
+    businessImpact: [32m'high'[39m,
+    userImpact: [32m'moderate'[39m,
+    monitoringTags: {
+      service: [32m'scoring-engine'[39m,
+      [32m'error.code'[39m: [32m'ML_MODEL_PREDICTION_FAILED'[39m,
+      component: [32m'scoring-processing'[39m
+    }
+  }
+}
+PASS scoring-engine-svc apps/scoring-engine-svc/src/scoring.service.spec.ts (43.213 s)
+[31m[Nest] 7524  - [39m02/27/2026, 9:18:58 AM [31m  ERROR[39m [38;5;3m[CulturalFitAnalyzerService] [39m[31mError in cultural fit analysis[39m
+[31m[Nest] 7524  - [39m02/27/2026, 9:18:58 AM [31m  ERROR[39m [38;5;3m[CulturalFitAnalyzerService] [39mTypeError: Cannot read properties of null (reading 'companySize')
+    at CulturalFitAnalyzerService.calculateAlignmentScores [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/services/cultural-fit-analyzer.service.ts:436:18[90m)[39m
+    at CulturalFitAnalyzerService.analyzeCulturalFit [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/services/cultural-fit-analyzer.service.ts:163:36[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at Object.<anonymous> [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/services/cultural-fit-analyzer.service.spec.ts:911:22[90m)[39m
+PASS scoring-engine-svc apps/scoring-engine-svc/src/services/cultural-fit-analyzer.service.spec.ts (37.953 s)
+PASS api-contracts libs/api-contracts/src/validation/contract.validator.test.ts (40.027 s)
+PASS app-gateway apps/app-gateway/src/guest/controllers/guest-resume.controller.spec.ts (24.366 s)
+PASS app-gateway apps/app-gateway/src/domains/analytics/reports.controller.spec.ts (10.415 s)
+PASS scoring-engine-svc apps/scoring-engine-svc/src/integration/scoring-engine.integration.spec.ts (46.362 s)
+PASS shared-dtos libs/shared-dtos/src/encryption/encryption.service.spec.ts (5.868 s)
+PASS jd-extractor-svc apps/jd-extractor-svc/src/integration/jd-extractor.nats.spec.ts (33.961 s)
+PASS app-gateway apps/app-gateway/src/auth/auth.service.spec.ts (39.77 s)
+PASS app-gateway apps/app-gateway/src/auth/guards/jwt-auth.guard.spec.ts (25.974 s)
+PASS resume-parser-svc apps/resume-parser-svc/src/parsing/parsing.service.spec.ts (51.275 s)
+PASS shared-dtos libs/shared-dtos/src/domains/usage-tracker.helper.spec.ts (66.258 s)
+PASS app-gateway apps/app-gateway/src/marketing/feedback-code.service.spec.ts (35.437 s)
+PASS report-generator-svc apps/report-generator-svc/src/report-generator/report.repository.spec.ts (36.704 s)
+PASS app-gateway apps/app-gateway/src/cache/vector-store.service.spec.ts (40.83 s)
+PASS ai-recruitment-frontend apps/ai-recruitment-frontend/src/app/services/api.service.spec.ts (27.151 s)
+PASS app-gateway apps/app-gateway/src/auth/services/mfa.service.spec.ts (29.613 s)
+PASS scoring-engine-svc apps/scoring-engine-svc/src/app/app.controller.spec.ts (8.299 s)
+[31m[Nest] 7536  - [39m02/27/2026, 9:20:51 AM [31m  ERROR[39m [38;5;3m[LlmService] [39m[31mGemini API call failed: API Error[39m
+[31m[Nest] 7536  - [39m02/27/2026, 9:20:51 AM [31m  ERROR[39m [38;5;3m[LlmService] [39m[31mGemini API call failed: Cannot read properties of null (reading 'requirements')[39m
+PASS jd-extractor-svc apps/jd-extractor-svc/src/llm/llm.service.spec.ts (27.463 s)
+PASS resume-parser-svc apps/resume-parser-svc/src/parsing/pdf-extraction.spec.ts (22.809 s)
+PASS resume-parser-svc apps/resume-parser-svc/src/repositories/resume.repository.integration.spec.ts (19.101 s)
+PASS resume-parser-svc apps/resume-parser-svc/src/parsing/services/parsing-event.service.spec.ts (6.311 s)
+PASS resume-parser-svc apps/resume-parser-svc/src/app/app.service.spec.ts (23.245 s)
+PASS jd-extractor-svc apps/jd-extractor-svc/src/services/jd-extractor-nats.service.spec.ts (6.923 s)
+PASS resume-parser-svc apps/resume-parser-svc/src/parsing/services/parsing-file.service.spec.ts (43.105 s)
+[31m[Nest] 7536  - [39m02/27/2026, 9:21:34 AM [31m  ERROR[39m [38;5;3m[GridFsService] [39m[31mError in downloadFile[39m
+[31m[Nest] 7536  - [39m02/27/2026, 9:21:34 AM [31m  ERROR[39m [38;5;3m[GridFsService] [39mObject(2) {
+  error: [32m'File not found in GridFS: 507f1f77bcf86cd799439011'[39m,
+  gridFsUrl: [32m'gridfs://resume-files/507f1f77bcf86cd799439011'[39m
+}
+[31m[Nest] 7536  - [39m02/27/2026, 9:21:34 AM [31m  ERROR[39m [38;5;3m[GridFsService] [39m[31mError retrieving GridFS file info[39m
+[31m[Nest] 7536  - [39m02/27/2026, 9:21:34 AM [31m  ERROR[39m [38;5;3m[GridFsService] [39mObject(2) {
+  error: [32m'File not found in GridFS: 507f1f77bcf86cd799439011'[39m,
+  gridFsUrl: [32m'gridfs://resume-files/507f1f77bcf86cd799439011'[39m
+}
+[31m[Nest] 7536  - [39m02/27/2026, 9:21:34 AM [31m  ERROR[39m [38;5;3m[GridFsService] [39m[31mError in downloadFile[39m
+[31m[Nest] 7536  - [39m02/27/2026, 9:21:34 AM [31m  ERROR[39m [38;5;3m[GridFsService] [39mObject(2) {
+  error: [32m'Invalid GridFS URL format: invalid-url. Expected format: gridfs://bucket-name/fileId'[39m,
+  gridFsUrl: [32m'invalid-url'[39m
+}
+PASS resume-parser-svc apps/resume-parser-svc/src/gridfs/gridfs.service.integration.spec.ts (20.148 s)
+PASS app-gateway apps/app-gateway/src/app/app.controller.spec.ts (16.261 s)
+PASS app-gateway apps/app-gateway/src/domains/user-management/user-management.repository.spec.ts (26.435 s)
+PASS report-generator-svc apps/report-generator-svc/src/report-generator/report-templates.service.spec.ts (41.274 s)
+PASS app-gateway apps/app-gateway/src/repositories/job.repository.integration.spec.ts (13.409 s)
+PASS resume-parser-svc apps/resume-parser-svc/src/integration/resume-parser-integration.service.spec.ts (10.739 s)
+PASS scoring-engine-svc apps/scoring-engine-svc/src/services/experience-analyzer.service.spec.ts (13.14 s)
+PASS ai-recruitment-frontend apps/ai-recruitment-frontend/src/app/pages/jobs/create-job/create-job.component.spec.ts (8.694 s)
+PASS ai-recruitment-frontend apps/ai-recruitment-frontend/src/app/app.spec.ts (20.957 s)
+PASS resume-parser-svc apps/resume-parser-svc/src/repositories/resume.repository.spec.ts (13.16 s)
+PASS app-gateway apps/app-gateway/src/guest/controllers/guest.controller.spec.ts (11.358 s)
+PASS report-generator-svc apps/report-generator-svc/src/report-helpers/llm-report-mapper.service.spec.ts
+PASS report-generator-svc apps/report-generator-svc/src/app/app.controller.spec.ts
+PASS app-gateway apps/app-gateway/src/domains/domains.integration.spec.ts (11.838 s)
+PASS app-gateway apps/app-gateway/src/domains/analytics/analytics-integration.service.spec.ts (11.589 s)
+PASS resume-parser-svc apps/resume-parser-svc/src/gridfs/gridfs.service.spec.ts (13.162 s)
+PASS app-gateway apps/app-gateway/src/guest/services/guest-usage.service.spec.ts (13.705 s)
+PASS app-gateway apps/app-gateway/src/domains/analytics/metrics.controller.spec.ts (11.692 s)
+PASS ai-recruitment-frontend apps/ai-recruitment-frontend/src/app/pages/resume/upload-resume.component.spec.ts (9.448 s)
+PASS app-gateway apps/app-gateway/src/jobs/jobs.integration.spec.ts (9.478 s)
+PASS ai-recruitment-frontend apps/ai-recruitment-frontend/src/app/components/mobile/mobile-dashboard.interactions.spec.ts (7.667 s)
+PASS ai-recruitment-frontend apps/ai-recruitment-frontend/src/app/store/jobs/job.effects.spec.ts (13.59 s)
+PASS jd-extractor-svc apps/jd-extractor-svc/src/app/health.controller.spec.ts (11.102 s)
+PASS app-gateway apps/app-gateway/src/cache/cache.service.spec.ts (9.696 s)
+PASS app-gateway apps/app-gateway/src/marketing/marketing-admin.controller.spec.ts (9.872 s)
+PASS ai-recruitment-frontend apps/ai-recruitment-frontend/src/app/store/guest/guest.effects.spec.ts (7.262 s)
+[31m[Nest] 7547  - [39m02/27/2026, 9:22:54 AM [31m  ERROR[39m [38;5;3m[ScoringConfidenceService] [39m[31mError generating confidence report[39m
+[31m[Nest] 7547  - [39m02/27/2026, 9:22:54 AM [31m  ERROR[39m [38;5;3m[ScoringConfidenceService] [39mTypeError: Cannot read properties of null (reading 'contactInfo')
+    at DataQualityService.assessCompleteness [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/services/confidence/data-quality.service.ts:63:17[90m)[39m
+    at DataQualityService.assessDataQuality [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/services/confidence/data-quality.service.ts:26:31[90m)[39m
+    at ScoringConfidenceService.generateConfidenceReport [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/services/scoring-confidence.service.ts:148:33[90m)[39m
+    at Object.<anonymous> [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mapps/scoring-engine-svc/src/services/scoring-confidence.service.spec.ts:190:30[90m)[39m
+    at Promise.finally.completed [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1559:28[90m)[39m
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1499:10[90m)[39m
+    at _callCircusTest [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1009:40[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at _runTest [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:949:3[90m)[39m
+    at _runTestsForDescribeBlock [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:839:13[90m)[39m
+    at _runTestsForDescribeBlock [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:829:11[90m)[39m
+    at _runTestsForDescribeBlock [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:829:11[90m)[39m
+    at run [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:757:3[90m)[39m
+    at runAndTransformResultsToJestFormat [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/jestAdapterInit.js:1920:21[90m)[39m
+    at jestAdapter [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-circus[24m/build/runner.js:101:19[90m)[39m
+    at runTestInternal [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-runner[24m/build/testWorker.js:275:16[90m)[39m
+    at runTest [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-runner[24m/build/testWorker.js:343:7[90m)[39m
+    at Object.worker [90m(/mnt/d/Code/AI-Recruitment-Clerk/[39mnode_modules/[4mjest-runner[24m/build/testWorker.js:497:12[90m)[39m
+PASS scoring-engine-svc apps/scoring-engine-svc/src/services/scoring-confidence.service.spec.ts (8.279 s)
+PASS app-gateway apps/app-gateway/src/embedding/providers/openai-embedding.provider.spec.ts (8.705 s)
+PASS app-gateway apps/app-gateway/src/security/redis-token-blacklist.service.spec.ts (9.925 s)
+PASS jd-extractor-svc apps/jd-extractor-svc/src/app/app.controller.spec.ts (8.722 s)
+PASS ai-recruitment-frontend apps/ai-recruitment-frontend/src/app/components/mobile/mobile-dashboard.rendering.spec.ts (9.575 s)
+PASS scoring-engine-svc apps/scoring-engine-svc/src/app/app.service.spec.ts (10.745 s)
+PASS scoring-engine-svc apps/scoring-engine-svc/src/services/enhanced-skill-matcher.service.spec.ts
+PASS ai-recruitment-frontend apps/ai-recruitment-frontend/src/app/pages/jobs/jobs-list/jobs-list.component.spec.ts (8.439 s)
+PASS report-generator-svc apps/report-generator-svc/src/app/app.service.spec.ts (7.2 s)
+PASS resume-parser-svc apps/resume-parser-svc/src/services/resume-parser-nats.service.spec.ts (7.009 s)
+PASS ai-recruitment-frontend apps/ai-recruitment-frontend/src/app/components/guest/guest-limit-modal.component.spec.ts (6.555 s)
+PASS jd-extractor-svc apps/jd-extractor-svc/src/app/app.service.spec.ts (8.647 s)
+PASS ai-recruitment-frontend apps/ai-recruitment-frontend/src/app/services/guest/device-id.service.spec.ts (7.435 s)
+PASS jd-extractor-svc apps/jd-extractor-svc/src/extraction/extraction.service.spec.ts (5.972 s)
+PASS ai-recruitment-frontend apps/ai-recruitment-frontend/src/app/services/i18n/i18n.service.spec.ts (7.681 s)
+  ● Console
+
+    console.warn
+      Translation not found for key: nonexistent.key
+
+      231 |       return;
+      232 |     }
+    > 233 |     originalConsoleWarn.apply(console, args);
+          |                         ^
+      234 |   };
+      235 |
+      236 |   const originalConsoleLog = console.log;
+
+      at console.warn (../../jest.setup.ts:233:25)
+      at I18nService.translate (src/app/services/i18n/i18n.service.ts:293:15)
+      at src/app/services/i18n/i18n.service.spec.ts:90:30
+      at _ZoneDelegate.invoke (../../node_modules/zone.js/bundles/zone.umd.js:410:32)
+      at ProxyZoneSpec.onInvoke (../../node_modules/zone.js/bundles/zone-testing.umd.js:2219:43)
+      at _ZoneDelegate.invoke (../../node_modules/zone.js/bundles/zone.umd.js:409:38)
+      at ZoneImpl.run (../../node_modules/zone.js/bundles/zone.umd.js:145:47)
+      at Object.wrappedFunc (../../node_modules/zone.js/bundles/zone-testing.umd.js:449:38)
+
+    console.warn
+      Translation not found for key:
+
+      231 |       return;
+      232 |     }
+    > 233 |     originalConsoleWarn.apply(console, args);
+          |                         ^
+      234 |   };
+      235 |
+      236 |   const originalConsoleLog = console.log;
+
+      at console.warn (../../jest.setup.ts:233:25)
+      at I18nService.translate (src/app/services/i18n/i18n.service.ts:293:15)
+      at src/app/services/i18n/i18n.service.spec.ts:128:30
+      at _ZoneDelegate.invoke (../../node_modules/zone.js/bundles/zone.umd.js:410:32)
+      at ProxyZoneSpec.onInvoke (../../node_modules/zone.js/bundles/zone-testing.umd.js:2219:43)
+      at _ZoneDelegate.invoke (../../node_modules/zone.js/bundles/zone.umd.js:409:38)
+      at ZoneImpl.run (../../node_modules/zone.js/bundles/zone.umd.js:145:47)
+      at Object.wrappedFunc (../../node_modules/zone.js/bundles/zone-testing.umd.js:449:38)
+
+    console.error
+      Failed to load translations for en-US: Error: HTTP error
+          at /mnt/d/Code/AI-Recruitment-Clerk/apps/ai-recruitment-frontend/src/app/services/i18n/i18n.service.spec.ts:250:53
+          at Observable.init [as _subscribe] (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/observable/throwError.js:8:64)
+          at Observable._trySubscribe (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:41:25)
+          at /mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:35:31
+          at Object.errorContext (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+          at Observable.subscribe (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+          at /mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/operators/catchError.js:12:27
+          at OperatorSubscriber.<anonymous> (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+          at /mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+          at Object.errorContext (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+          at Observable.subscribe (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+          at /mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/operators/tap.js:18:20
+          at SafeSubscriber.<anonymous> (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+          at /mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+          at Object.errorContext (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+          at Observable.subscribe (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+          at /mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/operators/finalize.js:8:20
+          at SafeSubscriber.<anonymous> (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+          at /mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+          at Object.errorContext (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+          at Observable.subscribe (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+          at I18nService.loadTranslations (/mnt/d/Code/AI-Recruitment-Clerk/apps/ai-recruitment-frontend/src/app/services/i18n/i18n.service.ts:195:8)
+          at I18nService.initializeLanguage (/mnt/d/Code/AI-Recruitment-Clerk/apps/ai-recruitment-frontend/src/app/services/i18n/i18n.service.ts:139:10)
+          at new I18nService (/mnt/d/Code/AI-Recruitment-Clerk/apps/ai-recruitment-frontend/src/app/services/i18n/i18n.service.ts:124:10)
+          at Object.I18nService_Factory [as factory] (ng:///I18nService/ɵfac.js:5:10)
+          at /mnt/d/Code/AI-Recruitment-Clerk/node_modules/@angular/core/fesm2022/root_effect_scheduler.mjs:2194:47
+          at runInInjectorProfilerContext (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/@angular/core/fesm2022/root_effect_scheduler.mjs:749:9)
+          at R3Injector.hydrate (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/@angular/core/fesm2022/root_effect_scheduler.mjs:2192:21)
+          at R3Injector.get (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/@angular/core/fesm2022/root_effect_scheduler.mjs:2040:33)
+          at _TestBedImpl.inject (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/@angular/core/fesm2022/testing.mjs:2004:52)
+          at Function.inject (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/@angular/core/fesm2022/testing.mjs:1843:37)
+          at /mnt/d/Code/AI-Recruitment-Clerk/apps/ai-recruitment-frontend/src/app/services/i18n/i18n.service.spec.ts:262:35
+          at _ZoneDelegate.invoke (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/zone.js/bundles/zone.umd.js:410:32)
+          at ProxyZoneSpec.onInvoke (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/zone.js/bundles/zone-testing.umd.js:2219:43)
+          at _ZoneDelegate.invoke (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/zone.js/bundles/zone.umd.js:409:38)
+          at ZoneImpl.run (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/zone.js/bundles/zone.umd.js:145:47)
+          at Object.wrappedFunc (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/zone.js/bundles/zone-testing.umd.js:449:38)
+          at Promise.finally.completed (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1559:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1499:10)
+          at _callCircusTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1009:40)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at _runTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:949:3)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+          at run (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+          at runAndTransformResultsToJestFormat (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1920:21)
+
+      215 |     return;
+      216 |   }
+    > 217 |   originalConsoleError.apply(console, args);
+          |                        ^
+      218 | };
+      219 |
+      220 | if (!process.env.CI) {
+
+      at console.error (../../jest.setup.ts:217:24)
+      at src/app/services/i18n/i18n.service.ts:183:19
+      at ../../node_modules/rxjs/dist/cjs/internal/operators/catchError.js:13:51
+      at OperatorSubscriber._this._error (../../node_modules/rxjs/dist/cjs/internal/operators/OperatorSubscriber.js:43:21)
+      at OperatorSubscriber.Subscriber.error (../../node_modules/rxjs/dist/cjs/internal/Subscriber.js:60:18)
+      at Observable.init [as _subscribe] (../../node_modules/rxjs/dist/cjs/internal/observable/throwError.js:8:58)
+      at Observable._trySubscribe (../../node_modules/rxjs/dist/cjs/internal/Observable.js:41:25)
+      at ../../node_modules/rxjs/dist/cjs/internal/Observable.js:35:31
+      at Object.errorContext (../../node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+      at Observable.subscribe (../../node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+      at ../../node_modules/rxjs/dist/cjs/internal/operators/catchError.js:12:27
+      at OperatorSubscriber.<anonymous> (../../node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+      at ../../node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+      at Object.errorContext (../../node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+      at Observable.subscribe (../../node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+      at ../../node_modules/rxjs/dist/cjs/internal/operators/tap.js:18:20
+      at SafeSubscriber.<anonymous> (../../node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+      at ../../node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+      at Object.errorContext (../../node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+      at Observable.subscribe (../../node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+      at ../../node_modules/rxjs/dist/cjs/internal/operators/finalize.js:8:20
+      at SafeSubscriber.<anonymous> (../../node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+      at ../../node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+      at Object.errorContext (../../node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+      at Observable.subscribe (../../node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+      at I18nService.loadTranslations (src/app/services/i18n/i18n.service.ts:195:8)
+      at I18nService.initializeLanguage (src/app/services/i18n/i18n.service.ts:139:10)
+      at new I18nService (src/app/services/i18n/i18n.service.ts:124:10)
+      at Object.I18nService_Factory [as factory] (../../ng:/I18nService/ɵfac.js:5:10)
+      at ../../node_modules/@angular/core/fesm2022/root_effect_scheduler.mjs:2194:47
+      at runInInjectorProfilerContext (../../node_modules/@angular/core/fesm2022/root_effect_scheduler.mjs:749:9)
+      at R3Injector.hydrate (../../node_modules/@angular/core/fesm2022/root_effect_scheduler.mjs:2192:21)
+      at R3Injector.get (../../node_modules/@angular/core/fesm2022/root_effect_scheduler.mjs:2040:33)
+      at _TestBedImpl.inject (../../node_modules/@angular/core/fesm2022/testing.mjs:2004:52)
+      at Function.inject (../../node_modules/@angular/core/fesm2022/testing.mjs:1843:37)
+      at src/app/services/i18n/i18n.service.spec.ts:262:35
+      at _ZoneDelegate.invoke (../../node_modules/zone.js/bundles/zone.umd.js:410:32)
+      at ProxyZoneSpec.onInvoke (../../node_modules/zone.js/bundles/zone-testing.umd.js:2219:43)
+      at _ZoneDelegate.invoke (../../node_modules/zone.js/bundles/zone.umd.js:409:38)
+      at ZoneImpl.run (../../node_modules/zone.js/bundles/zone.umd.js:145:47)
+      at Object.wrappedFunc (../../node_modules/zone.js/bundles/zone-testing.umd.js:449:38)
+
+    console.error
+      Failed to load translations for en-US: Error: HTTP error
+          at /mnt/d/Code/AI-Recruitment-Clerk/apps/ai-recruitment-frontend/src/app/services/i18n/i18n.service.spec.ts:270:53
+          at Observable.init [as _subscribe] (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/observable/throwError.js:8:64)
+          at Observable._trySubscribe (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:41:25)
+          at /mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:35:31
+          at Object.errorContext (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+          at Observable.subscribe (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+          at /mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/operators/catchError.js:12:27
+          at OperatorSubscriber.<anonymous> (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+          at /mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+          at Object.errorContext (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+          at Observable.subscribe (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+          at /mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/operators/tap.js:18:20
+          at SafeSubscriber.<anonymous> (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+          at /mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+          at Object.errorContext (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+          at Observable.subscribe (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+          at /mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/operators/finalize.js:8:20
+          at SafeSubscriber.<anonymous> (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+          at /mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+          at Object.errorContext (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+          at Observable.subscribe (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+          at I18nService.loadTranslations (/mnt/d/Code/AI-Recruitment-Clerk/apps/ai-recruitment-frontend/src/app/services/i18n/i18n.service.ts:195:8)
+          at I18nService.initializeLanguage (/mnt/d/Code/AI-Recruitment-Clerk/apps/ai-recruitment-frontend/src/app/services/i18n/i18n.service.ts:139:10)
+          at new I18nService (/mnt/d/Code/AI-Recruitment-Clerk/apps/ai-recruitment-frontend/src/app/services/i18n/i18n.service.ts:124:10)
+          at Object.I18nService_Factory [as factory] (ng:///I18nService/ɵfac.js:5:10)
+          at /mnt/d/Code/AI-Recruitment-Clerk/node_modules/@angular/core/fesm2022/root_effect_scheduler.mjs:2194:47
+          at runInInjectorProfilerContext (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/@angular/core/fesm2022/root_effect_scheduler.mjs:749:9)
+          at R3Injector.hydrate (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/@angular/core/fesm2022/root_effect_scheduler.mjs:2192:21)
+          at R3Injector.get (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/@angular/core/fesm2022/root_effect_scheduler.mjs:2040:33)
+          at _TestBedImpl.inject (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/@angular/core/fesm2022/testing.mjs:2004:52)
+          at Function.inject (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/@angular/core/fesm2022/testing.mjs:1843:37)
+          at /mnt/d/Code/AI-Recruitment-Clerk/apps/ai-recruitment-frontend/src/app/services/i18n/i18n.service.spec.ts:282:15
+          at _ZoneDelegate.invoke (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/zone.js/bundles/zone.umd.js:410:32)
+          at ProxyZoneSpec.onInvoke (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/zone.js/bundles/zone-testing.umd.js:2219:43)
+          at _ZoneDelegate.invoke (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/zone.js/bundles/zone.umd.js:409:38)
+          at ZoneImpl.run (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/zone.js/bundles/zone.umd.js:145:47)
+          at Object.wrappedFunc (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/zone.js/bundles/zone-testing.umd.js:449:38)
+          at Promise.finally.completed (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1559:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1499:10)
+          at _callCircusTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1009:40)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at _runTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:949:3)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+          at run (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+          at runAndTransformResultsToJestFormat (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1920:21)
+
+      215 |     return;
+      216 |   }
+    > 217 |   originalConsoleError.apply(console, args);
+          |                        ^
+      218 | };
+      219 |
+      220 | if (!process.env.CI) {
+
+      at console.error (../../jest.setup.ts:217:24)
+      at src/app/services/i18n/i18n.service.ts:183:19
+      at ../../node_modules/rxjs/dist/cjs/internal/operators/catchError.js:13:51
+      at OperatorSubscriber._this._error (../../node_modules/rxjs/dist/cjs/internal/operators/OperatorSubscriber.js:43:21)
+      at OperatorSubscriber.Subscriber.error (../../node_modules/rxjs/dist/cjs/internal/Subscriber.js:60:18)
+      at Observable.init [as _subscribe] (../../node_modules/rxjs/dist/cjs/internal/observable/throwError.js:8:58)
+      at Observable._trySubscribe (../../node_modules/rxjs/dist/cjs/internal/Observable.js:41:25)
+      at ../../node_modules/rxjs/dist/cjs/internal/Observable.js:35:31
+      at Object.errorContext (../../node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+      at Observable.subscribe (../../node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+      at ../../node_modules/rxjs/dist/cjs/internal/operators/catchError.js:12:27
+      at OperatorSubscriber.<anonymous> (../../node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+      at ../../node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+      at Object.errorContext (../../node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+      at Observable.subscribe (../../node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+      at ../../node_modules/rxjs/dist/cjs/internal/operators/tap.js:18:20
+      at SafeSubscriber.<anonymous> (../../node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+      at ../../node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+      at Object.errorContext (../../node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+      at Observable.subscribe (../../node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+      at ../../node_modules/rxjs/dist/cjs/internal/operators/finalize.js:8:20
+      at SafeSubscriber.<anonymous> (../../node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+      at ../../node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+      at Object.errorContext (../../node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+      at Observable.subscribe (../../node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+      at I18nService.loadTranslations (src/app/services/i18n/i18n.service.ts:195:8)
+      at I18nService.initializeLanguage (src/app/services/i18n/i18n.service.ts:139:10)
+      at new I18nService (src/app/services/i18n/i18n.service.ts:124:10)
+      at Object.I18nService_Factory [as factory] (../../ng:/I18nService/ɵfac.js:5:10)
+      at ../../node_modules/@angular/core/fesm2022/root_effect_scheduler.mjs:2194:47
+      at runInInjectorProfilerContext (../../node_modules/@angular/core/fesm2022/root_effect_scheduler.mjs:749:9)
+      at R3Injector.hydrate (../../node_modules/@angular/core/fesm2022/root_effect_scheduler.mjs:2192:21)
+      at R3Injector.get (../../node_modules/@angular/core/fesm2022/root_effect_scheduler.mjs:2040:33)
+      at _TestBedImpl.inject (../../node_modules/@angular/core/fesm2022/testing.mjs:2004:52)
+      at Function.inject (../../node_modules/@angular/core/fesm2022/testing.mjs:1843:37)
+      at src/app/services/i18n/i18n.service.spec.ts:282:15
+      at _ZoneDelegate.invoke (../../node_modules/zone.js/bundles/zone.umd.js:410:32)
+      at ProxyZoneSpec.onInvoke (../../node_modules/zone.js/bundles/zone-testing.umd.js:2219:43)
+      at _ZoneDelegate.invoke (../../node_modules/zone.js/bundles/zone.umd.js:409:38)
+      at ZoneImpl.run (../../node_modules/zone.js/bundles/zone.umd.js:145:47)
+      at Object.wrappedFunc (../../node_modules/zone.js/bundles/zone-testing.umd.js:449:38)
+
+    console.warn
+      Translation not found for key: test.key
+
+      231 |       return;
+      232 |     }
+    > 233 |     originalConsoleWarn.apply(console, args);
+          |                         ^
+      234 |   };
+      235 |
+      236 |   const originalConsoleLog = console.log;
+
+      at console.warn (../../jest.setup.ts:233:25)
+      at I18nService.translate (src/app/services/i18n/i18n.service.ts:293:15)
+      at src/app/services/i18n/i18n.service.spec.ts:597:30
+      at _ZoneDelegate.invoke (../../node_modules/zone.js/bundles/zone.umd.js:410:32)
+      at ProxyZoneSpec.onInvoke (../../node_modules/zone.js/bundles/zone-testing.umd.js:2219:43)
+      at _ZoneDelegate.invoke (../../node_modules/zone.js/bundles/zone.umd.js:409:38)
+      at ZoneImpl.run (../../node_modules/zone.js/bundles/zone.umd.js:145:47)
+      at Object.wrappedFunc (../../node_modules/zone.js/bundles/zone-testing.umd.js:449:38)
+
+    console.warn
+      Translation not found for key: test.key
+
+      231 |       return;
+      232 |     }
+    > 233 |     originalConsoleWarn.apply(console, args);
+          |                         ^
+      234 |   };
+      235 |
+      236 |   const originalConsoleLog = console.log;
+
+      at console.warn (../../jest.setup.ts:233:25)
+      at I18nService.translate (src/app/services/i18n/i18n.service.ts:293:15)
+      at src/app/services/i18n/i18n.service.spec.ts:608:30
+      at _ZoneDelegate.invoke (../../node_modules/zone.js/bundles/zone.umd.js:410:32)
+      at ProxyZoneSpec.onInvoke (../../node_modules/zone.js/bundles/zone-testing.umd.js:2219:43)
+      at _ZoneDelegate.invoke (../../node_modules/zone.js/bundles/zone.umd.js:409:38)
+      at ZoneImpl.run (../../node_modules/zone.js/bundles/zone.umd.js:145:47)
+      at Object.wrappedFunc (../../node_modules/zone.js/bundles/zone-testing.umd.js:449:38)
+
+    console.error
+      Failed to load translations for en-US: Error: Load failed
+          at /mnt/d/Code/AI-Recruitment-Clerk/apps/ai-recruitment-frontend/src/app/services/i18n/i18n.service.spec.ts:752:26
+          at Observable.init [as _subscribe] (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/observable/throwError.js:8:64)
+          at Observable._trySubscribe (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:41:25)
+          at /mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:35:31
+          at Object.errorContext (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+          at Observable.subscribe (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+          at /mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/operators/catchError.js:12:27
+          at OperatorSubscriber.<anonymous> (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+          at /mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+          at Object.errorContext (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+          at Observable.subscribe (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+          at /mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/operators/tap.js:18:20
+          at SafeSubscriber.<anonymous> (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+          at /mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+          at Object.errorContext (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+          at Observable.subscribe (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+          at /mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/operators/finalize.js:8:20
+          at SafeSubscriber.<anonymous> (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+          at /mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+          at Object.errorContext (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+          at Observable.subscribe (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+          at I18nService.loadTranslations (/mnt/d/Code/AI-Recruitment-Clerk/apps/ai-recruitment-frontend/src/app/services/i18n/i18n.service.ts:195:8)
+          at I18nService.initializeLanguage (/mnt/d/Code/AI-Recruitment-Clerk/apps/ai-recruitment-frontend/src/app/services/i18n/i18n.service.ts:139:10)
+          at new I18nService (/mnt/d/Code/AI-Recruitment-Clerk/apps/ai-recruitment-frontend/src/app/services/i18n/i18n.service.ts:124:10)
+          at Object.I18nService_Factory [as factory] (ng:///I18nService/ɵfac.js:5:10)
+          at /mnt/d/Code/AI-Recruitment-Clerk/node_modules/@angular/core/fesm2022/root_effect_scheduler.mjs:2194:47
+          at runInInjectorProfilerContext (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/@angular/core/fesm2022/root_effect_scheduler.mjs:749:9)
+          at R3Injector.hydrate (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/@angular/core/fesm2022/root_effect_scheduler.mjs:2192:21)
+          at R3Injector.get (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/@angular/core/fesm2022/root_effect_scheduler.mjs:2040:33)
+          at _TestBedImpl.inject (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/@angular/core/fesm2022/testing.mjs:2004:52)
+          at Function.inject (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/@angular/core/fesm2022/testing.mjs:1843:37)
+          at /mnt/d/Code/AI-Recruitment-Clerk/apps/ai-recruitment-frontend/src/app/services/i18n/i18n.service.spec.ts:765:15
+          at _ZoneDelegate.invoke (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/zone.js/bundles/zone.umd.js:410:32)
+          at ProxyZoneSpec.onInvoke (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/zone.js/bundles/zone-testing.umd.js:2219:43)
+          at _ZoneDelegate.invoke (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/zone.js/bundles/zone.umd.js:409:38)
+          at ZoneImpl.run (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/zone.js/bundles/zone.umd.js:145:47)
+          at Object.wrappedFunc (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/zone.js/bundles/zone-testing.umd.js:449:38)
+          at Promise.finally.completed (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1559:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1499:10)
+          at _callCircusTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1009:40)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at _runTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:949:3)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+          at run (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+          at runAndTransformResultsToJestFormat (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1920:21)
+
+      215 |     return;
+      216 |   }
+    > 217 |   originalConsoleError.apply(console, args);
+          |                        ^
+      218 | };
+      219 |
+      220 | if (!process.env.CI) {
+
+      at console.error (../../jest.setup.ts:217:24)
+      at src/app/services/i18n/i18n.service.ts:183:19
+      at ../../node_modules/rxjs/dist/cjs/internal/operators/catchError.js:13:51
+      at OperatorSubscriber._this._error (../../node_modules/rxjs/dist/cjs/internal/operators/OperatorSubscriber.js:43:21)
+      at OperatorSubscriber.Subscriber.error (../../node_modules/rxjs/dist/cjs/internal/Subscriber.js:60:18)
+      at Observable.init [as _subscribe] (../../node_modules/rxjs/dist/cjs/internal/observable/throwError.js:8:58)
+      at Observable._trySubscribe (../../node_modules/rxjs/dist/cjs/internal/Observable.js:41:25)
+      at ../../node_modules/rxjs/dist/cjs/internal/Observable.js:35:31
+      at Object.errorContext (../../node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+      at Observable.subscribe (../../node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+      at ../../node_modules/rxjs/dist/cjs/internal/operators/catchError.js:12:27
+      at OperatorSubscriber.<anonymous> (../../node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+      at ../../node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+      at Object.errorContext (../../node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+      at Observable.subscribe (../../node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+      at ../../node_modules/rxjs/dist/cjs/internal/operators/tap.js:18:20
+      at SafeSubscriber.<anonymous> (../../node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+      at ../../node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+      at Object.errorContext (../../node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+      at Observable.subscribe (../../node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+      at ../../node_modules/rxjs/dist/cjs/internal/operators/finalize.js:8:20
+      at SafeSubscriber.<anonymous> (../../node_modules/rxjs/dist/cjs/internal/util/lift.js:14:28)
+      at ../../node_modules/rxjs/dist/cjs/internal/Observable.js:30:30
+      at Object.errorContext (../../node_modules/rxjs/dist/cjs/internal/util/errorContext.js:22:9)
+      at Observable.subscribe (../../node_modules/rxjs/dist/cjs/internal/Observable.js:26:24)
+      at I18nService.loadTranslations (src/app/services/i18n/i18n.service.ts:195:8)
+      at I18nService.initializeLanguage (src/app/services/i18n/i18n.service.ts:139:10)
+      at new I18nService (src/app/services/i18n/i18n.service.ts:124:10)
+      at Object.I18nService_Factory [as factory] (../../ng:/I18nService/ɵfac.js:5:10)
+      at ../../node_modules/@angular/core/fesm2022/root_effect_scheduler.mjs:2194:47
+      at runInInjectorProfilerContext (../../node_modules/@angular/core/fesm2022/root_effect_scheduler.mjs:749:9)
+      at R3Injector.hydrate (../../node_modules/@angular/core/fesm2022/root_effect_scheduler.mjs:2192:21)
+      at R3Injector.get (../../node_modules/@angular/core/fesm2022/root_effect_scheduler.mjs:2040:33)
+      at _TestBedImpl.inject (../../node_modules/@angular/core/fesm2022/testing.mjs:2004:52)
+      at Function.inject (../../node_modules/@angular/core/fesm2022/testing.mjs:1843:37)
+      at src/app/services/i18n/i18n.service.spec.ts:765:15
+      at _ZoneDelegate.invoke (../../node_modules/zone.js/bundles/zone.umd.js:410:32)
+      at ProxyZoneSpec.onInvoke (../../node_modules/zone.js/bundles/zone-testing.umd.js:2219:43)
+      at _ZoneDelegate.invoke (../../node_modules/zone.js/bundles/zone.umd.js:409:38)
+      at ZoneImpl.run (../../node_modules/zone.js/bundles/zone.umd.js:145:47)
+      at Object.wrappedFunc (../../node_modules/zone.js/bundles/zone-testing.umd.js:449:38)
+
+PASS ai-recruitment-frontend apps/ai-recruitment-frontend/src/app/components/shared/timesheet-table/timesheet-table.component.spec.ts (8.734 s)
+PASS ai-recruitment-frontend apps/ai-recruitment-frontend/src/app/components/mobile/mobile-dashboard.lifecycle.spec.ts (10.775 s)
+PASS ai-recruitment-frontend apps/ai-recruitment-frontend/src/app/components/mobile/mobile-dashboard.init.spec.ts (8.146 s)
+PASS scoring-engine-svc apps/scoring-engine-svc/src/services/scoring-engine-nats.service.spec.ts (9.457 s)
+PASS ai-recruitment-frontend apps/ai-recruitment-frontend/src/app/services/marketing/guest-usage.service.spec.ts (7.354 s)
+PASS ai-recruitment-frontend apps/ai-recruitment-frontend/src/app/directives/pull-to-refresh.directive.spec.ts (8.03 s)
+PASS ai-recruitment-frontend apps/ai-recruitment-frontend/src/app/pages/marketing/campaign.component.spec.ts (16.029 s)
+PASS ai-recruitment-frontend apps/ai-recruitment-frontend/src/app/store/reports/report.effects.spec.ts (7.195 s)
+PASS shared-dtos libs/shared-dtos/src/contracts/incentive.contracts.spec.ts
+  ● Console
+
+    console.warn
+      SlowOperation failed after 150ms: IncentiveContractViolation: Postcondition failed in SlowOperation: SlowOperation exceeded maximum execution time: 150ms > 100ms
+          at Function.ensure (/mnt/d/Code/AI-Recruitment-Clerk/libs/shared-dtos/src/contracts/incentive.contracts.ts:537:13)
+          at Function.performanceContract (/mnt/d/Code/AI-Recruitment-Clerk/libs/shared-dtos/src/contracts/incentive.contracts.ts:504:12)
+          at /mnt/d/Code/AI-Recruitment-Clerk/libs/shared-dtos/src/contracts/incentive.contracts.spec.ts:866:28
+          at Object.<anonymous> (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/expect/build/index.js:1824:9)
+          at Object.throwingMatcher [as toThrow] (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/expect/build/index.js:2235:93)
+          at Object.<anonymous> (/mnt/d/Code/AI-Recruitment-Clerk/libs/shared-dtos/src/contracts/incentive.contracts.spec.ts:871:10)
+          at Promise.finally.completed (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1559:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1499:10)
+          at _callCircusTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1009:40)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at _runTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:949:3)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+          at run (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+          at runAndTransformResultsToJestFormat (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1920:21)
+          at jestAdapter (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/runner.js:101:19)
+          at runTestInternal (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-runner/build/testWorker.js:275:16)
+          at runTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-runner/build/testWorker.js:343:7)
+          at Object.worker (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-runner/build/testWorker.js:497:12)
+
+      231 |       return;
+      232 |     }
+    > 233 |     originalConsoleWarn.apply(console, args);
+          |                         ^
+      234 |   };
+      235 |
+      236 |   const originalConsoleLog = console.log;
+
+      at console.warn (../../jest.setup.ts:233:25)
+      at Function.performanceContract (src/contracts/incentive.contracts.ts:513:15)
+      at src/contracts/incentive.contracts.spec.ts:866:28
+      at Object.<anonymous> (../../node_modules/expect/build/index.js:1824:9)
+      at Object.throwingMatcher [as toThrow] (../../node_modules/expect/build/index.js:2235:93)
+      at Object.<anonymous> (src/contracts/incentive.contracts.spec.ts:871:10)
+
+    console.warn
+      FailingOperation failed after 0ms: Error: Operation failed
+          at failingOperation (/mnt/d/Code/AI-Recruitment-Clerk/libs/shared-dtos/src/contracts/incentive.contracts.spec.ts:877:15)
+          at Function.performanceContract (/mnt/d/Code/AI-Recruitment-Clerk/libs/shared-dtos/src/contracts/incentive.contracts.ts:501:22)
+          at /mnt/d/Code/AI-Recruitment-Clerk/libs/shared-dtos/src/contracts/incentive.contracts.spec.ts:881:28
+          at Object.<anonymous> (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/expect/build/index.js:1824:9)
+          at Object.throwingMatcher [as toThrow] (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/expect/build/index.js:2235:93)
+          at Object.<anonymous> (/mnt/d/Code/AI-Recruitment-Clerk/libs/shared-dtos/src/contracts/incentive.contracts.spec.ts:886:10)
+          at Promise.finally.completed (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1559:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1499:10)
+          at _callCircusTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1009:40)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at _runTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:949:3)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+          at _runTestsForDescribeBlock (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+          at run (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+          at runAndTransformResultsToJestFormat (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/jestAdapterInit.js:1920:21)
+          at jestAdapter (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-circus/build/runner.js:101:19)
+          at runTestInternal (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-runner/build/testWorker.js:275:16)
+          at runTest (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-runner/build/testWorker.js:343:7)
+          at Object.worker (/mnt/d/Code/AI-Recruitment-Clerk/node_modules/jest-runner/build/testWorker.js:497:12)
+
+      231 |       return;
+      232 |     }
+    > 233 |     originalConsoleWarn.apply(console, args);
+          |                         ^
+      234 |   };
+      235 |
+      236 |   const originalConsoleLog = console.log;
+
+      at console.warn (../../jest.setup.ts:233:25)
+      at Function.performanceContract (src/contracts/incentive.contracts.ts:513:15)
+      at src/contracts/incentive.contracts.spec.ts:881:28
+      at Object.<anonymous> (../../node_modules/expect/build/index.js:1824:9)
+      at Object.throwingMatcher [as toThrow] (../../node_modules/expect/build/index.js:2235:93)
+      at Object.<anonymous> (src/contracts/incentive.contracts.spec.ts:886:10)
+
+PASS ai-recruitment-frontend apps/ai-recruitment-frontend/src/app/services/navigation/navigation-guide.service.spec.ts (6.452 s)
+PASS ai-recruitment-frontend apps/ai-recruitment-frontend/src/app/store/resumes/resume.selectors.spec.ts (6.65 s)
+PASS ai-recruitment-frontend apps/ai-recruitment-frontend/src/app/pages/results/detailed-results.component.spec.ts (7.642 s)
+PASS shared-dtos libs/shared-dtos/src/domains/__tests__/user-session.test.ts (6.286 s)
+PASS shared-dtos libs/shared-dtos/src/contracts/dbc.monitoring.test.ts (5.001 s)
+PASS ai-recruitment-frontend apps/ai-recruitment-frontend/src/app/components/mobile/mobile-swipe.touch.spec.ts (6.834 s)
+PASS ai-recruitment-frontend apps/ai-recruitment-frontend/src/app/store/reports/report.actions.spec.ts (9.004 s)
+PASS ai-recruitment-frontend apps/ai-recruitment-frontend/src/app/store/resumes/resume.effects.spec.ts (9.973 s)
+PASS jd-extractor-svc apps/jd-extractor-svc/src/config/jd-extractor.config.service.spec.ts (17.256 s)
+PASS report-generator-svc apps/report-generator-svc/src/services/report-generator-nats.service.spec.ts (7.849 s)
+PASS ai-recruitment-frontend apps/ai-recruitment-frontend/src/app/store/resumes/resume.actions.spec.ts (6.727 s)
+Terminated
