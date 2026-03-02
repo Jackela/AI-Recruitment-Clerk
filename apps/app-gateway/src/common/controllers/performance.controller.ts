@@ -16,9 +16,271 @@ import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
 import { Permission } from '@ai-recruitment-clerk/user-management-domain';
 import type { PerformanceMonitoringInterceptor } from '../interceptors/performance-monitoring.interceptor';
-import type { CacheService } from '../../cache/cache.service';
-import type { CacheOptimizationService } from '../../cache/cache-optimization.service';
+import type { CacheService, CacheMetrics } from '../../cache/cache.service';
+import type { CacheOptimizationService, PerformanceStats, CacheOptimizationConfig } from '../../cache/cache-optimization.service';
 import type { DatabaseOptimizationMiddleware } from '../middleware/database-optimization.middleware';
+
+/**
+ * API performance stats returned by PerformanceMonitoringInterceptor
+ */
+interface ApiPerformanceStats {
+  totalRequests: number;
+  averageResponseTime: number;
+  slowRequests: number;
+  cacheHitRate: number;
+  errorRate: number;
+  lastUpdated: number;
+  endpointStats: Record<string, EndpointStats>;
+}
+
+/**
+ * Per-endpoint performance statistics
+ */
+interface EndpointStats {
+  count: number;
+  averageTime: number;
+  minTime: number;
+  maxTime: number;
+  errors: number;
+}
+
+/**
+ * Cache health check result
+ */
+interface CacheHealthResult {
+  status: string;
+  connected: boolean;
+  type: string;
+  metrics: CacheMetrics;
+  details?: string;
+}
+
+/**
+ * System resource usage
+ */
+interface SystemResourceUsage {
+  uptime: number;
+  memory: NodeJS.MemoryUsage;
+  cpu: NodeJS.CpuUsage;
+}
+
+/**
+ * Performance stats response
+ */
+export interface PerformanceStatsResponse {
+  timestamp: string;
+  api: ApiPerformanceStats | null;
+  cache: {
+    metrics: CacheMetrics;
+    health: CacheHealthResult;
+  };
+  database: {
+    activeConnections: number;
+    pendingConnections: number;
+    queryExecutionTime: number;
+    slowQueries: number;
+    connectionPoolSize: number;
+    lastOptimization: number;
+  };
+  system: SystemResourceUsage;
+}
+
+/**
+ * Historical metrics period information
+ */
+interface HistoricalPeriod {
+  date: string;
+  window: string;
+}
+
+/**
+ * Historical metrics summary statistics
+ */
+interface HistoricalSummary {
+  totalRequests: number;
+  averageResponseTime: number;
+  slowRequestRate: number;
+  errorRate: number;
+  cacheHitRate: number;
+}
+
+/**
+ * Individual metric record from PerformanceMonitoringInterceptor
+ */
+interface MetricRecord {
+  endpoint: string;
+  method: string;
+  responseTime: number;
+  statusCode: number;
+  timestamp: number;
+  userId?: string;
+  cacheHit?: boolean;
+  dbQueryTime?: number;
+  redisQueryTime?: number;
+}
+
+/**
+ * Historical metrics response
+ */
+export interface HistoricalMetricsResponse {
+  message?: string;
+  period: HistoricalPeriod;
+  summary?: HistoricalSummary;
+  metrics: MetricRecord[];
+}
+
+/**
+ * API performance report from interceptor
+ */
+interface ApiReport {
+  summary: {
+    totalRequests: number;
+    averageResponseTime: number;
+    slowRequestPercentage: number;
+    cacheHitRate: number;
+    errorRate: number;
+    lastUpdated: string;
+  } | { message: string };
+  slowestEndpoints: Array<{
+    endpoint: string;
+    averageTime: number;
+    maxTime: number;
+    count: number;
+    errorRate: number;
+  }>;
+  recommendations: string[];
+}
+
+/**
+ * Cache optimization report
+ */
+interface CacheReport {
+  performance: PerformanceStats;
+  config: CacheOptimizationConfig;
+  recommendations: string[];
+  health: CacheHealthResult;
+}
+
+/**
+ * Database optimization report
+ */
+interface DatabaseReport {
+  performance: {
+    activeConnections: number;
+    pendingConnections: number;
+    queryExecutionTime: number;
+    slowQueries: number;
+    connectionPoolSize: number;
+    lastOptimization: number;
+  };
+  recommendations: string[];
+  health: 'healthy' | 'warning' | 'critical';
+}
+
+/**
+ * Performance report response
+ */
+export interface PerformanceReportResponse {
+  generatedAt: string;
+  overallScore: number;
+  criticalIssues: string[];
+  api: ApiReport;
+  cache: CacheReport;
+  database: DatabaseReport;
+  recommendations: string[];
+}
+
+/**
+ * Optimization result for cache
+ */
+interface CacheOptimizationResult {
+  success: boolean;
+  actions: string[];
+  duration: number;
+}
+
+/**
+ * Optimization result for database
+ */
+interface DatabaseOptimizationResult {
+  success: boolean;
+  duration: number;
+  optimizations: string[];
+}
+
+/**
+ * Trigger optimization response
+ */
+export interface TriggerOptimizationResponse {
+  success: boolean;
+  duration: number;
+  results?: {
+    cache: CacheOptimizationResult;
+    database: DatabaseOptimizationResult;
+  };
+  error?: string;
+  message: string;
+}
+
+/**
+ * Cache warmup result
+ */
+interface CacheWarmupResult {
+  success: boolean;
+  preloadedKeys: number;
+  duration: number;
+}
+
+/**
+ * Cache performance response
+ */
+export interface CachePerformanceResponse {
+  metrics: CacheMetrics;
+  health: CacheHealthResult;
+  optimization: {
+    performance: PerformanceStats;
+    config: CacheOptimizationConfig;
+    recommendations: string[];
+    health: CacheHealthResult;
+  };
+  recommendations: string[];
+}
+
+/**
+ * Database connection info
+ */
+interface DatabaseConnectionInfo {
+  poolSize: number;
+  activeConnections: number;
+  utilization: number;
+}
+
+/**
+ * Database performance response
+ */
+export interface DatabasePerformanceResponse {
+  metrics: {
+    activeConnections: number;
+    pendingConnections: number;
+    queryExecutionTime: number;
+    slowQueries: number;
+    connectionPoolSize: number;
+    lastOptimization: number;
+  };
+  recommendations: string[];
+  health: 'healthy' | 'warning' | 'critical';
+  connectionInfo: DatabaseConnectionInfo;
+}
+
+/**
+ * Cache warmup response
+ */
+export interface CacheWarmupResponse {
+  success: boolean;
+  preloadedKeys: number;
+  duration: number;
+  message: string;
+}
 
 /**
  * Exposes endpoints for performance.
@@ -54,14 +316,13 @@ export class PerformanceController {
   @ApiResponse({ status: 403, description: '权限不足' })
   @Permissions(Permission.READ_ANALYSIS)
   @Get('stats')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async getPerformanceStats(): Promise<any> {
+  public async getPerformanceStats(): Promise<PerformanceStatsResponse> {
     const [performanceStats, cacheMetrics, dbMetrics, cacheHealth] =
       await Promise.all([
-        this.performanceInterceptor.getPerformanceStats(),
+        this.performanceInterceptor.getPerformanceStats() as Promise<ApiPerformanceStats | null>,
         this.cacheService.getMetrics(),
         this.dbOptimization.getPerformanceMetrics(),
-        this.cacheService.healthCheck(),
+        this.cacheService.healthCheck() as Promise<CacheHealthResult>,
       ]);
 
     return {
@@ -95,12 +356,10 @@ export class PerformanceController {
   @ApiResponse({ status: 200, description: '历史数据获取成功' })
   @Permissions(Permission.READ_ANALYSIS)
   @Get('history')
-   
   public async getHistoricalMetrics(
     @Query('date') date?: string,
     @Query('window') window?: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<HistoricalMetricsResponse> {
     const metrics = await this.performanceInterceptor.getHistoricalMetrics(
       date,
       window,
@@ -109,8 +368,10 @@ export class PerformanceController {
     if (metrics.length === 0) {
       return {
         message: 'No historical data available for the specified period',
-        date: date || new Date().toISOString().split('T')[0],
-        window: window || 'current',
+        period: {
+          date: date || new Date().toISOString().split('T')[0],
+          window: window || 'current',
+        },
         metrics: [],
       };
     }
@@ -150,12 +411,11 @@ export class PerformanceController {
   @ApiResponse({ status: 200, description: '性能报告生成成功' })
   @Permissions(Permission.READ_ANALYSIS)
   @Get('report')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async generatePerformanceReport(): Promise<any> {
+  public async generatePerformanceReport(): Promise<PerformanceReportResponse> {
     const [apiReport, cacheReport, dbReport] = await Promise.all([
-      this.performanceInterceptor.generatePerformanceReport(),
-      this.cacheOptimization.getOptimizationReport(),
-      this.dbOptimization.getOptimizationRecommendations(),
+      this.performanceInterceptor.generatePerformanceReport() as Promise<ApiReport>,
+      this.cacheOptimization.getOptimizationReport() as Promise<CacheReport>,
+      this.dbOptimization.getOptimizationRecommendations() as Promise<DatabaseReport>,
     ]);
 
     const overallScore = this.calculateOverallScore(
@@ -196,14 +456,13 @@ export class PerformanceController {
   @ApiResponse({ status: 500, description: '优化流程执行失败' })
   @Permissions(Permission.CREATE_JOB) // 使用较高权限
   @Post('optimize')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async triggerOptimization(): Promise<any> {
+  public async triggerOptimization(): Promise<TriggerOptimizationResponse> {
     const startTime = Date.now();
 
     try {
       const [cacheOptimization, dbOptimization] = await Promise.all([
-        this.cacheOptimization.triggerOptimization(),
-        this.dbOptimization.triggerManualOptimization(),
+        this.cacheOptimization.triggerOptimization() as Promise<CacheOptimizationResult>,
+        this.dbOptimization.triggerManualOptimization() as Promise<DatabaseOptimizationResult>,
       ]);
 
       const duration = Date.now() - startTime;
@@ -239,12 +498,11 @@ export class PerformanceController {
   @ApiResponse({ status: 200, description: '缓存性能数据获取成功' })
   @Permissions(Permission.READ_ANALYSIS)
   @Get('cache')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async getCachePerformance(): Promise<any> {
+  public async getCachePerformance(): Promise<CachePerformanceResponse> {
     const [metrics, health, optimizationReport] = await Promise.all([
       this.cacheService.getMetrics(),
-      this.cacheService.healthCheck(),
-      this.cacheOptimization.getOptimizationReport(),
+      this.cacheService.healthCheck() as Promise<CacheHealthResult>,
+      this.cacheOptimization.getOptimizationReport() as Promise<CacheReport>,
     ]);
 
     return {
@@ -266,11 +524,10 @@ export class PerformanceController {
   @ApiResponse({ status: 200, description: '数据库性能数据获取成功' })
   @Permissions(Permission.READ_ANALYSIS)
   @Get('database')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async getDatabasePerformance(): Promise<any> {
+  public async getDatabasePerformance(): Promise<DatabasePerformanceResponse> {
     const [metrics, recommendations] = await Promise.all([
       this.dbOptimization.getPerformanceMetrics(),
-      this.dbOptimization.getOptimizationRecommendations(),
+      this.dbOptimization.getOptimizationRecommendations() as Promise<DatabaseReport>,
     ]);
 
     return {
@@ -298,12 +555,11 @@ export class PerformanceController {
   @ApiResponse({ status: 200, description: '缓存预热成功' })
   @Permissions(Permission.CREATE_JOB)
   @Post('cache/warmup')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async warmupCache(): Promise<any> {
-    const result = await this.cacheOptimization.warmupCache([
+  public async warmupCache(): Promise<CacheWarmupResponse> {
+    const result = (await this.cacheOptimization.warmupCache([
       'critical',
       'frequently-accessed',
-    ]);
+    ])) as CacheWarmupResult;
 
     return {
       success: result.success,
@@ -315,22 +571,17 @@ export class PerformanceController {
     };
   }
 
-   
   private calculateOverallScore(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    apiReport: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    cacheReport: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    dbReport: any,
+    apiReport: ApiReport,
+    cacheReport: CacheReport,
+    dbReport: DatabaseReport,
   ): number {
     let score = 100;
 
     // API性能评分 (40%)
-    const apiScore = Math.max(
-      0,
-      100 - apiReport.summary.averageResponseTime / 5,
-    ); // 500ms = 0分
+    const apiSummary = apiReport.summary;
+    const apiAvgResponseTime = 'averageResponseTime' in apiSummary ? apiSummary.averageResponseTime : 0;
+    const apiScore = Math.max(0, 100 - apiAvgResponseTime / 5); // 500ms = 0分
     score = score * 0.4 + apiScore * 0.4;
 
     // 缓存性能评分 (30%)
@@ -347,18 +598,17 @@ export class PerformanceController {
     return Math.round(score);
   }
 
-   
   private identifyCriticalIssues(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    apiReport: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    cacheReport: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    dbReport: any,
+    apiReport: ApiReport,
+    cacheReport: CacheReport,
+    dbReport: DatabaseReport,
   ): string[] {
     const issues: string[] = [];
 
-    if (apiReport.summary.averageResponseTime > 500) {
+    const apiSummary = apiReport.summary;
+    const apiAvgResponseTime = 'averageResponseTime' in apiSummary ? apiSummary.averageResponseTime : 0;
+
+    if (apiAvgResponseTime > 500) {
       issues.push('API平均响应时间超过500ms，严重影响用户体验');
     }
 
@@ -378,12 +628,9 @@ export class PerformanceController {
   }
 
   private generateConsolidatedRecommendations(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    apiReport: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    cacheReport: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    dbReport: any,
+    apiReport: ApiReport,
+    cacheReport: CacheReport,
+    dbReport: DatabaseReport,
   ): string[] {
     const recommendations = new Set<string>();
 
@@ -399,7 +646,10 @@ export class PerformanceController {
     );
 
     // 添加综合建议
-    if (apiReport.summary.slowRequestPercentage > 20) {
+    const apiSummary = apiReport.summary;
+    const apiSlowRequestPercentage = 'slowRequestPercentage' in apiSummary ? apiSummary.slowRequestPercentage : 0;
+
+    if (apiSlowRequestPercentage > 20) {
       recommendations.add('建议全面检查系统架构，考虑引入负载均衡和缓存层');
     }
 
@@ -411,10 +661,8 @@ export class PerformanceController {
   }
 
   private generateCacheRecommendations(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    metrics: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    health: any,
+    metrics: CacheMetrics,
+    health: CacheHealthResult,
   ): string[] {
     const recommendations: string[] = [];
 
