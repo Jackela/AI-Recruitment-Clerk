@@ -1,4 +1,265 @@
 import { Injectable, Logger } from '@nestjs/common';
+import type { ResumeSearchDto } from '@ai-recruitment-clerk/resume-dto';
+
+/**
+ * File metadata from Express.Multer
+ */
+interface FileMetadata {
+  originalname: string;
+  mimetype: string;
+  size: number;
+}
+
+/**
+ * Resume upload data structure
+ */
+export interface ResumeUploadData {
+  file?: FileMetadata;
+  fileName?: string;
+  uploadedBy: string;
+  jobId?: string;
+  candidateName?: string;
+  candidateEmail?: string;
+  notes?: string;
+  tags?: string[];
+}
+
+/**
+ * Resume upload result
+ */
+export interface ResumeUploadResult {
+  resumeId: string;
+  fileName: string;
+  uploadedBy: string;
+  jobId?: string;
+  candidateName?: string;
+  candidateEmail?: string;
+  status: string;
+  uploadedAt: string;
+  processingEstimate: string;
+}
+
+/**
+ * Work experience entry in resume analysis
+ */
+export interface WorkExperienceEntry {
+  company: string;
+  role: string;
+  duration: string;
+}
+
+/**
+ * Education entry in resume analysis
+ */
+export interface EducationEntry {
+  school: string;
+  degree: string;
+}
+
+/**
+ * Resume analysis result
+ */
+export interface ResumeAnalysisResult {
+  resumeId: string;
+  jobId?: string;
+  skills: string[];
+  experience: WorkExperienceEntry[];
+  education: EducationEntry[];
+  score: number;
+}
+
+/**
+ * Resume skills analysis result
+ */
+export interface ResumeSkillsAnalysisResult {
+  resumeId: string;
+  extractedSkills: string[];
+  requiredSkills: string[];
+  matchScore: number;
+}
+
+/**
+ * Pagination options for search
+ */
+export interface SearchOptions {
+  page?: number;
+  limit?: number;
+}
+
+/**
+ * Search result item (minimal resume info)
+ */
+export interface ResumeSearchResultItem {
+  id: string;
+  fileName: string;
+  status: string;
+  uploadedAt: Date;
+  candidateName?: string;
+}
+
+/**
+ * Paginated search results
+ */
+export interface ResumeSearchResult {
+  resumes: ResumeSearchResultItem[];
+  totalCount: number;
+  page: number;
+  totalPages: number;
+}
+
+/**
+ * Resume filters for listing
+ */
+export interface ResumeFilters {
+  page?: number;
+  limit?: number;
+  status?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}
+
+/**
+ * Resume list result
+ */
+export interface ResumeListResult {
+  resumes: ResumeSearchResultItem[];
+  total: number;
+  page: number;
+  totalPages: number;
+}
+
+/**
+ * Basic resume details
+ */
+export interface ResumeDetails {
+  id: string;
+  fileName: string;
+  status: string;
+  uploadedBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Resume status update result
+ */
+export interface ResumeStatusUpdateResult {
+  resumeId: string;
+  status: string;
+  updatedBy: string;
+  reason?: string;
+  updatedAt: Date;
+}
+
+/**
+ * Resume delete result
+ */
+export interface ResumeDeleteResult {
+  resumeId: string;
+  deleted: boolean;
+  deletedBy: string;
+  reason?: string;
+  hardDelete: boolean;
+  deletedAt: Date;
+}
+
+/**
+ * Batch operation parameters
+ */
+export interface BatchOperationParameters {
+  reason?: string;
+  bonusType?: string;
+  bonusAmount?: number;
+  newQuotaAmount?: number;
+}
+
+/**
+ * Batch operation result item
+ */
+export interface BatchOperationResultItem {
+  resumeId: string;
+  success: boolean;
+  error?: string;
+}
+
+/**
+ * Batch operation result
+ */
+export interface BatchOperationResult {
+  totalProcessed: number;
+  successful: number;
+  failed: number;
+  results: BatchOperationResultItem[];
+}
+
+/**
+ * Reprocess options
+ */
+export interface ReprocessOptions {
+  forceReparse?: boolean;
+  updateSkillsOnly?: boolean;
+  analysisOptions?: {
+    includeDetailedSkills?: boolean;
+    includeSoftSkills?: boolean;
+    includeCertifications?: boolean;
+  };
+}
+
+/**
+ * Reprocess result
+ */
+export interface ReprocessResult {
+  jobId: string;
+  estimatedTime: string;
+  status: string;
+}
+
+/**
+ * Processing status counts
+ */
+export interface ProcessingStatusCounts {
+  pending: number;
+  inProgress: number;
+  completed: number;
+  failed: number;
+}
+
+/**
+ * Quality metrics
+ */
+export interface QualityMetrics {
+  averageScore: number;
+  highQuality: number;
+  needsReview: number;
+}
+
+/**
+ * Processing statistics
+ */
+export interface ProcessingStats {
+  totalResumes: number;
+  processingStatus: ProcessingStatusCounts;
+  averageProcessingTime: number;
+  skillsDistribution: Record<string, number>;
+  monthlyTrends: Array<{
+    month: string;
+    count: number;
+    avgScore: number;
+  }>;
+  qualityMetrics: QualityMetrics;
+}
+
+/**
+ * Health status
+ */
+export interface HealthStatus {
+  overall: string;
+  database: string;
+  storage: string;
+  parser: string;
+  queue: string;
+  error?: string;
+}
 
 /**
  * Provides resume functionality.
@@ -8,23 +269,24 @@ export class ResumeService {
   private readonly logger = new Logger(ResumeService.name);
 
   /**
-   * 上传简历 - EMERGENCY IMPLEMENTATION
+   * Upload resume - EMERGENCY IMPLEMENTATION
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async uploadResume(uploadData: any): Promise<any> {
+  public async uploadResume(
+    uploadData: ResumeUploadData,
+  ): Promise<ResumeUploadResult> {
     try {
       this.logger.log('Uploading resume', {
         fileName: uploadData.file?.originalname || uploadData.fileName,
       });
       return {
         resumeId: `resume_${Date.now()}`,
-        fileName: uploadData.file?.originalname || uploadData.fileName,
+        fileName: uploadData.file?.originalname || uploadData.fileName || '',
         uploadedBy: uploadData.uploadedBy,
         jobId: uploadData.jobId,
         candidateName: uploadData.candidateName,
         candidateEmail: uploadData.candidateEmail,
         status: 'uploaded',
-        uploadedAt: new Date(),
+        uploadedAt: new Date().toISOString(),
         processingEstimate: '2-5 minutes',
       };
     } catch (error) {
@@ -34,14 +296,13 @@ export class ResumeService {
   }
 
   /**
-   * 获取简历分析 - EMERGENCY IMPLEMENTATION
+   * Get resume analysis - EMERGENCY IMPLEMENTATION
    */
   public async getResumeAnalysis(
     resumeId: string,
     jobId?: string,
     _userId?: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<ResumeAnalysisResult> {
     try {
       return {
         resumeId,
@@ -60,13 +321,12 @@ export class ResumeService {
   }
 
   /**
-   * 获取技能分析 - EMERGENCY IMPLEMENTATION
+   * Get skills analysis - EMERGENCY IMPLEMENTATION
    */
   public async getResumeSkillsAnalysis(
     resumeId: string,
     _userId?: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<ResumeSkillsAnalysisResult> {
     try {
       return {
         resumeId,
@@ -81,16 +341,13 @@ export class ResumeService {
   }
 
   /**
-   * 搜索简历 - EMERGENCY IMPLEMENTATION
+   * Search resumes - EMERGENCY IMPLEMENTATION
    */
   public async searchResumes(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    _searchDto: any,
+    _searchDto: ResumeSearchDto,
     _organizationId: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    options?: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+    options?: SearchOptions,
+  ): Promise<ResumeSearchResult> {
     try {
       return {
         resumes: [],
@@ -105,15 +362,14 @@ export class ResumeService {
   }
 
   /**
-   * 更新简历状态 - EMERGENCY IMPLEMENTATION
+   * Update resume status - EMERGENCY IMPLEMENTATION
    */
   public async updateResumeStatus(
     resumeId: string,
     status: string,
     updatedBy: string,
     reason?: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<ResumeStatusUpdateResult> {
     try {
       this.logger.log('Updating resume status', {
         resumeId,
@@ -134,15 +390,14 @@ export class ResumeService {
   }
 
   /**
-   * 删除简历 - EMERGENCY IMPLEMENTATION
+   * Delete resume - EMERGENCY IMPLEMENTATION
    */
   public async deleteResume(
     resumeId: string,
     deletedBy: string,
     reason?: string,
     hardDelete?: boolean,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<ResumeDeleteResult> {
     try {
       this.logger.log('Deleting resume', { resumeId, deletedBy });
       return {
@@ -160,10 +415,12 @@ export class ResumeService {
   }
 
   /**
-   * 获取简历列表 - EMERGENCY IMPLEMENTATION
+   * Get resume list - EMERGENCY IMPLEMENTATION
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async getResumes(_organizationId: string, filters: any): Promise<any> {
+  public async getResumes(
+    _organizationId: string,
+    filters: ResumeFilters,
+  ): Promise<ResumeListResult> {
     try {
       return {
         resumes: [],
@@ -178,10 +435,9 @@ export class ResumeService {
   }
 
   /**
-   * 获取简历详情 - EMERGENCY IMPLEMENTATION
+   * Get resume details - EMERGENCY IMPLEMENTATION
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async getResume(resumeId: string): Promise<any> {
+  public async getResume(resumeId: string): Promise<ResumeDetails> {
     try {
       return {
         id: resumeId,
@@ -198,7 +454,7 @@ export class ResumeService {
   }
 
   /**
-   * 检查简历访问权限 - EMERGENCY IMPLEMENTATION
+   * Check resume access - EMERGENCY IMPLEMENTATION
    */
   public async checkResumeAccess(
     resumeId: string,
@@ -219,16 +475,14 @@ export class ResumeService {
   }
 
   /**
-   * 批量处理简历 - EMERGENCY IMPLEMENTATION
+   * Batch process resumes - EMERGENCY IMPLEMENTATION
    */
   public async batchProcessResumes(
     resumeIds: string[],
     operation: string,
     userId: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    _parameters?: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+    _parameters?: BatchOperationParameters,
+  ): Promise<BatchOperationResult> {
     try {
       this.logger.log('Batch processing resumes', {
         count: resumeIds.length,
@@ -248,15 +502,13 @@ export class ResumeService {
   }
 
   /**
-   * 重新处理简历 - EMERGENCY IMPLEMENTATION
+   * Reprocess resume - EMERGENCY IMPLEMENTATION
    */
   public async reprocessResume(
     resumeId: string,
     userId: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    _options?: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+    _options?: ReprocessOptions,
+  ): Promise<ReprocessResult> {
     try {
       this.logger.log('Reprocessing resume', { resumeId, userId });
       return {
@@ -271,16 +523,17 @@ export class ResumeService {
   }
 
   /**
-   * 获取处理统计 - EMERGENCY IMPLEMENTATION
+   * Get processing statistics - EMERGENCY IMPLEMENTATION
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async getProcessingStats(_organizationId: string): Promise<any> {
+  public async getProcessingStats(
+    _organizationId: string,
+  ): Promise<ProcessingStats> {
     try {
       return {
         totalResumes: 0,
         processingStatus: {
-          uploaded: 0,
-          processing: 0,
+          pending: 0,
+          inProgress: 0,
           completed: 0,
           failed: 0,
         },
@@ -296,10 +549,9 @@ export class ResumeService {
   }
 
   /**
-   * 获取健康状态 - EMERGENCY IMPLEMENTATION
+   * Get health status - EMERGENCY IMPLEMENTATION
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async getHealthStatus(): Promise<any> {
+  public async getHealthStatus(): Promise<HealthStatus> {
     try {
       return {
         overall: 'healthy',
@@ -312,6 +564,10 @@ export class ResumeService {
       this.logger.error('Error getting health status', error);
       return {
         overall: 'unhealthy',
+        database: 'unknown',
+        storage: 'unknown',
+        parser: 'unknown',
+        queue: 'unknown',
         error: error instanceof Error ? error.message : String(error),
       };
     }
