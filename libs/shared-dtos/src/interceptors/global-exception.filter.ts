@@ -25,21 +25,31 @@ import { ErrorCorrelationManager } from '../errors/error-correlation';
  * Type guard to check if an object has a message property
  */
 function hasMessageProperty(value: unknown): value is { message: unknown } {
-  return typeof value === 'object' && value !== null && 'message' in value;
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  return 'message' in value;
 }
 
 /**
  * Type guard to check if an object has an error property
  */
 function hasErrorProperty(value: unknown): value is { error: unknown } {
-  return typeof value === 'object' && value !== null && 'error' in value;
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  return 'error' in value;
 }
 
 /**
  * Type guard to check if an object has a toString method
  */
 function hasToStringMethod(value: unknown): value is { toString: () => string } {
-  return typeof value === 'object' && value !== null && 'toString' in value && typeof (value as Record<string, unknown>).toString === 'function';
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const obj = value as Record<string, unknown>;
+  return 'toString' in obj && typeof obj.toString === 'function';
 }
 
 /**
