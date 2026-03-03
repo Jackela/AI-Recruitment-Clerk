@@ -490,10 +490,32 @@ export class ErrorUtils {
 
     // Enhance final error
     if (lastError instanceof EnhancedAppException) {
-      throw lastError.withContext({
-        retryAttempts: maxRetries,
-        operationName,
-      });
+      // Create a new error with updated details including retryAttempts
+      const updatedDetails = lastError.enhancedDetails.details && typeof lastError.enhancedDetails.details === 'object'
+        ? { ...lastError.enhancedDetails.details, retryAttempts: maxRetries, operationName }
+        : { retryAttempts: maxRetries, operationName };
+
+      const newError = new EnhancedAppException(
+        lastError.enhancedDetails.type,
+        lastError.enhancedDetails.code,
+        lastError.enhancedDetails.message,
+        lastError.getStatus(),
+        updatedDetails,
+        lastError.enhancedDetails.context,
+      );
+
+      // Copy enhanced properties
+      if (lastError.enhancedDetails.recoveryStrategies) {
+        newError.withRecoveryStrategies(lastError.enhancedDetails.recoveryStrategies);
+      }
+      if (lastError.enhancedDetails.businessImpact) {
+        newError.withBusinessImpact(lastError.enhancedDetails.businessImpact);
+      }
+      if (lastError.enhancedDetails.userImpact) {
+        newError.withUserImpact(lastError.enhancedDetails.userImpact);
+      }
+
+      throw newError;
     }
 
     throw new EnhancedAppException(
