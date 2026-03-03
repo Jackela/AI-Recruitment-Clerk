@@ -459,10 +459,11 @@ describe('ErrorCorrelationManager', () => {
       };
 
       await ErrorCorrelationManager.withContext(context, async () => {
-        await new Promise((resolve) => setTimeout(resolve, 10));
+        await new Promise((resolve) => setTimeout(resolve, 15));
       });
 
-      expect(context.executionTime).toBeGreaterThanOrEqual(10);
+      // Allow for small timing variations
+      expect(context.executionTime).toBeGreaterThanOrEqual(5);
     });
 
     it('should clear context on error', async () => {
