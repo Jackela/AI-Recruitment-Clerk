@@ -38,7 +38,7 @@ function hasMessageProperty(value: unknown): value is { message: unknown } {
  * Type guard to check if an object has an error property
  */
 function hasErrorProperty(value: unknown): value is { error: unknown } {
-  if (typeof value !== 'object' || value === null) {
+  if (value == null || typeof value !== 'object') {
     return false;
   }
   return 'error' in value;
