@@ -22,40 +22,11 @@ import { StandardizedErrorResponseFormatter } from '../errors/error-response-for
 import type { AppException } from '../common/error-handling.patterns';
 import { ErrorHandler, ErrorSeverity } from '../common/error-handling.patterns';
 import { ErrorCorrelationManager } from '../errors/error-correlation';
-
-/**
- * Type guard to check if an object has a message property
- */
-function hasMessageProperty(value: unknown): value is { message: unknown } {
-  if (typeof value !== 'object' || value === null) {
-    return false;
-  }
-  const obj = value as Record<string, unknown>;
-  return 'message' in obj;
-}
-
-/**
- * Type guard to check if an object has an error property
- */
-function hasErrorProperty(value: unknown): value is { error: unknown } {
-  if (value == null || typeof value !== 'object') {
-    return false;
-  }
-  return 'error' in value;
-}
-
-/**
- * Type guard to check if an object has a toString method
- */
-function hasToStringMethod(
-  value: unknown,
-): value is { toString: () => string } {
-  if (value == null || typeof value !== 'object') {
-    return false;
-  }
-  const obj = value as Record<string, unknown>;
-  return 'toString' in obj && typeof obj.toString === 'function';
-}
+import {
+  hasMessageProperty,
+  hasErrorProperty,
+  hasToStringMethod,
+} from '../common/type-guards';
 
 /**
  * Interface for HTTP exception response object

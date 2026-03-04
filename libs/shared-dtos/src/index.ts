@@ -172,7 +172,7 @@ export {
   EventStatus,
   EventType,
   EventCategory,
-  ConsentStatus as AnalyticsConsentStatus,  // Renamed to avoid conflict with privacy ConsentStatus
+  ConsentStatus as AnalyticsConsentStatus, // Renamed to avoid conflict with privacy ConsentStatus
   MetricUnit,
   AnalyticsEventSummary,
   DeviceInfo,
@@ -252,6 +252,9 @@ export * from './common/nats-client.pattern';
 // Note: mobile-component.patterns depends on Angular and breaks Node test envs.
 // It is intentionally not re-exported from the root barrel to keep backend tests working.
 export * from './common/error-handling.patterns';
+
+// Type Guards - Runtime type checking utilities
+export * from './common/type-guards';
 
 // Testing Utilities - Mock Factories for Test Fixtures
 export * from './testing/mock-factories';
