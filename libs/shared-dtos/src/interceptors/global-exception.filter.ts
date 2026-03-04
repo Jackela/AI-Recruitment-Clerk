@@ -50,7 +50,7 @@ function hasErrorProperty(value: unknown): value is { error: unknown } {
 function hasToStringMethod(
   value: unknown,
 ): value is { toString: () => string } {
-  if (typeof value !== 'object' || value === null) {
+  if (value == null || typeof value !== 'object') {
     return false;
   }
   const obj = value as Record<string, unknown>;
