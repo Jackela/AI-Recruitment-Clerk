@@ -3,9 +3,7 @@
  * Ensures all exceptions are properly formatted and logged
  */
 
-import type {
-  ExceptionFilter,
-  ArgumentsHost} from '@nestjs/common';
+import type { ExceptionFilter, ArgumentsHost } from '@nestjs/common';
 import {
   Catch,
   HttpException,
@@ -15,7 +13,11 @@ import {
   Optional,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
-import { EnhancedAppException, ExtendedErrorType, type CombinedErrorType } from '../errors/enhanced-error-types';
+import {
+  EnhancedAppException,
+  ExtendedErrorType,
+  type CombinedErrorType,
+} from '../errors/enhanced-error-types';
 import { StandardizedErrorResponseFormatter } from '../errors/error-response-formatter';
 import type { AppException } from '../common/error-handling.patterns';
 import { ErrorHandler, ErrorSeverity } from '../common/error-handling.patterns';
@@ -28,7 +30,8 @@ function hasMessageProperty(value: unknown): value is { message: unknown } {
   if (typeof value !== 'object' || value === null) {
     return false;
   }
-  return 'message' in value;
+  const obj = value as Record<string, unknown>;
+  return 'message' in obj;
 }
 
 /**
@@ -44,7 +47,9 @@ function hasErrorProperty(value: unknown): value is { error: unknown } {
 /**
  * Type guard to check if an object has a toString method
  */
-function hasToStringMethod(value: unknown): value is { toString: () => string } {
+function hasToStringMethod(
+  value: unknown,
+): value is { toString: () => string } {
   if (typeof value !== 'object' || value === null) {
     return false;
   }
@@ -176,7 +181,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       errorDetails = {};
     }
 
-    const errorType = this.mapHttpStatusToErrorType(httpStatus) as CombinedErrorType;
+    const errorType = this.mapHttpStatusToErrorType(
+      httpStatus,
+    ) as CombinedErrorType;
     const enhancedError = new EnhancedAppException(
       errorType,
       errorDetails.code || 'HTTP_EXCEPTION',
