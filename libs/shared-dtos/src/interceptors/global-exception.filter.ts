@@ -3,9 +3,7 @@
  * Ensures all exceptions are properly formatted and logged
  */
 
-import type {
-  ExceptionFilter,
-  ArgumentsHost} from '@nestjs/common';
+import type { ExceptionFilter, ArgumentsHost } from '@nestjs/common';
 import {
   Catch,
   HttpException,
@@ -15,10 +13,31 @@ import {
   Optional,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
-import { EnhancedAppException } from '../errors/enhanced-error-types';
+import {
+  EnhancedAppException,
+  ExtendedErrorType,
+  type CombinedErrorType,
+} from '../errors/enhanced-error-types';
 import { StandardizedErrorResponseFormatter } from '../errors/error-response-formatter';
-import { ErrorHandler } from '../common/error-handling.patterns';
+import type { AppException } from '../common/error-handling.patterns';
+import { ErrorHandler, ErrorSeverity } from '../common/error-handling.patterns';
 import { ErrorCorrelationManager } from '../errors/error-correlation';
+import {
+  hasMessageProperty,
+  hasErrorProperty,
+  hasToStringMethod,
+} from '../common/type-guards';
+
+/**
+ * Interface for HTTP exception response object
+ */
+interface HttpExceptionResponseObject {
+  message?: string;
+  code?: string;
+  error?: string;
+  statusCode?: number;
+  [key: string]: unknown;
+}
 
 /**
  * Represents the global exception filter.
@@ -95,28 +114,25 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   }
 
   private convertAppExceptionToEnhanced(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    appError: any,
+    appError: AppException,
     context: string,
   ): EnhancedAppException {
     if (appError instanceof EnhancedAppException) {
       return appError;
     }
 
+    const errorType = appError.errorDetails.type as CombinedErrorType;
     const enhancedError = new EnhancedAppException(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (appError.errorDetails?.type as any) || 'SYSTEM_ERROR',
-      appError.errorDetails?.code || 'UNKNOWN_ERROR',
+      errorType,
+      appError.errorDetails.code || 'UNKNOWN_ERROR',
       appError.message,
-      appError.getStatus?.() || 500,
-      appError.errorDetails?.details,
+      appError.getStatus(),
+      appError.errorDetails.details,
       { originalContext: context },
     );
 
     // Set appropriate severity
-    const severity = appError.errorDetails?.severity || 'high';
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    enhancedError.withSeverity(severity as any);
+    enhancedError.withSeverity(appError.errorDetails.severity);
 
     return enhancedError;
   }
@@ -127,17 +143,20 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const errorResponse = httpError.getResponse();
     const httpStatus = httpError.getStatus();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let errorDetails: any = {};
-    if (typeof errorResponse === 'object') {
-      errorDetails = errorResponse;
+    let errorDetails: HttpExceptionResponseObject;
+    if (typeof errorResponse === 'object' && errorResponse !== null) {
+      errorDetails = errorResponse as HttpExceptionResponseObject;
     } else if (typeof errorResponse === 'string') {
       errorDetails = { message: errorResponse };
+    } else {
+      errorDetails = {};
     }
 
+    const errorType = this.mapHttpStatusToErrorType(
+      httpStatus,
+    ) as CombinedErrorType;
     const enhancedError = new EnhancedAppException(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this.mapHttpStatusToErrorType(httpStatus) as any,
+      errorType,
       errorDetails.code || 'HTTP_EXCEPTION',
       errorDetails.message || httpError.message,
       httpStatus,
@@ -147,8 +166,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     // Set severity based on HTTP status
     const severity = this.mapHttpStatusToSeverity(httpStatus);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    enhancedError.withSeverity(severity as any);
+    enhancedError.withSeverity(severity);
 
     return enhancedError;
   }
@@ -159,8 +177,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const errorMessage = this.extractErrorMessage(exception);
 
     const enhancedError = new EnhancedAppException(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      'SYSTEM_ERROR' as any,
+      ExtendedErrorType.SYSTEM_ERROR,
       'UNKNOWN_EXCEPTION',
       `An unexpected error occurred: ${errorMessage}`,
       HttpStatus.INTERNAL_SERVER_ERROR,
@@ -171,8 +188,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       { source: 'GlobalExceptionFilter' },
     );
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    enhancedError.withSeverity('critical' as any);
+    enhancedError.withSeverity(ErrorSeverity.CRITICAL);
 
     return enhancedError;
   }
@@ -183,19 +199,16 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     }
 
     if (exception && typeof exception === 'object') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const errorObj = exception as any;
-
-      if (errorObj.message) {
-        return String(errorObj.message);
+      if (hasMessageProperty(exception)) {
+        return String(exception.message);
       }
 
-      if (errorObj.error) {
-        return String(errorObj.error);
+      if (hasErrorProperty(exception)) {
+        return String(exception.error);
       }
 
-      if (errorObj.toString) {
-        return errorObj.toString();
+      if (hasToStringMethod(exception)) {
+        return exception.toString();
       }
     }
 
@@ -337,9 +350,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     return statusMap[status] || 'SYSTEM_ERROR';
   }
 
-  private mapHttpStatusToSeverity(status: number): string {
-    if (status >= 500) return 'high';
-    if (status >= 400) return 'medium';
-    return 'low';
+  private mapHttpStatusToSeverity(status: number): ErrorSeverity {
+    if (status >= 500) return ErrorSeverity.HIGH;
+    if (status >= 400) return ErrorSeverity.MEDIUM;
+    return ErrorSeverity.LOW;
   }
 }

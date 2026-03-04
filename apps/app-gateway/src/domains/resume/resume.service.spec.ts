@@ -11,7 +11,7 @@ describe('ResumeService', () => {
   it('uploads resume and returns normalized payload', async () => {
     const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(1700000000000);
     const uploadData = {
-      file: { originalname: 'candidate.pdf' },
+      file: { originalname: 'candidate.pdf', mimetype: 'application/pdf', size: 1024 },
       uploadedBy: 'user-1',
       jobId: 'job-1',
       candidateName: 'Alice',
@@ -32,7 +32,7 @@ describe('ResumeService', () => {
         processingEstimate: '2-5 minutes',
       }),
     );
-    expect(result.uploadedAt).toBeInstanceOf(Date);
+    expect(typeof result.uploadedAt).toBe('string');
     nowSpy.mockRestore();
   });
 
@@ -202,8 +202,8 @@ describe('ResumeService', () => {
     expect(result).toEqual({
       totalResumes: 0,
       processingStatus: {
-        uploaded: 0,
-        processing: 0,
+        pending: 0,
+        inProgress: 0,
         completed: 0,
         failed: 0,
       },
@@ -227,15 +227,16 @@ describe('ResumeService', () => {
   });
 
   it('rethrows upload errors when input access fails', async () => {
-    const badUploadInput = {};
+    const badUploadInput: Record<string, unknown> = { uploadedBy: 'user-1' };
     Object.defineProperty(badUploadInput, 'file', {
       get() {
         throw new Error('file metadata unavailable');
       },
+      configurable: true,
     });
 
     await expect(
-      service.uploadResume(badUploadInput as unknown as Record<string, unknown>),
+      service.uploadResume(badUploadInput as unknown as Parameters<typeof service.uploadResume>[0]),
     ).rejects.toThrow('file metadata unavailable');
   });
 

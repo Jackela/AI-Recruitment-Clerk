@@ -6,7 +6,8 @@
 import { HttpStatus } from '@nestjs/common';
 import type {
   ErrorType,
-  ErrorDetails} from '../common/error-handling.patterns';
+  ErrorDetails,
+  ErrorSeverity} from '../common/error-handling.patterns';
 import {
   AppException
 } from '../common/error-handling.patterns';
@@ -149,6 +150,16 @@ export class EnhancedAppException extends AppException {
    */
   public withUserImpact(impact: 'none' | 'minimal' | 'moderate' | 'severe'): this {
     this.enhancedDetails.userImpact = impact;
+    return this;
+  }
+
+  /**
+   * Set severity level
+   */
+  public withSeverity(severity: ErrorSeverity): this {
+    // Update both base class errorDetails and enhancedDetails
+    this.errorDetails.severity = severity;
+    this.enhancedDetails.severity = severity;
     return this;
   }
 

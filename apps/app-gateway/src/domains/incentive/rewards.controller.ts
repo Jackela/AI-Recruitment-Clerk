@@ -597,9 +597,9 @@ export class RewardsController {
         data: paymentResult.success
           ? {
               incentiveId,
-              transactionId: paymentResult.transactionId,
-              amount: paymentResult.amount,
-              currency: paymentResult.currency,
+              transactionId: paymentResult.transactionId!,
+              amount: paymentResult.amount!,
+              currency: paymentResult.currency!,
               paymentMethod: paymentData.paymentMethod,
               paidAt: new Date().toISOString(),
               processedBy: req.user.id,

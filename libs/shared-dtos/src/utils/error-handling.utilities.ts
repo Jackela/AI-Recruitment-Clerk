@@ -10,6 +10,71 @@ import {
 } from '../errors/enhanced-error-types';
 import { DomainErrorFactory, DatabaseErrorCode } from '../errors/domain-errors';
 import { ErrorCorrelationManager } from '../errors/error-correlation';
+import { ErrorSeverity } from '../common/error-handling.patterns';
+
+/**
+ * Severity level type alias for use in error context
+ */
+export type SeverityLevel = 'low' | 'medium' | 'high' | 'critical';
+
+/**
+ * Business impact level type
+ */
+export type BusinessImpactLevel = 'low' | 'medium' | 'high' | 'critical';
+
+/**
+ * User impact level type
+ */
+export type UserImpactLevel = 'none' | 'minimal' | 'moderate' | 'severe';
+
+/**
+ * Interface for validation entry in validateAndThrow
+ */
+export interface ValidationEntry {
+  condition: boolean;
+  field: string;
+  message: string;
+  value?: unknown;
+}
+
+/**
+ * Interface for error handling context options
+ */
+export interface ErrorHandlingContext {
+  operationName: string;
+  defaultErrorType?: ExtendedErrorType | string;
+  defaultErrorCode?: string;
+  severity?: SeverityLevel;
+  businessImpact?: BusinessImpactLevel;
+  userImpact?: UserImpactLevel;
+  recoveryStrategies?: string[];
+  logger?: Logger;
+}
+
+/**
+ * Interface for error retry options
+ */
+export interface ErrorRetryOptions {
+  maxRetries?: number;
+  baseDelay?: number;
+  exponentialBackoff?: boolean;
+  retryCondition?: (error: Error) => boolean;
+  operationName: string;
+  logger?: Logger;
+}
+
+/**
+ * Helper function to convert string severity to ErrorSeverity enum
+ */
+function toErrorSeverity(severity: SeverityLevel): ErrorSeverity {
+  const mapping: Record<SeverityLevel, ErrorSeverity> = {
+    low: ErrorSeverity.LOW,
+    medium: ErrorSeverity.MEDIUM,
+    high: ErrorSeverity.HIGH,
+    critical: ErrorSeverity.CRITICAL,
+  };
+  return mapping[severity];
+}
 
 /**
  * Error creation utilities for different scenarios
@@ -34,8 +99,7 @@ export class ErrorUtils {
     );
 
     return error
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .withSeverity('medium' as any)
+      .withSeverity(toErrorSeverity('medium'))
       .withUserImpact('moderate')
       .withBusinessImpact('low')
       .withRecoveryStrategies([
@@ -61,8 +125,7 @@ export class ErrorUtils {
     );
 
     return error
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .withSeverity('medium' as any)
+      .withSeverity(toErrorSeverity('medium'))
       .withUserImpact('moderate')
       .withBusinessImpact('medium')
       .withRecoveryStrategies([
@@ -89,8 +152,7 @@ export class ErrorUtils {
     );
 
     return error
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .withSeverity('medium' as any)
+      .withSeverity(toErrorSeverity('medium'))
       .withUserImpact('moderate')
       .withBusinessImpact('medium')
       .withRecoveryStrategies([
@@ -117,8 +179,7 @@ export class ErrorUtils {
     );
 
     return error
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .withSeverity('low' as any)
+      .withSeverity(toErrorSeverity('low'))
       .withUserImpact('minimal')
       .withBusinessImpact('low')
       .withRecoveryStrategies([
@@ -145,8 +206,7 @@ export class ErrorUtils {
     );
 
     return error
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .withSeverity('low' as any)
+      .withSeverity(toErrorSeverity('low'))
       .withUserImpact('minimal')
       .withBusinessImpact('low')
       .withRecoveryStrategies([
@@ -179,8 +239,7 @@ export class ErrorUtils {
     );
 
     return error
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .withSeverity('high' as any)
+      .withSeverity(toErrorSeverity('high'))
       .withUserImpact('moderate')
       .withBusinessImpact('high')
       .withRecoveryStrategies([
@@ -213,16 +272,7 @@ export class ErrorUtils {
    */
   public static async withErrorHandling<T>(
     operation: () => Promise<T>,
-    errorContext: {
-      operationName: string;
-      defaultErrorType?: ExtendedErrorType | string;
-      defaultErrorCode?: string;
-      severity?: 'low' | 'medium' | 'high' | 'critical';
-      businessImpact?: 'low' | 'medium' | 'high' | 'critical';
-      userImpact?: 'none' | 'minimal' | 'moderate' | 'severe';
-      recoveryStrategies?: string[];
-      logger?: Logger;
-    },
+    errorContext: ErrorHandlingContext,
   ): Promise<T> {
     const logger = errorContext.logger || this.logger;
     const startTime = Date.now();
@@ -262,11 +312,15 @@ export class ErrorUtils {
         throw error;
       }
 
+      // Determine the error type to use
+      const errorType =
+        typeof errorContext.defaultErrorType === 'string'
+          ? (errorContext.defaultErrorType as ExtendedErrorType)
+          : errorContext.defaultErrorType || ExtendedErrorType.SYSTEM_ERROR;
+
       // Create enhanced error from regular error
       const enhancedError = new EnhancedAppException(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (errorContext.defaultErrorType as any) ||
-          ExtendedErrorType.SYSTEM_ERROR,
+        errorType,
         errorContext.defaultErrorCode || 'OPERATION_FAILED',
         error instanceof Error ? error.message : 'An unexpected error occurred',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -279,8 +333,7 @@ export class ErrorUtils {
 
       // Apply context
       if (errorContext.severity) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        enhancedError.withSeverity(errorContext.severity as any);
+        enhancedError.withSeverity(toErrorSeverity(errorContext.severity));
       }
       if (errorContext.businessImpact) {
         enhancedError.withBusinessImpact(errorContext.businessImpact);
@@ -339,17 +392,19 @@ export class ErrorUtils {
     context?: Record<string, unknown>,
   ): asserts condition {
     if (!condition) {
+      const resolvedErrorType =
+        typeof errorType === 'string'
+          ? (errorType as ExtendedErrorType)
+          : errorType;
       const error = new EnhancedAppException(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        typeof errorType === 'string' ? (errorType as any) : errorType,
+        resolvedErrorType,
         errorCode,
         message,
         httpStatus,
         context,
       );
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      error.withSeverity('medium' as any);
+      error.withSeverity(toErrorSeverity('medium'));
       throw error;
     }
   }
@@ -357,15 +412,7 @@ export class ErrorUtils {
   /**
    * Validate and throw detailed validation error
    */
-  public static validateAndThrow(
-    validations: Array<{
-      condition: boolean;
-      field: string;
-      message: string;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      value?: any;
-    }>,
-  ): void {
+  public static validateAndThrow(validations: ValidationEntry[]): void {
     const failures = validations.filter((v) => !v.condition);
 
     if (failures.length > 0) {
@@ -392,14 +439,7 @@ export class ErrorUtils {
    */
   public static async withRetry<T>(
     operation: () => Promise<T>,
-    options: {
-      maxRetries?: number;
-      baseDelay?: number;
-      exponentialBackoff?: boolean;
-      retryCondition?: (error: Error) => boolean;
-      operationName: string;
-      logger?: Logger;
-    },
+    options: ErrorRetryOptions,
   ): Promise<T> {
     const {
       maxRetries = 3,
@@ -450,10 +490,32 @@ export class ErrorUtils {
 
     // Enhance final error
     if (lastError instanceof EnhancedAppException) {
-      throw lastError.withContext({
-        retryAttempts: maxRetries,
-        operationName,
-      });
+      // Create a new error with updated details including retryAttempts
+      const updatedDetails = lastError.enhancedDetails.details && typeof lastError.enhancedDetails.details === 'object'
+        ? { ...lastError.enhancedDetails.details, retryAttempts: maxRetries, operationName }
+        : { retryAttempts: maxRetries, operationName };
+
+      const newError = new EnhancedAppException(
+        lastError.enhancedDetails.type,
+        lastError.enhancedDetails.code,
+        lastError.enhancedDetails.message,
+        lastError.getStatus(),
+        updatedDetails,
+        lastError.enhancedDetails.context,
+      );
+
+      // Copy enhanced properties
+      if (lastError.enhancedDetails.recoveryStrategies) {
+        newError.withRecoveryStrategies(lastError.enhancedDetails.recoveryStrategies);
+      }
+      if (lastError.enhancedDetails.businessImpact) {
+        newError.withBusinessImpact(lastError.enhancedDetails.businessImpact);
+      }
+      if (lastError.enhancedDetails.userImpact) {
+        newError.withUserImpact(lastError.enhancedDetails.userImpact);
+      }
+
+      throw newError;
     }
 
     throw new EnhancedAppException(
@@ -466,8 +528,6 @@ export class ErrorUtils {
         retryAttempts: maxRetries,
         operationName,
       },
-    )
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .withSeverity('high' as any);
+    ).withSeverity(toErrorSeverity('high'));
   }
 }
