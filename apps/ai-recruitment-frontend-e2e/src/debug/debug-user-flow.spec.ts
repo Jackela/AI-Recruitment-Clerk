@@ -93,7 +93,7 @@ test.describe('Debug User Flow - Step by Step', () => {
   });
 
   test('Step 1: Application loads and shows dashboard', async ({ page }) => {
-    console.log('Testing application load...');
+    // console.log('Testing application load...');
 
     await expect(page).toHaveURL(/\/jobs/);
     await expect(page.locator('#app-title')).toBeVisible();
@@ -103,11 +103,11 @@ test.describe('Debug User Flow - Step by Step', () => {
       }),
     ).toBeVisible();
 
-    console.log('✅ Application loaded successfully');
+    // console.log('✅ Application loaded successfully');
   });
 
   test('Step 2: Can navigate to job creation page', async ({ page }) => {
-    console.log('Testing navigation to job creation...');
+    // console.log('Testing navigation to job creation...');
 
     // Navigate to job creation page
     await page.goto('/jobs/create');
@@ -122,11 +122,11 @@ test.describe('Debug User Flow - Step by Step', () => {
     await expect(jobTitleInput).toBeVisible();
     await expect(jdTextarea).toBeVisible();
 
-    console.log('✅ Job creation form is accessible');
+    // console.log('✅ Job creation form is accessible');
   });
 
   test('Step 3: Can fill and submit job creation form', async ({ page }) => {
-    console.log('Testing job creation form submission...');
+    // console.log('Testing job creation form submission...');
 
     await page.goto('/jobs/create');
     await page.waitForLoadState('domcontentloaded');
@@ -149,11 +149,11 @@ test.describe('Debug User Flow - Step by Step', () => {
     // Wait for form submission response
     await delay(2000);
 
-    console.log('✅ Job creation form submitted');
+    // console.log('✅ Job creation form submitted');
   });
 
   test('Step 4: Check if job details page exists', async ({ page }) => {
-    console.log('Testing navigation to job details page...');
+    // console.log('Testing navigation to job details page...');
 
     // Increase timeout for this test
     test.setTimeout(45000);
@@ -169,20 +169,20 @@ test.describe('Debug User Flow - Step by Step', () => {
 
     // Check what's on the page
     const pageContent = await page.textContent('body');
-    console.log('Page content length:', pageContent?.length || 0);
-    console.log(
-      'Page content preview:',
-      pageContent?.substring(0, 200) || 'No content',
-    );
+    // console.log('Page content length:', pageContent?.length || 0);
+    // console.log(
+    //   'Page content preview:',
+    //   pageContent?.substring(0, 200) || 'No content',
+    // );
 
     // Check for common page elements
     const headerCount = await page.locator('h1, h2, .page-title').count();
     const formCount = await page.locator('form').count();
     const angularRootCount = await page.locator('arc-root').count();
 
-    console.log('Header found:', headerCount > 0);
-    console.log('Form found:', formCount > 0);
-    console.log('Angular root found:', angularRootCount > 0);
+    // console.log('Header found:', headerCount > 0);
+    // console.log('Form found:', formCount > 0);
+    // console.log('Angular root found:', angularRootCount > 0);
 
     // Check if there are any file upload elements
     const fileInputs = await page.locator('input[type="file"]').count();
@@ -191,12 +191,12 @@ test.describe('Debug User Flow - Step by Step', () => {
       .filter({ hasText: /上传|Upload/i })
       .count();
 
-    console.log('File inputs found:', fileInputs);
-    console.log('Upload buttons found:', uploadButtons);
+    // console.log('File inputs found:', fileInputs);
+    // console.log('Upload buttons found:', uploadButtons);
 
     // Check current URL to see if we got redirected
     const currentUrl = page.url();
-    console.log('Current URL:', currentUrl);
+    // console.log('Current URL:', currentUrl);
 
     // Log status based on page state (unconditional logging)
     const includesJobs = currentUrl.includes('/jobs/');
@@ -205,9 +205,9 @@ test.describe('Debug User Flow - Step by Step', () => {
     const includesJobsPath = currentUrl.includes('/jobs');
     const includesJobId = currentUrl.includes(`/${mockJobResponse.jobId}`);
     const wasRedirectedToList = includesJobsPath && !includesJobId;
-    console.log('Is on job details page:', isOnJobDetailsPage);
-    console.log('Was redirected to list:', wasRedirectedToList);
-    console.log('Page load status: success');
+    // console.log('Is on job details page:', isOnJobDetailsPage);
+    // console.log('Was redirected to list:', wasRedirectedToList);
+    // console.log('Page load status: success');
 
     // Verify Angular root is present
     await expect(page.locator('arc-root')).toBeVisible();

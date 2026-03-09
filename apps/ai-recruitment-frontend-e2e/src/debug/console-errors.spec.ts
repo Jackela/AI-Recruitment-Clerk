@@ -24,12 +24,14 @@ test.describe('Console Error Detection', () => {
         type: msg.type(),
         text: msg.text(),
       });
-      console.log(`[${msg.type().toUpperCase()}]`, msg.text());
+      // Diagnostic: Log console message for debugging
+      // console.log(`[${msg.type().toUpperCase()}]`, msg.text());
     });
 
     // Capture uncaught exceptions
     page.on('pageerror', (exception) => {
-      console.log('🔴 UNCAUGHT EXCEPTION:', exception.message);
+      // Diagnostic: Log uncaught exception for debugging
+      // console.log('🔴 UNCAUGHT EXCEPTION:', exception.message);
       allMessages.push({
         type: 'exception',
         text: exception.message,
@@ -38,35 +40,36 @@ test.describe('Console Error Detection', () => {
 
     // Capture failed network requests
     page.on('requestfailed', (request) => {
-      console.log(
-        '🔴 FAILED REQUEST:',
-        request.url(),
-        request.failure()?.errorText,
-      );
+      // Diagnostic: Log failed request for debugging
+      // console.log(
+      //   '🔴 FAILED REQUEST:',
+      //   request.url(),
+      //   request.failure()?.errorText,
+      // );
       allMessages.push({
         type: 'network_error',
         text: `Failed to load: ${request.url()}`,
       });
     });
 
-    console.log('📍 Starting page navigation...');
+    // console.log('📍 Starting page navigation...');
     const response = await page.goto('/');
     await page.waitForURL(
       (url) => url.pathname.startsWith(LANDING_PATH),
       { timeout: 15_000 },
     );
-    console.log('📍 Response status:', response?.status());
+    // console.log('📍 Response status:', response?.status());
 
-    console.log('📍 Waiting for network to settle...');
+    // console.log('📍 Waiting for network to settle...');
     await page.waitForLoadState('domcontentloaded');
 
-    console.log('📍 Waiting for potential JavaScript execution...');
+    // console.log('📍 Waiting for potential JavaScript execution...');
     await page.waitForFunction(() => document.readyState === 'complete', {
       timeout: 10000,
     });
 
-    console.log('📍 === CONSOLE MESSAGE SUMMARY ===');
-    console.log('Total messages captured:', allMessages.length);
+    // console.log('📍 === CONSOLE MESSAGE SUMMARY ===');
+    // console.log('Total messages captured:', allMessages.length);
 
     const errorMessages = allMessages.filter(
       (msg) => msg.type === 'error' || msg.type === 'exception',
@@ -77,22 +80,22 @@ test.describe('Console Error Detection', () => {
       (msg) => msg.type === 'network_error',
     );
 
-    console.log('Errors:', errorMessages.length);
-    console.log('Warnings:', warningMessages.length);
-    console.log('Logs:', logMessages.length);
-    console.log('Network errors:', networkErrors.length);
+    // console.log('Errors:', errorMessages.length);
+    // console.log('Warnings:', warningMessages.length);
+    // console.log('Logs:', logMessages.length);
+    // console.log('Network errors:', networkErrors.length);
 
     // Log error details (unconditional logging for diagnostic test)
-    console.log('📍 === ERROR DETAILS ===');
-    errorMessages.forEach((error, index) => {
-      console.log(`Error ${index + 1}:`, error.text);
-    });
+    // console.log('📍 === ERROR DETAILS ===');
+    // errorMessages.forEach((error, index) => {
+    //   console.log(`Error ${index + 1}:`, error.text);
+    // });
 
     // Log network error details (unconditional logging for diagnostic test)
-    console.log('📍 === NETWORK ERROR DETAILS ===');
-    networkErrors.forEach((error, index) => {
-      console.log(`Network Error ${index + 1}:`, error.text);
-    });
+    // console.log('📍 === NETWORK ERROR DETAILS ===');
+    // networkErrors.forEach((error, index) => {
+    //   console.log(`Network Error ${index + 1}:`, error.text);
+    // });
 
     // Check if main.js actually loaded and executed
     const mainJsExecuted = logMessages.some(
@@ -102,19 +105,19 @@ test.describe('Console Error Detection', () => {
         msg.text.includes('platform'),
     );
 
-    console.log('📍 Main.js seems to have executed:', mainJsExecuted);
+    // console.log('📍 Main.js seems to have executed:', mainJsExecuted);
 
     // Check what the DOM looks like
     const arcRootHTML = await page.locator('arc-root').innerHTML();
     const bodyHTML = await page.locator('body').innerHTML();
 
-    console.log('📍 === DOM STATUS ===');
-    console.log('arc-root content length:', arcRootHTML.length);
-    console.log('body content length:', bodyHTML.length);
+    // console.log('📍 === DOM STATUS ===');
+    // console.log('arc-root content length:', arcRootHTML.length);
+    // console.log('body content length:', bodyHTML.length);
 
     // Log main.js status (unconditional for diagnostic test)
     const hasMainJs = bodyHTML.includes('main.js');
-    console.log('main.js script tag in DOM:', hasMainJs);
+    // console.log('main.js script tag in DOM:', hasMainJs);
 
     // This test is purely diagnostic
     expect(true).toBe(true);
@@ -131,10 +134,10 @@ test.describe('Console Error Detection', () => {
       if (response.url().includes('.js') || response.url().includes('.css')) {
         if (response.ok()) {
           resourcesLoaded.push(response.url());
-          console.log('✅ Loaded:', response.url());
+          // console.log('✅ Loaded:', response.url());
         } else {
           resourcesFailed.push(response.url());
-          console.log('❌ Failed:', response.url(), response.status());
+          // console.log('❌ Failed:', response.url(), response.status());
         }
       }
     });
@@ -143,17 +146,17 @@ test.describe('Console Error Detection', () => {
     await page.waitForLoadState('domcontentloaded');
     await delay(5000);
 
-    console.log('📍 === RESOURCE LOADING SUMMARY ===');
-    console.log('Resources loaded:', resourcesLoaded.length);
-    console.log('Resources failed:', resourcesFailed.length);
+    // console.log('📍 === RESOURCE LOADING SUMMARY ===');
+    // console.log('Resources loaded:', resourcesLoaded.length);
+    // console.log('Resources failed:', resourcesFailed.length);
 
-    resourcesLoaded.forEach((url) => {
-      console.log('✅', url);
-    });
+    // resourcesLoaded.forEach((url) => {
+    //   console.log('✅', url);
+    // });
 
-    resourcesFailed.forEach((url) => {
-      console.log('❌', url);
-    });
+    // resourcesFailed.forEach((url) => {
+    //   console.log('❌', url);
+    // });
 
     // Check if critical Angular files loaded
     const mainJsLoaded = resourcesLoaded.some((url) => url.includes('main.js'));
@@ -162,10 +165,10 @@ test.describe('Console Error Detection', () => {
     );
     const stylesLoaded = resourcesLoaded.some((url) => url.includes('styles'));
 
-    console.log('📍 Critical resources status:');
-    console.log('main.js loaded:', mainJsLoaded);
-    console.log('polyfills.js loaded:', polyfillsLoaded);
-    console.log('styles loaded:', stylesLoaded);
+    // console.log('📍 Critical resources status:');
+    // console.log('main.js loaded:', mainJsLoaded);
+    // console.log('polyfills.js loaded:', polyfillsLoaded);
+    // console.log('styles loaded:', stylesLoaded);
 
     expect(true).toBe(true);
   });
