@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures';
+import { test, expect } from '../fixtures';
 
 /**
  * Debug Selectors - Find correct element selectors
