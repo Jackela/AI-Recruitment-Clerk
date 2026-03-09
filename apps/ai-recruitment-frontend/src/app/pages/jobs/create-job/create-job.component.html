@@ -54,7 +54,7 @@
       <h2 id="form-heading" class="card-title">{{ 'jobs.createJob.information' | translate }}</h2>
     </div>
     <div class="card-body">
-      <form [formGroup]="createJobForm" (ngSubmit)="onSubmit()" novalidate>
+      <form [formGroup]="createJobForm" (ngSubmit)="onSubmit()" data-testid="create-job-form" novalidate>
         <!-- Job Title Field -->
         <div class="form-field">
           <label for="jobTitle" class="field-label">
@@ -70,6 +70,7 @@
             id="jobTitle"
             class="field-input"
             formControlName="jobTitle"
+            data-testid="job-title-input"
             [class.invalid]="hasFieldError('jobTitle')"
             [placeholder]="'jobs.createJob.jobTitle.placeholder' | translate"
             maxlength="100"
@@ -107,6 +108,7 @@
               id="jdText"
               class="field-textarea"
               formControlName="jdText"
+              data-testid="jd-textarea"
               [class.invalid]="hasFieldError('jdText')"
               [placeholder]="'jobs.createJob.jobDescription.placeholder' | translate"
               rows="12"
@@ -164,6 +166,7 @@
           <button
             type="button"
             class="btn-secondary"
+            data-testid="cancel-button"
             (click)="onCancel()"
             [disabled]="creating$ | async"
             [attr.aria-label]="'jobs.createJob.actions.cancel' | translate"
@@ -177,6 +180,7 @@
           <button
             type="submit"
             class="btn-primary"
+            data-testid="submit-button"
             [disabled]="!createJobForm.valid || (creating$ | async)"
             [attr.aria-label]="(creating$ | async) ? ('jobs.createJob.actions.creating' | translate) : ('jobs.createJob.actions.create' | translate)"
           >

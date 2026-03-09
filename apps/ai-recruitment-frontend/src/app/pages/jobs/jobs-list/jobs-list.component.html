@@ -1,9 +1,9 @@
-<div class="jobs-list-container">
+<div class="jobs-list-container" data-testid="jobs-container">
   <!-- Fantasy Header Section -->
   <header class="page-header" role="banner">
     <div class="header-content">
       <div class="header-text">
-        <h1 id="page-title" class="page-title">岗位管理</h1>
+        <h1 id="page-title" class="page-title" data-testid="page-title">岗位管理</h1>
         <p class="page-subtitle" role="doc-subtitle">管理您的招聘职位和候选人</p>
       </div>
       <div class="header-actions">
@@ -29,7 +29,7 @@
           <span *ngIf="loading$ | async" class="spinner" aria-hidden="true"></span>
           <span>刷新</span>
         </button>
-        <a routerLink="/jobs/create" class="btn-primary" [attr.aria-label]="'创建新岗位'">
+        <a routerLink="/jobs/create" class="btn-primary" data-testid="create-job-button" [attr.aria-label]="'创建新岗位'">
           <svg
             width="20"
             height="20"
@@ -125,7 +125,7 @@
   </div>
 
   <!-- Loading State with Skeletons -->
-  <div *ngIf="loading$ | async" class="loading-state" role="status" aria-live="polite">
+  <div *ngIf="loading$ | async" class="loading-state" data-testid="loading-state" role="status" aria-live="polite">
     <div class="skeleton-grid">
       <div class="skeleton-card" *ngFor="let item of [1, 2, 3, 4, 5, 6]">
         <div class="skeleton-header">
@@ -153,10 +153,11 @@
     aria-labelledby="jobs-heading"
   >
     <h2 id="jobs-heading" class="sr-only">职位列表</h2>
-    <div class="jobs-bento-grid jobs-grid" role="grid" aria-label="职位卡片网格">
-      <div
-        *ngFor="let job of jobs$ | async; trackBy: trackByJobId"
-        class="job-bento-card job-card"
+    <div class="jobs-bento-grid jobs-grid" data-testid="jobs-grid" role="grid" aria-label="职位卡片网格">
+<div
+      *ngFor="let job of jobs$ | async; trackBy: trackByJobId"
+      class="job-bento-card job-card"
+      data-testid="job-card"
         [class.processing]="isJobProcessing(job)"
         role="gridcell"
         [attr.aria-label]="job.title + ', ' + job.department"
@@ -296,6 +297,7 @@
     <div
       *ngIf="(jobs$ | async)?.length === 0"
       class="empty-state"
+      data-testid="empty-state"
       role="status"
       aria-live="polite"
     >

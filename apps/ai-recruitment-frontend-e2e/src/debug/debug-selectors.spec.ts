@@ -11,7 +11,7 @@ function delay(ms: number): Promise<void> {
 
 test.describe('Debug Selectors', () => {
   test('Find correct selectors for jobs page', async ({ page }) => {
-    console.log('🔍 Debugging selectors for jobs page...');
+    // console.log('🔍 Debugging selectors for jobs page...');
 
     await page.goto('/jobs');
     await page.waitForLoadState('domcontentloaded');
@@ -19,11 +19,11 @@ test.describe('Debug Selectors', () => {
 
     // Find all elements with "岗位管理" text
     const jobsManagementElements = await page.locator('text=岗位管理').all();
-    console.log(
-      'Found',
-      jobsManagementElements.length,
-      'elements with "岗位管理" text',
-    );
+    // console.log(
+    //   'Found',
+    //   jobsManagementElements.length,
+    //   'elements with "岗位管理" text',
+    // );
 
     for (let i = 0; i < jobsManagementElements.length; i++) {
       const element = jobsManagementElements[i];
@@ -34,12 +34,12 @@ test.describe('Debug Selectors', () => {
         el.textContent?.trim(),
       );
 
-      console.log(`Element ${i + 1}:`, {
-        tagName,
-        className,
-        id,
-        textContent,
-      });
+      // console.log(`Element ${i + 1}:`, {
+      //   tagName,
+      //   className,
+      //   id,
+      //   textContent,
+      // });
     }
 
     // Try different selectors
@@ -56,30 +56,26 @@ test.describe('Debug Selectors', () => {
     for (const selector of selectors) {
       try {
         const count = await page.locator(selector).count();
-        console.log(`Selector "${selector}": ${count} matches`);
+        // console.log(`Selector "${selector}": ${count} matches`);
 
         // Always attempt to get first element info - will gracefully handle empty results
         const firstElement = page.locator(selector).first();
-        const tagName = await firstElement
-          .evaluate((el) => el.tagName)
-          .catch(() => 'N/A');
+        const tagName = await firstElement.evaluate((el) => el.tagName).catch(() => 'N/A');
         const text = await firstElement.textContent().catch(() => 'N/A');
-        console.log(`  First match: <${tagName}> "${text?.trim() ?? 'N/A'}"`);
+        // console.log(`  First match: <${tagName}> "${text?.trim() ?? 'N/A'}"`);
       } catch (error) {
-        console.log(
-          `Selector "${selector}": ERROR - ${(error as Error).message}`,
-        );
+        // console.log(`Selector "${selector}": ERROR - ${(error as Error).message}`);
       }
     }
 
     // Check if there are h2 elements specifically
     const h2Elements = await page.locator('h2').all();
-    console.log('Total h2 elements:', h2Elements.length);
+    // console.log('Total h2 elements:', h2Elements.length);
 
     for (let i = 0; i < Math.min(h2Elements.length, 3); i++) {
       const text = await h2Elements[i].textContent();
       const className = await h2Elements[i].evaluate((el) => el.className);
-      console.log(`h2[${i}]: "${text?.trim()}" class="${className}"`);
+      // console.log(`h2[${i}]: "${text?.trim()}" class="${className}"`);
     }
 
     expect(true).toBe(true);

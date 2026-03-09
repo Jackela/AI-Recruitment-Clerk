@@ -18,10 +18,9 @@ async function expectJobsLanding(page: Page): Promise<void> {
     (location) => location.pathname.startsWith(LANDING_PATH),
     { timeout: 15_000 },
   );
-  await expect(page.locator('#app-title')).toBeVisible();
-  await expect(
-    page.locator('nav a').filter({ hasText: '岗位管理' }),
-  ).toBeVisible();
+  // Use data-testid for stable element selection
+  await expect(page.getByTestId('page-title')).toBeVisible();
+  await expect(page.getByTestId('jobs-container')).toBeVisible();
 }
 
 test.describe('Core User Flow - Job Creation to Report Viewing', () => {
@@ -30,23 +29,16 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
     await expectJobsLanding(page);
 
     await gotoAndConfirmLanding(page, `${BASE_URL}jobs/create`);
-    const form = page.locator('form');
+    const form = page.getByTestId('create-job-form');
     await expect(form).toBeVisible();
 
+    // Use data-testid selectors instead of formControlName
+    await page.getByTestId('job-title-input').fill('高级前端工程师');
     await page
-      .locator('input[formControlName="jobTitle"]')
-      .fill('高级前端工程师');
-    await page
-      .locator('textarea[formControlName="jdText"]')
+      .getByTestId('jd-textarea')
       .fill('职位要求：熟悉主流前端框架，具备良好协作能力。');
 
-    const submitButton = page
-      .locator('button[type="submit"]')
-      .or(
-        page
-          .locator('button')
-          .filter({ hasText: /提交|创建|Submit|Create/i }),
-      );
+    const submitButton = page.getByTestId('submit-button');
     await expect(submitButton).toBeEnabled();
     await submitButton.click();
 
@@ -65,7 +57,7 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
     await expectJobsLanding(page);
 
     await gotoAndConfirmLanding(page, `${BASE_URL}jobs/create`);
-    await expect(page.locator('form')).toBeVisible();
+    await expect(page.getByTestId('create-job-form')).toBeVisible();
 
     await page.goto(`${BASE_URL}reports`);
     await page.waitForLoadState('domcontentloaded');
@@ -74,7 +66,10 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
 
   test('Job creation form accessibility basics', async ({ page }) => {
     await gotoAndConfirmLanding(page, `${BASE_URL}jobs/create`);
-    const inputs = page.locator('form input, form textarea, form select');
+    // Use data-testid selectors for form elements
+    const inputs = page.locator(
+      '[data-testid="job-title-input"], [data-testid="jd-textarea"]',
+    );
 
     const sampleCount = Math.min(await inputs.count(), 3);
     for (let i = 0; i < sampleCount; i++) {
