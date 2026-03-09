@@ -1,0 +1,85 @@
+import { test, expect } from '../fixtures';
+
+const LANDING_PATH = '/jobs';
+
+/**
+ * Custom delay helper to avoid page.waitForTimeout() lint issues.
+ */
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+test.describe('Deep Console Debug', () => {
+  test('capture all console messages and errors', async ({ page }) => {
+    const allMessages: string[] = [];
+    const errors: string[] = [];
+
+    // Capture ALL console messages, not just errors
+    page.on('console', (msg) => {
+      const message = `[${msg.type()}] ${msg.text()}`;
+      allMessages.push(message);
+
+      if (msg.type() === 'error') {
+        errors.push(msg.text());
+      }
+    });
+
+    // Capture page errors (unhandled exceptions)
+    page.on('pageerror', (error) => {
+      const errorMsg = `PAGE ERROR: ${error.message}`;
+      errors.push(errorMsg);
+      allMessages.push(errorMsg);
+      console.log('Unhandled page error:', error.message);
+      console.log('Stack:', error.stack);
+    });
+
+    console.log('Starting page navigation...');
+    await page.goto('/');
+    await page.waitForURL((url) => url.pathname.startsWith(LANDING_PATH), {
+      timeout: 15_000,
+    });
+
+    console.log('Waiting for network to settle...');
+    await page.waitForLoadState('domcontentloaded');
+
+    // Wait longer for any delayed bootstrap issues
+    console.log('Waiting for potential Angular bootstrap...');
+    await delay(5000);
+
+    console.log('=== ALL CONSOLE MESSAGES ===');
+    allMessages.forEach((msg, index) => {
+      console.log(`${index + 1}: ${msg}`);
+    });
+
+    console.log('=== ERROR SUMMARY ===');
+    console.log(`Total messages: ${allMessages.length}`);
+    console.log(`Error messages: ${errors.length}`);
+
+    console.log('ERRORS FOUND:', errors);
+
+    // Check if main.js is actually being loaded
+    const response = await page.goto('/');
+    const responseText = await response?.text();
+    console.log(
+      'Response includes main.js:',
+      responseText?.includes('main.js') || false,
+    );
+    console.log(
+      'Response includes polyfills.js:',
+      responseText?.includes('polyfills.js') || false,
+    );
+
+    // Check for any network failures
+    const failedRequests: string[] = [];
+    page.on('requestfailed', (request) => {
+      failedRequests.push(
+        `${request.method()} ${request.url()} - ${request.failure()?.errorText}`,
+      );
+    });
+
+    console.log('FAILED REQUESTS:', failedRequests);
+
+    // This test always passes - just for debugging
+    expect(true).toBe(true);
+  });
+});
