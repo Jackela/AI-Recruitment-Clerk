@@ -6,6 +6,7 @@
  * @module ScoringProxyControllerTests
  */
 
+import type { Readable } from 'node:stream';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { ScoringProxyController } from './scoring-proxy.controller';
 import type { MetricsService } from '../ops/metrics.service';
@@ -37,7 +38,7 @@ describe('ScoringProxyController', () => {
     destination: string;
     filename: string;
     path: string;
-    stream: any;
+    stream: Readable;
   }
 
   const createMockFile = (overrides: Partial<MockMulterFile> = {}): MockMulterFile => ({
@@ -50,7 +51,7 @@ describe('ScoringProxyController', () => {
     destination: '',
     filename: '',
     path: '',
-    stream: null as any,
+    stream: null as unknown as Readable,
     ...overrides,
   });
 

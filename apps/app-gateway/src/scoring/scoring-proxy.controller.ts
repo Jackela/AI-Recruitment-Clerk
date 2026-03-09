@@ -1,3 +1,4 @@
+
 import {
   Body,
   Controller,
@@ -12,6 +13,25 @@ import pdf from 'pdf-parse-fork';
 import type { MetricsService } from '../ops/metrics.service';
 
 /**
+ * DTO for gap analysis request body.
+ */
+interface GapAnalysisBodyDto {
+  jdText?: string;
+  resumeText?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * DTO for gap analysis response.
+ */
+interface GapAnalysisResponseDto {
+  matchedSkills?: string[];
+  missingSkills?: string[];
+  suggestedSkills?: string[];
+  [key: string]: unknown;
+}
+
+/**
  * Exposes endpoints for scoring proxy.
  */
 @Controller('scoring')
@@ -23,8 +43,9 @@ export class ScoringProxyController {
    * @returns The result of the operation.
    */
   @Post('gap-analysis')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-function-return-type
-  public async gapAnalysis(@Body() body: any) {
+  public async gapAnalysis(
+    @Body() body: GapAnalysisBodyDto,
+  ): Promise<GapAnalysisResponseDto> {
     this.metrics.incExposure();
     const base =
       process.env.SCORING_ENGINE_URL || 'http://scoring-engine-svc:3000';
