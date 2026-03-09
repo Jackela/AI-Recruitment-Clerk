@@ -6,11 +6,9 @@
  * @module PrivacyComplianceControllerTests
  */
 
-import type { TestingModule } from '@nestjs/testing';
-import { Test } from '@nestjs/testing';
-import { ForbiddenException, HttpStatus } from '@nestjs/common';
+import { ForbiddenException } from '@nestjs/common';
 import { PrivacyComplianceController } from './privacy-compliance.controller';
-import { PrivacyComplianceService } from './privacy-compliance.service';
+import type { PrivacyComplianceService } from './privacy-compliance.service';
 import type {
   CaptureConsentDto,
   WithdrawConsentDto,
@@ -125,28 +123,17 @@ describe('PrivacyComplianceController', () => {
     createdAt: new Date(),
   } as DataExportPackage;
 
-  beforeEach(async () => {
-    const privacyServiceMock = {
+  beforeEach(() => {
+    privacyService = {
       captureConsent: jest.fn(),
       withdrawConsent: jest.fn(),
       getConsentStatus: jest.fn(),
       createRightsRequest: jest.fn(),
       processDataAccessRequest: jest.fn(),
       processDataErasureRequest: jest.fn(),
-    };
+    } as unknown as jest.Mocked<PrivacyComplianceService>;
 
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [PrivacyComplianceController],
-      providers: [
-        {
-          provide: PrivacyComplianceService,
-          useValue: privacyServiceMock,
-        },
-      ],
-    }).compile();
-
-    controller = module.get<PrivacyComplianceController>(PrivacyComplianceController);
-    privacyService = module.get(PrivacyComplianceService) as jest.Mocked<PrivacyComplianceService>;
+    controller = new PrivacyComplianceController(privacyService as any);
   });
 
   afterEach(() => {

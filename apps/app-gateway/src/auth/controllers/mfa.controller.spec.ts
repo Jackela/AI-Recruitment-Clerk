@@ -6,11 +6,9 @@
  * @module MfaControllerTests
  */
 
-import type { TestingModule } from '@nestjs/testing';
-import { Test } from '@nestjs/testing';
 import { HttpStatus, HttpException } from '@nestjs/common';
 import { MfaController } from './mfa.controller';
-import { MfaService } from '../services/mfa.service';
+import type { MfaService } from '../services/mfa.service';
 import type {
   EnableMfaDto,
   VerifyMfaDto,
@@ -57,28 +55,17 @@ describe('MfaController', () => {
     message: 'TOTP MFA has been enabled successfully',
   };
 
-  beforeEach(async () => {
-    const mfaServiceMock = {
+  beforeEach(() => {
+    mfaService = {
       getMfaStatus: jest.fn(),
       enableMfa: jest.fn(),
       verifyMfa: jest.fn(),
       disableMfa: jest.fn(),
       generateNewBackupCodes: jest.fn(),
       sendMfaToken: jest.fn(),
-    };
+    } as unknown as jest.Mocked<MfaService>;
 
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [MfaController],
-      providers: [
-        {
-          provide: MfaService,
-          useValue: mfaServiceMock,
-        },
-      ],
-    }).compile();
-
-    controller = module.get<MfaController>(MfaController);
-    mfaService = module.get(MfaService) as jest.Mocked<MfaService>;
+    controller = new MfaController(mfaService as any);
   });
 
   afterEach(() => {

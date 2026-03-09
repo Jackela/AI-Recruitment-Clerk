@@ -66,7 +66,8 @@ export class ScoringProxyController {
   @UseInterceptors(FileInterceptor('resume'))
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   public async gapAnalysisFile(
-    @UploadedFile() file: Express.Multer.File,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    @UploadedFile() file: any,
     @Body() body: { jdText?: string },
   ) {
     if (!file) {
