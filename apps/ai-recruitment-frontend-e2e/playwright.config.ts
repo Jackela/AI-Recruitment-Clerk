@@ -84,6 +84,8 @@ if (process.env.E2E_ENABLE_FIREFOX === 'true') {
 
 export default defineConfig({
   testDir: './src',
+  // Exclude debug/diagnostic tests from regular runs
+  testIgnore: ['**/debug/**', '**/*.debug.spec.ts'],
   timeout: 60000,
   expect: {
     timeout: 15000,
