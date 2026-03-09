@@ -27,8 +27,10 @@ test.describe('Simple Jobs Page Test', () => {
     await page.goto('/jobs');
     await page.waitForLoadState('networkidle');
 
-    // Give time for Angular to render
-    await page.waitForTimeout(3000);
+    // Wait for Angular to render using a stable selector instead of timeout
+    await expect(page.getByTestId('jobs-container')).toBeVisible({
+      timeout: 5000,
+    });
 
     // Check what's actually on the page
     const bodyText = await page.textContent('body');
@@ -38,30 +40,23 @@ test.describe('Simple Jobs Page Test', () => {
       bodyText?.substring(0, 300) || 'No content',
     );
 
-    // Check if the main app header is there
-    const hasAppTitle = await page.locator('text=AI 招聘助理').count();
-    console.log('🏷️ App title found:', hasAppTitle);
-
-    // Check if we can find the specific page title
-    const hasPageTitle = await page.locator('h2, .page-title').count();
-    console.log('📋 Page title elements found:', hasPageTitle);
+    // Check if the main app header is there using data-testid
+    const pageTitle = page.getByTestId('page-title');
+    const hasAppTitle = await pageTitle.count();
+    console.log('🏷️ Page title found:', hasAppTitle);
 
     // Check the specific text we expect
     const hasJobsTitle = await page.locator('text=岗位管理').count();
     console.log('💼 "岗位管理" text found:', hasJobsTitle);
 
-    // Check if there are any job-related elements
-    const hasJobsContainer = await page.locator('.jobs-list-container').count();
-    const hasJobsGrid = await page.locator('.jobs-grid').count();
-    const hasEmptyState = await page.locator('.empty-state').count();
+    // Check if there are any job-related elements using data-testid
+    const hasJobsGrid = await page.getByTestId('jobs-grid').count();
+    const hasEmptyState = await page.getByTestId('empty-state').count();
+    const hasLoadingState = await page.getByTestId('loading-state').count();
 
-    console.log('📦 Jobs container found:', hasJobsContainer);
     console.log('🔲 Jobs grid found:', hasJobsGrid);
     console.log('🚫 Empty state found:', hasEmptyState);
-
-    // Check for loading indicators
-    const hasLoader = await page.locator('text=加载中').count();
-    console.log('⏳ Loading indicator found:', hasLoader);
+    console.log('⏳ Loading state found:', hasLoadingState);
 
     // Report any errors found
     console.log('💥 Console errors count:', consoleErrors.length);
@@ -89,24 +84,25 @@ test.describe('Simple Jobs Page Test', () => {
 
     await page.goto('/jobs/create');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
 
-    // This should work since basic navigation test passed
-    const hasForm = await page.locator('form').count();
-    const hasJobTitleInput = await page
-      .locator('input[formControlName="jobTitle"]')
-      .count();
-    const hasJdTextarea = await page
-      .locator('textarea[formControlName="jdText"]')
-      .count();
+    // Wait for form to be visible instead of using timeout
+    await expect(page.getByTestId('create-job-form')).toBeVisible({
+      timeout: 5000,
+    });
 
-    console.log('📝 Form found:', hasForm);
-    console.log('🏷️ Job title input found:', hasJobTitleInput);
-    console.log('📄 JD textarea found:', hasJdTextarea);
+    // Use data-testid selectors for form elements
+    const hasJobTitleInput = await page.getByTestId('job-title-input').count();
+    const hasJdTextarea = await page.getByTestId('jd-textarea').count();
+    const hasSubmitButton = await page.getByTestId('submit-button').count();
+
+    console.log('📝 Form elements found:');
+    console.log('  - Job title input:', hasJobTitleInput);
+    console.log('  - JD textarea:', hasJdTextarea);
+    console.log('  - Submit button:', hasSubmitButton);
 
     // This should pass based on previous tests
-    expect(hasForm).toBeGreaterThan(0);
     expect(hasJobTitleInput).toBeGreaterThan(0);
     expect(hasJdTextarea).toBeGreaterThan(0);
+    expect(hasSubmitButton).toBeGreaterThan(0);
   });
 });
