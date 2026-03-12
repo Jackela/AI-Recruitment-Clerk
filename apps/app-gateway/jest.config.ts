@@ -2,11 +2,7 @@ export default {
   displayName: 'app-gateway',
   preset: '../../jest.preset.cjs',
   testEnvironment: 'node',
-  testMatch: [
-    '<rootDir>/src/**/*.spec.ts',
-    '<rootDir>/test/**/*.spec.ts',
-  ],
-  testPathIgnorePatterns: ['<rootDir>/test/'],
+  testMatch: ['<rootDir>/src/**/*.spec.ts', '<rootDir>/test/**/*.spec.ts'],
   transform: {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
   },

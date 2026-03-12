@@ -1,7 +1,7 @@
-import type { OnInit, OnDestroy} from '@angular/core';
+import type { OnInit, OnDestroy } from '@angular/core';
 import { Component, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import { takeUntil, filter } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
@@ -76,12 +76,23 @@ export class JobsListComponent implements OnInit, OnDestroy {
   public activeJobs$: Observable<JobListItem[]>;
 
   // WebSocket-related observables
-  public jobsWithProgress$: Observable<Array<JobListItem & { progress: JobProgressValue | null }>>;
+  public jobsWithProgress$: Observable<
+    Array<JobListItem & { progress: JobProgressValue | null }>
+  >;
   public webSocketConnected$: Observable<boolean>;
   public webSocketStatus$: Observable<
     'connecting' | 'connected' | 'disconnected' | 'error'
   >;
   public jobManagementStateWithWebSocket$: Observable<JobManagementStateWithWebSocket>;
+
+  // Offline mode observables
+  public isOffline$: Observable<boolean>;
+  public connectionMessage$: Observable<string | null>;
+  public offlineStatus$: Observable<{
+    isOffline: boolean;
+    message: string | null;
+    showWarning: boolean;
+  }>;
 
   private readonly destroy$ = new Subject<void>();
   private readonly sessionId = `jobs-list-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -112,6 +123,13 @@ export class JobsListComponent implements OnInit, OnDestroy {
     this.jobManagementStateWithWebSocket$ = this.store.select(
       JobSelectors.selectJobManagementStateWithWebSocket,
     );
+
+    // Initialize offline mode observables
+    this.isOffline$ = this.store.select(JobSelectors.selectIsOffline);
+    this.connectionMessage$ = this.store.select(
+      JobSelectors.selectConnectionMessage,
+    );
+    this.offlineStatus$ = this.store.select(JobSelectors.selectOfflineStatus);
   }
 
   /**
@@ -234,7 +252,9 @@ export class JobsListComponent implements OnInit, OnDestroy {
    * @returns Progress percentage (0-100) or null if no progress
    */
   public getJobProgress(
-    jobWithProgress: JobListItem & { progress: { progress?: number; step?: string } | null },
+    jobWithProgress: JobListItem & {
+      progress: { progress?: number; step?: string } | null;
+    },
   ): number | null {
     return jobWithProgress.progress?.progress || null;
   }
@@ -245,7 +265,9 @@ export class JobsListComponent implements OnInit, OnDestroy {
    * @returns Current step description or null
    */
   public getCurrentStep(
-    jobWithProgress: JobListItem & { progress: { progress?: number; step?: string } | null },
+    jobWithProgress: JobListItem & {
+      progress: { progress?: number; step?: string } | null;
+    },
   ): string | null {
     return jobWithProgress.progress?.step || null;
   }
@@ -274,5 +296,12 @@ export class JobsListComponent implements OnInit, OnDestroy {
       failed: '失败',
     };
     return statusMap[status] || status;
+  }
+
+  /**
+   * Retries the backend connection.
+   */
+  public onRetryConnection(): void {
+    this.store.dispatch(JobActions.retryConnection());
   }
 }

@@ -1,10 +1,55 @@
 <div class="jobs-list-container" data-testid="jobs-container">
+  <!-- Offline Mode Banner -->
+  <div
+    *ngIf="offlineStatus$ | async as offlineStatus"
+    class="offline-banner"
+    [class.show]="offlineStatus.showWarning"
+    role="alert"
+    aria-live="polite"
+  >
+    <div class="offline-content" *ngIf="offlineStatus.isOffline">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        aria-hidden="true"
+      >
+        <path d="M1 1l22 22"></path>
+        <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
+        <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
+        <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
+        <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
+        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+        <line x1="12" y1="20" x2="12.01" y2="20"></line>
+      </svg>
+      <div class="offline-message">
+        <strong>离线模式</strong>
+        <span *ngIf="offlineStatus.message">{{ offlineStatus.message }}</span>
+      </div>
+      <button
+        type="button"
+        class="btn-retry"
+        (click)="onRetryConnection()"
+        [disabled]="(loading$ | async) || false"
+      >
+        <span *ngIf="!(loading$ | async)">重试连接</span>
+        <span *ngIf="loading$ | async" class="spinner-small"></span>
+      </button>
+    </div>
+  </div>
+
   <!-- Fantasy Header Section -->
   <header class="page-header" role="banner">
     <div class="header-content">
       <div class="header-text">
-        <h1 id="page-title" class="page-title" data-testid="page-title">岗位管理</h1>
-        <p class="page-subtitle" role="doc-subtitle">管理您的招聘职位和候选人</p>
+        <h1 id="page-title" class="page-title" data-testid="page-title">
+          岗位管理
+        </h1>
+        <p class="page-subtitle" role="doc-subtitle">
+          管理您的招聘职位和候选人
+        </p>
       </div>
       <div class="header-actions">
         <button
@@ -26,10 +71,19 @@
             <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path>
             <path d="M21 3v5h-5"></path>
           </svg>
-          <span *ngIf="loading$ | async" class="spinner" aria-hidden="true"></span>
+          <span
+            *ngIf="loading$ | async"
+            class="spinner"
+            aria-hidden="true"
+          ></span>
           <span>刷新</span>
         </button>
-        <a routerLink="/jobs/create" class="btn-primary" data-testid="create-job-button" [attr.aria-label]="'创建新岗位'">
+        <a
+          routerLink="/jobs/create"
+          class="btn-primary"
+          data-testid="create-job-button"
+          [attr.aria-label]="'创建新岗位'"
+        >
           <svg
             width="20"
             height="20"
@@ -49,7 +103,11 @@
   </header>
 
   <!-- Statistics Panel -->
-  <section class="stats-section" aria-labelledby="stats-heading" *ngIf="jobsStatistics$ | async as stats">
+  <section
+    class="stats-section"
+    aria-labelledby="stats-heading"
+    *ngIf="jobsStatistics$ | async as stats"
+  >
     <h2 id="stats-heading" class="sr-only">职位统计</h2>
     <div class="stats-grid" role="group" aria-label="职位统计卡片">
       <arc-dashboard-card
@@ -119,13 +177,23 @@
       </svg>
       <span class="error-message">{{ error }}</span>
     </div>
-    <button (click)="onRefresh()" class="error-retry" [attr.aria-label]="'重试'">
+    <button
+      (click)="onRefresh()"
+      class="error-retry"
+      [attr.aria-label]="'重试'"
+    >
       重试
     </button>
   </div>
 
   <!-- Loading State with Skeletons -->
-  <div *ngIf="loading$ | async" class="loading-state" data-testid="loading-state" role="status" aria-live="polite">
+  <div
+    *ngIf="loading$ | async"
+    class="loading-state"
+    data-testid="loading-state"
+    role="status"
+    aria-live="polite"
+  >
     <div class="skeleton-grid">
       <div class="skeleton-card" *ngFor="let item of [1, 2, 3, 4, 5, 6]">
         <div class="skeleton-header">
@@ -153,11 +221,16 @@
     aria-labelledby="jobs-heading"
   >
     <h2 id="jobs-heading" class="sr-only">职位列表</h2>
-    <div class="jobs-bento-grid jobs-grid" data-testid="jobs-grid" role="grid" aria-label="职位卡片网格">
-<div
-      *ngFor="let job of jobs$ | async; trackBy: trackByJobId"
-      class="job-bento-card job-card"
-      data-testid="job-card"
+    <div
+      class="jobs-bento-grid jobs-grid"
+      data-testid="jobs-grid"
+      role="grid"
+      aria-label="职位卡片网格"
+    >
+      <div
+        *ngFor="let job of jobs$ | async; trackBy: trackByJobId"
+        class="job-bento-card job-card"
+        data-testid="job-card"
         [class.processing]="isJobProcessing(job)"
         role="gridcell"
         [attr.aria-label]="job.title + ', ' + job.department"
@@ -194,7 +267,10 @@
           <p class="job-department">{{ job.department || '未分类部门' }}</p>
 
           <div class="job-meta">
-            <div class="meta-item resume-count" [attr.aria-label]="'简历数量: ' + job.resumeCount">
+            <div
+              class="meta-item resume-count"
+              [attr.aria-label]="'简历数量: ' + job.resumeCount"
+            >
               <svg
                 width="16"
                 height="16"
@@ -208,9 +284,16 @@
                 ></path>
                 <polyline points="14,2 14,8 20,8"></polyline>
               </svg>
-              <span><strong>{{ job.resumeCount }}</strong> 份简历</span>
+              <span
+                ><strong>{{ job.resumeCount }}</strong> 份简历</span
+              >
             </div>
-            <div class="meta-item" [attr.aria-label]="'创建时间: ' + (job.createdAt | date: 'yyyy-MM-dd')">
+            <div
+              class="meta-item"
+              [attr.aria-label]="
+                '创建时间: ' + (job.createdAt | date: 'yyyy-MM-dd')
+              "
+            >
               <svg
                 width="16"
                 height="16"
@@ -228,11 +311,17 @@
 
           <!-- Progress Bar for Processing Jobs -->
           <div
-            *ngIf="isJobProcessing(job) && (jobsWithProgress$ | async) as jobsWithProgress"
+            *ngIf="
+              isJobProcessing(job) &&
+              (jobsWithProgress$ | async) as jobsWithProgress
+            "
             class="progress-container"
           >
             <ng-container *ngFor="let jobWithProgress of jobsWithProgress">
-              <div *ngIf="jobWithProgress.id === job.id" class="progress-wrapper">
+              <div
+                *ngIf="jobWithProgress.id === job.id"
+                class="progress-wrapper"
+              >
                 <div class="progress-bar">
                   <div
                     class="progress-fill"
@@ -243,7 +332,9 @@
                     role="progressbar"
                   ></div>
                 </div>
-                <span class="progress-text">{{ getCurrentStep(jobWithProgress) || '处理中...' }}</span>
+                <span class="progress-text">{{
+                  getCurrentStep(jobWithProgress) || '处理中...'
+                }}</span>
               </div>
             </ng-container>
           </div>
@@ -319,7 +410,11 @@
         您还没有创建任何职位。<br />
         点击下方按钮创建您的第一个职位吧！
       </p>
-      <a routerLink="/jobs/create" class="btn-primary" [attr.aria-label]="'创建第一个职位'">
+      <a
+        routerLink="/jobs/create"
+        class="btn-primary"
+        [attr.aria-label]="'创建第一个职位'"
+      >
         <svg
           width="20"
           height="20"

@@ -1,0 +1,85 @@
+name: visual-regression
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'apps/ai-recruitment-frontend/**'
+      - 'apps/ai-recruitment-frontend-e2e/**'
+  pull_request:
+    paths:
+      - 'apps/ai-recruitment-frontend/**'
+      - 'apps/ai-recruitment-frontend-e2e/**'
+  workflow_dispatch:
+    inputs:
+      update-snapshots:
+        description: 'Update baseline snapshots'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+jobs:
+  visual_regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Cache Nx
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: |
+            .nx/cache
+            node_modules/.cache
+          key: ${{ runner.os }}-nx-${{ hashFiles('package-lock.json', '**/project.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nx-
+      - name: Cache Playwright browsers
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            pw-${{ runner.os }}-
+      - run: npm ci
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      - name: Update Baseline Snapshots
+        if: github.event.inputs.update-snapshots == 'true' || github.event_name == 'workflow_dispatch'
+        run: npm run test:e2e:visual:update
+      - name: Run Visual Regression Tests
+        run: npm run test:e2e:visual:ci
+      - name: Upload Visual Regression Snapshots
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: visual-snapshots
+          path: |
+            apps/ai-recruitment-frontend-e2e/src/visual/**/*.png
+          if-no-files-found: ignore
+      - name: Upload Diffs on Failure
+        if: failure()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: visual-diffs
+          path: |
+            apps/ai-recruitment-frontend-e2e/src/visual/**/*-diff.png
+            apps/ai-recruitment-frontend-e2e/src/visual/**/*-actual.png
+            apps/ai-recruitment-frontend-e2e/src/visual/**/*-expected.png
+          if-no-files-found: ignore
+      - name: Upload Playwright Report
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: playwright-visual-report
+          path: playwright-report/
+          if-no-files-found: ignore

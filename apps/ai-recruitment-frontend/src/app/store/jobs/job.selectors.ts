@@ -46,14 +46,18 @@ export const selectActiveJobs = createSelector(
     jobs.filter((job) => job.status === 'active'),
 );
 
-export const selectJobById = (jobId: string): MemoizedSelector<object, JobListItem | undefined> =>
+export const selectJobById = (
+  jobId: string,
+): MemoizedSelector<object, JobListItem | undefined> =>
   createSelector(
     selectAllJobs,
     (jobs: JobListItem[]): JobListItem | undefined =>
       jobs.find((job) => job.id === jobId),
   );
 
-export const selectJobsByStatus = (status: string): MemoizedSelector<object, JobListItem[]> =>
+export const selectJobsByStatus = (
+  status: string,
+): MemoizedSelector<object, JobListItem[]> =>
   createSelector(selectAllJobs, (jobs: JobListItem[]): JobListItem[] =>
     jobs.filter((job) => job.status === status),
   );
@@ -152,10 +156,13 @@ export const selectJobProgress = createSelector(
   (state: JobState) => state.jobProgress,
 );
 
-export const selectJobProgressById = (jobId: string): MemoizedSelector<object, JobProgressValue> =>
+export const selectJobProgressById = (
+  jobId: string,
+): MemoizedSelector<object, JobProgressValue> =>
   createSelector(
     selectJobProgress,
-    (jobProgress: JobState['jobProgress']): JobProgressValue => jobProgress[jobId] || null,
+    (jobProgress: JobState['jobProgress']): JobProgressValue =>
+      jobProgress[jobId] || null,
   );
 
 // Enhanced job management state with WebSocket info
@@ -184,4 +191,25 @@ export const selectJobsWithProgress = createSelector(
       ...job,
       progress: jobProgress[job.id] || null,
     })),
+);
+
+// Offline mode selectors
+export const selectIsOffline = createSelector(
+  selectJobState,
+  (state: JobState): boolean => state.isOffline,
+);
+
+export const selectConnectionMessage = createSelector(
+  selectJobState,
+  (state: JobState): string | null => state.connectionMessage,
+);
+
+export const selectOfflineStatus = createSelector(
+  selectIsOffline,
+  selectConnectionMessage,
+  (isOffline, message) => ({
+    isOffline,
+    message,
+    showWarning: isOffline,
+  }),
 );

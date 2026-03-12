@@ -82,6 +82,71 @@ if (process.env.E2E_ENABLE_FIREFOX === 'true') {
   });
 }
 
+// WebKit / Safari support
+if (process.env.E2E_ENABLE_WEBKIT === 'true') {
+  projects.push({
+    name: 'webkit',
+    use: {
+      ...devices['Desktop Safari'],
+      navigationTimeout: 90000,
+      actionTimeout: 30000,
+      launchOptions: {
+        timeout: 60000,
+        args: [
+          '--disable-web-security',
+          '--disable-features=VizDisplayCompositor',
+          '--disable-ipc-flooding-protection',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-renderer-backgrounding',
+          '--disable-field-trial-config',
+          '--no-first-run',
+        ],
+        headless: !process.env.WEBKIT_HEADED,
+      },
+      contextOptions: {
+        ignoreHTTPSErrors: true,
+        bypassCSP: true,
+      },
+    },
+  });
+
+  // Mobile Safari - iPhone
+  projects.push({
+    name: 'webkit-iphone',
+    use: {
+      ...devices['iPhone 14'],
+      navigationTimeout: 90000,
+      actionTimeout: 30000,
+      launchOptions: {
+        timeout: 60000,
+        headless: !process.env.WEBKIT_HEADED,
+      },
+      contextOptions: {
+        ignoreHTTPSErrors: true,
+        bypassCSP: true,
+      },
+    },
+  });
+
+  // Mobile Safari - iPad
+  projects.push({
+    name: 'webkit-ipad',
+    use: {
+      ...devices['iPad Pro 11'],
+      navigationTimeout: 90000,
+      actionTimeout: 30000,
+      launchOptions: {
+        timeout: 60000,
+        headless: !process.env.WEBKIT_HEADED,
+      },
+      contextOptions: {
+        ignoreHTTPSErrors: true,
+        bypassCSP: true,
+      },
+    },
+  });
+}
+
 export default defineConfig({
   testDir: './src',
   // Exclude debug/diagnostic tests from regular runs
@@ -89,12 +154,16 @@ export default defineConfig({
   timeout: 60000,
   expect: {
     timeout: 15000,
+    toHaveScreenshot: {
+      maxDiffPixels: 100,
+      threshold: 0.2,
+    },
   },
-  // Enhanced stability configuration for port management
-  fullyParallel: false,
+  // Parallel execution optimized for modern CI and local environments
+  fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 3 : 2, // Increased retries for infrastructure stability
-  workers: process.env.CI ? 1 : 1, // Use single worker to prevent port conflicts
+  retries: process.env.CI ? 2 : 1,
+  workers: process.env.CI ? 4 : undefined, // CI: fixed 4 workers, Local: auto-detect (50% CPUs)
   // Extended global timeout for comprehensive setup/teardown
   globalTimeout: 900000, // 15 minutes global timeout for robust cleanup and port management
   reporter: 'html',

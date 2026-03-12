@@ -43,8 +43,21 @@
     },
     "@nx/jest:jest": {
       "cache": true,
+      "dependsOn": ["build"],
       "inputs": [
         "default",
+        "^default",
+        "{workspaceRoot}/jest.config.mjs",
+        "{projectRoot}/jest.config.ts",
+        "{workspaceRoot}/tsconfig.base.json"
+      ]
+    },
+    "test": {
+      "cache": true,
+      "dependsOn": ["build"],
+      "inputs": [
+        "default",
+        "^default",
         "{workspaceRoot}/jest.config.mjs",
         "{projectRoot}/jest.config.ts",
         "{workspaceRoot}/tsconfig.base.json"

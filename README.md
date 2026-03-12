@@ -599,6 +599,34 @@ scripts\validate-system.bat   # Windows
 scripts\run-e2e-tests.bat     # Windows
 ```
 
+### Run Edge Case Tests
+
+The system includes comprehensive edge case testing covering boundary conditions, concurrent operations, and error scenarios:
+
+```bash
+# Run all edge case tests
+npx jest --testPathPatterns="edge-cases"
+
+# Run specific module edge cases
+npx jest jobs.edge-cases
+npx jest resumes.edge-cases
+npx jest auth.edge-cases
+npx jest analysis.edge-cases
+
+# Run with coverage report
+npx jest --testPathPatterns="edge-cases" --coverage
+```
+
+**Edge Case Coverage**: 130+ test cases across 4 modules
+
+- ✅ Empty/null/undefined inputs
+- ✅ Boundary values (MAX_INT, empty strings, unicode)
+- ✅ Concurrent operations and race conditions
+- ✅ Timeout scenarios and slow responses
+- ✅ Security edge cases (SQL injection, XSS)
+
+See [EDGE_CASE_TESTING.md](./EDGE_CASE_TESTING.md) for complete documentation.
+
 ### Service URLs (After Deployment)
 
 - **Frontend Application**: http://localhost:4200

@@ -1,6 +1,4 @@
-import type {
-  OnInit,
-  OnDestroy} from '@angular/core';
+import type { OnInit, OnDestroy } from '@angular/core';
 import {
   Component,
   inject,
@@ -22,6 +20,7 @@ import type { WebSocketStatsService } from './services/realtime/websocket-stats.
 import { AccessibilityService } from './services/accessibility/accessibility.service';
 import { ThemeService } from './services/theme/theme.service';
 import { SkipNavigationDirective } from './directives/accessibility/skip-navigation.directive';
+import { ServiceUnavailableComponent } from './core/components/service-unavailable/service-unavailable.component';
 import { APP_CONFIG } from '../config';
 import { getText } from '../config/i18n.config';
 import type { Subscription } from 'rxjs';
@@ -42,6 +41,7 @@ import type { Subscription } from 'rxjs';
     ThemeToggleComponent,
     LanguageSelectorComponent,
     SkipNavigationDirective,
+    ServiceUnavailableComponent,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -131,9 +131,8 @@ export class App implements OnInit, OnDestroy {
 
   private async ensureWebsocketStats(): Promise<WebSocketStatsService> {
     if (!this.websocketStats) {
-      const { WebSocketStatsService } = await import(
-        './services/realtime/websocket-stats.service'
-      );
+      const { WebSocketStatsService } =
+        await import('./services/realtime/websocket-stats.service');
       this.websocketStats = this.injector.get(WebSocketStatsService);
     }
 
@@ -163,16 +162,14 @@ export class App implements OnInit, OnDestroy {
       return;
     }
 
-    const { KeyboardNavigationService } = await import(
-      './services/keyboard/keyboard-navigation.service'
-    );
+    const { KeyboardNavigationService } =
+      await import('./services/keyboard/keyboard-navigation.service');
     this.keyboardNav = this.injector.get(KeyboardNavigationService);
   }
 
   private async setupKeyboardShortcuts(): Promise<void> {
-    const { registerKeyboardShortcuts } = await import(
-      './setup-keyboard-shortcuts'
-    );
+    const { registerKeyboardShortcuts } =
+      await import('./setup-keyboard-shortcuts');
 
     registerKeyboardShortcuts({
       accessibilityService: this.accessibilityService,
