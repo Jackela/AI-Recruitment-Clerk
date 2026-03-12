@@ -10,8 +10,8 @@
 
 ## Build, Test, and Development Commands
 
-- **Node.js Version**: Use Node.js 20.18.x (see `.nvmrc`). Node.js 22+ is not supported due to Jest compatibility issues.
-- Install deps: `npm ci` (Node >= 20.18, < 22.0).
+- **Node.js Version**: Use Node.js 22.x (see `.nvmrc`). Node.js 22+ is now fully supported.
+- Install deps: `npm ci` (Node >= 22.0, < 23.0).
 - Build gateway: `npm run build` (Nx builds `apps/app-gateway`).
 - Run gateway (dev build output): `npm start` or `npm run start:prod` for production mode.
 - Lint all: `npm run lint` (Nx run-many lint).
