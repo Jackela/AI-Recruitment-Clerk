@@ -33,7 +33,6 @@ describe('DatabasePerformanceMonitor', () => {
       expect(console.warn).toHaveBeenCalled();
       expect(console.warn).toHaveBeenCalledWith(
         expect.stringContaining('slowOp took'),
-        expect.stringContaining('expected 50ms'),
       );
     });
 

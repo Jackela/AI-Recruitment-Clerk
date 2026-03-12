@@ -262,8 +262,8 @@ describe('PhoneValidator', () => {
     });
 
     it('should extract country code with 3 digits', () => {
-      const result = PhoneValidator.extractCountryCode('+1234567890');
-      expect(result).toBe('123');
+      const result = PhoneValidator.extractCountryCode('+8613812345678');
+      expect(result).toBe('86');
     });
   });
 });

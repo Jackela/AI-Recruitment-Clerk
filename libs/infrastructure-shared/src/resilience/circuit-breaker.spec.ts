@@ -1,5 +1,4 @@
 import { WithCircuitBreaker, CircuitBreakerConfig } from './circuit-breaker';
-import type { DecoratorTarget } from '../contracts/design-by-contract';
 
 describe('CircuitBreaker', () => {
   let consoleErrorSpy: jest.SpyInstance;

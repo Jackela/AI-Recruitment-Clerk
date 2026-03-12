@@ -1,12 +1,18 @@
 import { Logger, createLogger, sharedLogger } from './shared-logger';
 import type { LogContext, LogEntry, LoggerOptions } from './logger.service';
+import { Logger as NestLogger } from '@nestjs/common';
 
 describe('Shared Logger', () => {
+  let mockLog: jest.SpyInstance;
+  let mockError: jest.SpyInstance;
+  let mockWarn: jest.SpyInstance;
+  let mockDebug: jest.SpyInstance;
+
   beforeEach(() => {
-    jest.spyOn(console, 'log').mockImplementation();
-    jest.spyOn(console, 'error').mockImplementation();
-    jest.spyOn(console, 'warn').mockImplementation();
-    jest.spyOn(console, 'debug').mockImplementation();
+    mockLog = jest.spyOn(NestLogger.prototype, 'log').mockImplementation();
+    mockError = jest.spyOn(NestLogger.prototype, 'error').mockImplementation();
+    mockWarn = jest.spyOn(NestLogger.prototype, 'warn').mockImplementation();
+    mockDebug = jest.spyOn(NestLogger.prototype, 'debug').mockImplementation();
   });
 
   afterEach(() => {
@@ -47,22 +53,22 @@ describe('Shared Logger', () => {
 
     it('should have default Application context', () => {
       sharedLogger.log('Test message');
-      expect(console.log).toHaveBeenCalled();
+      expect(mockLog).toHaveBeenCalled();
     });
 
     it('should be able to log errors', () => {
       sharedLogger.error('Test error');
-      expect(console.error).toHaveBeenCalled();
+      expect(mockError).toHaveBeenCalled();
     });
 
     it('should be able to log warnings', () => {
       sharedLogger.warn('Test warning');
-      expect(console.warn).toHaveBeenCalled();
+      expect(mockWarn).toHaveBeenCalled();
     });
 
     it('should be able to log debug messages', () => {
       sharedLogger.debug('Test debug');
-      expect(console.debug).toHaveBeenCalled();
+      expect(mockDebug).toHaveBeenCalled();
     });
   });
 

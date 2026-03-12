@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Inject,
   ConflictException,
   NotFoundException,
 } from '@nestjs/common';
@@ -60,7 +61,9 @@ export interface RoleAssignmentRepository {
 @Injectable()
 export class RoleService {
   constructor(
+    @Inject('RoleRepository')
     private readonly roleRepository: RoleRepository,
+    @Inject('RoleAssignmentRepository')
     private readonly assignmentRepository: RoleAssignmentRepository,
   ) {}
 

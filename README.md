@@ -3,6 +3,7 @@
 > **Intelligent Recruitment Assistant - AI-Powered Resume & Job Matching System**
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-20.18.x-green)](https://nodejs.org/)
 [![NestJS](https://img.shields.io/badge/NestJS-11-red)](https://nestjs.com/)
 [![Angular](https://img.shields.io/badge/Angular-20-red)](https://angular.io/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-6.x-green)](https://www.mongodb.com/)
@@ -25,6 +26,17 @@ AI Recruitment Clerk is an **event-driven microservices system** that automates 
 - 📊 **Smart Report Generation**: Automated generation of detailed matching analysis reports
 
 ## 📚 Documentation Navigation
+
+### Prerequisites
+
+| Requirement | Version | Notes                                                      |
+| ----------- | ------- | ---------------------------------------------------------- |
+| **Node.js** | 20.18.x | Required for Jest compatibility; Node 22+ not supported    |
+| npm         | 10+     | Included with Node.js                                      |
+| MongoDB     | 7.0+    | [Download](https://www.mongodb.com/try/download/community) |
+| NATS Server | 2.10+   | [Download](https://nats.io/download/)                      |
+
+> ⚠️ **Important**: This project requires Node.js 20.18.x. Node.js 22+ is not supported due to Jest/test runner compatibility issues. Use `.nvmrc` or `nvm use` to switch to the correct version.
 
 ### Project Phoenix (C2C Coach)
 

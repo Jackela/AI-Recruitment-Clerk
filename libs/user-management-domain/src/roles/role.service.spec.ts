@@ -176,8 +176,8 @@ describe('RoleService', () => {
   describe('updateRole', () => {
     it('should update role with valid data', async () => {
       roleRepository.findById.mockResolvedValue(mockRole);
-      roleRepository.update.mockImplementation(
-        ((id, updates) = Promise.resolve({ ...mockRole, ...updates } as Role)),
+      roleRepository.update.mockImplementation((id, updates) =>
+        Promise.resolve({ ...mockRole, ...updates } as Role),
       );
 
       const result = await service.updateRole('role-1', {
@@ -205,8 +205,8 @@ describe('RoleService', () => {
 
     it('should update timestamp', async () => {
       roleRepository.findById.mockResolvedValue(mockRole);
-      roleRepository.update.mockImplementation(
-        ((id, updates) = Promise.resolve({ ...mockRole, ...updates } as Role)),
+      roleRepository.update.mockImplementation((id, updates) =>
+        Promise.resolve({ ...mockRole, ...updates } as Role),
       );
 
       const before = new Date();
@@ -250,8 +250,8 @@ describe('RoleService', () => {
   describe('assignRole', () => {
     it('should assign role to user', async () => {
       roleRepository.findById.mockResolvedValue(mockRole);
-      assignmentRepository.assignRole.mockImplementation(
-        (assignment = Promise.resolve(assignment)),
+      assignmentRepository.assignRole.mockImplementation((assignment) =>
+        Promise.resolve(assignment),
       );
 
       const result = await service.assignRole('user-1', 'role-1', 'admin-1');
@@ -345,8 +345,8 @@ describe('RoleService', () => {
   describe('setDefaultRole', () => {
     it('should set role as default', async () => {
       roleRepository.findById.mockResolvedValue(mockRole);
-      roleRepository.update.mockImplementation(
-        ((id, updates) = Promise.resolve({ ...mockRole, ...updates } as Role)),
+      roleRepository.update.mockImplementation((id, updates) =>
+        Promise.resolve({ ...mockRole, ...updates } as Role),
       );
 
       const result = await service.setDefaultRole('role-1');

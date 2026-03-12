@@ -195,8 +195,13 @@ export class UserRepository {
 
     // Support both hashed ($2) and plain text (development)
     if (user.password?.startsWith('$2')) {
-      const bcrypt = await import('bcrypt');
-      return bcrypt.compare(password, user.password);
+      try {
+        const bcrypt = await import('bcrypt');
+        return bcrypt.compare(password, user.password);
+      } catch {
+        // If bcrypt is not available, return false
+        return false;
+      }
     }
     return user.password === password;
   }
@@ -357,6 +362,7 @@ export class UserRepository {
     const userPermissions = user.permissions || [];
 
     return (
+      rolePermissions.includes('*') ||
       rolePermissions.includes(permission) ||
       userPermissions.includes(permission)
     );

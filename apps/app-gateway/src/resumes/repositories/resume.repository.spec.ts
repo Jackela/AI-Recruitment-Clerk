@@ -41,7 +41,12 @@ describe('ResumeRepository', () => {
       endSession: jest.fn(),
     };
 
-    mockResumeModel = {
+    // Create a constructor function that also has all the static methods
+    const MockResumeModel = jest.fn() as unknown as jest.Mocked<
+      Model<ResumeDocument>
+    >;
+
+    mockResumeModel = Object.assign(MockResumeModel, {
       findById: jest.fn().mockReturnValue({ exec: mockExec }),
       find: jest.fn().mockReturnValue({
         limit: jest.fn().mockReturnThis(),
@@ -63,7 +68,7 @@ describe('ResumeRepository', () => {
           .fn()
           .mockResolvedValue(mockSession as unknown as ClientSession),
       },
-    } as unknown as jest.Mocked<Model<ResumeDocument>>;
+    }) as jest.Mocked<Model<ResumeDocument>>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -119,9 +124,8 @@ describe('ResumeRepository', () => {
         populate: jest.fn().mockReturnThis(),
       };
 
-      const populateMock = jest.fn().mockResolvedValue(mockResume);
       mockResumeModel.findById = jest.fn().mockReturnValue({
-        populate: populateMock,
+        populate: jest.fn().mockReturnThis(),
         exec: jest.fn().mockResolvedValue(mockResume),
       });
 
@@ -197,8 +201,8 @@ describe('ResumeRepository', () => {
         },
       };
 
-      mockResumeModel.findOne = jest.fn().mockReturnValue({
-        exec: jest.fn().mockResolvedValue(mockResume),
+      mockResumeModel.find = jest.fn().mockReturnValue({
+        exec: jest.fn().mockResolvedValue([mockResume]),
       });
 
       const result = await repository.findByFilePath(

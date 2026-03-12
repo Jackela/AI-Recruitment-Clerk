@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Inject,
   ConflictException,
   NotFoundException,
   BadRequestException,
@@ -37,7 +38,10 @@ export interface UserRepository {
  */
 @Injectable()
 export class UserService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    @Inject('UserRepository')
+    private readonly userRepository: UserRepository,
+  ) {}
 
   /**
    * Create a new user.

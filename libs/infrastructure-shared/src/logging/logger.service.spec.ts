@@ -5,15 +5,19 @@ import {
   LogContext,
   LoggerOptions,
 } from './logger.service';
+import { Logger as NestLogger } from '@nestjs/common';
 
 describe('Logger', () => {
-  let mockLogger: jest.SpyInstance;
+  let mockLog: jest.SpyInstance;
+  let mockError: jest.SpyInstance;
+  let mockWarn: jest.SpyInstance;
+  let mockDebug: jest.SpyInstance;
 
   beforeEach(() => {
-    mockLogger = jest.spyOn(console, 'log').mockImplementation();
-    jest.spyOn(console, 'error').mockImplementation();
-    jest.spyOn(console, 'warn').mockImplementation();
-    jest.spyOn(console, 'debug').mockImplementation();
+    mockLog = jest.spyOn(NestLogger.prototype, 'log').mockImplementation();
+    mockError = jest.spyOn(NestLogger.prototype, 'error').mockImplementation();
+    mockWarn = jest.spyOn(NestLogger.prototype, 'warn').mockImplementation();
+    mockDebug = jest.spyOn(NestLogger.prototype, 'debug').mockImplementation();
   });
 
   afterEach(() => {
@@ -48,20 +52,20 @@ describe('Logger', () => {
     it('should log error message', () => {
       const testLogger = new Logger('TestService');
       testLogger.error('Test error message');
-      expect(console.error).toHaveBeenCalled();
+      expect(mockError).toHaveBeenCalled();
     });
 
     it('should log error with trace', () => {
       const testLogger = new Logger('TestService');
       testLogger.error('Test error', 'stack trace here');
-      expect(console.error).toHaveBeenCalled();
+      expect(mockError).toHaveBeenCalled();
     });
 
     it('should log error with Error object', () => {
       const testLogger = new Logger('TestService');
       const error = new Error('Test error');
       testLogger.error('Test error message', error);
-      expect(console.error).toHaveBeenCalled();
+      expect(mockError).toHaveBeenCalled();
     });
 
     it('should log error with context', () => {
@@ -73,7 +77,7 @@ describe('Logger', () => {
         userId: 'user-789',
       };
       testLogger.error('Test error', undefined, context);
-      expect(console.error).toHaveBeenCalled();
+      expect(mockError).toHaveBeenCalled();
     });
   });
 
@@ -81,7 +85,7 @@ describe('Logger', () => {
     it('should log warning message', () => {
       const testLogger = new Logger('TestService');
       testLogger.warn('Test warning message');
-      expect(console.warn).toHaveBeenCalled();
+      expect(mockWarn).toHaveBeenCalled();
     });
 
     it('should log warning with context', () => {
@@ -90,7 +94,7 @@ describe('Logger', () => {
         operation: 'testOperation',
       };
       testLogger.warn('Test warning', context);
-      expect(console.warn).toHaveBeenCalled();
+      expect(mockWarn).toHaveBeenCalled();
     });
   });
 
@@ -98,7 +102,7 @@ describe('Logger', () => {
     it('should log info message', () => {
       const testLogger = new Logger('TestService');
       testLogger.log('Test log message');
-      expect(console.log).toHaveBeenCalled();
+      expect(mockLog).toHaveBeenCalled();
     });
 
     it('should log info with context', () => {
@@ -108,7 +112,7 @@ describe('Logger', () => {
         traceId: 'trace-123',
       };
       testLogger.log('Test log', context);
-      expect(console.log).toHaveBeenCalled();
+      expect(mockLog).toHaveBeenCalled();
     });
   });
 
@@ -116,7 +120,7 @@ describe('Logger', () => {
     it('should log debug message', () => {
       const testLogger = new Logger('TestService');
       testLogger.debug('Test debug message');
-      expect(console.debug).toHaveBeenCalled();
+      expect(mockDebug).toHaveBeenCalled();
     });
 
     it('should log debug with context', () => {
@@ -125,7 +129,7 @@ describe('Logger', () => {
         operation: 'testOperation',
       };
       testLogger.debug('Test debug', context);
-      expect(console.debug).toHaveBeenCalled();
+      expect(mockDebug).toHaveBeenCalled();
     });
   });
 
@@ -133,7 +137,7 @@ describe('Logger', () => {
     it('should log verbose message (alias for debug)', () => {
       const testLogger = new Logger('TestService');
       testLogger.verbose('Test verbose message');
-      expect(console.debug).toHaveBeenCalled();
+      expect(mockDebug).toHaveBeenCalled();
     });
   });
 
@@ -155,7 +159,7 @@ describe('Logger', () => {
         traceId: 'trace-123',
       });
       testLogger.log('Test message');
-      expect(console.log).toHaveBeenCalled();
+      expect(mockLog).toHaveBeenCalled();
     });
   });
 
@@ -174,7 +178,7 @@ describe('Logger', () => {
       testLogger.setContext({ operation: 'parentOp' });
       const childLogger = testLogger.child({ userId: 'user-123' });
       childLogger.log('Test message');
-      expect(console.log).toHaveBeenCalled();
+      expect(mockLog).toHaveBeenCalled();
     });
   });
 
@@ -189,13 +193,13 @@ describe('Logger', () => {
         customField: 'customValue',
       };
       testLogger.log('Test message', context);
-      expect(console.log).toHaveBeenCalled();
+      expect(mockLog).toHaveBeenCalled();
     });
 
     it('should format log entry without context', () => {
       const testLogger = new Logger('TestService');
       testLogger.log('Test message');
-      expect(console.log).toHaveBeenCalled();
+      expect(mockLog).toHaveBeenCalled();
     });
   });
 });
@@ -218,6 +222,22 @@ describe('createLogger', () => {
 });
 
 describe('logger', () => {
+  let mockLog: jest.SpyInstance;
+  let mockError: jest.SpyInstance;
+  let mockWarn: jest.SpyInstance;
+  let mockDebug: jest.SpyInstance;
+
+  beforeEach(() => {
+    mockLog = jest.spyOn(NestLogger.prototype, 'log').mockImplementation();
+    mockError = jest.spyOn(NestLogger.prototype, 'error').mockImplementation();
+    mockWarn = jest.spyOn(NestLogger.prototype, 'warn').mockImplementation();
+    mockDebug = jest.spyOn(NestLogger.prototype, 'debug').mockImplementation();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('should be default logger instance', () => {
     expect(logger).toBeDefined();
     expect(logger).toBeInstanceOf(Logger);
@@ -225,6 +245,6 @@ describe('logger', () => {
 
   it('should have Application context', () => {
     logger.log('Test message from default logger');
-    expect(console.log).toHaveBeenCalled();
+    expect(mockLog).toHaveBeenCalled();
   });
 });

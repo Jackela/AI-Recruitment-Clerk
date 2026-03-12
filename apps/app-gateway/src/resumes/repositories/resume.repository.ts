@@ -403,7 +403,7 @@ export class ResumeRepository {
         },
       }));
 
-      const result = await this.resumeModel.bulkWrite(operations);
+      const result = await this.resumeModel.bulkWrite(operations as any);
       this.logger.log(`Batch updated ${result.modifiedCount} resumes`);
       return result.modifiedCount;
     } catch (error) {

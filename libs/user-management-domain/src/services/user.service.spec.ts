@@ -315,13 +315,17 @@ describe('UserService', () => {
 
   describe('activateUser', () => {
     it('should activate user', async () => {
-      const pendingUser = { ...mockUser, status: UserStatus.PENDING };
-      repository.findById.mockResolvedValue(pendingUser as User);
-      repository.update.mockImplementation(
-        ((id, updates) = Promise.resolve({
+      const pendingUser = {
+        ...mockUser,
+        status: UserStatus.PENDING,
+        canTransitionTo: jest.fn().mockReturnValue(true),
+      };
+      repository.findById.mockResolvedValue(pendingUser as unknown as User);
+      repository.update.mockImplementation((id, updates) =>
+        Promise.resolve({
           ...pendingUser,
           ...updates,
-        } as User)),
+        } as unknown as User),
       );
 
       const result = await service.activateUser('user-1');
@@ -337,13 +341,14 @@ describe('UserService', () => {
         ...mockUser,
         status: UserStatus.ACTIVE,
         isActive: true,
+        canTransitionTo: jest.fn().mockReturnValue(true),
       };
-      repository.findById.mockResolvedValue(activeUser as User);
-      repository.update.mockImplementation(
-        ((id, updates) = Promise.resolve({
+      repository.findById.mockResolvedValue(activeUser as unknown as User);
+      repository.update.mockImplementation((id, updates) =>
+        Promise.resolve({
           ...activeUser,
           ...updates,
-        } as User)),
+        } as unknown as User),
       );
 
       const result = await service.deactivateUser('user-1');
@@ -355,9 +360,14 @@ describe('UserService', () => {
 
   describe('suspendUser', () => {
     it('should suspend user', async () => {
-      repository.findById.mockResolvedValue(mockUser);
-      repository.update.mockImplementation(
-        ((id, updates) = Promise.resolve({ ...mockUser, ...updates } as User)),
+      const pendingUser = {
+        ...mockUser,
+        status: UserStatus.PENDING,
+        canTransitionTo: jest.fn().mockReturnValue(true),
+      };
+      repository.findById.mockResolvedValue(pendingUser as unknown as User);
+      repository.update.mockImplementation((id, updates) =>
+        Promise.resolve({ ...pendingUser, ...updates } as unknown as User),
       );
 
       const result = await service.suspendUser('user-1');
@@ -369,9 +379,14 @@ describe('UserService', () => {
 
   describe('bulkActivate', () => {
     it('should activate multiple users', async () => {
-      repository.findById.mockResolvedValue(mockUser);
-      repository.update.mockImplementation(
-        ((id, updates) = Promise.resolve({ ...mockUser, ...updates } as User)),
+      const pendingUser = {
+        ...mockUser,
+        status: UserStatus.PENDING,
+        canTransitionTo: jest.fn().mockReturnValue(true),
+      };
+      repository.findById.mockResolvedValue(pendingUser as unknown as User);
+      repository.update.mockImplementation((id, updates) =>
+        Promise.resolve({ ...pendingUser, ...updates } as unknown as User),
       );
 
       const result = await service.bulkActivate(['user-1', 'user-2']);
@@ -381,8 +396,13 @@ describe('UserService', () => {
     });
 
     it('should handle partial failures', async () => {
+      const pendingUser = {
+        ...mockUser,
+        status: UserStatus.PENDING,
+        canTransitionTo: jest.fn().mockReturnValue(true),
+      };
       repository.findById
-        .mockResolvedValueOnce(mockUser)
+        .mockResolvedValueOnce(pendingUser as unknown as User)
         .mockResolvedValueOnce(null);
 
       const result = await service.bulkActivate(['user-1', 'user-2']);
@@ -398,13 +418,14 @@ describe('UserService', () => {
         ...mockUser,
         status: UserStatus.ACTIVE,
         isActive: true,
+        canTransitionTo: jest.fn().mockReturnValue(true),
       };
-      repository.findById.mockResolvedValue(activeUser as User);
-      repository.update.mockImplementation(
-        ((id, updates) = Promise.resolve({
+      repository.findById.mockResolvedValue(activeUser as unknown as User);
+      repository.update.mockImplementation((id, updates) =>
+        Promise.resolve({
           ...activeUser,
           ...updates,
-        } as User)),
+        } as unknown as User),
       );
 
       const result = await service.bulkDeactivate(['user-1', 'user-2']);

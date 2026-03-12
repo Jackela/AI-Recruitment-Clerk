@@ -3,6 +3,7 @@ import { RetryUtility } from './retry';
 describe('RetryUtility', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterEach(() => {
@@ -53,7 +54,6 @@ describe('RetryUtility', () => {
     });
 
     it('should use default delay of 1000', async () => {
-      jest.useFakeTimers();
       const operation = jest
         .fn()
         .mockRejectedValueOnce(new Error('fail'))
@@ -65,11 +65,9 @@ describe('RetryUtility', () => {
       jest.advanceTimersByTime(1000);
 
       await retryPromise;
-      jest.useRealTimers();
     });
 
     it('should increase delay with each retry', async () => {
-      jest.useFakeTimers();
       const operation = jest
         .fn()
         .mockRejectedValueOnce(new Error('fail 1'))
@@ -90,7 +88,6 @@ describe('RetryUtility', () => {
       expect(operation).toHaveBeenCalledTimes(3);
 
       await retryPromise;
-      jest.useRealTimers();
     });
 
     it('should throw generic error when no error is captured', async () => {
@@ -114,7 +111,6 @@ describe('RetryUtility', () => {
     });
 
     it('should retry with exponential backoff', async () => {
-      jest.useFakeTimers();
       const operation = jest
         .fn()
         .mockRejectedValueOnce(new Error('fail 1'))
@@ -139,11 +135,9 @@ describe('RetryUtility', () => {
       expect(operation).toHaveBeenCalledTimes(3);
 
       await retryPromise;
-      jest.useRealTimers();
     });
 
     it('should respect maxDelayMs', async () => {
-      jest.useFakeTimers();
       const operation = jest.fn().mockRejectedValue(new Error('fail'));
 
       const retryPromise = RetryUtility.withExponentialBackoff(operation, {
@@ -163,11 +157,9 @@ describe('RetryUtility', () => {
       jest.advanceTimersByTime(3000);
 
       await expect(retryPromise).rejects.toThrow();
-      jest.useRealTimers();
     });
 
     it('should apply jitter', async () => {
-      jest.useFakeTimers();
       jest.spyOn(Math, 'random').mockReturnValue(0.5);
 
       const operation = jest
@@ -185,7 +177,6 @@ describe('RetryUtility', () => {
       jest.advanceTimersByTime(100);
 
       await retryPromise;
-      jest.useRealTimers();
     });
 
     it('should use default options', async () => {
@@ -225,15 +216,19 @@ describe('RetryUtility', () => {
     });
 
     it('should calculate backoff correctly', async () => {
-      jest.useFakeTimers();
       const delays: number[] = [];
       const originalSetTimeout = global.setTimeout;
       jest
         .spyOn(global, 'setTimeout')
-        .mockImplementation((callback: TimerHandler, delay?: number) => {
-          if (delay) delays.push(delay);
-          return originalSetTimeout(callback, 0);
-        });
+        .mockImplementation(
+          (
+            callback: () => void,
+            delay?: number,
+          ): ReturnType<typeof setTimeout> => {
+            if (delay) delays.push(delay);
+            return originalSetTimeout(callback, 0);
+          },
+        );
 
       const operation = jest.fn().mockRejectedValue(new Error('fail'));
 
@@ -253,7 +248,6 @@ describe('RetryUtility', () => {
       expect(delays[1]).toBe(200);
       expect(delays[2]).toBe(400);
 
-      jest.useRealTimers();
     });
   });
 });

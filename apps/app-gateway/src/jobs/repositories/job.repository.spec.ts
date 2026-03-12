@@ -4,7 +4,9 @@ import type { Job, JobDocument } from '../../schemas/job.schema';
 import type { Model } from 'mongoose';
 
 // Mock data helpers
-const createMockJob = (overrides: Partial<Job> = {}): JobDocument => {
+const createMockJob = (
+  overrides: Partial<Job> & { _id?: string } = {},
+): JobDocument => {
   const baseJob = {
     _id: 'job-' + Math.random().toString(36).substr(2, 9),
     title: 'Software Engineer',
@@ -104,9 +106,10 @@ const createJobModelMock = (jobs: JobDocument[] = []) => {
 
     // Query operations with chainable interface
     findById: jest.fn((id: string) => ({
-      exec: jest
-        .fn()
-        .mockResolvedValue(jobStore.find((j) => j._id === id) || null),
+      exec: jest.fn().mockImplementation(async () => {
+        const found = jobStore.find((j) => String(j._id) === id);
+        return found || null;
+      }),
     })),
 
     find: jest.fn((query = {}) => {
@@ -147,6 +150,10 @@ const createJobModelMock = (jobs: JobDocument[] = []) => {
         );
       }
 
+      // Store pagination state to apply in correct order at exec time
+      let skipCount = 0;
+      let limitCount: number | undefined;
+
       const chainable = {
         sort: jest.fn((sortOptions: Record<string, unknown>) => {
           // Simple sort implementation
@@ -160,28 +167,39 @@ const createJobModelMock = (jobs: JobDocument[] = []) => {
           return chainable;
         }),
         limit: jest.fn((n: number) => {
-          results = results.slice(0, n);
+          limitCount = n;
           return chainable;
         }),
         skip: jest.fn((n: number) => {
-          results = results.slice(n);
+          skipCount = n;
           return chainable;
         }),
-        exec: jest.fn().mockResolvedValue(results),
+        exec: jest.fn().mockImplementation(() => {
+          // Apply skip first, then limit (MongoDB semantics)
+          let finalResults = results;
+          if (skipCount > 0) {
+            finalResults = finalResults.slice(skipCount);
+          }
+          if (limitCount !== undefined) {
+            finalResults = finalResults.slice(0, limitCount);
+          }
+          return Promise.resolve(finalResults);
+        }),
       };
       return chainable;
     }),
 
     findByIdAndUpdate: jest.fn(
       (id: string, update: { $set?: Partial<Job> } | Partial<Job>) => {
-        const index = jobStore.findIndex((j) => j._id === id);
+        const index = jobStore.findIndex((j) => String(j._id) === id);
         if (index === -1) {
           return { exec: jest.fn().mockResolvedValue(null) };
         }
 
-        const updateData = update.$set || update;
-        jobStore[index] = {
-          ...jobStore[index],
+        const updateData =
+          (update as { $set?: Partial<Job> }).$set || (update as Partial<Job>);
+        (jobStore as unknown as any[])[index] = {
+          ...(jobStore[index] as unknown as any),
           ...updateData,
           updatedAt: new Date(),
         };
@@ -190,7 +208,7 @@ const createJobModelMock = (jobs: JobDocument[] = []) => {
     ),
 
     findByIdAndDelete: jest.fn((id: string) => {
-      const index = jobStore.findIndex((j) => j._id === id);
+      const index = jobStore.findIndex((j) => String(j._id) === id);
       if (index === -1) {
         return { exec: jest.fn().mockResolvedValue(null) };
       }
@@ -276,11 +294,6 @@ describe('JobRepository', () => {
 
       const mockSavedJob = createMockJob(jobData);
       jobModel.prototype.save = jest.fn().mockResolvedValue(mockSavedJob);
-
-      // Override the constructor call
-      jest.spyOn(jobModel, 'prototype' as never, 'get').mockReturnValue({
-        save: jest.fn().mockResolvedValue(mockSavedJob),
-      });
 
       // Create a mock implementation that mimics new jobModel()
       const jobModelConstructor = jest.fn().mockImplementation(() => ({
@@ -381,11 +394,11 @@ describe('JobRepository', () => {
       const cachedResult = await repository.findById('job-cache-test');
 
       expect(cachedResult).toBeDefined();
-      expect(jobModel.findById).toHaveBeenCalledTimes(2); // Called twice because cache mock always executes fn
+      expect(jobModel.findById).toHaveBeenCalledTimes(1); // Only called once because cache mock caches the result
     });
 
     it('should handle database errors gracefully', async () => {
-      jobModel.findById = jest.fn(() => ({
+      (jobModel.findById as jest.Mock) = jest.fn(() => ({
         exec: jest.fn().mockRejectedValue(new Error('Connection lost')),
       }));
 
