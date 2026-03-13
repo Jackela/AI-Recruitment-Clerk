@@ -19,7 +19,6 @@ process.env.MONGOMS_DOWNLOAD_TIMEOUT = '60000';
 if (process.env.SUPPRESS_TEST_LOGS === 'true' || process.env.CI) {
   const originalLog = console.log;
   const originalError = console.error;
-  const _originalWarn = console.warn;
 
   console.log = (...args: any[]) => {
     const msg = args.join(' ');

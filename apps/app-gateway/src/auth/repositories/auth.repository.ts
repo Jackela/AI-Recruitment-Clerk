@@ -1,8 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import type { Model } from 'mongoose';
-import type { UserProfileDocument } from '../../schemas/user-profile.schema';
-import { UserProfile } from '../../schemas/user-profile.schema';
 
 export interface TokenRecord {
   id: string;
@@ -55,10 +51,7 @@ export class AuthRepository {
   private readonly sessionStore = new Map<string, SessionRecord>();
   private readonly mfaDeviceStore = new Map<string, MfaDeviceRecord[]>();
 
-  constructor(
-    @InjectModel(UserProfile.name)
-    private readonly _userProfileModel: Model<UserProfileDocument>,
-  ) {}
+  constructor() {}
 
   // Token Storage Methods
   async storeToken(
