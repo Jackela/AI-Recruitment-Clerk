@@ -27,7 +27,7 @@ export class Resume {
     },
     required: true,
   })
-  fileMetadata: {
+  fileMetadata!: {
     filePath: string;
     fileSize: number;
     mimeType: string;
@@ -40,7 +40,7 @@ export class Resume {
     enum: ['pending', 'processing', 'completed', 'failed', 'deleted'],
     default: 'pending',
   })
-  status: string;
+  status: string = "pending";
 
   @Prop({ type: Object, required: false })
   parsedData?: Record<string, unknown>;
@@ -55,10 +55,10 @@ export class Resume {
   deletedAt?: Date;
 
   @Prop({ type: Date, default: Date.now })
-  createdAt: Date;
+  createdAt: Date = new Date();
 
   @Prop({ type: Date, default: Date.now })
-  updatedAt: Date;
+  updatedAt: Date = new Date();
 }
 
 export const ResumeSchema = SchemaFactory.createForClass(Resume);

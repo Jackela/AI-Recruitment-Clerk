@@ -6,7 +6,6 @@ import {
   IsBoolean,
   IsEnum,
   IsDate,
-  ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { UserRole, UserStatus } from '../index';
@@ -16,14 +15,14 @@ import { UserRole, UserStatus } from '../index';
  */
 export class User {
   @IsString()
-  id: string;
+  id!: string;
 
   @IsEmail()
-  email: string;
+  email!: string;
 
   @IsString()
   @MinLength(8)
-  passwordHash: string;
+  passwordHash!: string;
 
   @IsString()
   @IsOptional()

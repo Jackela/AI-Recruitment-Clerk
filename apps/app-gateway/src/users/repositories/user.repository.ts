@@ -4,7 +4,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import type { Model, FilterQuery, UpdateQuery } from 'mongoose';
+import type { Model, UpdateQuery } from 'mongoose';
 import type { CreateUserDto } from '@ai-recruitment-clerk/user-management-domain';
 import {
   UserRole,
@@ -196,7 +196,7 @@ export class UserRepository {
     // Support both hashed ($2) and plain text (development)
     if (user.password?.startsWith('$2')) {
       try {
-        const bcrypt = await import('bcrypt');
+        const bcrypt = await import('bcryptjs');
         return bcrypt.compare(password, user.password);
       } catch {
         // If bcrypt is not available, return false

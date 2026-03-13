@@ -12,7 +12,7 @@ import {
   UserRole,
   UserStatus,
   Permission,
-} from '@ai-recruitment/user-management-domain';
+} from '@ai-recruitment-clerk/user-management-domain';
 
 /**
  * Job status values for recruitment lifecycle.

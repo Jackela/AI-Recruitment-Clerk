@@ -7,7 +7,6 @@ import {
   CookieConsent,
   ConsentStatus,
   ConsentPurpose,
-  ConsentMethod,
   DataCategory,
   type ConsentRecordDocument,
   type ConsentAuditLogDocument,

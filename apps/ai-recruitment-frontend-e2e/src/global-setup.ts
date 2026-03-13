@@ -5,7 +5,7 @@ import { UserFactory } from './factories/user.factory';
 import { JobFactory } from './factories/job.factory';
 import { ResumeFactory } from './factories/resume.factory';
 
-async function globalSetup(config: FullConfig) {
+async function globalSetup(_config: FullConfig) {
   console.log('🚀 Starting E2E test suite setup...');
 
   const env = getTestEnvironment();

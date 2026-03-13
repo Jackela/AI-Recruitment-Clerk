@@ -24,7 +24,7 @@
  * repo.findOne.mockResolvedValue(user1);
  * ```
  */
-export const mockRepository = <T = any>() => ({
+export const mockRepository = <_T = any>() => ({
   find: jest.fn(),
   findOne: jest.fn(),
   findOneBy: jest.fn(),

@@ -4,7 +4,7 @@ import {
   ConflictException,
   NotFoundException,
 } from '@nestjs/common';
-import { UserRole, UserStatus } from '../index';
+import { UserRole } from '../index';
 
 /**
  * Role entity.

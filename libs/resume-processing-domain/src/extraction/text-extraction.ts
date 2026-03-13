@@ -158,7 +158,8 @@ export class TextExtractionService {
     for (const line of lines) {
       const trimmed = line.trim();
       if (
-        trimmed.length > 0 < 50 &&
+        trimmed.length > 0 &&
+        trimmed.length < 50 &&
         !emailRegex.test(trimmed) &&
         !phoneRegex.test(trimmed) &&
         !linkedInRegex.test(trimmed) &&

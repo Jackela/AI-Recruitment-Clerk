@@ -378,7 +378,7 @@ export class AnalysisRepository {
     this.logger.debug(
       `Successfully created ${savedAnalyses.length} analysis results in batch`,
     );
-    return savedAnalyses;
+    return savedAnalyses as AnalysisResultDocument[];
   }
 
   /**

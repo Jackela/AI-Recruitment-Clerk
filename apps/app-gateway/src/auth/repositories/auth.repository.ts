@@ -57,7 +57,7 @@ export class AuthRepository {
 
   constructor(
     @InjectModel(UserProfile.name)
-    private readonly userProfileModel: Model<UserProfileDocument>,
+    private readonly _userProfileModel: Model<UserProfileDocument>,
   ) {}
 
   // Token Storage Methods
