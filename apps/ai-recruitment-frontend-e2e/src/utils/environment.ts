@@ -33,7 +33,7 @@ export function getUniqueIdentifier(prefix?: string): string {
   return base;
 }
 
-export function getTestEmail(role: string = 'user'): string {
+export function getTestEmail(role = 'user'): string {
   const env = getTestEnvironment();
   return `${role}_${env.testRunId}@test.com`;
 }

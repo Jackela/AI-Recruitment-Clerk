@@ -28,7 +28,7 @@ const createMockAnalysisDoc = (overrides = {}) =>
     createdBy: 'user-001',
     save: jest.fn().mockResolvedValue(this),
     ...overrides,
-  }) as unknown as ReturnType<Model<typeof AnalysisResult>['create'>;
+  }) as unknown as ReturnType<Model<typeof AnalysisResult>['create']>;
 
 describe('AnalysisRepository', () => {
   let repository: AnalysisRepository;
@@ -38,7 +38,9 @@ describe('AnalysisRepository', () => {
   const mockExec = jest.fn();
   const mockSort = jest.fn().mockReturnValue({ exec: mockExec });
   const mockLimit = jest.fn().mockReturnValue({ exec: mockExec });
-  const mockSkip = jest.fn().mockReturnValue({ sort: mockSort, exec: mockExec });
+  const mockSkip = jest
+    .fn()
+    .mockReturnValue({ sort: mockSort, exec: mockExec });
   const mockFind = jest.fn().mockReturnValue({
     sort: mockSort,
     skip: mockSkip,
@@ -93,7 +95,9 @@ describe('AnalysisRepository', () => {
         status: 'processing' as const,
       };
 
-      jest.spyOn(analysisResultModel, 'create').mockResolvedValue(mockDoc as any);
+      jest
+        .spyOn(analysisResultModel, 'create')
+        .mockResolvedValue(mockDoc as any);
 
       // Act
       const result = await repository.createAnalysis(analysisData);
@@ -136,7 +140,9 @@ describe('AnalysisRepository', () => {
       const result = await repository.deleteAnalysis('analysis-001');
 
       // Assert
-      expect(mockDeleteOne).toHaveBeenCalledWith({ analysisId: 'analysis-001' });
+      expect(mockDeleteOne).toHaveBeenCalledWith({
+        analysisId: 'analysis-001',
+      });
       expect(result).toBe(true);
     });
   });
@@ -144,8 +150,14 @@ describe('AnalysisRepository', () => {
   describe('Result Versioning', () => {
     it('should create new version of analysis', async () => {
       // Arrange
-      const currentVersion = createMockAnalysisDoc({ version: 1, isLatestVersion: true });
-      const newVersion = createMockAnalysisDoc({ version: 2, isLatestVersion: true });
+      const currentVersion = createMockAnalysisDoc({
+        version: 1,
+        isLatestVersion: true,
+      });
+      const newVersion = createMockAnalysisDoc({
+        version: 2,
+        isLatestVersion: true,
+      });
 
       mockExec
         .mockResolvedValueOnce(currentVersion) // find current latest
@@ -163,7 +175,10 @@ describe('AnalysisRepository', () => {
 
     it('should find latest version of analysis', async () => {
       // Arrange
-      const mockDoc = createMockAnalysisDoc({ isLatestVersion: true, version: 3 });
+      const mockDoc = createMockAnalysisDoc({
+        isLatestVersion: true,
+        version: 3,
+      });
       mockExec.mockResolvedValueOnce(mockDoc);
 
       // Act
@@ -200,7 +215,10 @@ describe('AnalysisRepository', () => {
       // Arrange
       const analysisIds = ['analysis-001', 'analysis-002', 'analysis-003'];
       const mockResults = analysisIds.map((id) =>
-        createMockAnalysisDoc({ analysisId: id, overallScore: 80 + Math.random() * 20 }),
+        createMockAnalysisDoc({
+          analysisId: id,
+          overallScore: 80 + Math.random() * 20,
+        }),
       );
       mockExec.mockResolvedValueOnce(mockResults);
 
@@ -244,9 +262,24 @@ describe('AnalysisRepository', () => {
     it('should create batch analysis results', async () => {
       // Arrange
       const batchData = [
-        { analysisId: 'a1', jobId: 'job-001', resumeId: 'r1', overallScore: 85 },
-        { analysisId: 'a2', jobId: 'job-001', resumeId: 'r2', overallScore: 90 },
-        { analysisId: 'a3', jobId: 'job-001', resumeId: 'r3', overallScore: 75 },
+        {
+          analysisId: 'a1',
+          jobId: 'job-001',
+          resumeId: 'r1',
+          overallScore: 85,
+        },
+        {
+          analysisId: 'a2',
+          jobId: 'job-001',
+          resumeId: 'r2',
+          overallScore: 90,
+        },
+        {
+          analysisId: 'a3',
+          jobId: 'job-001',
+          resumeId: 'r3',
+          overallScore: 75,
+        },
       ];
       const mockResults = batchData.map((data) => createMockAnalysisDoc(data));
       mockInsertMany.mockResolvedValueOnce(mockResults);
@@ -262,8 +295,9 @@ describe('AnalysisRepository', () => {
     it('should find batch results for job and resumes', async () => {
       // Arrange
       const resumeIds = ['r1', 'r2', 'r3'];
-      const mockResults = resumeIds.map((id) =
-        createMockAnalysisDoc({ resumeId: id }));
+      const mockResults = resumeIds.map(
+        (id = createMockAnalysisDoc({ resumeId: id })),
+      );
       mockExec.mockResolvedValueOnce(mockResults);
 
       // Act

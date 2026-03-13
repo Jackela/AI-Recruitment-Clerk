@@ -1,6 +1,11 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
-import { UnauthorizedException, ConflictException, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  UnauthorizedException,
+  ConflictException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
@@ -12,7 +17,10 @@ import type {
   UserDto,
   JwtPayload,
 } from '@ai-recruitment-clerk/user-management-domain';
-import { UserRole, UserStatus } from '@ai-recruitment-clerk/user-management-domain';
+import {
+  UserRole,
+  UserStatus,
+} from '@ai-recruitment-clerk/user-management-domain';
 
 describe('AuthService - Edge Cases', () => {
   let service: AuthService;
@@ -87,7 +95,9 @@ describe('AuthService - Edge Cases', () => {
     service = module.get<AuthService>(AuthService);
     userService = module.get(UserService) as jest.Mocked<UserService>;
     jwtService = module.get(JwtService) as jest.Mocked<JwtService>;
-    redisBlacklist = module.get(RedisTokenBlacklistService) as jest.Mocked<RedisTokenBlacklistService>;
+    redisBlacklist = module.get(
+      RedisTokenBlacklistService,
+    ) as jest.Mocked<RedisTokenBlacklistService>;
     configService = module.get(ConfigService) as jest.Mocked<ConfigService>;
 
     // Clear failed login attempts before each test
@@ -107,7 +117,9 @@ describe('AuthService - Edge Cases', () => {
 
       userService.findByEmail.mockResolvedValue(null);
 
-      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
+      await expect(service.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should reject login with null password', async () => {
@@ -119,7 +131,9 @@ describe('AuthService - Edge Cases', () => {
       userService.findByEmail.mockResolvedValue(mockUser);
       userService.validatePassword.mockResolvedValue(false);
 
-      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
+      await expect(service.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should reject login with undefined email', async () => {
@@ -130,7 +144,9 @@ describe('AuthService - Edge Cases', () => {
 
       userService.findByEmail.mockResolvedValue(null);
 
-      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
+      await expect(service.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should handle register with empty name fields', async () => {
@@ -185,7 +201,9 @@ describe('AuthService - Edge Cases', () => {
 
       userService.findByEmail.mockResolvedValue(null);
 
-      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
+      await expect(service.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 
@@ -201,12 +219,14 @@ describe('AuthService - Edge Cases', () => {
 
       // 5 failed attempts
       for (let i = 0; i < 5; i++) {
-        await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
+        await expect(service.login(loginDto)).rejects.toThrow(
+          UnauthorizedException,
+        );
       }
 
       // 6th attempt should show account locked
       await expect(service.login(loginDto)).rejects.toThrow(
-        'Account temporarily locked due to multiple failed attempts'
+        'Account temporarily locked due to multiple failed attempts',
       );
     });
 
@@ -256,7 +276,7 @@ describe('AuthService - Edge Cases', () => {
         Promise.resolve({
           ...mockUser,
           email,
-        })
+        }),
       );
       userService.validatePassword.mockResolvedValue(false);
 
@@ -266,8 +286,12 @@ describe('AuthService - Edge Cases', () => {
       }
 
       // user2 should still be able to attempt login
-      await expect(service.login(loginDto2)).rejects.toThrow('Invalid credentials');
-      await expect(service.login(loginDto2)).rejects.toThrow('Invalid credentials');
+      await expect(service.login(loginDto2)).rejects.toThrow(
+        'Invalid credentials',
+      );
+      await expect(service.login(loginDto2)).rejects.toThrow(
+        'Invalid credentials',
+      );
     });
 
     it('should reset failed attempts counter on successful login', async () => {
@@ -281,9 +305,8 @@ describe('AuthService - Edge Cases', () => {
       };
 
       userService.findByEmail.mockResolvedValue(mockUser);
-      userService.validatePassword.mockImplementation((_, password) =
-003e
-        Promise.resolve(password === 'CorrectPassword123!')
+      userService.validatePassword.mockImplementation((_, password) =>
+        Promise.resolve(password === 'CorrectPassword123!'),
       );
 
       // 3 failed attempts
@@ -296,21 +319,25 @@ describe('AuthService - Edge Cases', () => {
 
       // 3 more failed attempts should not lock (counter was reset)
       for (let i = 0; i < 3; i++) {
-        await expect(service.login(wrongLoginDto)).rejects.toThrow('Invalid credentials');
+        await expect(service.login(wrongLoginDto)).rejects.toThrow(
+          'Invalid credentials',
+        );
       }
 
       // Should still not be locked (only 3 since last success)
-      await expect(service.login(wrongLoginDto)).rejects.toThrow('Invalid credentials');
+      await expect(service.login(wrongLoginDto)).rejects.toThrow(
+        'Invalid credentials',
+      );
     });
   });
 
   describe('Token Boundary Edge Cases', () => {
     it('should reject token with empty payload', async () => {
       const emptyPayload: JwtPayload = {} as any;
-      
-      await expect(service.validateJwtPayload(emptyPayload, 'token')).rejects.toThrow(
-        'Invalid token payload'
-      );
+
+      await expect(
+        service.validateJwtPayload(emptyPayload, 'token'),
+      ).rejects.toThrow('Invalid token payload');
     });
 
     it('should reject token with null subject', async () => {
@@ -320,9 +347,9 @@ describe('AuthService - Edge Cases', () => {
         role: UserRole.HR_MANAGER,
       };
 
-      await expect(service.validateJwtPayload(payload, 'token')).rejects.toThrow(
-        'Invalid token payload'
-      );
+      await expect(
+        service.validateJwtPayload(payload, 'token'),
+      ).rejects.toThrow('Invalid token payload');
     });
 
     it('should reject token that is exactly 24 hours old', async () => {
@@ -336,9 +363,9 @@ describe('AuthService - Edge Cases', () => {
 
       redisBlacklist.isBlacklisted.mockResolvedValue(false);
 
-      await expect(service.validateJwtPayload(payload, 'token')).rejects.toThrow(
-        'Token too old'
-      );
+      await expect(
+        service.validateJwtPayload(payload, 'token'),
+      ).rejects.toThrow('Token too old');
     });
 
     it('should accept token that is just under 24 hours old', async () => {
@@ -367,7 +394,7 @@ describe('AuthService - Edge Cases', () => {
       redisBlacklist.isBlacklisted.mockResolvedValue(false);
 
       await expect(service.refreshToken('refresh-token')).rejects.toThrow(
-        UnauthorizedException
+        UnauthorizedException,
       );
     });
 
@@ -382,7 +409,9 @@ describe('AuthService - Edge Cases', () => {
       redisBlacklist.isBlacklisted.mockResolvedValue(false);
 
       // Should reject because it's in the future
-      await expect(service.validateJwtPayload(payload, 'token')).rejects.toThrow();
+      await expect(
+        service.validateJwtPayload(payload, 'token'),
+      ).rejects.toThrow();
     });
   });
 
@@ -396,7 +425,9 @@ describe('AuthService - Edge Cases', () => {
       userService.findByEmail.mockResolvedValue(mockUser);
       userService.validatePassword.mockResolvedValue(true);
 
-      const promises = Array(5).fill(null).map(() => service.login(loginDto));
+      const promises = Array(5)
+        .fill(null)
+        .map(() => service.login(loginDto));
       const results = await Promise.all(promises);
 
       results.forEach((result) => {
@@ -407,9 +438,14 @@ describe('AuthService - Edge Cases', () => {
 
     it('should handle concurrent logout with same token', async () => {
       const token = 'valid-token';
-      jwtService.decode.mockReturnValue({ sub: 'user-1', exp: Date.now() / 1000 + 3600 });
+      jwtService.decode.mockReturnValue({
+        sub: 'user-1',
+        exp: Date.now() / 1000 + 3600,
+      });
 
-      const promises = Array(3).fill(null).map(() => service.logout(token));
+      const promises = Array(3)
+        .fill(null)
+        .map(() => service.logout(token));
       await expect(Promise.all(promises)).resolves.not.toThrow();
 
       expect(redisBlacklist.blacklistToken).toHaveBeenCalled();
@@ -428,7 +464,9 @@ describe('AuthService - Edge Cases', () => {
       redisBlacklist.isBlacklisted.mockResolvedValue(false);
       userService.findById.mockResolvedValue(mockUser);
 
-      const promises = Array(3).fill(null).map(() => service.refreshToken(refreshToken));
+      const promises = Array(3)
+        .fill(null)
+        .map(() => service.refreshToken(refreshToken));
       const results = await Promise.all(promises);
 
       results.forEach((result) => {
@@ -446,7 +484,9 @@ describe('AuthService - Edge Cases', () => {
         password: 'hashed_old_password',
       };
 
-      userService.findByIdWithSensitiveData.mockResolvedValue(userWithPassword as any);
+      userService.findByIdWithSensitiveData.mockResolvedValue(
+        userWithPassword as any,
+      );
 
       // Mock bcrypt.compare to simulate password check
       jest.mock('bcryptjs', () => ({
@@ -467,12 +507,16 @@ describe('AuthService - Edge Cases', () => {
       });
 
       // Note: This test demonstrates the scenario, actual implementation may vary
-      const promises = Array(3).fill(null).map(() =>
-        service.changePassword(userId, 'OldPass123!', 'NewPass123!')
-      );
+      const promises = Array(3)
+        .fill(null)
+        .map(() =>
+          service.changePassword(userId, 'OldPass123!', 'NewPass123!'),
+        );
 
       const results = await Promise.allSettled(promises);
-      const successCount = results.filter((r) => r.status === 'fulfilled').length;
+      const successCount = results.filter(
+        (r) => r.status === 'fulfilled',
+      ).length;
       expect(successCount).toBeGreaterThanOrEqual(0); // At least 0 succeed (depends on bcrypt mock)
     });
   });
@@ -488,7 +532,7 @@ describe('AuthService - Edge Cases', () => {
       userService.findByEmail.mockResolvedValue(null);
 
       await expect(service.register(createUserDto)).rejects.toThrow(
-        'Password must be at least 8 characters long'
+        'Password must be at least 8 characters long',
       );
     });
 
@@ -516,7 +560,7 @@ describe('AuthService - Edge Cases', () => {
       userService.findByEmail.mockResolvedValue(null);
 
       await expect(service.register(createUserDto)).rejects.toThrow(
-        'Password must contain at least one uppercase letter'
+        'Password must contain at least one uppercase letter',
       );
     });
 
@@ -530,7 +574,7 @@ describe('AuthService - Edge Cases', () => {
       userService.findByEmail.mockResolvedValue(null);
 
       await expect(service.register(createUserDto)).rejects.toThrow(
-        'Password must contain at least one lowercase letter'
+        'Password must contain at least one lowercase letter',
       );
     });
 
@@ -544,7 +588,7 @@ describe('AuthService - Edge Cases', () => {
       userService.findByEmail.mockResolvedValue(null);
 
       await expect(service.register(createUserDto)).rejects.toThrow(
-        'Password must contain at least one number'
+        'Password must contain at least one number',
       );
     });
 
@@ -558,7 +602,7 @@ describe('AuthService - Edge Cases', () => {
       userService.findByEmail.mockResolvedValue(null);
 
       await expect(service.register(createUserDto)).rejects.toThrow(
-        'Password must contain at least one special character'
+        'Password must contain at least one special character',
       );
     });
 
@@ -584,7 +628,9 @@ describe('AuthService - Edge Cases', () => {
         password: 'hashed_password',
       };
 
-      userService.findByIdWithSensitiveData.mockResolvedValue(userWithPassword as any);
+      userService.findByIdWithSensitiveData.mockResolvedValue(
+        userWithPassword as any,
+      );
 
       // Mock bcrypt.compare to always return true (same password)
       jest.mock('bcryptjs', () => ({
@@ -614,11 +660,21 @@ describe('AuthService - Edge Cases', () => {
 
     it('should handle concurrent token blacklisting', async () => {
       const token = 'token-to-blacklist';
-      jwtService.decode.mockReturnValue({ sub: 'user-1', exp: Date.now() / 1000 + 3600 });
+      jwtService.decode.mockReturnValue({
+        sub: 'user-1',
+        exp: Date.now() / 1000 + 3600,
+      });
 
-      const promises = Array(5).fill(null).map(() =>
-        redisBlacklist.blacklistToken(token, 'user-1', Date.now() / 1000 + 3600, 'test')
-      );
+      const promises = Array(5)
+        .fill(null)
+        .map(() =>
+          redisBlacklist.blacklistToken(
+            token,
+            'user-1',
+            Date.now() / 1000 + 3600,
+            'test',
+          ),
+        );
 
       await expect(Promise.all(promises)).resolves.not.toThrow();
     });
@@ -660,9 +716,9 @@ describe('AuthService - Edge Cases', () => {
 
       redisBlacklist.isUserBlacklisted.mockResolvedValue(true);
 
-      await expect(service.validateJwtPayload(payload, 'token')).rejects.toThrow(
-        'All user tokens have been revoked'
-      );
+      await expect(
+        service.validateJwtPayload(payload, 'token'),
+      ).rejects.toThrow('All user tokens have been revoked');
     });
 
     it('should reject token when organization mismatch', async () => {
@@ -679,9 +735,9 @@ describe('AuthService - Edge Cases', () => {
         organizationId: 'org-original',
       });
 
-      await expect(service.validateJwtPayload(payload, 'token')).rejects.toThrow(
-        'Organization mismatch'
-      );
+      await expect(
+        service.validateJwtPayload(payload, 'token'),
+      ).rejects.toThrow('Organization mismatch');
     });
 
     it('should reject token for inactive user', async () => {
@@ -697,9 +753,9 @@ describe('AuthService - Edge Cases', () => {
         status: UserStatus.INACTIVE,
       });
 
-      await expect(service.validateJwtPayload(payload, 'token')).rejects.toThrow(
-        'User account is not active'
-      );
+      await expect(
+        service.validateJwtPayload(payload, 'token'),
+      ).rejects.toThrow('User account is not active');
     });
 
     it('should handle token with missing email', async () => {
@@ -711,9 +767,9 @@ describe('AuthService - Edge Cases', () => {
 
       redisBlacklist.isBlacklisted.mockResolvedValue(false);
 
-      await expect(service.validateJwtPayload(payload, 'token')).rejects.toThrow(
-        'Invalid token payload'
-      );
+      await expect(
+        service.validateJwtPayload(payload, 'token'),
+      ).rejects.toThrow('Invalid token payload');
     });
 
     it('should handle token with missing role', async () => {
@@ -725,9 +781,9 @@ describe('AuthService - Edge Cases', () => {
 
       redisBlacklist.isBlacklisted.mockResolvedValue(false);
 
-      await expect(service.validateJwtPayload(payload, 'token')).rejects.toThrow(
-        'Invalid token payload'
-      );
+      await expect(
+        service.validateJwtPayload(payload, 'token'),
+      ).rejects.toThrow('Invalid token payload');
     });
   });
 
@@ -772,12 +828,12 @@ describe('AuthService - Edge Cases', () => {
 
       expect(redisBlacklist.blacklistAllUserTokens).toHaveBeenCalledWith(
         'user-1',
-        'security_breach'
+        'security_breach',
       );
       expect(userService.updateSecurityFlag).toHaveBeenCalledWith(
         'user-1',
         'tokens_revoked',
-        true
+        true,
       );
     });
   });

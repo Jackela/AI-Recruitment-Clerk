@@ -76,7 +76,9 @@ export async function measurePerformanceMetrics(
     }, 0);
 
     // Get memory info if available (Chrome only)
-    const memory = (performance as any).memory;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const memory = (performance as { memory?: { usedJSHeapSize: number } })
+      .memory;
 
     return {
       navigationTiming: {

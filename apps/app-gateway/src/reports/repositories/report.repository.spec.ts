@@ -43,7 +43,7 @@ const createMockReportDoc = (overrides = {}) =>
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
-  }) as unknown as ReturnType<Model<typeof GeneratedReport>['create'>;
+  }) as unknown as ReturnType<Model<typeof GeneratedReport>['create']>;
 
 describe('ReportRepository', () => {
   let repository: ReportRepository;

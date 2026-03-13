@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * API Mock Responses
  */
@@ -41,8 +42,14 @@ export const MOCK_JOBS_LIST: MockJob[] = [
  * API Mock Handlers
  */
 
-export function createJobMockHandler(status: number = 202) {
-  return async (route: any) => {
+export function createJobMockHandler(status = 202) {
+  return async (route: {
+    fulfill: (options: {
+      status: number;
+      contentType: string;
+      body: string;
+    }) => Promise<void>;
+  }) => {
     console.log('📡 API Call intercepted: POST /jobs');
     await route.fulfill({
       status,
@@ -53,7 +60,13 @@ export function createJobMockHandler(status: number = 202) {
 }
 
 export function getJobsMockHandler() {
-  return async (route: any) => {
+  return async (route: {
+    fulfill: (options: {
+      status: number;
+      contentType: string;
+      body: string;
+    }) => Promise<void>;
+  }) => {
     console.log('📡 API Call intercepted: GET /jobs');
     await route.fulfill({
       status: 200,
@@ -63,7 +76,13 @@ export function getJobsMockHandler() {
   };
 }
 
-export function setupJobsApiMocking(page: any): Promise<void> {
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export function setupJobsApiMocking(page: {
+  route: (
+    pattern: string,
+    handler: (route: any) => Promise<void>,
+  ) => Promise<void>;
+}): Promise<void> {
   return page.route('**/jobs', async (route: any) => {
     const method = route.request().method();
 
