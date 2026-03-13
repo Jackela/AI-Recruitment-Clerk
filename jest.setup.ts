@@ -21,9 +21,10 @@ expect.extend({
     const pass = received instanceof constructor;
     return {
       pass,
-      message: () => pass
-        ? `expected ${received} not to be an instance of ${constructor.name}`
-        : `expected ${received} to be an instance of ${constructor.name}`
+      message: () =>
+        pass
+          ? `expected ${received} not to be an instance of ${constructor.name}`
+          : `expected ${received} to be an instance of ${constructor.name}`,
     };
   },
 });
@@ -33,7 +34,11 @@ process.env.NODE_ENV = 'test';
 
 // Stabilize MongoDB Memory Server across environments
 process.env.MONGOMS_VERSION = process.env.MONGOMS_VERSION || '7.0.5';
-process.env.MONGOMS_DISABLE_MD5_CHECK = process.env.MONGOMS_DISABLE_MD5_CHECK || '1';
+process.env.MONGOMS_DISABLE_MD5_CHECK =
+  process.env.MONGOMS_DISABLE_MD5_CHECK || '1';
+
+// Disable NATS connection in tests to prevent hanging
+process.env.NATS_OPTIONAL = 'true';
 
 // Disable NestJS logger noise during tests
 try {
@@ -68,7 +73,7 @@ process.emitWarning = ((warning: any, ...args: any[]) => {
 afterEach(async () => {
   try {
     await runCleanups();
-    
+
     // 清理时钟和定时器
     if (typeof jest !== 'undefined') {
       jest.useRealTimers();
@@ -96,7 +101,11 @@ const isStandardIoHandle = (handle: any): boolean => {
     return true;
   }
 
-  if (handle.constructor?.name === 'Pipe' && typeof fd === 'number' && fd <= 3) {
+  if (
+    handle.constructor?.name === 'Pipe' &&
+    typeof fd === 'number' &&
+    fd <= 3
+  ) {
     return true;
   }
 
@@ -126,13 +135,13 @@ const isStandardIoHandle = (handle: any): boolean => {
 afterAll(async () => {
   try {
     await runCleanups();
-    
+
     // 清理时钟和定时器
     if (typeof jest !== 'undefined') {
       jest.useRealTimers();
       jest.clearAllTimers();
     }
-    
+
     // 检查是否有遗留的活动句柄
     if (process.env.NODE_ENV === 'test') {
       const rawHandles = (process as any)._getActiveHandles?.() || [];
@@ -211,7 +220,9 @@ const ignoredConsoleErrorPatterns = [
 ];
 console.error = (...args: any[]) => {
   const message = args.join(' ');
-  if (ignoredConsoleErrorPatterns.some((pattern) => message.includes(pattern))) {
+  if (
+    ignoredConsoleErrorPatterns.some((pattern) => message.includes(pattern))
+  ) {
     return;
   }
   originalConsoleError.apply(console, args);

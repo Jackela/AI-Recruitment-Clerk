@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "useDefineForClassFields": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "strict": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "strictPropertyInitialization": false,
+    "suppressImplicitAnyIndexErrors": true,
+    "skipLibCheck": true,
+    "outDir": "./dist",
+    "rootDir": "."
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

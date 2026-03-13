@@ -11,6 +11,7 @@ import { App } from './app/app';
 import { appRoutes } from './app/app.routes';
 import { SmartPreloadingStrategy } from './app/services/smart-preloading.strategy';
 import { HttpErrorInterceptor } from './app/interceptors/http-error.interceptor';
+import { TimeoutInterceptor } from './app/core/interceptors/timeout.interceptor';
 import { GlobalErrorHandler } from './app/components/shared/error-boundary/error-boundary.component';
 
 // Reducers
@@ -36,6 +37,11 @@ async function bootstrap(): Promise<void> {
     {
       provide: HTTP_INTERCEPTORS,
       useClass: HttpErrorInterceptor,
+      multi: true,
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: TimeoutInterceptor,
       multi: true,
     },
     importProvidersFrom(

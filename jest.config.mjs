@@ -23,6 +23,10 @@ const baseProjects = [
 export default {
   projects: baseProjects,
   passWithNoTests: true,
+  // Jest cache configuration for CI optimization
+  cacheDirectory: '<rootDir>/.jest-cache',
+  clearMocks: true,
+  restoreMocks: true,
   // Coverage aggregation configuration
   coverageDirectory: '<rootDir>/coverage',
   collectCoverage: false, // Set to false by default, enable via --coverage flag
