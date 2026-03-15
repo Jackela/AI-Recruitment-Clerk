@@ -41,7 +41,7 @@ export class UserService {
   /**
    * Create a new user.
    */
-  public async async createUser(dto: CreateUserDto): Promise<UserDto> {
+  public async createUser(dto: CreateUserDto): Promise<UserDto> {
     // Validate user data
     const validation = User.validateCreate({
       email: dto.email,
@@ -84,7 +84,7 @@ export class UserService {
   /**
    * Find user by ID.
    */
-  public async async findById(id: string): Promise<UserDto> {
+  public async findById(id: string): Promise<UserDto> {
     const user = await this.userRepository.findById(id);
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
@@ -95,7 +95,7 @@ export class UserService {
   /**
    * Find user by email.
    */
-  public async async findByEmail(email: string): Promise<UserDto | null> {
+  public async findByEmail(email: string): Promise<UserDto | null> {
     const user = await this.userRepository.findByEmail(email);
     return user ? this.toDto(user) : null;
   }
@@ -103,7 +103,7 @@ export class UserService {
   /**
    * Get all users with pagination.
    */
-  public async async findAll(
+  public async findAll(
     options: { skip?: number; take?: number; organizationId?: string } = {},
   ): Promise<{
     users: UserDto[];
@@ -123,7 +123,7 @@ export class UserService {
   /**
    * Update user.
    */
-  public async async updateUser(id: string, dto: UpdateUserDto): Promise<UserDto> {
+  public async updateUser(id: string, dto: UpdateUserDto): Promise<UserDto> {
     const user = await this.userRepository.findById(id);
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
@@ -169,7 +169,7 @@ export class UserService {
   /**
    * Delete user.
    */
-  public async async deleteUser(id: string): Promise<void> {
+  public async deleteUser(id: string): Promise<void> {
     const user = await this.userRepository.findById(id);
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
@@ -181,7 +181,7 @@ export class UserService {
   /**
    * Search users.
    */
-  public async async searchUsers(
+  public async searchUsers(
     query: string,
     organizationId?: string,
   ): Promise<UserDto[]> {
@@ -192,7 +192,7 @@ export class UserService {
   /**
    * Filter users by status.
    */
-  public async async filterByStatus(
+  public async filterByStatus(
     status: UserStatus,
     organizationId?: string,
   ): Promise<UserDto[]> {
@@ -206,28 +206,28 @@ export class UserService {
   /**
    * Activate user.
    */
-  public async async activateUser(id: string): Promise<UserDto> {
+  public async activateUser(id: string): Promise<UserDto> {
     return this.updateUser(id, { status: UserStatus.ACTIVE });
   }
 
   /**
    * Deactivate user.
    */
-  public async async deactivateUser(id: string): Promise<UserDto> {
+  public async deactivateUser(id: string): Promise<UserDto> {
     return this.updateUser(id, { status: UserStatus.INACTIVE });
   }
 
   /**
    * Suspend user.
    */
-  public async async suspendUser(id: string): Promise<UserDto> {
+  public async suspendUser(id: string): Promise<UserDto> {
     return this.updateUser(id, { status: UserStatus.SUSPENDED });
   }
 
   /**
    * Bulk activate users.
    */
-  public async async bulkActivate(
+  public async bulkActivate(
     ids: string[],
   ): Promise<{ success: number; failed: number }> {
     let success = 0;
@@ -273,7 +273,7 @@ export class UserService {
   /**
    * Bulk delete users.
    */
-  public async async bulkDelete(
+  public async bulkDelete(
     ids: string[],
   ): Promise<{ success: number; failed: number }> {
     let success = 0;

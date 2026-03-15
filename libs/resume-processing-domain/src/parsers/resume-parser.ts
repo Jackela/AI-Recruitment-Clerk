@@ -38,7 +38,7 @@ export class PdfResumeParser extends ResumeParser {
     return mimeType === 'application/pdf';
   }
 
-  public async async parse(
+  public async parse(
     buffer: Buffer,
     filename: string,
     options: ParserOptions = {},
@@ -279,7 +279,7 @@ export class DocxResumeParser extends ResumeParser {
     );
   }
 
-  public async async parse(
+  public async parse(
     buffer: Buffer,
     filename: string,
     options: ParserOptions = {},
@@ -338,7 +338,7 @@ export class HtmlResumeParser extends ResumeParser {
     return mimeType === 'text/html' || mimeType === 'application/xhtml+xml';
   }
 
-  public async async parse(
+  public async parse(
     buffer: Buffer,
     filename: string,
     options: ParserOptions = {},
@@ -404,7 +404,7 @@ export class PlainTextResumeParser extends ResumeParser {
     return mimeType === 'text/plain' || mimeType === 'text/markdown';
   }
 
-  public async async parse(
+  public async parse(
     buffer: Buffer,
     filename: string,
     options: ParserOptions = {},
