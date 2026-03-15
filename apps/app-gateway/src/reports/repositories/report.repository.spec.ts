@@ -19,7 +19,7 @@ const createMockTemplateDoc = (overrides = {}) =>
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
-  }) as unknown as ReturnType<Model<typeof ReportTemplate>['create'>;
+  }) as unknown as ReturnType<Model<typeof ReportTemplate>['create']>;
 
 const createMockReportDoc = (overrides = {}) =>
   ({
@@ -54,7 +54,9 @@ describe('ReportRepository', () => {
   const mockExec = jest.fn();
   const mockSort = jest.fn().mockReturnValue({ exec: mockExec });
   const mockLimit = jest.fn().mockReturnValue({ exec: mockExec });
-  const mockSkip = jest.fn().mockReturnValue({ sort: mockSort, exec: mockExec });
+  const mockSkip = jest
+    .fn()
+    .mockReturnValue({ sort: mockSort, exec: mockExec });
   const mockFind = jest.fn().mockReturnValue({
     sort: mockSort,
     skip: mockSkip,
@@ -113,7 +115,9 @@ describe('ReportRepository', () => {
         structure: {},
       };
       const mockDoc = createMockTemplateDoc(templateData);
-      jest.spyOn(reportTemplateModel, 'create').mockResolvedValue(mockDoc as any);
+      jest
+        .spyOn(reportTemplateModel, 'create')
+        .mockResolvedValue(mockDoc as any);
 
       // Act
       const result = await repository.createTemplate(templateData);
@@ -140,7 +144,10 @@ describe('ReportRepository', () => {
       // Arrange
       const mockTemplates = [
         createMockTemplateDoc({ type: 'candidate' }),
-        createMockTemplateDoc({ type: 'candidate', templateId: 'template-002' }),
+        createMockTemplateDoc({
+          type: 'candidate',
+          templateId: 'template-002',
+        }),
       ];
       mockExec.mockResolvedValueOnce(mockTemplates);
 
@@ -148,7 +155,10 @@ describe('ReportRepository', () => {
       const result = await repository.findActiveTemplates('candidate');
 
       // Assert
-      expect(mockFind).toHaveBeenCalledWith({ isActive: true, type: 'candidate' });
+      expect(mockFind).toHaveBeenCalledWith({
+        isActive: true,
+        type: 'candidate',
+      });
       expect(result).toHaveLength(2);
     });
   });
@@ -163,7 +173,9 @@ describe('ReportRepository', () => {
         type: 'candidate' as const,
       };
       const mockDoc = createMockReportDoc(reportData);
-      jest.spyOn(generatedReportModel, 'create').mockResolvedValue(mockDoc as any);
+      jest
+        .spyOn(generatedReportModel, 'create')
+        .mockResolvedValue(mockDoc as any);
 
       // Act
       const result = await repository.createReport(reportData);
@@ -192,7 +204,10 @@ describe('ReportRepository', () => {
       mockExec.mockResolvedValueOnce(mockDoc);
 
       // Act
-      const result = await repository.updateReportStatus('report-001', 'generated');
+      const result = await repository.updateReportStatus(
+        'report-001',
+        'generated',
+      );
 
       // Assert
       expect(mockFindOneAndUpdate).toHaveBeenCalled();
@@ -296,7 +311,10 @@ describe('ReportRepository', () => {
       };
 
       // Act
-      const result = await repository.scheduleReport('report-001', scheduleData);
+      const result = await repository.scheduleReport(
+        'report-001',
+        scheduleData,
+      );
 
       // Assert
       expect(mockFindOneAndUpdate).toHaveBeenCalled();
@@ -374,7 +392,10 @@ describe('ReportRepository', () => {
         reportId: 'report-001',
         $or: [
           { generatedBy: 'user-001' },
-          { 'shares.sharedWith': 'user-001', 'shares.expiresAt': { $gt: expect.any(Date) } },
+          {
+            'shares.sharedWith': 'user-001',
+            'shares.expiresAt': { $gt: expect.any(Date) },
+          },
         ],
       });
       expect(result).toBe(true);

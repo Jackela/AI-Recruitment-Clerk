@@ -9,15 +9,15 @@ export interface TestEnvironment {
 
 export function getTestEnvironment(): TestEnvironment {
   const timestamp = Date.now();
-  const testRunId = process.env.TEST_RUN_ID || `run_${timestamp}`;
-  const parallelIndex = parseInt(process.env.TEST_PARALLEL_INDEX || '0', 10);
+  const testRunId = process.env['TEST_RUN_ID'] || `run_${timestamp}`;
+  const parallelIndex = parseInt(process.env['TEST_PARALLEL_INDEX'] || '0', 10);
 
   return {
     dbPrefix: `test_${timestamp}_${parallelIndex}_`,
-    apiUrl: process.env.TEST_API_URL || 'http://localhost:3000',
-    frontendUrl: process.env.TEST_FRONTEND_URL || 'http://localhost:4200',
+    apiUrl: process.env['TEST_API_URL'] || 'http://localhost:3000',
+    frontendUrl: process.env['TEST_FRONTEND_URL'] || 'http://localhost:4200',
     isolationLevel:
-      (process.env.TEST_ISOLATION as TestEnvironment['isolationLevel']) ||
+      (process.env['TEST_ISOLATION'] as TestEnvironment['isolationLevel']) ||
       'test',
     testRunId,
     parallelIndex,
@@ -63,9 +63,11 @@ export function generateTestRunConfig(): {
 }
 
 export function isCI(): boolean {
-  return process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
+  return (
+    process.env['CI'] === 'true' || process.env['GITHUB_ACTIONS'] === 'true'
+  );
 }
 
 export function getRetryCount(): number {
-  return parseInt(process.env.TEST_RETRY_COUNT || '0', 10);
+  return parseInt(process.env['TEST_RETRY_COUNT'] || '0', 10);
 }

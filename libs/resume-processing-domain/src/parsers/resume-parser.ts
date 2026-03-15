@@ -125,7 +125,7 @@ export class PdfResumeParser extends ResumeParser {
     phone: string | null;
   } {
     const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
-    const phoneRegex = /[\+]?[\d\s\-\(\)]{10,}/;
+    const phoneRegex = /[+]?[\d\s\-()]{10,}/;
 
     let email: string | null = null;
     let phone: string | null = null;

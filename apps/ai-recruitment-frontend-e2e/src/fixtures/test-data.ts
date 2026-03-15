@@ -91,7 +91,7 @@ export const TEST_USERS: Record<string, User> = {
   },
 };
 
-export const SAMPLE_RESUMES: Record<string, string> = {
+export const SAMPLE_RESUMES = {
   seniorDeveloper: 'src/test-data/resumes/简历.pdf',
   juniorDeveloper: 'src/test-data/resumes/简历2.pdf',
   backend: 'src/test-data/resumes/符天奇-简历.pdf',
@@ -105,7 +105,7 @@ export const SAMPLE_RESUMES: Record<string, string> = {
   sunResume: 'src/test-data/resumes/SUN.pdf',
   fuResume: 'src/test-data/resumes/符天奇-简历.pdf',
   kongModified: 'src/test-data/resumes/孔维轩_简历_改.pdf',
-};
+} as const;
 
 export const SAMPLE_JOBS: Record<string, JobData> = {
   frontend: {
@@ -184,31 +184,31 @@ export const SAMPLE_CANDIDATES = [
   {
     email: 'candidate1@test.com',
     name: 'Alice Johnson',
-    resume: SAMPLE_RESUMES.seniorDeveloper,
+    resume: SAMPLE_RESUMES['seniorDeveloper'],
     skills: ['React', 'TypeScript', 'Node.js', 'GraphQL'],
   },
   {
     email: 'candidate2@test.com',
     name: 'Bob Smith',
-    resume: SAMPLE_RESUMES.backend,
+    resume: SAMPLE_RESUMES['backend'],
     skills: ['Python', 'Django', 'PostgreSQL', 'Docker'],
   },
   {
     email: 'candidate3@test.com',
     name: 'Carol White',
-    resume: SAMPLE_RESUMES.fullStackDeveloper,
+    resume: SAMPLE_RESUMES['fullStackDeveloper'],
     skills: ['Vue.js', 'Node.js', 'MongoDB', 'AWS'],
   },
   {
     email: 'candidate4@test.com',
     name: 'David Brown',
-    resume: SAMPLE_RESUMES.projectManager,
+    resume: SAMPLE_RESUMES['projectManager'],
     skills: ['Project Management', 'Agile', 'Scrum', 'JIRA'],
   },
   {
     email: 'candidate5@test.com',
     name: 'Emma Davis',
-    resume: SAMPLE_RESUMES.architect,
+    resume: SAMPLE_RESUMES['architect'],
     skills: ['System Design', 'Microservices', 'AWS', 'Kubernetes'],
   },
 ];

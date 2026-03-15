@@ -25,7 +25,7 @@
     "test": "jest --config jest.config.mjs --passWithNoTests",
     "test:smoke": "jest --config jest.smoke.config.mjs --passWithNoTests",
     "test:app-gateway": "jest --config jest.config.mjs --passWithNoTests apps/app-gateway",
-    "test:ci": "jest --config jest.config.cjs --ci --coverage --passWithNoTests",
+    "test:ci": "jest --config jest.config.mjs --ci --coverage --passWithNoTests",
     "test:coverage": "jest --config jest.config.mjs --coverage --passWithNoTests",
     "lint": "npx nx run-many -t lint --all --parallel=3 --exclude ai-recruitment-clerk",
     "typecheck": "tsc --noEmit --project tsconfig.ci.json",

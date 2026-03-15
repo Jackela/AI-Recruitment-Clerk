@@ -130,7 +130,7 @@ export class TextExtractionService {
           lowerLine === header ||
           lowerLine.startsWith(header + ' ') ||
           lowerLine.endsWith(' ' + header) ||
-          new RegExp(`^${header}[:\s-]`).test(lowerLine)
+          new RegExp(`^${header}[:\\s-]`).test(lowerLine)
         ) {
           return type as SectionInfo['type'];
         }
@@ -141,9 +141,8 @@ export class TextExtractionService {
   }
 
   extractContactInfo(text: string): ContactInfo {
-    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
-    const phoneRegex =
-      /[\+]?[(]?[\d]{1,4}[)]?[-\s\.]?[\d]{1,4}[-\s\.]?[\d]{1,9}/g;
+    const emailRegex = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g;
+    const phoneRegex = /[+]?[(]?\d{1,4}[)]?[-\s.]?\d{1,4}[-\s.]?\d{1,9}/g;
     const linkedInRegex = /linkedin\.com\/in\/[a-zA-Z0-9-]+/i;
     const websiteRegex = /(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}/i;
 
@@ -257,7 +256,7 @@ export class TextExtractionService {
 
   extractBullets(text: string): string[] {
     const bulletPatterns = [
-      /^[\s]*[•\-\*\+◦▪▫◆◇][\s]+(.+)$/gm,
+      /^[\s]*[•\-*+◦▪▫◆◇][\s]+(.+)$/gm,
       /^[\s]*\d+[.)][\s]+(.+)$/gm,
     ];
 
@@ -299,7 +298,7 @@ export class TextExtractionService {
             lines[j].trim().startsWith('•') ||
             lines[j].trim().startsWith('-')
           ) {
-            bullets.push(lines[j].replace(/^[\s•\-]+/, '').trim());
+            bullets.push(lines[j].replace(/^[\s•-]+/, '').trim());
           }
           j++;
         }

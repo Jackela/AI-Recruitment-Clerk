@@ -29,6 +29,7 @@ const createMockAnalysisDoc = (overrides = {}) =>
     save: jest.fn().mockResolvedValue(this),
     ...overrides,
   }) as unknown as ReturnType<Model<typeof AnalysisResult>['create']>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 
 describe('AnalysisRepository', () => {
   let repository: AnalysisRepository;

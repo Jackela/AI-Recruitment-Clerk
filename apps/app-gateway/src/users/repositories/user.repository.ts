@@ -54,7 +54,7 @@ export interface UserEntity {
     action: string;
     timestamp: Date;
     performedBy?: string;
-    details?: Record<string, any>;
+    details?: Record<string, unknown>;
   }>;
   createdAt: Date;
   updatedAt: Date;
@@ -465,37 +465,37 @@ export class UserRepository {
   /**
    * Map MongoDB document to UserEntity.
    */
-  private mapToEntity(doc: any): UserEntity {
+  private mapToEntity(doc: Record<string, unknown> | unknown): UserEntity {
+    const d = doc as Record<string, unknown>;
     return {
-      _id: doc._id?.toString(),
-      id: doc.id,
-      email: doc.email,
-      username: doc.username,
-      password: doc.password,
-      firstName: doc.firstName,
-      lastName: doc.lastName,
-      role: doc.role,
-      permissions: doc.permissions,
-      organizationId: doc.organizationId,
-      teamIds: doc.teamIds || [],
-      status: doc.status,
-      lastLogin: doc.lastLogin,
-      lastActivity: doc.lastActivity,
-      avatarUrl: doc.avatarUrl,
-      securityFlags: doc.securityFlags || {},
-      preferences: doc.preferences || {
-        language: 'en',
-        theme: 'light',
-        timezone: 'UTC',
-        notifications: { email: true, push: false, sms: false },
-      },
-      settings: doc.settings || {
-        emailVisibility: false,
-        profileVisibility: 'organization',
-      },
-      auditLog: doc.auditLog || [],
-      createdAt: doc.createdAt,
-      updatedAt: doc.updatedAt,
+      _id: d._id?.toString() || '',
+      id: d.id as string,
+      email: d.email as string,
+      username: d.username as string | undefined,
+      password: d.password as string,
+      firstName: d.firstName as string,
+      lastName: d.lastName as string,
+      role: d.role as UserRole,
+      permissions: d.permissions as string[] | undefined,
+      organizationId: d.organizationId as string | undefined,
+      teamIds: (d.teamIds as string[] | undefined) || [],
+      status: d.status as UserStatus,
+      lastLogin: d.lastLogin as Date | undefined,
+      lastActivity: d.lastActivity as Date | undefined,
+      avatarUrl: d.avatarUrl as string | undefined,
+      securityFlags: d.securityFlags as Record<string, unknown> | undefined,
+      preferences: d.preferences as Record<string, unknown> | undefined,
+      settings: d.settings as Record<string, unknown> | undefined,
+      auditLog: d.auditLog as
+        | Array<{
+            action: string;
+            timestamp: Date;
+            performedBy?: string;
+            details?: Record<string, unknown>;
+          }>
+        | undefined,
+      createdAt: d.createdAt as Date,
+      updatedAt: d.updatedAt as Date,
     };
   }
 }

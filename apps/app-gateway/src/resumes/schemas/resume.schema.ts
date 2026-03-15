@@ -40,7 +40,7 @@ export class Resume {
     enum: ['pending', 'processing', 'completed', 'failed', 'deleted'],
     default: 'pending',
   })
-  status: string = "pending";
+  status = 'pending';
 
   @Prop({ type: Object, required: false })
   parsedData?: Record<string, unknown>;

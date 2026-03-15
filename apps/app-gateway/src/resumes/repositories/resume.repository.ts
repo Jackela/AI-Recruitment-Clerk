@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import type { Model, ClientSession } from 'mongoose';
+import type { Model, ClientSession, AnyBulkWriteOperation } from 'mongoose';
 import type { ResumeDocument } from '../schemas/resume.schema';
 import { Resume } from '../schemas/resume.schema';
 
@@ -202,8 +202,7 @@ export class ResumeRepository {
   ): Promise<ResumeDocument[]> {
     try {
       const { candidateId, email, phone, name, limit = 50, skip = 0 } = options;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const query: any = {};
+      const query: Record<string, unknown> = {};
 
       if (candidateId) {
         query.candidateId = candidateId;
@@ -275,8 +274,7 @@ export class ResumeRepository {
     errorMessage?: string,
   ): Promise<ResumeDocument | null> {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const updateData: any = {
+      const updateData: Record<string, unknown> = {
         status,
         updatedAt: new Date(),
       };
@@ -401,9 +399,9 @@ export class ResumeRepository {
             },
           },
         },
-      }));
+      })) as AnyBulkWriteOperation<ResumeDocument>[];
 
-      const result = await this.resumeModel.bulkWrite(operations as any);
+      const result = await this.resumeModel.bulkWrite(operations);
       this.logger.log(`Batch updated ${result.modifiedCount} resumes`);
       return result.modifiedCount;
     } catch (error) {
