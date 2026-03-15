@@ -3,11 +3,11 @@ import { test, expect } from '@playwright/test';
 test.describe('Component Visual', () => {
   test('job table matches snapshot', async ({ page }) => {
     await page.goto('/jobs');
-    await page.waitForSelector('[data-testid="job-table"], table, .job-table', {
-      state: 'visible',
-      timeout: 10000,
-    });
-    const table = await page
+    await page
+      .locator('[data-testid="job-table"], table, .job-table')
+      .first()
+      .waitFor({ state: 'visible', timeout: 10000 });
+    const table = page
       .locator('[data-testid="job-table"], table, .job-table')
       .first();
     await expect(table).toHaveScreenshot('job-table.png');
@@ -15,11 +15,13 @@ test.describe('Component Visual', () => {
 
   test('resume upload area matches snapshot', async ({ page }) => {
     await page.goto('/resume');
-    await page.waitForSelector(
-      '[data-testid="upload-area"], [data-testid="resume-upload"], .upload-area',
-      { state: 'visible', timeout: 10000 },
-    );
-    const uploadArea = await page
+    await page
+      .locator(
+        '[data-testid="upload-area"], [data-testid="resume-upload"], .upload-area',
+      )
+      .first()
+      .waitFor({ state: 'visible', timeout: 10000 });
+    const uploadArea = page
       .locator(
         '[data-testid="upload-area"], [data-testid="resume-upload"], .upload-area',
       )
@@ -29,11 +31,11 @@ test.describe('Component Visual', () => {
 
   test('dashboard sidebar matches snapshot', async ({ page }) => {
     await page.goto('/dashboard');
-    await page.waitForSelector('[data-testid="sidebar"], .sidebar, nav', {
-      state: 'visible',
-      timeout: 10000,
-    });
-    const sidebar = await page
+    await page
+      .locator('[data-testid="sidebar"], .sidebar, nav')
+      .first()
+      .waitFor({ state: 'visible', timeout: 10000 });
+    const sidebar = page
       .locator('[data-testid="sidebar"], .sidebar, nav')
       .first();
     await expect(sidebar).toHaveScreenshot('dashboard-sidebar.png');
@@ -41,11 +43,13 @@ test.describe('Component Visual', () => {
 
   test('search input matches snapshot', async ({ page }) => {
     await page.goto('/jobs');
-    await page.waitForSelector(
-      '[data-testid="search-input"], input[type="search"], .search-input',
-      { state: 'visible', timeout: 10000 },
-    );
-    const searchInput = await page
+    await page
+      .locator(
+        '[data-testid="search-input"], input[type="search"], .search-input',
+      )
+      .first()
+      .waitFor({ state: 'visible', timeout: 10000 });
+    const searchInput = page
       .locator(
         '[data-testid="search-input"], input[type="search"], .search-input',
       )

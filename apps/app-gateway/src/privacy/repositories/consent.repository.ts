@@ -1,13 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import type { Model } from 'mongoose';
+import type {
+  ConsentPurpose,
+  DataCategory} from '../../schemas/consent-record.schema';
 import {
   ConsentRecord,
   ConsentAuditLog,
   CookieConsent,
   ConsentStatus,
-  ConsentPurpose,
-  DataCategory,
   type ConsentRecordDocument,
   type ConsentAuditLogDocument,
   type CookieConsentDocument,

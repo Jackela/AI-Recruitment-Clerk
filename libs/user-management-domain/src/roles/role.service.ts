@@ -70,7 +70,7 @@ export class RoleService {
   /**
    * Create a new role.
    */
-  async createRole(roleData: {
+  public async async createRole(roleData: {
     name: string;
     key: UserRole;
     description?: string;
@@ -103,7 +103,7 @@ export class RoleService {
   /**
    * Find role by ID.
    */
-  async findById(id: string): Promise<Role> {
+  public async async findById(id: string): Promise<Role> {
     const role = await this.roleRepository.findById(id);
     if (!role) {
       throw new NotFoundException(`Role with id ${id} not found`);
@@ -114,7 +114,7 @@ export class RoleService {
   /**
    * Find role by key.
    */
-  async findByKey(key: UserRole): Promise<Role> {
+  public async async findByKey(key: UserRole): Promise<Role> {
     const role = await this.roleRepository.findByKey(key);
     if (!role) {
       throw new NotFoundException(`Role with key ${key} not found`);
@@ -125,14 +125,14 @@ export class RoleService {
   /**
    * Get all roles.
    */
-  async findAll(): Promise<Role[]> {
+  public async async findAll(): Promise<Role[]> {
     return this.roleRepository.findAll();
   }
 
   /**
    * Update role.
    */
-  async updateRole(
+  public async async updateRole(
     id: string,
     updates: Partial<Omit<Role, 'id' | 'createdAt'>>,
   ): Promise<Role> {
@@ -158,7 +158,7 @@ export class RoleService {
   /**
    * Delete role.
    */
-  async deleteRole(id: string): Promise<void> {
+  public async async deleteRole(id: string): Promise<void> {
     const role = await this.roleRepository.findById(id);
     if (!role) {
       throw new NotFoundException(`Role with id ${id} not found`);
@@ -174,7 +174,7 @@ export class RoleService {
   /**
    * Assign role to user.
    */
-  async assignRole(
+  public async async assignRole(
     userId: string,
     roleId: string,
     assignedBy?: string,
@@ -198,7 +198,7 @@ export class RoleService {
   /**
    * Remove role from user.
    */
-  async removeRole(userId: string, roleId: string): Promise<void> {
+  public async async removeRole(userId: string, roleId: string): Promise<void> {
     const removed = await this.assignmentRepository.removeRole(userId, roleId);
     if (!removed) {
       throw new NotFoundException('Role assignment not found');
@@ -208,7 +208,7 @@ export class RoleService {
   /**
    * Get user roles.
    */
-  async getUserRoles(userId: string): Promise<Role[]> {
+  public async async getUserRoles(userId: string): Promise<Role[]> {
     const assignments = await this.assignmentRepository.findByUserId(userId);
     const roles: Role[] = [];
 
@@ -225,7 +225,7 @@ export class RoleService {
   /**
    * Get users with role.
    */
-  async getUsersWithRole(roleId: string): Promise<string[]> {
+  public async async getUsersWithRole(roleId: string): Promise<string[]> {
     const assignments = await this.assignmentRepository.findByRoleId(roleId);
     return assignments.map((a) => a.userId);
   }
@@ -233,7 +233,7 @@ export class RoleService {
   /**
    * Set default role.
    */
-  async setDefaultRole(roleId: string): Promise<Role> {
+  public async async setDefaultRole(roleId: string): Promise<Role> {
     const role = await this.roleRepository.findById(roleId);
     if (!role) {
       throw new NotFoundException(`Role with id ${roleId} not found`);
@@ -248,21 +248,21 @@ export class RoleService {
   /**
    * Get default role.
    */
-  async getDefaultRole(): Promise<Role | null> {
+  public async async getDefaultRole(): Promise<Role | null> {
     return this.roleRepository.findDefault();
   }
 
   /**
    * Check if role has higher hierarchy than another.
    */
-  hasHigherHierarchy(role1: Role, role2: Role): boolean {
+  public hasHigherHierarchy(role1: Role, role2: Role): boolean {
     return role1.hierarchyLevel > role2.hierarchyLevel;
   }
 
   /**
    * Check if user can manage role.
    */
-  canManageRole(userRole: Role, targetRole: Role): boolean {
+  public canManageRole(userRole: Role, targetRole: Role): boolean {
     // User with higher hierarchy can manage lower roles
     return this.hasHigherHierarchy(userRole, targetRole);
   }
@@ -270,7 +270,7 @@ export class RoleService {
   /**
    * Get role hierarchy.
    */
-  async getRoleHierarchy(): Promise<Role[]> {
+  public async async getRoleHierarchy(): Promise<Role[]> {
     const roles = await this.roleRepository.findAll();
     return roles.sort((a, b) => b.hierarchyLevel - a.hierarchyLevel);
   }
@@ -278,7 +278,7 @@ export class RoleService {
   /**
    * Initialize default roles.
    */
-  async initializeDefaultRoles(): Promise<void> {
+  public async async initializeDefaultRoles(): Promise<void> {
     const defaultRoles: Array<{
       name: string;
       key: UserRole;
@@ -333,7 +333,7 @@ export class RoleService {
   /**
    * Clear all user roles.
    */
-  async clearUserRoles(userId: string): Promise<void> {
+  public async async clearUserRoles(userId: string): Promise<void> {
     await this.assignmentRepository.removeAllUserRoles(userId);
   }
 

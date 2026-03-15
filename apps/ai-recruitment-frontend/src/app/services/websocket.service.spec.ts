@@ -1,12 +1,13 @@
 import { TestBed, fakeAsync, tick, flush } from '@angular/core/testing';
-import {
-  WebSocketService,
+import type {
   WebSocketMessage,
   ProgressUpdate,
   CompletionData,
   ErrorData,
   JobUpdateEvent,
-  JobProgressEvent,
+  JobProgressEvent} from './websocket.service';
+import {
+  WebSocketService
 } from './websocket.service';
 import { ToastService } from './toast.service';
 import { Subject } from 'rxjs';
@@ -104,7 +105,7 @@ describe('WebSocketService', () => {
 
       // Get the connect_error handler
       const connectErrorHandler = mockSocket.on.mock.calls.find(
-        (call: [string, Function]) => call[0] === 'connect_error',
+        (call: [string, (...args: unknown[]) => void]) => call[0] === 'connect_error',
       )?.[1];
 
       if (connectErrorHandler) {
@@ -130,7 +131,7 @@ describe('WebSocketService', () => {
 
       // Get the message handler from socket.on
       const socketMessageHandler = mockSocket.on.mock.calls.find(
-        (call: [string, Function]) => call[0] === 'message',
+        (call: [string, (...args: unknown[]) => void]) => call[0] === 'message',
       )?.[1];
 
       const testMessage: WebSocketMessage = {
@@ -159,7 +160,7 @@ describe('WebSocketService', () => {
       });
 
       const socketMessageHandler = mockSocket.on.mock.calls.find(
-        (call: [string, Function]) => call[0] === 'message',
+        (call: [string, (...args: unknown[]) => void]) => call[0] === 'message',
       )?.[1];
 
       // Message with correct session ID
@@ -228,7 +229,7 @@ describe('WebSocketService', () => {
       service.connect(sessionId).subscribe();
 
       const socketMessageHandler = mockSocket.on.mock.calls.find(
-        (call: [string, Function]) => call[0] === 'message',
+        (call: [string, (...args: unknown[]) => void]) => call[0] === 'message',
       )?.[1];
 
       if (socketMessageHandler) {
@@ -252,7 +253,7 @@ describe('WebSocketService', () => {
       service.connect(sessionId).subscribe();
 
       const socketMessageHandler = mockSocket.on.mock.calls.find(
-        (call: [string, Function]) => call[0] === 'message',
+        (call: [string, (...args: unknown[]) => void]) => call[0] === 'message',
       )?.[1];
 
       if (socketMessageHandler) {
@@ -302,7 +303,7 @@ describe('WebSocketService', () => {
       service.connect(sessionId).subscribe();
 
       const socketMessageHandler = mockSocket.on.mock.calls.find(
-        (call: [string, Function]) => call[0] === 'message',
+        (call: [string, (...args: unknown[]) => void]) => call[0] === 'message',
       )?.[1];
 
       if (socketMessageHandler) {
@@ -333,7 +334,7 @@ describe('WebSocketService', () => {
       service.connect(sessionId).subscribe();
 
       const socketMessageHandler = mockSocket.on.mock.calls.find(
-        (call: [string, Function]) => call[0] === 'message',
+        (call: [string, (...args: unknown[]) => void]) => call[0] === 'message',
       )?.[1];
 
       if (socketMessageHandler) {
@@ -403,7 +404,7 @@ describe('WebSocketService', () => {
       service.connect('session-123').subscribe();
 
       const jobUpdateHandler = mockSocket.on.mock.calls.find(
-        (call: [string, Function]) => call[0] === 'job_updated',
+        (call: [string, (...args: unknown[]) => void]) => call[0] === 'job_updated',
       )?.[1];
 
       if (jobUpdateHandler) {
@@ -434,7 +435,7 @@ describe('WebSocketService', () => {
       service.connect('session-123').subscribe();
 
       const jobProgressHandler = mockSocket.on.mock.calls.find(
-        (call: [string, Function]) => call[0] === 'job_progress',
+        (call: [string, (...args: unknown[]) => void]) => call[0] === 'job_progress',
       )?.[1];
 
       if (jobProgressHandler) {
@@ -452,7 +453,7 @@ describe('WebSocketService', () => {
       service.connect('session-123').subscribe();
 
       const confirmationHandler = mockSocket.on.mock.calls.find(
-        (call: [string, Function]) => call[0] === 'job_subscription_confirmed',
+        (call: [string, (...args: unknown[]) => void]) => call[0] === 'job_subscription_confirmed',
       )?.[1];
 
       if (confirmationHandler) {
@@ -473,7 +474,7 @@ describe('WebSocketService', () => {
       service.connect('session-123').subscribe();
 
       const errorHandler = mockSocket.on.mock.calls.find(
-        (call: [string, Function]) => call[0] === 'job_subscription_error',
+        (call: [string, (...args: unknown[]) => void]) => call[0] === 'job_subscription_error',
       )?.[1];
 
       if (errorHandler) {
@@ -495,7 +496,7 @@ describe('WebSocketService', () => {
       service.connect('session-123').subscribe();
 
       const reconnectHandler = mockSocket.on.mock.calls.find(
-        (call: [string, Function]) => call[0] === 'reconnect',
+        (call: [string, (...args: unknown[]) => void]) => call[0] === 'reconnect',
       )?.[1];
 
       if (reconnectHandler) {
@@ -517,7 +518,7 @@ describe('WebSocketService', () => {
       service.connect('session-123').subscribe();
 
       const reconnectErrorHandler = mockSocket.on.mock.calls.find(
-        (call: [string, Function]) => call[0] === 'reconnect_error',
+        (call: [string, (...args: unknown[]) => void]) => call[0] === 'reconnect_error',
       )?.[1];
 
       if (reconnectErrorHandler) {
@@ -557,7 +558,7 @@ describe('WebSocketService', () => {
 
       // Simulate connection
       const connectHandler = mockSocket.on.mock.calls.find(
-        (call: [string, Function]) => call[0] === 'connect',
+        (call: [string, (...args: unknown[]) => void]) => call[0] === 'connect',
       )?.[1];
 
       if (connectHandler) {
@@ -662,7 +663,7 @@ describe('WebSocketService', () => {
       service.connect('session-123').subscribe();
 
       const socketMessageHandler = mockSocket.on.mock.calls.find(
-        (call: [string, Function]) => call[0] === 'message',
+        (call: [string, (...args: unknown[]) => void]) => call[0] === 'message',
       )?.[1];
 
       // Should not throw on invalid data
@@ -677,7 +678,7 @@ describe('WebSocketService', () => {
       service.connect('session-123').subscribe();
 
       const jobUpdateHandler = mockSocket.on.mock.calls.find(
-        (call: [string, Function]) => call[0] === 'job_updated',
+        (call: [string, (...args: unknown[]) => void]) => call[0] === 'job_updated',
       )?.[1];
 
       if (jobUpdateHandler) {

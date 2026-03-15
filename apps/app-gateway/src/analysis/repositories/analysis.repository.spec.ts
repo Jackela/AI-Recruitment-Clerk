@@ -1,4 +1,5 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import type { Model } from 'mongoose';
 import { AnalysisRepository } from './analysis.repository';
@@ -29,7 +30,7 @@ const createMockAnalysisDoc = (overrides = {}) =>
     save: jest.fn().mockResolvedValue(this),
     ...overrides,
   }) as unknown as ReturnType<Model<typeof AnalysisResult>['create']>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 
 describe('AnalysisRepository', () => {
   let repository: AnalysisRepository;

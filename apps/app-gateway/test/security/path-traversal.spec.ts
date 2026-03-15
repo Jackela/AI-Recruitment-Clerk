@@ -96,7 +96,7 @@ describe('Path Traversal Protection', () => {
       '..\x00/etc/passwd',
       '../../etc/hosts',
       '../../../proc/self/environ',
-      '..\..\..\boot.ini',
+      String.raw`..\..\..\boot.ini`,
       '../../../var/www/html/config.php',
     ];
 

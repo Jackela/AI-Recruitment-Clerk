@@ -1,5 +1,9 @@
 import { ScoringService } from './scoring.service';
-import { JobRequirements, CandidateProfile, ScoringCriteria } from './scoring.service';
+import type {
+  JobRequirements,
+  CandidateProfile,
+  ScoringCriteria,
+} from './scoring.service';
 
 describe('ScoringService', () => {
   const mockJobRequirements: JobRequirements = {
@@ -22,7 +26,10 @@ describe('ScoringService', () => {
 
   describe('calculateBasicScore', () => {
     it('should calculate basic score', () => {
-      const score = ScoringService.calculateBasicScore(mockCandidateProfile, mockJobRequirements);
+      const score = ScoringService.calculateBasicScore(
+        mockCandidateProfile,
+        mockJobRequirements,
+      );
 
       expect(score).toBeGreaterThan(0);
       expect(score).toBeLessThanOrEqual(100);
@@ -37,7 +44,10 @@ describe('ScoringService', () => {
         languages: ['English'],
       };
 
-      const score = ScoringService.calculateBasicScore(perfectCandidate, mockJobRequirements);
+      const score = ScoringService.calculateBasicScore(
+        perfectCandidate,
+        mockJobRequirements,
+      );
 
       expect(score).toBeGreaterThan(80);
     });
@@ -51,7 +61,10 @@ describe('ScoringService', () => {
         languages: ['French'],
       };
 
-      const score = ScoringService.calculateBasicScore(poorCandidate, mockJobRequirements);
+      const score = ScoringService.calculateBasicScore(
+        poorCandidate,
+        mockJobRequirements,
+      );
 
       expect(score).toBeLessThan(50);
     });
@@ -154,7 +167,10 @@ describe('ScoringService', () => {
       const candidateSkills = ['JavaScript', 'TypeScript', 'Python'];
       const requiredSkills = ['JavaScript', 'React'];
 
-      const result = ScoringService.matchSkills(candidateSkills, requiredSkills);
+      const result = ScoringService.matchSkills(
+        candidateSkills,
+        requiredSkills,
+      );
 
       expect(result.matched).toContain('JavaScript');
       expect(result.missing).toContain('React');
@@ -166,7 +182,10 @@ describe('ScoringService', () => {
       const candidateSkills = ['javascript', 'reactjs'];
       const requiredSkills = ['JavaScript', 'React'];
 
-      const result = ScoringService.matchSkills(candidateSkills, requiredSkills);
+      const result = ScoringService.matchSkills(
+        candidateSkills,
+        requiredSkills,
+      );
 
       expect(result.matched).toContain('JavaScript');
       expect(result.matched).toContain('React');
@@ -177,7 +196,11 @@ describe('ScoringService', () => {
       const requiredSkills = ['JavaScript'];
       const preferredSkills = ['Node.js', 'GraphQL'];
 
-      const result = ScoringService.matchSkills(candidateSkills, requiredSkills, preferredSkills);
+      const result = ScoringService.matchSkills(
+        candidateSkills,
+        requiredSkills,
+        preferredSkills,
+      );
 
       expect(result.matched).toContain('JavaScript');
       expect(result.matched).toContain('Node.js');
@@ -197,7 +220,10 @@ describe('ScoringService', () => {
       const candidateSkills = ['Python', 'Django'];
       const requiredSkills = ['JavaScript', 'React'];
 
-      const result = ScoringService.matchSkills(candidateSkills, requiredSkills);
+      const result = ScoringService.matchSkills(
+        candidateSkills,
+        requiredSkills,
+      );
 
       expect(result.matched).toHaveLength(0);
       expect(result.missing).toHaveLength(2);
@@ -224,10 +250,15 @@ describe('ScoringService', () => {
       const candidateSkills = ['React', 'react', 'REACT'];
       const requiredSkills = ['React'];
 
-      const result = ScoringService.matchSkills(candidateSkills, requiredSkills);
+      const result = ScoringService.matchSkills(
+        candidateSkills,
+        requiredSkills,
+      );
 
       // Should only match React once
-      expect(result.matched.filter((s) => s.toLowerCase() === 'react').length).toBe(1);
+      expect(
+        result.matched.filter((s) => s.toLowerCase() === 'react').length,
+      ).toBe(1);
     });
   });
 
@@ -235,11 +266,20 @@ describe('ScoringService', () => {
     it('should calculate scores for multiple candidates', () => {
       const candidates = [
         { id: 'candidate-1', profile: mockCandidateProfile },
-        { id: 'candidate-2', profile: { ...mockCandidateProfile, experienceYears: 2 } },
-        { id: 'candidate-3', profile: { ...mockCandidateProfile, experienceYears: 10 } },
+        {
+          id: 'candidate-2',
+          profile: { ...mockCandidateProfile, experienceYears: 2 },
+        },
+        {
+          id: 'candidate-3',
+          profile: { ...mockCandidateProfile, experienceYears: 10 },
+        },
       ];
 
-      const results = ScoringService.calculateBatchScores(candidates, mockJobRequirements);
+      const results = ScoringService.calculateBatchScores(
+        candidates,
+        mockJobRequirements,
+      );
 
       expect(results).toHaveLength(3);
       expect(results[0].candidateId).toBe('candidate-1');
@@ -249,9 +289,7 @@ describe('ScoringService', () => {
     });
 
     it('should use custom criteria for batch scoring', () => {
-      const candidates = [
-        { id: 'candidate-1', profile: mockCandidateProfile },
-      ];
+      const candidates = [{ id: 'candidate-1', profile: mockCandidateProfile }];
 
       const criteria: Partial<ScoringCriteria> = {
         skillsWeight: 0.7,
@@ -268,7 +306,10 @@ describe('ScoringService', () => {
     });
 
     it('should handle empty candidate list', () => {
-      const results = ScoringService.calculateBatchScores([], mockJobRequirements);
+      const results = ScoringService.calculateBatchScores(
+        [],
+        mockJobRequirements,
+      );
 
       expect(results).toHaveLength(0);
     });
@@ -373,7 +414,10 @@ describe('ScoringService', () => {
         experienceYears: 5,
       };
 
-      const result = ScoringService.calculateWeightedScore(candidate, mockJobRequirements);
+      const result = ScoringService.calculateWeightedScore(
+        candidate,
+        mockJobRequirements,
+      );
 
       expect(result.normalizedScore).toBeGreaterThanOrEqual(0);
       expect(result.matchedSkills).toHaveLength(0);
@@ -386,7 +430,10 @@ describe('ScoringService', () => {
         experienceYears: 0,
       };
 
-      const result = ScoringService.calculateWeightedScore(candidate, mockJobRequirements);
+      const result = ScoringService.calculateWeightedScore(
+        candidate,
+        mockJobRequirements,
+      );
 
       expect(result.normalizedScore).toBeGreaterThanOrEqual(0);
     });
@@ -397,7 +444,10 @@ describe('ScoringService', () => {
         minExperienceYears: 3,
       };
 
-      const result = ScoringService.calculateWeightedScore(mockCandidateProfile, requirements);
+      const result = ScoringService.calculateWeightedScore(
+        mockCandidateProfile,
+        requirements,
+      );
 
       expect(result.normalizedScore).toBeGreaterThan(0);
     });
@@ -408,7 +458,10 @@ describe('ScoringService', () => {
         minExperienceYears: 0,
       };
 
-      const result = ScoringService.calculateWeightedScore(mockCandidateProfile, requirements);
+      const result = ScoringService.calculateWeightedScore(
+        mockCandidateProfile,
+        requirements,
+      );
 
       expect(result.normalizedScore).toBeGreaterThan(0);
     });
@@ -422,7 +475,10 @@ describe('ScoringService', () => {
         languages: mockJobRequirements.requiredLanguages,
       };
 
-      const result = ScoringService.calculateWeightedScore(perfectCandidate, mockJobRequirements);
+      const result = ScoringService.calculateWeightedScore(
+        perfectCandidate,
+        mockJobRequirements,
+      );
 
       expect(result.missingSkills).toHaveLength(0);
       expect(result.matchedSkills.length).toBeGreaterThanOrEqual(
@@ -456,7 +512,10 @@ describe('ScoringService', () => {
         experienceYears: 10,
       };
 
-      const result = ScoringService.calculateWeightedScore(overqualifiedCandidate, requirements);
+      const result = ScoringService.calculateWeightedScore(
+        overqualifiedCandidate,
+        requirements,
+      );
 
       expect(result.experienceScore).toBeGreaterThan(0);
     });
@@ -467,7 +526,10 @@ describe('ScoringService', () => {
         educationLevel: 'master',
       };
 
-      const result = ScoringService.calculateWeightedScore(mastersCandidate, mockJobRequirements);
+      const result = ScoringService.calculateWeightedScore(
+        mastersCandidate,
+        mockJobRequirements,
+      );
 
       expect(result.educationScore).toBeGreaterThan(0);
     });
@@ -484,7 +546,10 @@ describe('ScoringService', () => {
         educationLevel: 'bachelor',
       };
 
-      const result = ScoringService.calculateWeightedScore(bachelorCandidate, requirements);
+      const result = ScoringService.calculateWeightedScore(
+        bachelorCandidate,
+        requirements,
+      );
 
       expect(result.educationScore).toBeGreaterThan(0);
       expect(result.educationScore).toBeLessThan(100);
@@ -497,7 +562,10 @@ describe('ScoringService', () => {
         educationLevel: 'custom_degree',
       };
 
-      const result = ScoringService.calculateWeightedScore(mockCandidateProfile, requirements);
+      const result = ScoringService.calculateWeightedScore(
+        mockCandidateProfile,
+        requirements,
+      );
 
       expect(result.educationScore).toBeGreaterThanOrEqual(0);
     });
@@ -505,10 +573,17 @@ describe('ScoringService', () => {
     it('should handle extra certifications', () => {
       const candidateWithExtras: CandidateProfile = {
         ...mockCandidateProfile,
-        certifications: ['AWS Certified', 'Google Cloud Certified', 'Azure Certified'],
+        certifications: [
+          'AWS Certified',
+          'Google Cloud Certified',
+          'Azure Certified',
+        ],
       };
 
-      const result = ScoringService.calculateWeightedScore(candidateWithExtras, mockJobRequirements);
+      const result = ScoringService.calculateWeightedScore(
+        candidateWithExtras,
+        mockJobRequirements,
+      );
 
       expect(result.certificationsScore).toBe(100);
     });
@@ -519,7 +594,10 @@ describe('ScoringService', () => {
         languages: ['english', 'ENGLISH', 'Spanish'],
       };
 
-      const result = ScoringService.calculateWeightedScore(candidate, mockJobRequirements);
+      const result = ScoringService.calculateWeightedScore(
+        candidate,
+        mockJobRequirements,
+      );
 
       expect(result.languagesScore).toBe(100);
     });
@@ -530,7 +608,10 @@ describe('ScoringService', () => {
         experienceYears: 5,
       };
 
-      const result = ScoringService.calculateWeightedScore(candidate, mockJobRequirements);
+      const result = ScoringService.calculateWeightedScore(
+        candidate,
+        mockJobRequirements,
+      );
 
       expect(result.matchedSkills.length).toBeGreaterThan(0);
     });
@@ -541,7 +622,10 @@ describe('ScoringService', () => {
         experienceYears: 5,
       };
 
-      const result = ScoringService.calculateWeightedScore(candidate, mockJobRequirements);
+      const result = ScoringService.calculateWeightedScore(
+        candidate,
+        mockJobRequirements,
+      );
 
       expect(result.normalizedScore).toBeGreaterThanOrEqual(0);
     });
@@ -555,7 +639,10 @@ describe('ScoringService', () => {
         languages: undefined,
       };
 
-      const result = ScoringService.calculateWeightedScore(candidate, mockJobRequirements);
+      const result = ScoringService.calculateWeightedScore(
+        candidate,
+        mockJobRequirements,
+      );
 
       expect(result.normalizedScore).toBeGreaterThanOrEqual(0);
     });
@@ -569,10 +656,13 @@ describe('ScoringService', () => {
       );
 
       expect(result.details.skillsMatch).toBeGreaterThan(0);
-      expect(result.matchedSkills.every((skill) =
-gt;
-        mockCandidateProfile.skills.map((s) => s.toLowerCase()).includes(skill.toLowerCase()),
-      )).toBe(true);
+      expect(
+        result.matchedSkills.every((skill) =>
+          mockCandidateProfile.skills
+            .map((s) => s.toLowerCase())
+            .includes(skill.toLowerCase()),
+        ),
+      ).toBe(true);
     });
 
     it('should calculate accurate experience match details', () => {

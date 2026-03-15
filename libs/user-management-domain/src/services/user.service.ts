@@ -6,13 +6,8 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { User } from '../entities/user.entity';
-import {
-  UserRole,
-  UserStatus,
-  CreateUserDto,
-  UpdateUserDto,
-  UserDto,
-} from '../index';
+import type { CreateUserDto, UpdateUserDto, UserDto } from '../index';
+import { UserRole, UserStatus } from '../index';
 
 /**
  * User repository interface.
@@ -46,7 +41,7 @@ export class UserService {
   /**
    * Create a new user.
    */
-  async createUser(dto: CreateUserDto): Promise<UserDto> {
+  public async async createUser(dto: CreateUserDto): Promise<UserDto> {
     // Validate user data
     const validation = User.validateCreate({
       email: dto.email,
@@ -89,7 +84,7 @@ export class UserService {
   /**
    * Find user by ID.
    */
-  async findById(id: string): Promise<UserDto> {
+  public async async findById(id: string): Promise<UserDto> {
     const user = await this.userRepository.findById(id);
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
@@ -100,7 +95,7 @@ export class UserService {
   /**
    * Find user by email.
    */
-  async findByEmail(email: string): Promise<UserDto | null> {
+  public async async findByEmail(email: string): Promise<UserDto | null> {
     const user = await this.userRepository.findByEmail(email);
     return user ? this.toDto(user) : null;
   }
@@ -108,7 +103,7 @@ export class UserService {
   /**
    * Get all users with pagination.
    */
-  async findAll(
+  public async async findAll(
     options: { skip?: number; take?: number; organizationId?: string } = {},
   ): Promise<{
     users: UserDto[];
@@ -128,7 +123,7 @@ export class UserService {
   /**
    * Update user.
    */
-  async updateUser(id: string, dto: UpdateUserDto): Promise<UserDto> {
+  public async async updateUser(id: string, dto: UpdateUserDto): Promise<UserDto> {
     const user = await this.userRepository.findById(id);
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
@@ -174,7 +169,7 @@ export class UserService {
   /**
    * Delete user.
    */
-  async deleteUser(id: string): Promise<void> {
+  public async async deleteUser(id: string): Promise<void> {
     const user = await this.userRepository.findById(id);
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
@@ -186,7 +181,7 @@ export class UserService {
   /**
    * Search users.
    */
-  async searchUsers(
+  public async async searchUsers(
     query: string,
     organizationId?: string,
   ): Promise<UserDto[]> {
@@ -197,7 +192,7 @@ export class UserService {
   /**
    * Filter users by status.
    */
-  async filterByStatus(
+  public async async filterByStatus(
     status: UserStatus,
     organizationId?: string,
   ): Promise<UserDto[]> {
@@ -211,28 +206,28 @@ export class UserService {
   /**
    * Activate user.
    */
-  async activateUser(id: string): Promise<UserDto> {
+  public async async activateUser(id: string): Promise<UserDto> {
     return this.updateUser(id, { status: UserStatus.ACTIVE });
   }
 
   /**
    * Deactivate user.
    */
-  async deactivateUser(id: string): Promise<UserDto> {
+  public async async deactivateUser(id: string): Promise<UserDto> {
     return this.updateUser(id, { status: UserStatus.INACTIVE });
   }
 
   /**
    * Suspend user.
    */
-  async suspendUser(id: string): Promise<UserDto> {
+  public async async suspendUser(id: string): Promise<UserDto> {
     return this.updateUser(id, { status: UserStatus.SUSPENDED });
   }
 
   /**
    * Bulk activate users.
    */
-  async bulkActivate(
+  public async async bulkActivate(
     ids: string[],
   ): Promise<{ success: number; failed: number }> {
     let success = 0;
@@ -243,7 +238,7 @@ export class UserService {
         try {
           await this.activateUser(id);
           success++;
-        } catch (error) {
+        } catch (_error) {
           failed++;
         }
       }),
@@ -255,7 +250,7 @@ export class UserService {
   /**
    * Bulk deactivate users.
    */
-  async bulkDeactivate(
+  public async bulkDeactivate(
     ids: string[],
   ): Promise<{ success: number; failed: number }> {
     let success = 0;
@@ -266,7 +261,7 @@ export class UserService {
         try {
           await this.deactivateUser(id);
           success++;
-        } catch (error) {
+        } catch (_error) {
           failed++;
         }
       }),
@@ -278,7 +273,7 @@ export class UserService {
   /**
    * Bulk delete users.
    */
-  async bulkDelete(
+  public async async bulkDelete(
     ids: string[],
   ): Promise<{ success: number; failed: number }> {
     let success = 0;
@@ -289,7 +284,7 @@ export class UserService {
         try {
           await this.deleteUser(id);
           success++;
-        } catch (error) {
+        } catch (_error) {
           failed++;
         }
       }),

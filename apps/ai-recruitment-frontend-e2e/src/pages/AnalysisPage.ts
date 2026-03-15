@@ -42,12 +42,9 @@ export class AnalysisPage extends BasePage {
   }
 
   async waitForAnalysis(): Promise<void> {
-    await this.page.waitForSelector(
-      `[data-testid="${this.selectors.resultsSection}"]`,
-      {
-        timeout: 30000,
-      },
-    );
+    await this.page
+      .locator(`[data-testid="${this.selectors.resultsSection}"]`)
+      .waitFor({ timeout: 30000 });
   }
 
   async getAnalysisResults(): Promise<boolean> {

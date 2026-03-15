@@ -1,7 +1,7 @@
 import { test, expect } from '../fixtures';
 import { JobsPage, DashboardPage } from '../pages';
 import { setupJobsApiMocking, TEST_JOB_DATA } from '../fixtures';
-import { gotoAndWait, setupErrorCollection, ROUTES } from '../utils';
+import { gotoAndWait, setupErrorCollection } from '../utils';
 
 /**
  * Core User Flow - Job Creation to Report Viewing

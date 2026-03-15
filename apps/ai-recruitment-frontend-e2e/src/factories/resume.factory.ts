@@ -1,5 +1,5 @@
 import { join } from 'path';
-import { TestResume } from '../seeds/resumes.seed';
+import type { TestResume } from '../seeds/resumes.seed';
 
 export interface ResumeCreateOptions {
   filename?: string;

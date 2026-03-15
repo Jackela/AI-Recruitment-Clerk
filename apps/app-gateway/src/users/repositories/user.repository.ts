@@ -75,7 +75,7 @@ export class UserRepository {
   /**
    * Create a new user with password hash.
    */
-  async create(
+  public async async create(
     createUserData: CreateUserDto & { password: string },
   ): Promise<UserEntity> {
     const existingUser = await this.findByEmail(createUserData.email);
@@ -133,7 +133,7 @@ export class UserRepository {
   /**
    * Find user by ID with roles.
    */
-  async findById(id: string): Promise<UserEntity | null> {
+  public async async findById(id: string): Promise<UserEntity | null> {
     const user = await this.userModel.findOne({ id }).exec();
     return user ? this.mapToEntity(user) : null;
   }
@@ -141,7 +141,7 @@ export class UserRepository {
   /**
    * Find user by email.
    */
-  async findByEmail(email: string): Promise<UserEntity | null> {
+  public async async findByEmail(email: string): Promise<UserEntity | null> {
     if (!email) return null;
     const user = await this.userModel
       .findOne({ email: email.toLowerCase() })
@@ -152,7 +152,7 @@ export class UserRepository {
   /**
    * Find user by username.
    */
-  async findByUsername(username: string): Promise<UserEntity | null> {
+  public async async findByUsername(username: string): Promise<UserEntity | null> {
     if (!username) return null;
     const user = await this.userModel
       .findOne({ username: username.toLowerCase() })
@@ -163,7 +163,7 @@ export class UserRepository {
   /**
    * Find users by role.
    */
-  async findByRole(role: UserRole): Promise<UserEntity[]> {
+  public async async findByRole(role: UserRole): Promise<UserEntity[]> {
     const users = await this.userModel.find({ role }).exec();
     return users.map((user) => this.mapToEntity(user));
   }
@@ -171,7 +171,7 @@ export class UserRepository {
   /**
    * Find users by organization ID.
    */
-  async findByOrganizationId(organizationId: string): Promise<UserEntity[]> {
+  public async async findByOrganizationId(organizationId: string): Promise<UserEntity[]> {
     if (!organizationId) return [];
     const users = await this.userModel.find({ organizationId }).exec();
     return users.map((user) => this.mapToEntity(user));
@@ -180,7 +180,7 @@ export class UserRepository {
   /**
    * Find users by team ID.
    */
-  async findByTeamId(teamId: string): Promise<UserEntity[]> {
+  public async async findByTeamId(teamId: string): Promise<UserEntity[]> {
     if (!teamId) return [];
     const users = await this.userModel.find({ teamIds: teamId }).exec();
     return users.map((user) => this.mapToEntity(user));
@@ -189,7 +189,7 @@ export class UserRepository {
   /**
    * Verify password for user.
    */
-  async verifyPassword(userId: string, password: string): Promise<boolean> {
+  public async async verifyPassword(userId: string, password: string): Promise<boolean> {
     const user = await this.userModel.findOne({ id: userId }).exec();
     if (!user) return false;
 
@@ -209,7 +209,7 @@ export class UserRepository {
   /**
    * Update last login timestamp.
    */
-  async updateLastLogin(userId: string): Promise<void> {
+  public async async updateLastLogin(userId: string): Promise<void> {
     const now = new Date();
     await this.userModel
       .updateOne(
@@ -226,7 +226,7 @@ export class UserRepository {
   /**
    * Update user profile.
    */
-  async updateProfile(
+  public async async updateProfile(
     userId: string,
     updateData: Partial<
       Pick<UserEntity, 'firstName' | 'lastName' | 'email' | 'username'>
@@ -267,7 +267,7 @@ export class UserRepository {
   /**
    * Update avatar URL.
    */
-  async updateAvatar(userId: string, avatarUrl: string): Promise<UserEntity> {
+  public async async updateAvatar(userId: string, avatarUrl: string): Promise<UserEntity> {
     const now = new Date();
     const updatedUser = await this.userModel
       .findOneAndUpdate(
@@ -296,7 +296,7 @@ export class UserRepository {
   /**
    * Update user preferences.
    */
-  async updatePreferences(
+  public async async updatePreferences(
     userId: string,
     preferences: Partial<UserEntity['preferences']>,
   ): Promise<UserEntity> {
@@ -325,7 +325,7 @@ export class UserRepository {
   /**
    * Update user settings.
    */
-  async updateSettings(
+  public async async updateSettings(
     userId: string,
     settings: Partial<UserEntity['settings']>,
   ): Promise<UserEntity> {
@@ -354,7 +354,7 @@ export class UserRepository {
   /**
    * Check if user has permission.
    */
-  async hasPermission(userId: string, permission: string): Promise<boolean> {
+  public async async hasPermission(userId: string, permission: string): Promise<boolean> {
     const user = await this.findById(userId);
     if (!user) return false;
 
@@ -371,7 +371,7 @@ export class UserRepository {
   /**
    * Check if user is member of organization.
    */
-  async isOrganizationMember(
+  public async async isOrganizationMember(
     userId: string,
     organizationId: string,
   ): Promise<boolean> {
@@ -382,7 +382,7 @@ export class UserRepository {
   /**
    * Check if user is member of team.
    */
-  async isTeamMember(userId: string, teamId: string): Promise<boolean> {
+  public async async isTeamMember(userId: string, teamId: string): Promise<boolean> {
     const user = await this.userModel.findOne({ id: userId }).exec();
     return user?.teamIds?.includes(teamId) ?? false;
   }
@@ -390,7 +390,7 @@ export class UserRepository {
   /**
    * Delete user with cleanup.
    */
-  async delete(userId: string): Promise<void> {
+  public async async delete(userId: string): Promise<void> {
     const result = await this.userModel.deleteOne({ id: userId }).exec();
     if (result.deletedCount === 0) {
       throw new NotFoundException(`User with ID ${userId} not found`);
@@ -400,7 +400,7 @@ export class UserRepository {
   /**
    * Add user to team.
    */
-  async addToTeam(userId: string, teamId: string): Promise<void> {
+  public async async addToTeam(userId: string, teamId: string): Promise<void> {
     const result = await this.userModel
       .updateOne(
         { id: userId },
@@ -416,7 +416,7 @@ export class UserRepository {
   /**
    * Remove user from team.
    */
-  async removeFromTeam(userId: string, teamId: string): Promise<void> {
+  public async async removeFromTeam(userId: string, teamId: string): Promise<void> {
     const result = await this.userModel
       .updateOne(
         { id: userId },
@@ -432,7 +432,7 @@ export class UserRepository {
   /**
    * Get audit trail for user.
    */
-  async getAuditTrail(userId: string): Promise<UserEntity['auditLog']> {
+  public async async getAuditTrail(userId: string): Promise<UserEntity['auditLog']> {
     const user = await this.userModel.findOne({ id: userId }).exec();
     return user?.auditLog || [];
   }

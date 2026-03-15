@@ -1,6 +1,6 @@
 import type { PipeTransform } from '@angular/core';
 import { Pipe, SecurityContext } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
+import type { DomSanitizer } from '@angular/platform-browser';
 
 /**
  * Highlight pipe for highlighting search terms in text.
@@ -23,7 +23,7 @@ export class HighlightPipe implements PipeTransform {
   public transform(
     value: string | null | undefined,
     searchTerm: string | null | undefined,
-    highlightClass: string = 'highlight',
+    highlightClass = 'highlight',
   ): string {
     if (!value || !searchTerm) {
       return value || '';

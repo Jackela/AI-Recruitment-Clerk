@@ -1,4 +1,5 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import type { Model } from 'mongoose';
 import { ReportRepository } from './report.repository';

@@ -35,10 +35,9 @@ test.describe('Deep Console Debug', () => {
 
     // console.log('Starting page navigation...');
     await page.goto('/');
-    await page.waitForURL(
-      (url) => url.pathname.startsWith(LANDING_PATH),
-      { timeout: 15_000 },
-    );
+    await page.waitForURL((url) => url.pathname.startsWith(LANDING_PATH), {
+      timeout: 15_000,
+    });
 
     // console.log('Waiting for network to settle...');
     await page.waitForLoadState('domcontentloaded');
@@ -59,16 +58,7 @@ test.describe('Deep Console Debug', () => {
     // console.log('ERRORS FOUND:', errors);
 
     // Check if main.js is actually being loaded
-    const response = await page.goto('/');
-    const responseText = await response?.text();
-    // console.log(
-    //   'Response includes main.js:',
-    //   responseText?.includes('main.js') || false,
-    // );
-    // console.log(
-    //   'Response includes polyfills.js:',
-    //   responseText?.includes('polyfills.js') || false,
-    // );
+    await page.goto('/');
 
     // Check for any network failures
     const failedRequests: string[] = [];

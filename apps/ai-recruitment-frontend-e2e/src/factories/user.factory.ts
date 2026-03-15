@@ -1,4 +1,4 @@
-import { TestUser } from '../seeds/users.seed';
+import type { TestUser } from '../seeds/users.seed';
 
 export interface UserCreateOptions {
   email?: string;

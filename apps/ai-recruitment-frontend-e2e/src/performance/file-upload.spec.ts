@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
 import {
   loadPerformanceBudget,
-  createTestBlob,
   clearPerformanceEntries,
 } from '../utils/performance';
 import * as fs from 'fs';
@@ -49,12 +48,11 @@ test.describe('File Upload Performance', () => {
       );
 
       // Wait for upload to complete (progress bar or success message)
-      await page.waitForSelector(
-        '[data-testid="upload-success"], [data-testid="upload-complete"]',
-        {
-          timeout: budget.upload.duration,
-        },
-      );
+      await page
+        .locator(
+          '[data-testid="upload-success"], [data-testid="upload-complete"]',
+        )
+        .waitFor({ timeout: budget.upload.duration });
 
       const uploadTime = Date.now() - startTime;
 
@@ -106,12 +104,11 @@ test.describe('File Upload Performance', () => {
       );
 
       // Wait for upload to complete
-      await page.waitForSelector(
-        '[data-testid="upload-success"], [data-testid="upload-complete"]',
-        {
-          timeout: 20000,
-        },
-      );
+      await page
+        .locator(
+          '[data-testid="upload-success"], [data-testid="upload-complete"]',
+        )
+        .waitFor({ timeout: 20000 });
 
       const uploadTime = Date.now() - startTime;
 
@@ -166,9 +163,9 @@ test.describe('File Upload Performance', () => {
       );
 
       // Wait for all uploads to complete
-      await page.waitForSelector('[data-testid="all-uploads-complete"]', {
-        timeout: 60000,
-      });
+      await page
+        .locator('[data-testid="all-uploads-complete"]')
+        .waitFor({ timeout: 60000 });
 
       const uploadTime = Date.now() - startTime;
       const totalSize = fileSize * 3;
@@ -222,12 +219,9 @@ test.describe('File Upload Performance', () => {
       // Wait for progress indicator to appear
       const progressStartTime = Date.now();
 
-      await page.waitForSelector(
-        '[data-testid="upload-progress"], .upload-progress',
-        {
-          timeout: 2000,
-        },
-      );
+      await page
+        .locator('[data-testid="upload-progress"], .upload-progress')
+        .waitFor({ timeout: 2000 });
 
       const progressShowTime = Date.now() - progressStartTime;
 

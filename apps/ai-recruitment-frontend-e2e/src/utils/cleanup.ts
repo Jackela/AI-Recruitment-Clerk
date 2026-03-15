@@ -1,4 +1,5 @@
-import { request, APIRequestContext } from '@playwright/test';
+import type { APIRequestContext } from '@playwright/test';
+import { request } from '@playwright/test';
 import { getTestEnvironment } from './environment';
 
 export interface CleanupResult {

@@ -3,13 +3,14 @@ import {
   HttpClientTestingModule,
   HttpTestingController,
 } from '@angular/common/http/testing';
-import {
-  AuthService,
+import type {
   AuthTokenResponse,
   UserProfile,
   LoginCredentials,
   RegistrationData,
-  PasswordResetRequest,
+  PasswordResetRequest} from './auth.service';
+import {
+  AuthService
 } from './auth.service';
 import { environment } from '../../environments/environment';
 

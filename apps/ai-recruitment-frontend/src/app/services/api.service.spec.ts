@@ -504,7 +504,7 @@ describe('ApiService', () => {
         const mockFile = new File(['content'], 'test.pdf', {
           type: 'application/pdf',
         });
-        let progressEvents: number[] = [];
+        const progressEvents: number[] = [];
 
         service.uploadResumes('job-1', [mockFile]).subscribe();
 

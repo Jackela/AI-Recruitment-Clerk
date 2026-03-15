@@ -19,10 +19,9 @@ const mockJobResponse = {
 const LANDING_PATH = '/jobs';
 
 async function waitForLanding(page: Page): Promise<void> {
-  await page.waitForURL(
-    (url) => url.pathname.startsWith(LANDING_PATH),
-    { timeout: 15_000 },
-  );
+  await page.waitForURL((url) => url.pathname.startsWith(LANDING_PATH), {
+    timeout: 15_000,
+  });
   await page.waitForLoadState('domcontentloaded');
 }
 
@@ -168,7 +167,7 @@ test.describe('Debug User Flow - Step by Step', () => {
     await delay(2000);
 
     // Check what's on the page
-    const pageContent = await page.textContent('body');
+    await page.textContent('body');
     // console.log('Page content length:', pageContent?.length || 0);
     // console.log(
     //   'Page content preview:',
@@ -176,17 +175,17 @@ test.describe('Debug User Flow - Step by Step', () => {
     // );
 
     // Check for common page elements
-    const headerCount = await page.locator('h1, h2, .page-title').count();
-    const formCount = await page.locator('form').count();
-    const angularRootCount = await page.locator('arc-root').count();
+    await page.locator('h1, h2, .page-title').count();
+    await page.locator('form').count();
+    await page.locator('arc-root').count();
 
     // console.log('Header found:', headerCount > 0);
     // console.log('Form found:', formCount > 0);
     // console.log('Angular root found:', angularRootCount > 0);
 
     // Check if there are any file upload elements
-    const fileInputs = await page.locator('input[type="file"]').count();
-    const uploadButtons = await page
+    await page.locator('input[type="file"]').count();
+    await page
       .locator('button')
       .filter({ hasText: /上传|Upload/i })
       .count();
@@ -199,12 +198,7 @@ test.describe('Debug User Flow - Step by Step', () => {
     // console.log('Current URL:', currentUrl);
 
     // Log status based on page state (unconditional logging)
-    const includesJobs = currentUrl.includes('/jobs/');
-    const hasAngularRoot = angularRootCount > 0;
-    const isOnJobDetailsPage = includesJobs && hasAngularRoot;
-    const includesJobsPath = currentUrl.includes('/jobs');
-    const includesJobId = currentUrl.includes(`/${mockJobResponse.jobId}`);
-    const wasRedirectedToList = includesJobsPath && !includesJobId;
+    currentUrl.includes('/jobs/');
     // console.log('Is on job details page:', isOnJobDetailsPage);
     // console.log('Was redirected to list:', wasRedirectedToList);
     // console.log('Page load status: success');

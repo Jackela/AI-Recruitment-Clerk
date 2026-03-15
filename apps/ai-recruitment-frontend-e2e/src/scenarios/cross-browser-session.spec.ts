@@ -197,11 +197,11 @@ test.describe('Cross-browser Session Persistence', () => {
         '[data-testid="job-card"]:has-text("Window 1 Job") [data-testid="delete-button"]',
       );
       await page2.click('[data-testid="confirm-delete"]');
-      await page2.waitForSelector('[data-testid="delete-success"]');
+      await page2.locator('[data-testid="delete-success"]').waitFor();
 
       // 在窗口1中刷新，职位应该消失
       await page1.reload();
-      await expect(page1.locator('text=Window 1 Job')).not.toBeVisible();
+      await expect(page1.locator('text=Window 1 Job')).toBeHidden();
     } finally {
       await context1.close();
       await context2.close();

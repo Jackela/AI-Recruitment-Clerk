@@ -20,7 +20,7 @@ test.describe('Bulk Operations', () => {
 
     // 登录
     await loginPage.navigateTo();
-    await loginPage.login(TEST_USERS["hr"].email, TEST_USERS["hr"].password);
+    await loginPage.login(TEST_USERS['hr'].email, TEST_USERS['hr'].password);
     await dashboardPage.waitForPageLoad();
 
     // 获取初始职位数量
@@ -55,9 +55,9 @@ UI/UX Designer,User interface design,Design,San Francisco`),
     await page.click('[data-testid="confirm-import"]');
 
     // 验证批量创建成功
-    await page.waitForSelector('[data-testid="import-success"]', {
-      timeout: 30000,
-    });
+    await page
+      .locator('[data-testid="import-success"]')
+      .waitFor({ timeout: 30000 });
 
     await page.goto('/jobs');
     const newCount = await page.locator('[data-testid="job-card"]').count();
@@ -78,8 +78,11 @@ UI/UX Designer,User interface design,Design,San Francisco`),
     page,
   }) => {
     await page.goto('/login');
-    await page.fill('[data-testid="email-input"]', TEST_USERS["hr"].email);
-    await page.fill('[data-testid="password-input"]', TEST_USERS["hr"].password);
+    await page.fill('[data-testid="email-input"]', TEST_USERS['hr'].email);
+    await page.fill(
+      '[data-testid="password-input"]',
+      TEST_USERS['hr'].password,
+    );
     await page.click('[data-testid="submit-button"]');
     await page.waitForURL(/\/dashboard/);
 
@@ -122,22 +125,23 @@ UI/UX Designer,User interface design,Design,San Francisco`),
     await page.click('[data-testid="confirm-delete"]');
 
     // 验证删除成功
-    await page.waitForSelector('[data-testid="bulk-delete-success"]', {
-      timeout: 10000,
-    });
+    await page
+      .locator('[data-testid="bulk-delete-success"]')
+      .waitFor({ timeout: 10000 });
 
     // 验证职位已删除
     for (let i = 1; i <= 3; i++) {
-      await expect(
-        page.locator(`text=Bulk Delete Test Job ${i}`),
-      ).not.toBeVisible();
+      await expect(page.locator(`text=Bulk Delete Test Job ${i}`)).toBeHidden();
     }
   });
 
   test('bulk export to Excel with filtering', async ({ page }) => {
     await page.goto('/login');
-    await page.fill('[data-testid="email-input"]', TEST_USERS["hr"].email);
-    await page.fill('[data-testid="password-input"]', TEST_USERS["hr"].password);
+    await page.fill('[data-testid="email-input"]', TEST_USERS['hr'].email);
+    await page.fill(
+      '[data-testid="password-input"]',
+      TEST_USERS['hr'].password,
+    );
     await page.click('[data-testid="submit-button"]');
     await page.waitForURL(/\/dashboard/);
 
@@ -170,8 +174,11 @@ UI/UX Designer,User interface design,Design,San Francisco`),
 
   test('bulk update candidate status', async ({ page }) => {
     await page.goto('/login');
-    await page.fill('[data-testid="email-input"]', TEST_USERS["hr"].email);
-    await page.fill('[data-testid="password-input"]', TEST_USERS["hr"].password);
+    await page.fill('[data-testid="email-input"]', TEST_USERS['hr'].email);
+    await page.fill(
+      '[data-testid="password-input"]',
+      TEST_USERS['hr'].password,
+    );
     await page.click('[data-testid="submit-button"]');
     await page.waitForURL(/\/dashboard/);
 
@@ -217,8 +224,11 @@ UI/UX Designer,User interface design,Design,San Francisco`),
 
   test('bulk resume analysis with progress tracking', async ({ page }) => {
     await page.goto('/login');
-    await page.fill('[data-testid="email-input"]', TEST_USERS["hr"].email);
-    await page.fill('[data-testid="password-input"]', TEST_USERS["hr"].password);
+    await page.fill('[data-testid="email-input"]', TEST_USERS['hr'].email);
+    await page.fill(
+      '[data-testid="password-input"]',
+      TEST_USERS['hr'].password,
+    );
     await page.click('[data-testid="submit-button"]');
     await page.waitForURL(/\/dashboard/);
 
@@ -233,9 +243,9 @@ UI/UX Designer,User interface design,Design,San Francisco`),
 
     // 批量上传多个简历
     const files = [
-      SAMPLE_RESUMES["seniorDeveloper"],
-      SAMPLE_RESUMES["juniorDeveloper"],
-      SAMPLE_RESUMES["fullStackDeveloper"],
+      SAMPLE_RESUMES['seniorDeveloper'],
+      SAMPLE_RESUMES['juniorDeveloper'],
+      SAMPLE_RESUMES['fullStackDeveloper'],
     ];
 
     const fileInput = page.locator('input[type="file"]');
@@ -279,8 +289,11 @@ UI/UX Designer,User interface design,Design,San Francisco`),
 
   test('bulk operation with partial failures', async ({ page }) => {
     await page.goto('/login');
-    await page.fill('[data-testid="email-input"]', TEST_USERS["hr"].email);
-    await page.fill('[data-testid="password-input"]', TEST_USERS["hr"].password);
+    await page.fill('[data-testid="email-input"]', TEST_USERS['hr'].email);
+    await page.fill(
+      '[data-testid="password-input"]',
+      TEST_USERS['hr'].password,
+    );
     await page.click('[data-testid="submit-button"]');
     await page.waitForURL(/\/dashboard/);
 

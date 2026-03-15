@@ -18,7 +18,7 @@ export class DateFormatPipe implements PipeTransform {
    */
   public transform(
     value: Date | string | number | null | undefined,
-    format: string = 'yyyy-MM-dd',
+    format = 'yyyy-MM-dd',
   ): string {
     if (value === null || value === undefined) {
       return '';

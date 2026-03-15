@@ -27,12 +27,10 @@ test.describe('Debug Selectors', () => {
 
     for (let i = 0; i < jobsManagementElements.length; i++) {
       const element = jobsManagementElements[i];
-      const tagName = await element.evaluate((el) => el.tagName);
-      const className = await element.evaluate((el) => el.className);
-      const id = await element.evaluate((el) => el.id);
-      const textContent = await element.evaluate((el) =>
-        el.textContent?.trim(),
-      );
+      await element.evaluate((el) => el.tagName);
+      await element.evaluate((el) => el.className);
+      await element.evaluate((el) => el.id);
+      await element.evaluate((el) => el.textContent?.trim());
 
       // console.log(`Element ${i + 1}:`, {
       //   tagName,
@@ -55,15 +53,15 @@ test.describe('Debug Selectors', () => {
 
     for (const selector of selectors) {
       try {
-        const count = await page.locator(selector).count();
+        await page.locator(selector).count();
         // console.log(`Selector "${selector}": ${count} matches`);
 
         // Always attempt to get first element info - will gracefully handle empty results
         const firstElement = page.locator(selector).first();
-        const tagName = await firstElement.evaluate((el) => el.tagName).catch(() => 'N/A');
-        const text = await firstElement.textContent().catch(() => 'N/A');
+        await firstElement.evaluate((el) => el.tagName).catch(() => 'N/A');
+        await firstElement.textContent().catch(() => 'N/A');
         // console.log(`  First match: <${tagName}> "${text?.trim() ?? 'N/A'}"`);
-      } catch (error) {
+      } catch (_error) {
         // console.log(`Selector "${selector}": ERROR - ${(error as Error).message}`);
       }
     }
@@ -73,8 +71,8 @@ test.describe('Debug Selectors', () => {
     // console.log('Total h2 elements:', h2Elements.length);
 
     for (let i = 0; i < Math.min(h2Elements.length, 3); i++) {
-      const text = await h2Elements[i].textContent();
-      const className = await h2Elements[i].evaluate((el) => el.className);
+      await h2Elements[i].textContent();
+      await h2Elements[i].evaluate((el) => el.className);
       // console.log(`h2[${i}]: "${text?.trim()}" class="${className}"`);
     }
 

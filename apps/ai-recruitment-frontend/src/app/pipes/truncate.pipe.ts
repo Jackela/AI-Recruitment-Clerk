@@ -19,8 +19,8 @@ export class TruncatePipe implements PipeTransform {
    */
   public transform(
     value: string | null | undefined,
-    maxLength: number = 50,
-    suffix: string = '...',
+    maxLength = 50,
+    suffix = '...',
   ): string {
     if (value === null || value === undefined) {
       return '';

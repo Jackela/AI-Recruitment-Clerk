@@ -1,11 +1,13 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { ConflictException, NotFoundException } from '@nestjs/common';
-import {
-  RoleService,
+import type {
   Role,
   RoleAssignment,
   RoleRepository,
-  RoleAssignmentRepository,
+  RoleAssignmentRepository} from './role.service';
+import {
+  RoleService
 } from './role.service';
 import { UserRole } from '../index';
 

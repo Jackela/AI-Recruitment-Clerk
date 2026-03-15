@@ -1,4 +1,4 @@
-import { FullConfig } from '@playwright/test';
+import type { FullConfig } from '@playwright/test';
 import { cleanupTestData } from './utils/cleanup';
 import { getTestEnvironment } from './utils/environment';
 import { UserFactory } from './factories/user.factory';

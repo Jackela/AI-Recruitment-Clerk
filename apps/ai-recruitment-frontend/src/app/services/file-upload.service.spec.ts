@@ -4,10 +4,11 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { HttpEventType, HttpErrorResponse } from '@angular/common/http';
+import type {
+  UploadConfig} from './file-upload.service';
 import {
   FileUploadService,
   UploadFile,
-  UploadConfig,
   UploadState,
   UploadResult,
 } from './file-upload.service';

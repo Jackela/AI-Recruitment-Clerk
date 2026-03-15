@@ -26,7 +26,7 @@ test.describe('Complete Hiring Flow', () => {
 
     // Step 1: HR 登录并创建职位
     await loginPage.navigateTo();
-    await loginPage.login(TEST_USERS["hr"].email, TEST_USERS["hr"].password);
+    await loginPage.login(TEST_USERS['hr'].email, TEST_USERS['hr'].password);
 
     await dashboardPage.waitForPageLoad();
     await expect(page).toHaveURL(/\/dashboard/);
@@ -60,8 +60,8 @@ test.describe('Complete Hiring Flow', () => {
     await page.evaluate(() => localStorage.clear());
     await loginPage.navigateTo();
     await loginPage.login(
-      TEST_USERS["candidate"].email,
-      TEST_USERS["candidate"].password,
+      TEST_USERS['candidate'].email,
+      TEST_USERS['candidate'].password,
     );
 
     await page.goto('/upload');
@@ -71,7 +71,7 @@ test.describe('Complete Hiring Flow', () => {
 
     // 上传简历文件
     const fileInput = page.locator('input[type="file"]');
-    await fileInput.setInputFiles(SAMPLE_RESUMES["seniorDeveloper"]);
+    await fileInput.setInputFiles(SAMPLE_RESUMES['seniorDeveloper']);
 
     await page.click('[data-testid="upload-submit-button"]');
 
@@ -79,9 +79,9 @@ test.describe('Complete Hiring Flow', () => {
     await expect(
       page.locator('[data-testid="analysis-progress"]'),
     ).toBeVisible();
-    await page.waitForSelector('[data-testid="analysis-complete"]', {
-      timeout: 60000,
-    });
+    await page
+      .locator('[data-testid="analysis-complete"]')
+      .waitFor({ timeout: 60000 });
 
     // Step 4: 生成报告
     await analysisPage.navigateTo();
@@ -125,7 +125,7 @@ test.describe('Complete Hiring Flow', () => {
 
     // HR 登录并创建职位
     await loginPage.navigateTo();
-    await loginPage.login(TEST_USERS["hr"].email, TEST_USERS["hr"].password);
+    await loginPage.login(TEST_USERS['hr'].email, TEST_USERS['hr'].password);
 
     // 创建职位
     await jobsPage.navigateToCreateJob();
@@ -137,11 +137,17 @@ test.describe('Complete Hiring Flow', () => {
 
     // 模拟多个候选人申请
     const candidates = [
-      { email: 'candidate1@test.com', resume: SAMPLE_RESUMES["juniorDeveloper"] },
-      { email: 'candidate2@test.com', resume: SAMPLE_RESUMES["seniorDeveloper"] },
+      {
+        email: 'candidate1@test.com',
+        resume: SAMPLE_RESUMES['juniorDeveloper'],
+      },
+      {
+        email: 'candidate2@test.com',
+        resume: SAMPLE_RESUMES['seniorDeveloper'],
+      },
       {
         email: 'candidate3@test.com',
-        resume: SAMPLE_RESUMES["fullStackDeveloper"],
+        resume: SAMPLE_RESUMES['fullStackDeveloper'],
       },
     ];
 
@@ -154,15 +160,15 @@ test.describe('Complete Hiring Flow', () => {
       const fileInput = page.locator('input[type="file"]');
       await fileInput.setInputFiles(candidate.resume);
       await page.click('[data-testid="upload-submit-button"]');
-      await page.waitForSelector('[data-testid="upload-success"]', {
-        timeout: 30000,
-      });
+      await page
+        .locator('[data-testid="upload-success"]')
+        .waitFor({ timeout: 30000 });
     }
 
     // HR 查看候选人排名
     await page.evaluate(() => localStorage.clear());
     await loginPage.navigateTo();
-    await loginPage.login(TEST_USERS["hr"].email, TEST_USERS["hr"].password);
+    await loginPage.login(TEST_USERS['hr'].email, TEST_USERS['hr'].password);
 
     await page.goto('/analysis/ranking');
     await expect(page.locator('[data-testid="ranking-list"]')).toBeVisible();

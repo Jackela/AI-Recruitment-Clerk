@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
-import {
+import type {
   HttpInterceptor,
   HttpRequest,
   HttpHandler,
   HttpEvent,
 } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { throwError } from 'rxjs';
 import { timeout, catchError } from 'rxjs/operators';
 import { APP_CONFIG } from '../../../config/app.config';
 
@@ -16,9 +17,9 @@ import { APP_CONFIG } from '../../../config/app.config';
 @Injectable()
 export class TimeoutInterceptor implements HttpInterceptor {
   intercept(
-    req: HttpRequest<any>,
+    req: HttpRequest<unknown>,
     next: HttpHandler,
-  ): Observable<HttpEvent<any>> {
+  ): Observable<HttpEvent<unknown>> {
     return next.handle(req).pipe(
       timeout(APP_CONFIG.API.timeout),
       catchError((error) => {

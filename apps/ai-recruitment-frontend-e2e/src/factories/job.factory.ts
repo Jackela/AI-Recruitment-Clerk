@@ -1,4 +1,4 @@
-import { TestJob } from '../seeds/jobs.seed';
+import type { TestJob } from '../seeds/jobs.seed';
 
 export interface JobCreateOptions {
   title?: string;

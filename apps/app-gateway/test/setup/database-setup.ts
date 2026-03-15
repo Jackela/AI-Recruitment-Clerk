@@ -77,7 +77,7 @@ let activeQueryRunner: QueryRunner | null = null;
  * ```
  */
 export const setupTestDatabase = async (
-  entities: Function[] = [],
+  entities: Array<new (...args: unknown[]) => unknown> = [],
   configOverrides: Partial<TypeOrmModuleOptions> = {},
 ): Promise<DataSource> => {
   if (activeDataSource?.isInitialized) {

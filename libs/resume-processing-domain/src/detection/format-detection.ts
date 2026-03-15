@@ -73,7 +73,7 @@ export class FormatDetectionService {
     },
   ];
 
-  detectFileType(buffer: Buffer, filename?: string): FileFormat {
+  public detectFileType(buffer: Buffer, filename?: string): FileFormat {
     let detectedMimeType = 'application/octet-stream';
     let confidence = 0;
 
@@ -163,7 +163,7 @@ export class FormatDetectionService {
     return textChars.length / sample.length > 0.9;
   }
 
-  detectEncoding(buffer: Buffer): EncodingInfo {
+  public detectEncoding(buffer: Buffer): EncodingInfo {
     if (buffer.length === 0) {
       return {
         encoding: 'utf-8',
@@ -253,7 +253,7 @@ export class FormatDetectionService {
     return true;
   }
 
-  validateFormat(
+  public validateFormat(
     buffer: Buffer,
     filename: string,
     mimeType?: string,
@@ -333,11 +333,11 @@ export class FormatDetectionService {
     return { errors, warnings };
   }
 
-  isSupportedFormat(mimeType: string): boolean {
+  public isSupportedFormat(mimeType: string): boolean {
     return this.supportedFormats.has(mimeType);
   }
 
-  getSupportedFormats(): FileFormat[] {
+  public getSupportedFormats(): FileFormat[] {
     return Array.from(this.supportedFormats.entries()).map(
       ([mimeType, extension]) => ({
         mimeType,
@@ -348,7 +348,7 @@ export class FormatDetectionService {
     );
   }
 
-  assertSupportedFormat(mimeType: string): void {
+  public assertSupportedFormat(mimeType: string): void {
     if (!this.isSupportedFormat(mimeType)) {
       throw new ResumeParserException(
         ResumeParserErrorCode.UNSUPPORTED_FORMAT,

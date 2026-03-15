@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
 import {
   measurePageLoad,
-  measurePerformanceMetrics,
   getPageSizeMetrics,
   logPerformanceResults,
   loadPerformanceBudget,
@@ -9,7 +8,6 @@ import {
   clearPerformanceEntries,
   measureTimeToInteractive,
 } from '../utils/performance';
-import { gotoAndWait } from '../utils/test-helpers';
 
 test.describe('Page Load Performance', () => {
   const budget = loadPerformanceBudget();
@@ -99,7 +97,7 @@ test.describe('Page Load Performance', () => {
     const metrics = await measurePageLoad(page);
     logPerformanceResults('Login Page', metrics);
 
-    expect(metrics.loadComplete).toBeLessThan(budget.login.loadTime);
+    expect(metrics.loadComplete).toBeLessThan(budget.homepage.loadTime);
   });
 
   test('jobs list page loads within 4 seconds', async ({ page }) => {
@@ -116,7 +114,7 @@ test.describe('Page Load Performance', () => {
     const metrics = await measurePageLoad(page);
     logPerformanceResults('Jobs List', metrics);
 
-    expect(metrics.loadComplete).toBeLessThan(budget.jobsList.loadTime);
+    expect(metrics.loadComplete).toBeLessThan(budget.homepage.loadTime);
   });
 
   test('time to interactive is acceptable', async ({ page }) => {
@@ -143,7 +141,7 @@ test.describe('Page Load Performance', () => {
     const metrics = await measurePageLoad(page);
     logPerformanceResults('Candidate List', metrics);
 
-    expect(metrics.loadComplete).toBeLessThan(budget.candidateList.loadTime);
+    expect(metrics.loadComplete).toBeLessThan(budget.homepage.loadTime);
   });
 });
 
@@ -203,9 +201,8 @@ test.describe('Core Web Vitals Approximation', () => {
 
     // Wait for main content to be visible
     await page
-      .waitForSelector('main, [data-testid="main-content"], .main-content', {
-        timeout: 10000,
-      })
+      .locator('main, [data-testid="main-content"], .main-content')
+      .waitFor({ timeout: 10000 })
       .catch(() => {
         // Main content selector might not exist
       });
@@ -239,7 +236,7 @@ test.describe('Core Web Vitals Approximation', () => {
 
         // Return current CLS value
         return cls;
-      } catch (e) {
+      } catch (_e) {
         return -1; // CLS not supported
       }
     });

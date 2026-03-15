@@ -102,9 +102,9 @@ test.describe('Concurrent Users', () => {
           const fileInput = page1.locator('input[type="file"]');
           await fileInput.setInputFiles('src/test-data/resumes/简历.pdf');
           await page1.click('[data-testid="upload-submit-button"]');
-          await page1.waitForSelector('[data-testid="upload-success"]', {
-            timeout: 60000,
-          });
+          await page1
+            .locator('[data-testid="upload-success"]')
+            .waitFor({ timeout: 60000 });
           return 'candidate1';
         })(),
         (async () => {
@@ -121,9 +121,9 @@ test.describe('Concurrent Users', () => {
           const fileInput = page2.locator('input[type="file"]');
           await fileInput.setInputFiles('src/test-data/resumes/简历2.pdf');
           await page2.click('[data-testid="upload-submit-button"]');
-          await page2.waitForSelector('[data-testid="upload-success"]', {
-            timeout: 60000,
-          });
+          await page2
+            .locator('[data-testid="upload-success"]')
+            .waitFor({ timeout: 60000 });
           return 'candidate2';
         })(),
         (async () => {
@@ -140,9 +140,9 @@ test.describe('Concurrent Users', () => {
           const fileInput = page3.locator('input[type="file"]');
           await fileInput.setInputFiles('src/test-data/resumes/简历_PM.pdf');
           await page3.click('[data-testid="upload-submit-button"]');
-          await page3.waitForSelector('[data-testid="upload-success"]', {
-            timeout: 60000,
-          });
+          await page3
+            .locator('[data-testid="upload-success"]')
+            .waitFor({ timeout: 60000 });
           return 'candidate3';
         })(),
       ];
@@ -173,10 +173,10 @@ test.describe('Concurrent Users', () => {
     try {
       // 两个 HR 同时编辑同一个职位
       await page1.goto('/login');
-      await page1.fill('[data-testid="email-input"]', TEST_USERS["hr"].email);
+      await page1.fill('[data-testid="email-input"]', TEST_USERS['hr'].email);
       await page1.fill(
         '[data-testid="password-input"]',
-        TEST_USERS["hr"].password,
+        TEST_USERS['hr'].password,
       );
       await page1.click('[data-testid="submit-button"]');
       await page1.waitForURL(/\/dashboard/);
@@ -201,8 +201,8 @@ test.describe('Concurrent Users', () => {
       await page1.goto('/jobs/1/edit');
       await page2.goto('/jobs/1/edit');
 
-      await page1.waitForSelector('[data-testid="edit-job-form"]');
-      await page2.waitForSelector('[data-testid="edit-job-form"]');
+      await page1.locator('[data-testid="edit-job-form"]').waitFor();
+      await page2.locator('[data-testid="edit-job-form"]').waitFor();
 
       // 用户 1 修改标题
       await page1.fill('[data-testid="job-title-input"]', 'Updated by HR 1');

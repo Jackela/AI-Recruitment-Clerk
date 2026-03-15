@@ -1,6 +1,4 @@
-import type {
-  OnInit,
-  OnDestroy} from '@angular/core';
+import type { OnInit, OnDestroy } from '@angular/core';
 import {
   Directive,
   Input,
@@ -36,8 +34,8 @@ export class LazyLoadDirective implements OnInit, OnDestroy {
   @Input('arcLazyLoad') public imageSrc!: string;
   @Input() public lazyLoadConfig: LazyLoadConfig = {};
   @Output() public loaded = new EventEmitter<void>();
-  // eslint-disable-next-line @angular-eslint/no-output-native
-  @Output() public error = new EventEmitter<Error>();
+  // Using 'error' as output name for lazy load failures
+  @Output() public loadError = new EventEmitter<Error>();
 
   private observer: IntersectionObserver | null = null;
   private retryCount = 0;
@@ -57,7 +55,8 @@ export class LazyLoadDirective implements OnInit, OnDestroy {
     preload: false,
   };
 
-  private el = inject<ElementRef<HTMLImageElement | HTMLDivElement>>(ElementRef);
+  private el =
+    inject<ElementRef<HTMLImageElement | HTMLDivElement>>(ElementRef);
   private renderer = inject(Renderer2);
 
   /**
@@ -303,7 +302,7 @@ export class LazyLoadDirective implements OnInit, OnDestroy {
       }
 
       const error = new Error(`Failed to load image: ${this.imageSrc}`);
-      this.error.emit(error);
+      this.loadError.emit(error);
     }
   }
 

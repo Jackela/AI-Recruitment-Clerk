@@ -1,10 +1,11 @@
+import type {
+  ParserOptions} from './resume-parser';
 import {
   ResumeParserFactory,
   PdfResumeParser,
   DocxResumeParser,
   HtmlResumeParser,
-  PlainTextResumeParser,
-  ParserOptions,
+  PlainTextResumeParser
 } from './resume-parser';
 import {
   ResumeParserException,

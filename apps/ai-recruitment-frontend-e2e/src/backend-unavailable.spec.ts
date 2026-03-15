@@ -26,7 +26,7 @@ test.describe('Backend Unavailable Scenarios', () => {
     page,
   }) => {
     // Check for the service unavailable overlay or error message
-    const errorMessage = await page
+    const errorMessage = page
       .locator('.error-message, .service-unavailable, [role="alert"]')
       .first();
 
@@ -72,7 +72,7 @@ test.describe('Backend Unavailable Scenarios', () => {
     await page.waitForTimeout(3000);
 
     // Try to interact with upload
-    const uploadInput = await page.locator('input[type="file"]').first();
+    const uploadInput = page.locator('input[type="file"]').first();
     const hasUpload = await uploadInput.isVisible().catch(() => false);
 
     if (hasUpload) {
@@ -87,7 +87,7 @@ test.describe('Backend Unavailable Scenarios', () => {
       await page.waitForTimeout(2000);
 
       // Should show error about backend unavailable
-      const errorElement = await page
+      const errorElement = page
         .locator('.error, [role="alert"], .alert')
         .first();
       const errorText = await errorElement.textContent().catch(() => '');
@@ -100,7 +100,7 @@ test.describe('Backend Unavailable Scenarios', () => {
 
   test('should allow retry connection', async ({ page }) => {
     // Look for retry button
-    const retryButton = await page
+    const retryButton = page
       .locator(
         'button:has-text("重试"), button:has-text("Retry"), button:has-text("重新连接")',
       )
@@ -115,7 +115,7 @@ test.describe('Backend Unavailable Scenarios', () => {
       await page.waitForTimeout(3000);
 
       // Should still show error (since backend is not running)
-      const errorMessage = await page
+      const errorMessage = page
         .locator('.error-message, [role="alert"]')
         .first();
       const isErrorVisible = await errorMessage.isVisible().catch(() => false);

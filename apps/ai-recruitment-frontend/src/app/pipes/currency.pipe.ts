@@ -27,8 +27,8 @@ export class CurrencyPipe implements PipeTransform {
    */
   public transform(
     value: number | string | null | undefined,
-    currencyCode: string = 'USD',
-    decimalPlaces: number = 2,
+    currencyCode = 'USD',
+    decimalPlaces = 2,
   ): string {
     if (value === null || value === undefined) {
       return '';

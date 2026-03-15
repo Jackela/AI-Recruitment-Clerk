@@ -1,12 +1,14 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { Logger } from '@nestjs/common';
 import type { Model, ClientSession } from 'mongoose';
-import {
-  ResumeRepository,
+import type {
   FileMetadata,
   ResumeCreateData,
-  ResumeUpdateData,
+  ResumeUpdateData} from './resume.repository';
+import {
+  ResumeRepository
 } from './resume.repository';
 import { Resume } from '../schemas/resume.schema';
 import type { ResumeDocument } from '../schemas/resume.schema';

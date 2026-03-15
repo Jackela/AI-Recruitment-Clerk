@@ -48,7 +48,7 @@ export class User {
   status: UserStatus = UserStatus.PENDING;
 
   @IsBoolean()
-  isActive: boolean = false;
+  isActive = false;
 
   @IsDate()
   @Type(() => Date)
@@ -119,7 +119,7 @@ export class User {
   /**
    * Update user profile.
    */
-  updateProfile(updates: {
+  public updateProfile(updates: {
     firstName?: string;
     lastName?: string;
     email?: string;
@@ -152,7 +152,7 @@ export class User {
   /**
    * Activate user account.
    */
-  activate(): void {
+  public activate(): void {
     this.status = UserStatus.ACTIVE;
     this.isActive = true;
     this.updatedAt = new Date();
@@ -161,7 +161,7 @@ export class User {
   /**
    * Deactivate user account.
    */
-  deactivate(): void {
+  public deactivate(): void {
     this.status = UserStatus.INACTIVE;
     this.isActive = false;
     this.updatedAt = new Date();
@@ -170,7 +170,7 @@ export class User {
   /**
    * Suspend user account.
    */
-  suspend(): void {
+  public suspend(): void {
     this.status = UserStatus.SUSPENDED;
     this.isActive = false;
     this.updatedAt = new Date();
@@ -179,7 +179,7 @@ export class User {
   /**
    * Check if user can transition to a new status.
    */
-  canTransitionTo(newStatus: UserStatus): boolean {
+  public canTransitionTo(newStatus: UserStatus): boolean {
     const transitions: Record<UserStatus, UserStatus[]> = {
       [UserStatus.PENDING]: [UserStatus.ACTIVE, UserStatus.SUSPENDED],
       [UserStatus.ACTIVE]: [UserStatus.INACTIVE, UserStatus.SUSPENDED],
@@ -193,7 +193,7 @@ export class User {
   /**
    * Get full name.
    */
-  getFullName(): string {
+  public getFullName(): string {
     if (this.firstName && this.lastName) {
       return `${this.firstName} ${this.lastName}`;
     }
@@ -203,7 +203,7 @@ export class User {
   /**
    * Record login.
    */
-  recordLogin(): void {
+  public recordLogin(): void {
     this.lastLoginAt = new Date();
   }
 }

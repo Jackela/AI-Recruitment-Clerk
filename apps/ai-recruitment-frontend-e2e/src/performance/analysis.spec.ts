@@ -31,12 +31,11 @@ test.describe('Analysis Performance', () => {
     );
 
     // Wait for file to be uploaded
-    await page.waitForSelector(
-      '[data-testid="upload-success"], [data-testid="upload-complete"]',
-      {
-        timeout: 30000,
-      },
-    );
+    await page
+      .locator(
+        '[data-testid="upload-success"], [data-testid="upload-complete"]',
+      )
+      .waitFor({ timeout: 30000 });
 
     // Start analysis
     await page.click('[data-testid="start-analysis"]');
@@ -44,9 +43,9 @@ test.describe('Analysis Performance', () => {
     const startTime = Date.now();
 
     // Wait for analysis to complete
-    await page.waitForSelector('[data-testid="analysis-complete"]', {
-      timeout: budget.analysis.duration + 5000,
-    });
+    await page
+      .locator('[data-testid="analysis-complete"]')
+      .waitFor({ timeout: budget.analysis.duration + 5000 });
 
     const analysisTime = Date.now() - startTime;
 
@@ -78,9 +77,9 @@ test.describe('Analysis Performance', () => {
     const startTime = Date.now();
 
     // Wait for matching to complete
-    await page.waitForSelector('[data-testid="matching-complete"]', {
-      timeout: 50000,
-    });
+    await page
+      .locator('[data-testid="matching-complete"]')
+      .waitFor({ timeout: 50000 });
 
     const matchingTime = Date.now() - startTime;
 
@@ -114,9 +113,9 @@ test.describe('Analysis Performance', () => {
     const startTime = Date.now();
 
     // Wait for batch analysis to complete
-    await page.waitForSelector('[data-testid="batch-analysis-complete"]', {
-      timeout: 130000,
-    });
+    await page
+      .locator('[data-testid="batch-analysis-complete"]')
+      .waitFor({ timeout: 130000 });
 
     const batchAnalysisTime = Date.now() - startTime;
 
@@ -145,9 +144,9 @@ test.describe('Analysis Performance', () => {
     const startTime = Date.now();
 
     // Wait for skill extraction to complete
-    await page.waitForSelector('[data-testid="skills-extracted"]', {
-      timeout: 35000,
-    });
+    await page
+      .locator('[data-testid="skills-extracted"]')
+      .waitFor({ timeout: 35000 });
 
     const extractionTime = Date.now() - startTime;
 
@@ -176,9 +175,9 @@ test.describe('Analysis Performance', () => {
     const startTime = Date.now();
 
     // Wait for report to generate
-    await page.waitForSelector('[data-testid="report-generated"]', {
-      timeout: 25000,
-    });
+    await page
+      .locator('[data-testid="report-generated"]')
+      .waitFor({ timeout: 25000 });
 
     const reportTime = Date.now() - startTime;
 

@@ -94,7 +94,7 @@ export class PermissionService {
   /**
    * Check if user has a specific permission.
    */
-  hasPermission(
+  public hasPermission(
     userPermissions: Permission[],
     requiredPermission: Permission,
   ): boolean {
@@ -104,7 +104,7 @@ export class PermissionService {
   /**
    * Check if user has all required permissions.
    */
-  hasAllPermissions(
+  public hasAllPermissions(
     userPermissions: Permission[],
     requiredPermissions: Permission[],
   ): PermissionCheckResult {
@@ -121,7 +121,7 @@ export class PermissionService {
   /**
    * Check if user has any of the required permissions.
    */
-  hasAnyPermission(
+  public hasAnyPermission(
     userPermissions: Permission[],
     requiredPermissions: Permission[],
   ): boolean {
@@ -133,14 +133,14 @@ export class PermissionService {
   /**
    * Get permissions for a role.
    */
-  getRolePermissions(role: UserRole): Permission[] {
+  public getRolePermissions(role: UserRole): Permission[] {
     return this.rolePermissions.get(role) || [];
   }
 
   /**
    * Get permissions for multiple roles.
    */
-  getRolesPermissions(roles: UserRole[]): Permission[] {
+  public getRolesPermissions(roles: UserRole[]): Permission[] {
     const permissions = new Set<Permission>();
 
     roles.forEach((role) => {
@@ -154,7 +154,7 @@ export class PermissionService {
   /**
    * Check if permission is inherited from roles.
    */
-  isInheritedPermission(
+  public isInheritedPermission(
     userRoles: UserRole[],
     permission: Permission,
   ): boolean {
@@ -165,7 +165,7 @@ export class PermissionService {
   /**
    * Get all unique permissions across all roles.
    */
-  getAllPermissions(): Permission[] {
+  public getAllPermissions(): Permission[] {
     const allPermissions = new Set<Permission>();
 
     this.rolePermissions.forEach((permissions) => {
@@ -178,7 +178,7 @@ export class PermissionService {
   /**
    * Check permission with inheritance from roles.
    */
-  checkPermissionWithInheritance(
+  public checkPermissionWithInheritance(
     userPermissions: Permission[],
     userRoles: UserRole[],
     requiredPermission: Permission,
@@ -195,7 +195,7 @@ export class PermissionService {
   /**
    * Evaluate dynamic permission condition.
    */
-  evaluateDynamicPermission(
+  public evaluateDynamicPermission(
     context: Record<string, unknown>,
     condition: (ctx: Record<string, unknown>) => boolean,
   ): boolean {
@@ -205,7 +205,7 @@ export class PermissionService {
   /**
    * Check resource ownership permission.
    */
-  checkResourceOwnership(
+  public checkResourceOwnership(
     userId: string,
     resourceOwnerId: string,
     userPermissions: Permission[],
@@ -227,7 +227,7 @@ export class PermissionService {
   /**
    * Check organization access permission.
    */
-  checkOrganizationAccess(
+  public checkOrganizationAccess(
     userOrgId: string,
     targetOrgId: string,
     userPermissions: Permission[],
@@ -249,7 +249,7 @@ export class PermissionService {
   /**
    * Grant permission to role.
    */
-  grantPermissionToRole(role: UserRole, permission: Permission): void {
+  public grantPermissionToRole(role: UserRole, permission: Permission): void {
     const currentPerms = this.rolePermissions.get(role) || [];
     if (!currentPerms.includes(permission)) {
       this.rolePermissions.set(role, [...currentPerms, permission]);
@@ -259,7 +259,7 @@ export class PermissionService {
   /**
    * Revoke permission from role.
    */
-  revokePermissionFromRole(role: UserRole, permission: Permission): void {
+  public revokePermissionFromRole(role: UserRole, permission: Permission): void {
     const currentPerms = this.rolePermissions.get(role) || [];
     this.rolePermissions.set(
       role,
@@ -270,7 +270,7 @@ export class PermissionService {
   /**
    * Get roles that have a specific permission.
    */
-  getRolesWithPermission(permission: Permission): UserRole[] {
+  public getRolesWithPermission(permission: Permission): UserRole[] {
     const roles: UserRole[] = [];
 
     this.rolePermissions.forEach((permissions, role) => {

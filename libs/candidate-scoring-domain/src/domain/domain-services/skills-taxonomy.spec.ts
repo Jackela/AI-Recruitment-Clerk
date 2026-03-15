@@ -1,4 +1,4 @@
-import { SkillsTaxonomy, SkillCategory, SkillMapping } from './skills-taxonomy';
+import { SkillsTaxonomy } from './skills-taxonomy';
 
 describe('SkillsTaxonomy', () => {
   describe('normalizeSkill', () => {

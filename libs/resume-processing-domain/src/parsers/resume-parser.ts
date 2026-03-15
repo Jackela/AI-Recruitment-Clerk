@@ -3,7 +3,7 @@
  * Handles parsing of different resume formats (PDF, DOCX, HTML, TXT)
  */
 
-import { ResumeDTO } from '@ai-recruitment-clerk/resume-dto';
+import type { ResumeDTO } from '@ai-recruitment-clerk/resume-dto';
 import {
   ResumeParserException,
   ResumeParserErrorCode,
@@ -34,11 +34,11 @@ export abstract class ResumeParser {
 }
 
 export class PdfResumeParser extends ResumeParser {
-  supports(mimeType: string): boolean {
+  public supports(mimeType: string): boolean {
     return mimeType === 'application/pdf';
   }
 
-  async parse(
+  public async async parse(
     buffer: Buffer,
     filename: string,
     options: ParserOptions = {},
@@ -271,7 +271,7 @@ export class PdfResumeParser extends ResumeParser {
 }
 
 export class DocxResumeParser extends ResumeParser {
-  supports(mimeType: string): boolean {
+  public supports(mimeType: string): boolean {
     return (
       mimeType ===
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
@@ -279,7 +279,7 @@ export class DocxResumeParser extends ResumeParser {
     );
   }
 
-  async parse(
+  public async async parse(
     buffer: Buffer,
     filename: string,
     options: ParserOptions = {},
@@ -334,11 +334,11 @@ export class DocxResumeParser extends ResumeParser {
 }
 
 export class HtmlResumeParser extends ResumeParser {
-  supports(mimeType: string): boolean {
+  public supports(mimeType: string): boolean {
     return mimeType === 'text/html' || mimeType === 'application/xhtml+xml';
   }
 
-  async parse(
+  public async async parse(
     buffer: Buffer,
     filename: string,
     options: ParserOptions = {},
@@ -400,11 +400,11 @@ export class HtmlResumeParser extends ResumeParser {
 }
 
 export class PlainTextResumeParser extends ResumeParser {
-  supports(mimeType: string): boolean {
+  public supports(mimeType: string): boolean {
     return mimeType === 'text/plain' || mimeType === 'text/markdown';
   }
 
-  async parse(
+  public async async parse(
     buffer: Buffer,
     filename: string,
     options: ParserOptions = {},

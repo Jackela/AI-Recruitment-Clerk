@@ -6,7 +6,7 @@ test.describe('Theme Visual', () => {
     await page.waitForLoadState('networkidle');
 
     // Try to toggle dark theme
-    const themeToggle = await page
+    const themeToggle = page
       .locator(
         '[data-testid="theme-toggle"], [data-testid="dark-mode-toggle"], [data-testid="theme-switch"]',
       )

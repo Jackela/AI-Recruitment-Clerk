@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
 import { JobsService } from './jobs.service';
-import { CreateJobDto } from './dto/create-job.dto';
+import type { CreateJobDto } from './dto/create-job.dto';
 import type { JobRepository } from '../repositories/job.repository';
 import type { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
 import type { CacheService } from '../cache/cache.service';

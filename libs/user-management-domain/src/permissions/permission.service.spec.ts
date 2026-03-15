@@ -1,5 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { PermissionService, PermissionCheckResult } from './permission.service';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type { PermissionCheckResult } from './permission.service';
+import { PermissionService } from './permission.service';
 import { Permission, UserRole } from '../index';
 
 describe('PermissionService', () => {

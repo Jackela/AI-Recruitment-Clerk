@@ -1,12 +1,15 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import {
   ConflictException,
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { UserService, UserRepository } from './user.service';
-import { User } from '../entities/user.entity';
-import { UserRole, UserStatus, CreateUserDto, UpdateUserDto } from '../index';
+import type { UserRepository } from './user.service';
+import { UserService } from './user.service';
+import type { User } from '../entities/user.entity';
+import type { CreateUserDto, UpdateUserDto } from '../index';
+import { UserRole, UserStatus } from '../index';
 
 describe('UserService', () => {
   let service: UserService;

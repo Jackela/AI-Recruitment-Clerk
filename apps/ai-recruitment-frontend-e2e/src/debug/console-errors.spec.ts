@@ -53,11 +53,10 @@ test.describe('Console Error Detection', () => {
     });
 
     // console.log('📍 Starting page navigation...');
-    const response = await page.goto('/');
-    await page.waitForURL(
-      (url) => url.pathname.startsWith(LANDING_PATH),
-      { timeout: 15_000 },
-    );
+    await page.goto('/');
+    await page.waitForURL((url) => url.pathname.startsWith(LANDING_PATH), {
+      timeout: 15_000,
+    });
     // console.log('📍 Response status:', response?.status());
 
     // console.log('📍 Waiting for network to settle...');
@@ -71,14 +70,13 @@ test.describe('Console Error Detection', () => {
     // console.log('📍 === CONSOLE MESSAGE SUMMARY ===');
     // console.log('Total messages captured:', allMessages.length);
 
-    const errorMessages = allMessages.filter(
+    // Filter messages by type (for diagnostic purposes)
+    allMessages.filter(
       (msg) => msg.type === 'error' || msg.type === 'exception',
     );
-    const warningMessages = allMessages.filter((msg) => msg.type === 'warning');
-    const logMessages = allMessages.filter((msg) => msg.type === 'log');
-    const networkErrors = allMessages.filter(
-      (msg) => msg.type === 'network_error',
-    );
+    allMessages.filter((msg) => msg.type === 'warning');
+    allMessages.filter((msg) => msg.type === 'log');
+    allMessages.filter((msg) => msg.type === 'network_error');
 
     // console.log('Errors:', errorMessages.length);
     // console.log('Warnings:', warningMessages.length);
@@ -97,27 +95,13 @@ test.describe('Console Error Detection', () => {
     //   console.log(`Network Error ${index + 1}:`, error.text);
     // });
 
-    // Check if main.js actually loaded and executed
-    const mainJsExecuted = logMessages.some(
-      (msg) =>
-        msg.text.includes('Angular') ||
-        msg.text.includes('bootstrap') ||
-        msg.text.includes('platform'),
-    );
-
-    // console.log('📍 Main.js seems to have executed:', mainJsExecuted);
-
     // Check what the DOM looks like
-    const arcRootHTML = await page.locator('arc-root').innerHTML();
-    const bodyHTML = await page.locator('body').innerHTML();
+    await page.locator('arc-root').innerHTML();
+    await page.locator('body').innerHTML();
 
     // console.log('📍 === DOM STATUS ===');
     // console.log('arc-root content length:', arcRootHTML.length);
     // console.log('body content length:', bodyHTML.length);
-
-    // Log main.js status (unconditional for diagnostic test)
-    const hasMainJs = bodyHTML.includes('main.js');
-    // console.log('main.js script tag in DOM:', hasMainJs);
 
     // This test is purely diagnostic
     expect(true).toBe(true);
@@ -159,11 +143,9 @@ test.describe('Console Error Detection', () => {
     // });
 
     // Check if critical Angular files loaded
-    const mainJsLoaded = resourcesLoaded.some((url) => url.includes('main.js'));
-    const polyfillsLoaded = resourcesLoaded.some((url) =>
-      url.includes('polyfills.js'),
-    );
-    const stylesLoaded = resourcesLoaded.some((url) => url.includes('styles'));
+    resourcesLoaded.some((url) => url.includes('main.js'));
+    resourcesLoaded.some((url) => url.includes('polyfills.js'));
+    resourcesLoaded.some((url) => url.includes('styles'));
 
     // console.log('📍 Critical resources status:');
     // console.log('main.js loaded:', mainJsLoaded);

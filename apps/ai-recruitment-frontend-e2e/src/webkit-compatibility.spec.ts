@@ -26,9 +26,9 @@ async function gotoLanding(page: Page) {
 test.describe('WebKit Desktop Safari Compatibility', () => {
   test('WebKit basic page load and rendering', async ({
     page,
-    browserName,
+    browserName: _browserName,
   }) => {
-    test.skip(browserName !== 'webkit', 'WebKit only test');
+    test.skip(_browserName !== 'webkit', 'WebKit only test');
 
     await gotoLanding(page);
 
@@ -42,9 +42,9 @@ test.describe('WebKit Desktop Safari Compatibility', () => {
 
   test('WebKit CSS compatibility - flexbox and grid', async ({
     page,
-    browserName,
+    browserName: _browserName,
   }) => {
-    test.skip(browserName !== 'webkit', 'WebKit only test');
+    test.skip(_browserName !== 'webkit', 'WebKit only test');
 
     await gotoLanding(page);
 
@@ -82,8 +82,11 @@ test.describe('WebKit Desktop Safari Compatibility', () => {
     expect(cssSupport.transitions).toBe(true);
   });
 
-  test('WebKit JavaScript compatibility', async ({ page, browserName }) => {
-    test.skip(browserName !== 'webkit', 'WebKit only test');
+  test('WebKit JavaScript compatibility', async ({
+    page,
+    browserName: _browserName,
+  }) => {
+    test.skip(_browserName !== 'webkit', 'WebKit only test');
 
     await gotoLanding(page);
 
@@ -127,8 +130,8 @@ test.describe('WebKit Desktop Safari Compatibility', () => {
     expect(jsSupport.webkitUserAgent).toBe(true);
   });
 
-  test('WebKit form behavior', async ({ page, browserName }) => {
-    test.skip(browserName !== 'webkit', 'WebKit only test');
+  test('WebKit form behavior', async ({ page, browserName: _browserName }) => {
+    test.skip(_browserName !== 'webkit', 'WebKit only test');
 
     await page.goto('/jobs/create');
     await page.waitForLoadState('domcontentloaded');
@@ -149,8 +152,8 @@ test.describe('WebKit Desktop Safari Compatibility', () => {
     await expect(jdTextarea).toHaveValue('Test job description');
   });
 
-  test('WebKit event handling', async ({ page, browserName }) => {
-    test.skip(browserName !== 'webkit', 'WebKit only test');
+  test('WebKit event handling', async ({ page, browserName: _browserName }) => {
+    test.skip(_browserName !== 'webkit', 'WebKit only test');
 
     await gotoLanding(page);
 
@@ -163,8 +166,11 @@ test.describe('WebKit Desktop Safari Compatibility', () => {
     await expect(page).toHaveURL(/\/jobs/);
   });
 
-  test('WebKit scroll behavior', async ({ page, browserName }) => {
-    test.skip(browserName !== 'webkit', 'WebKit only test');
+  test('WebKit scroll behavior', async ({
+    page,
+    browserName: _browserName,
+  }) => {
+    test.skip(_browserName !== 'webkit', 'WebKit only test');
 
     await gotoLanding(page);
 
@@ -179,7 +185,10 @@ test.describe('WebKit Desktop Safari Compatibility', () => {
 });
 
 test.describe('WebKit Mobile Safari - iPhone', () => {
-  test('iPhone viewport and touch events', async ({ page, browserName }) => {
+  test('iPhone viewport and touch events', async ({
+    page,
+    browserName: _browserName,
+  }) => {
     // This test runs on webkit-iphone project
     await gotoLanding(page);
 
@@ -205,7 +214,7 @@ test.describe('WebKit Mobile Safari - iPhone', () => {
     expect(touchSupport.maxTouchPoints).toBeGreaterThan(0);
   });
 
-  test('iPhone responsive layout', async ({ page, browserName }) => {
+  test('iPhone responsive layout', async ({ page }) => {
     await gotoLanding(page);
 
     // Check for mobile-specific elements or classes
@@ -221,7 +230,7 @@ test.describe('WebKit Mobile Safari - iPhone', () => {
     expect(hasMobileLayout).toBeTruthy();
   });
 
-  test('iPhone form interactions', async ({ page, browserName }) => {
+  test('iPhone form interactions', async ({ page }) => {
     await page.goto('/jobs/create');
     await page.waitForLoadState('domcontentloaded');
 
@@ -236,7 +245,7 @@ test.describe('WebKit Mobile Safari - iPhone', () => {
 });
 
 test.describe('WebKit Mobile Safari - iPad', () => {
-  test('iPad viewport and touch events', async ({ page, browserName }) => {
+  test('iPad viewport and touch events', async ({ page }) => {
     await gotoLanding(page);
 
     // Verify iPad viewport
@@ -260,7 +269,7 @@ test.describe('WebKit Mobile Safari - iPad', () => {
     expect(touchSupport.maxTouchPoints).toBeGreaterThan(0);
   });
 
-  test('iPad navigation and interactions', async ({ page, browserName }) => {
+  test('iPad navigation and interactions', async ({ page }) => {
     await gotoLanding(page);
 
     // Test navigation
@@ -337,8 +346,11 @@ test.describe('WebKit Cross-Browser Consistency', () => {
 });
 
 test.describe('WebKit Known Issues and Workarounds', () => {
-  test('WebKit date input handling', async ({ page, browserName }) => {
-    test.skip(browserName !== 'webkit', 'WebKit only test');
+  test('WebKit date input handling', async ({
+    page,
+    browserName: _browserName,
+  }) => {
+    test.skip(_browserName !== 'webkit', 'WebKit only test');
 
     // Safari has specific date input behavior
     const dateSupport = await page.evaluate(() => {
@@ -358,8 +370,11 @@ test.describe('WebKit Known Issues and Workarounds', () => {
     expect(dateSupport.supportsTimeInput).toBe(true);
   });
 
-  test('WebKit fetch API behavior', async ({ page, browserName }) => {
-    test.skip(browserName !== 'webkit', 'WebKit only test');
+  test('WebKit fetch API behavior', async ({
+    page,
+    browserName: _browserName,
+  }) => {
+    test.skip(_browserName !== 'webkit', 'WebKit only test');
 
     await gotoLanding(page);
 

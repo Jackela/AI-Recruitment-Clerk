@@ -15,10 +15,9 @@ test.describe('Application Diagnostics', () => {
   test('capture page content and HTML structure', async ({ page }) => {
     // console.log('Navigating to application...');
     await page.goto('/');
-    await page.waitForURL(
-      (url) => url.pathname.startsWith(LANDING_PATH),
-      { timeout: 15_000 },
-    );
+    await page.waitForURL((url) => url.pathname.startsWith(LANDING_PATH), {
+      timeout: 15_000,
+    });
 
     // console.log('Waiting for page to load...');
     await page.waitForLoadState('domcontentloaded');
@@ -32,7 +31,7 @@ test.describe('Application Diagnostics', () => {
     // );
 
     // Check what elements exist
-    const bodyHTML = await page.locator('body').innerHTML();
+    await page.locator('body').innerHTML();
     // console.log('Body HTML:', bodyHTML);
 
     // Check for any JavaScript errors
@@ -54,23 +53,21 @@ test.describe('Application Diagnostics', () => {
     // });
 
     // Check for common Angular elements with a longer timeout
-    const appRootExists = await page.locator('app-root').count();
-    const scriptTags = await page.locator('script').count();
-    const styleTags = await page
-      .locator('style, link[rel="stylesheet"]')
-      .count();
+    await page.locator('app-root').count();
+    await page.locator('script').count();
+    await page.locator('style, link[rel="stylesheet"]').count();
 
     // console.log('app-root elements found:', appRootExists);
     // console.log('Script tags found:', scriptTags);
     // console.log('Style tags found:', styleTags);
 
     // Check the title
-    const pageTitle = await page.title();
+    await page.title();
     // console.log('Page title:', pageTitle);
 
     // Check if main.js is loaded
-    const mainJsLoaded = pageContent.includes('main.js');
-    const polyfillsLoaded = pageContent.includes('polyfills.js');
+    pageContent.includes('main.js');
+    pageContent.includes('polyfills.js');
     // console.log('main.js loaded:', mainJsLoaded);
     // console.log('polyfills.js loaded:', polyfillsLoaded);
 
@@ -101,13 +98,13 @@ test.describe('Application Diagnostics', () => {
     await delay(5000);
 
     // Check if Angular has added any of its typical classes or attributes
-    const ngElements = await page
+    await page
       .locator('[ng-version], .ng-star-inserted, [_ngcontent], [_nghost]')
       .count();
     // console.log('Angular-specific elements found:', ngElements);
 
     // Check if there's any content at all
-    const allText = await page.textContent('html');
+    await page.textContent('html');
     // console.log('Page text content length:', allText?.length || 0);
     // console.log(
     //   'Page text preview:',

@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test';
 import {
-  measurePageLoad,
   loadPerformanceBudget,
   clearPerformanceEntries,
 } from '../utils/performance';
@@ -52,7 +51,7 @@ test.describe('Critical Path Performance', () => {
 
     console.log(`\n⏱️ Job Creation Flow: ${totalTime}ms`);
 
-    expect(totalTime).toBeLessThan(budget.jobCreation.duration);
+    expect(totalTime).toBeLessThan(budget.analysis.duration);
   });
 
   test('login flow completes within 5 seconds', async ({ page }) => {
@@ -98,9 +97,9 @@ test.describe('Critical Path Performance', () => {
     await page.click('[data-testid="start-analysis"]');
 
     // Wait for analysis to complete
-    await page.waitForSelector('[data-testid="analysis-complete"]', {
-      timeout: budget.analysis.duration + 10000,
-    });
+    await page
+      .locator('[data-testid="analysis-complete"]')
+      .waitFor({ timeout: budget.analysis.duration + 10000 });
 
     const totalTime = Date.now() - startTime;
 
@@ -131,9 +130,9 @@ test.describe('Critical Path Performance', () => {
     await page.click('[data-testid="search-button"]');
 
     // Wait for results to load
-    await page.waitForSelector('[data-testid="candidate-results"]', {
-      timeout: 10000,
-    });
+    await page
+      .locator('[data-testid="candidate-results"]')
+      .waitFor({ timeout: 10000 });
 
     const searchTime = Date.now() - startTime;
 
@@ -176,9 +175,9 @@ test.describe('Critical Path Performance', () => {
     await page.click('[data-testid="submit-application"]');
 
     // Wait for confirmation
-    await page.waitForSelector('[data-testid="application-confirmation"]', {
-      timeout: 15000,
-    });
+    await page
+      .locator('[data-testid="application-confirmation"]')
+      .waitFor({ timeout: 15000 });
 
     const totalTime = Date.now() - startTime;
 

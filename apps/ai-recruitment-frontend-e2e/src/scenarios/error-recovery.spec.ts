@@ -57,7 +57,7 @@ test.describe('Error Recovery', () => {
     });
     await expect(
       page.locator('[data-testid="upload-progress"]'),
-    ).not.toBeVisible();
+    ).toBeHidden();
   });
 
   test('recovers from server error during job creation', async ({ page }) => {

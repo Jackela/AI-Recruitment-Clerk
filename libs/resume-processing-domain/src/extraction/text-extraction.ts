@@ -3,7 +3,7 @@
  * Extracts structured information from resume text
  */
 
-import { ResumeDTO } from '@ai-recruitment-clerk/resume-dto';
+import type { ResumeDTO } from '@ai-recruitment-clerk/resume-dto';
 
 export interface SectionInfo {
   type:
@@ -88,7 +88,7 @@ export class TextExtractionService {
     ],
   };
 
-  identifySections(text: string): SectionInfo[] {
+  public identifySections(text: string): SectionInfo[] {
     const sections: SectionInfo[] = [];
     const lines = text.split('\n');
     let currentSection: SectionInfo | null = null;
@@ -140,8 +140,8 @@ export class TextExtractionService {
     return 'unknown';
   }
 
-  extractContactInfo(text: string): ContactInfo {
-    const emailRegex = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g;
+  public extractContactInfo(text: string): ContactInfo {
+    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
     const phoneRegex = /[+]?[(]?\d{1,4}[)]?[-\s.]?\d{1,4}[-\s.]?\d{1,9}/g;
     const linkedInRegex = /linkedin\.com\/in\/[a-zA-Z0-9-]+/i;
     const websiteRegex = /(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}/i;
@@ -193,7 +193,7 @@ export class TextExtractionService {
     return match ? match[0] : null;
   }
 
-  parseDateRange(text: string): DateRange | null {
+  public parseDateRange(text: string): DateRange | null {
     const patterns = [
       /(\d{1,2}\/\d{4})\s*[-–to]+\s*(\d{1,2}\/\d{4}|present)/i,
       /(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+(\d{4})\s*[-–to]+\s*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+(\d{4}|present)/i,
@@ -254,7 +254,7 @@ export class TextExtractionService {
     return null;
   }
 
-  extractBullets(text: string): string[] {
+  public extractBullets(text: string): string[] {
     const bulletPatterns = [
       /^[\s]*[•\-*+◦▪▫◆◇][\s]+(.+)$/gm,
       /^[\s]*\d+[.)][\s]+(.+)$/gm,
@@ -274,7 +274,7 @@ export class TextExtractionService {
     return bullets;
   }
 
-  extractWorkExperience(text: string): WorkExperience[] {
+  public extractWorkExperience(text: string): WorkExperience[] {
     const experiences: WorkExperience[] = [];
     const sections = this.identifySections(text);
     const experienceSection = sections.find((s) => s.type === 'experience');
@@ -316,7 +316,7 @@ export class TextExtractionService {
     return experiences;
   }
 
-  extractEducation(text: string): EducationEntry[] {
+  public extractEducation(text: string): EducationEntry[] {
     const educations: EducationEntry[] = [];
     const sections = this.identifySections(text);
     const educationSection = sections.find((s) => s.type === 'education');
@@ -376,7 +376,7 @@ export class TextExtractionService {
     return match ? match[1].trim() : null;
   }
 
-  extractSkills(text: string): string[] {
+  public extractSkills(text: string): string[] {
     const sections = this.identifySections(text);
     const skillsSection = sections.find((s) => s.type === 'skills');
 
@@ -391,7 +391,7 @@ export class TextExtractionService {
     return [];
   }
 
-  extractSummary(text: string): string | null {
+  public extractSummary(text: string): string | null {
     const sections = this.identifySections(text);
     const summarySection = sections.find((s) => s.type === 'summary');
 
@@ -407,7 +407,7 @@ export class TextExtractionService {
     return null;
   }
 
-  convertToResumeDTO(text: string): ResumeDTO {
+  public convertToResumeDTO(text: string): ResumeDTO {
     const contactInfo = this.extractContactInfo(text);
     const workExperiences = this.extractWorkExperience(text);
     const educations = this.extractEducation(text);

@@ -172,7 +172,7 @@ describe('JobsEventService', () => {
       } as JobDocument);
 
       // Subscribe and trigger the handler
-      let capturedHandler: Function | undefined;
+      let capturedHandler: ((...args: unknown[]) => void) | undefined;
       natsClient.subscribeToAnalysisCompleted.mockImplementation((handler) => {
         capturedHandler = handler;
         return Promise.resolve();
@@ -210,7 +210,7 @@ describe('JobsEventService', () => {
     it('should handle event with missing jobId', async () => {
       const event = createCompletedEvent({ jobId: '' });
 
-      let capturedHandler: Function | undefined;
+      let capturedHandler: ((...args: unknown[]) => void) | undefined;
       natsClient.subscribeToAnalysisCompleted.mockImplementation((handler) => {
         capturedHandler = handler;
         return Promise.resolve();
@@ -230,7 +230,7 @@ describe('JobsEventService', () => {
 
       jobRepository.findById.mockResolvedValue(null);
 
-      let capturedHandler: Function | undefined;
+      let capturedHandler: ((...args: unknown[]) => void) | undefined;
       natsClient.subscribeToAnalysisCompleted.mockImplementation((handler) => {
         capturedHandler = handler;
         return Promise.resolve();
@@ -257,7 +257,7 @@ describe('JobsEventService', () => {
       jobRepository.updateJdAnalysis.mockResolvedValue(mockJob as JobDocument);
       jobRepository.updateStatus.mockResolvedValue(mockJob as JobDocument);
 
-      let capturedHandler: Function | undefined;
+      let capturedHandler: ((...args: unknown[]) => void) | undefined;
       natsClient.subscribeToAnalysisCompleted.mockImplementation((handler) => {
         capturedHandler = handler;
         return Promise.resolve();
@@ -288,7 +288,7 @@ describe('JobsEventService', () => {
       jobRepository.updateJdAnalysis.mockResolvedValue(mockJob as JobDocument);
       jobRepository.updateStatus.mockResolvedValue(mockJob as JobDocument);
 
-      let capturedHandler: Function | undefined;
+      let capturedHandler: ((...args: unknown[]) => void) | undefined;
       natsClient.subscribeToAnalysisCompleted.mockImplementation((handler) => {
         capturedHandler = handler;
         return Promise.resolve();
@@ -322,7 +322,7 @@ describe('JobsEventService', () => {
         status: 'failed',
       } as JobDocument);
 
-      let capturedHandler: Function | undefined;
+      let capturedHandler: ((...args: unknown[]) => void) | undefined;
       natsClient.subscribeToAnalysisCompleted.mockImplementation((handler) => {
         capturedHandler = handler;
         return Promise.resolve();
@@ -355,7 +355,7 @@ describe('JobsEventService', () => {
       jobRepository.updateJdAnalysis.mockResolvedValue(mockJob as JobDocument);
       jobRepository.updateStatus.mockResolvedValue(mockJob as JobDocument);
 
-      let capturedHandler: Function | undefined;
+      let capturedHandler: ((...args: unknown[]) => void) | undefined;
       natsClient.subscribeToAnalysisCompleted.mockImplementation((handler) => {
         capturedHandler = handler;
         return Promise.resolve();
@@ -391,7 +391,7 @@ describe('JobsEventService', () => {
       jobRepository.updateJdAnalysis.mockResolvedValue(mockJob as JobDocument);
       jobRepository.updateStatus.mockResolvedValue(mockJob as JobDocument);
 
-      let capturedHandler: Function | undefined;
+      let capturedHandler: ((...args: unknown[]) => void) | undefined;
       natsClient.subscribeToAnalysisCompleted.mockImplementation((handler) => {
         capturedHandler = handler;
         return Promise.resolve();
@@ -426,7 +426,7 @@ describe('JobsEventService', () => {
       jobRepository.updateJdAnalysis.mockResolvedValue(mockJob as JobDocument);
       jobRepository.updateStatus.mockResolvedValue(mockJob as JobDocument);
 
-      let capturedHandler: Function | undefined;
+      let capturedHandler: ((...args: unknown[]) => void) | undefined;
       natsClient.subscribeToAnalysisCompleted.mockImplementation((handler) => {
         capturedHandler = handler;
         return Promise.resolve();
@@ -477,7 +477,7 @@ describe('JobsEventService', () => {
         status: 'failed',
       } as JobDocument);
 
-      let capturedHandler: Function | undefined;
+      let capturedHandler: ((...args: unknown[]) => void) | undefined;
       natsClient.subscribeToAnalysisFailed.mockImplementation((handler) => {
         capturedHandler = handler;
         return Promise.resolve();
@@ -511,7 +511,7 @@ describe('JobsEventService', () => {
       jobRepository.findById.mockResolvedValue(mockJob as JobDocument);
       jobRepository.updateStatus.mockResolvedValue(mockJob as JobDocument);
 
-      let capturedHandler: Function | undefined;
+      let capturedHandler: ((...args: unknown[]) => void) | undefined;
       natsClient.subscribeToAnalysisFailed.mockImplementation((handler) => {
         capturedHandler = handler;
         return Promise.resolve();
@@ -529,7 +529,7 @@ describe('JobsEventService', () => {
     it('should handle event with missing jobId', async () => {
       const event = createFailedEvent({ jobId: '' });
 
-      let capturedHandler: Function | undefined;
+      let capturedHandler: ((...args: unknown[]) => void) | undefined;
       natsClient.subscribeToAnalysisFailed.mockImplementation((handler) => {
         capturedHandler = handler;
         return Promise.resolve();
@@ -549,7 +549,7 @@ describe('JobsEventService', () => {
 
       jobRepository.findById.mockResolvedValue(null);
 
-      let capturedHandler: Function | undefined;
+      let capturedHandler: ((...args: unknown[]) => void) | undefined;
       natsClient.subscribeToAnalysisFailed.mockImplementation((handler) => {
         capturedHandler = handler;
         return Promise.resolve();
@@ -573,7 +573,7 @@ describe('JobsEventService', () => {
         .mockRejectedValueOnce(new Error('Database error'))
         .mockResolvedValueOnce({ ...mockJob, status: 'failed' } as JobDocument);
 
-      let capturedHandler: Function | undefined;
+      let capturedHandler: ((...args: unknown[]) => void) | undefined;
       natsClient.subscribeToAnalysisFailed.mockImplementation((handler) => {
         capturedHandler = handler;
         return Promise.resolve();
@@ -688,7 +688,7 @@ describe('JobsEventService', () => {
       jobRepository.updateJdAnalysis.mockResolvedValue(mockJob as JobDocument);
       jobRepository.updateStatus.mockResolvedValue(mockJob as JobDocument);
 
-      let capturedHandler: Function | undefined;
+      let capturedHandler: ((...args: unknown[]) => void) | undefined;
       natsClient.subscribeToAnalysisCompleted.mockImplementation((handler) => {
         capturedHandler = handler;
         return Promise.resolve();
@@ -733,7 +733,7 @@ describe('JobsEventService', () => {
       jobRepository.updateJdAnalysis.mockResolvedValue(mockJob as JobDocument);
       jobRepository.updateStatus.mockResolvedValue(mockJob as JobDocument);
 
-      let capturedHandler: Function | undefined;
+      let capturedHandler: ((...args: unknown[]) => void) | undefined;
       natsClient.subscribeToAnalysisCompleted.mockImplementation((handler) => {
         capturedHandler = handler;
         return Promise.resolve();
@@ -780,7 +780,7 @@ describe('JobsEventService', () => {
       jobRepository.updateJdAnalysis.mockResolvedValue(mockJob as JobDocument);
       jobRepository.updateStatus.mockResolvedValue(mockJob as JobDocument);
 
-      let capturedHandler: Function | undefined;
+      let capturedHandler: ((...args: unknown[]) => void) | undefined;
       natsClient.subscribeToAnalysisCompleted.mockImplementation((handler) => {
         capturedHandler = handler;
         return Promise.resolve();

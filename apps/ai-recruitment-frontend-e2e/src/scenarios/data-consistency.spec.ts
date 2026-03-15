@@ -21,7 +21,7 @@ test.describe('Data Consistency', () => {
 
     // 登录
     await loginPage.navigateTo();
-    await loginPage.login(TEST_USERS["hr"].email, TEST_USERS["hr"].password);
+    await loginPage.login(TEST_USERS['hr'].email, TEST_USERS['hr'].password);
     await dashboardPage.waitForPageLoad();
 
     // 获取初始计数
@@ -36,9 +36,9 @@ test.describe('Data Consistency', () => {
     await page.click('[data-testid="confirm-delete"]');
 
     // 等待删除完成
-    await page.waitForSelector('[data-testid="delete-success"]', {
-      timeout: 10000,
-    });
+    await page
+      .locator('[data-testid="delete-success"]')
+      .waitFor({ timeout: 10000 });
 
     // 验证计数减少
     const newCount = await jobsPage.getJobCount();
@@ -60,10 +60,13 @@ test.describe('Data Consistency', () => {
     page,
   }) => {
     await page.goto('/login');
-    await page.fill('[data-testid="email-input"]', TEST_USERS["candidate"].email);
+    await page.fill(
+      '[data-testid="email-input"]',
+      TEST_USERS['candidate'].email,
+    );
     await page.fill(
       '[data-testid="password-input"]',
-      TEST_USERS["candidate"].password,
+      TEST_USERS['candidate'].password,
     );
     await page.click('[data-testid="submit-button"]');
     await page.waitForURL(/\/dashboard/);
@@ -73,9 +76,9 @@ test.describe('Data Consistency', () => {
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles('src/test-data/resumes/简历.pdf');
     await page.click('[data-testid="upload-submit-button"]');
-    await page.waitForSelector('[data-testid="upload-success"]', {
-      timeout: 60000,
-    });
+    await page
+      .locator('[data-testid="upload-success"]')
+      .waitFor({ timeout: 60000 });
 
     // 记录分析 ID
     const analysisId = await page
@@ -108,8 +111,11 @@ test.describe('Data Consistency', () => {
 
   test('bulk operations maintain referential integrity', async ({ page }) => {
     await page.goto('/login');
-    await page.fill('[data-testid="email-input"]', TEST_USERS["hr"].email);
-    await page.fill('[data-testid="password-input"]', TEST_USERS["hr"].password);
+    await page.fill('[data-testid="email-input"]', TEST_USERS['hr'].email);
+    await page.fill(
+      '[data-testid="password-input"]',
+      TEST_USERS['hr'].password,
+    );
     await page.click('[data-testid="submit-button"]');
     await page.waitForURL(/\/dashboard/);
 
@@ -134,7 +140,7 @@ test.describe('Data Consistency', () => {
 
     // 验证相关分析也被删除
     await page.goto('/analysis');
-    await expect(page.locator('text=Bulk Test Job')).not.toBeVisible();
+    await expect(page.locator('text=Bulk Test Job')).toBeHidden();
 
     // 验证数据库一致性
     const response = await page.evaluate(async () => {
@@ -148,8 +154,11 @@ test.describe('Data Consistency', () => {
 
   test('search results reflect real-time data changes', async ({ page }) => {
     await page.goto('/login');
-    await page.fill('[data-testid="email-input"]', TEST_USERS["hr"].email);
-    await page.fill('[data-testid="password-input"]', TEST_USERS["hr"].password);
+    await page.fill('[data-testid="email-input"]', TEST_USERS['hr'].email);
+    await page.fill(
+      '[data-testid="password-input"]',
+      TEST_USERS['hr'].password,
+    );
     await page.click('[data-testid="submit-button"]');
     await page.waitForURL(/\/dashboard/);
 
@@ -165,10 +174,10 @@ test.describe('Data Consistency', () => {
     // 在另一个标签页创建新职位
     const newPage = await page.context().newPage();
     await newPage.goto('/login');
-    await newPage.fill('[data-testid="email-input"]', TEST_USERS["hr"].email);
+    await newPage.fill('[data-testid="email-input"]', TEST_USERS['hr'].email);
     await newPage.fill(
       '[data-testid="password-input"]',
-      TEST_USERS["hr"].password,
+      TEST_USERS['hr'].password,
     );
     await newPage.click('[data-testid="submit-button"]');
     await newPage.waitForURL(/\/dashboard/);
@@ -198,8 +207,11 @@ test.describe('Data Consistency', () => {
     page,
   }) => {
     await page.goto('/login');
-    await page.fill('[data-testid="email-input"]', TEST_USERS["hr"].email);
-    await page.fill('[data-testid="password-input"]', TEST_USERS["hr"].password);
+    await page.fill('[data-testid="email-input"]', TEST_USERS['hr'].email);
+    await page.fill(
+      '[data-testid="password-input"]',
+      TEST_USERS['hr'].password,
+    );
     await page.click('[data-testid="submit-button"]');
     await page.waitForURL(/\/dashboard/);
 

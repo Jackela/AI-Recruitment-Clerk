@@ -1,11 +1,7 @@
 import { test, expect } from './fixtures';
 import { JobsPage } from './pages';
-import {
-  setupJobsApiMocking,
-  TEST_JOB_DATA,
-  MOCK_JOB_RESPONSE,
-} from './fixtures';
-import { gotoAndWait, setupErrorCollection, ROUTES } from './utils';
+import { setupJobsApiMocking, TEST_JOB_DATA } from './fixtures';
+import { setupErrorCollection } from './utils';
 
 /**
  * Detailed Job Creation Testing - Refactored to use Page Object Model

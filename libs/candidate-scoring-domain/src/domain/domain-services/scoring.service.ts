@@ -387,7 +387,7 @@ export class ScoringService {
   /**
    * Check if score meets minimum threshold
    */
-  static meetsThreshold(score: number, threshold: number = 60): boolean {
+  static meetsThreshold(score: number, threshold = 60): boolean {
     return score >= threshold;
   }
 
