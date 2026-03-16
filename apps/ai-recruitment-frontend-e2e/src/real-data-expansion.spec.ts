@@ -49,7 +49,12 @@ const PERFORMANCE_THRESHOLDS = {
 // Paths configuration
 const PATHS = {
   resumesDir: path.resolve(__dirname, 'test-data', 'resumes'),
-  jdFile: path.resolve(workspaceRoot, 'docs', 'recruitment', 'UAT_Architect_JD.txt'),
+  jdFile: path.resolve(
+    workspaceRoot,
+    'docs',
+    'recruitment',
+    'UAT_Architect_JD.txt',
+  ),
   coachPath: '/coach',
 };
 
@@ -335,7 +340,7 @@ test.describe('Real Data Expansion - Dynamic PDF Resume Testing', () => {
     page.on('console', (msg) => {
       if (msg.type() === 'error') {
         console.log(`🚨 Console Error: ${msg.text()}`);
-      } else if (msg.type() === 'warn') {
+      } else if (msg.type() === 'warning') {
         console.log(`⚠️ Console Warning: ${msg.text()}`);
       }
     });
@@ -369,7 +374,9 @@ test.describe('Real Data Expansion - Dynamic PDF Resume Testing', () => {
 
   // Dynamically generate test cases for each PDF file
   for (const filename of resumeFiles) {
-    test(`@real-data UAT workflow for ${sanitizeTestName(filename)}`, async ({ page }) => {
+    test(`@real-data UAT workflow for ${sanitizeTestName(filename)}`, async ({
+      page,
+    }) => {
       console.log(`\n🚀 Starting test for: ${filename}`);
       console.log(
         `📊 File ${resumeFiles.indexOf(filename) + 1} of ${resumeFiles.length}`,
@@ -385,7 +392,10 @@ test.describe('Real Data Expansion - Dynamic PDF Resume Testing', () => {
         expect(result.success).toBe(true);
         expect(result.metrics.totalTime).toBeLessThan(85000); // Under 85 seconds total
       } catch (error) {
-        console.error(`❌ Test failed for ${filename}:`, (error as Error).message);
+        console.error(
+          `❌ Test failed for ${filename}:`,
+          (error as Error).message,
+        );
 
         // Capture additional debug information
         try {

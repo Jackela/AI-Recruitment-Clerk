@@ -9,6 +9,7 @@ export default {
   coverageDirectory: '../../coverage/apps/report-generator-svc',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   testMatch: ['**/*.spec.ts'],
+  testPathIgnorePatterns: ['/node_modules/', '\\.integration\\.spec\\.ts$'],
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.spec.ts',

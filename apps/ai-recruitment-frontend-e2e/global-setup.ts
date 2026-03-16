@@ -1,10 +1,10 @@
-import { startMockServer } from './mock-server';
-import { waitForServerReady } from './browser-stability';
-import { portManager } from './port-manager';
+import { startMockServer } from './mock-server.js';
+import { waitForServerReady } from './browser-stability.js';
+import { portManager } from './port-manager.js';
 import {
   validateTestEnvironment,
   logTestEnvironment,
-} from './test-environment';
+} from './test-environment.js';
 
 async function globalSetup(): Promise<void> {
   console.log('🚀 Starting E2E test environment setup...');
@@ -22,8 +22,9 @@ async function globalSetup(): Promise<void> {
     // Continue with setup but log the error
   }
 
-  const useRealAPI = process.env["E2E_USE_REAL_API"] === 'true';
-  const skipWebServer = process.env["E2E_SKIP_WEBSERVER"] === 'true' || useRealAPI;
+  const useRealAPI = process.env['E2E_USE_REAL_API'] === 'true';
+  const skipWebServer =
+    process.env['E2E_SKIP_WEBSERVER'] === 'true' || useRealAPI;
 
   let mockServerPort: number | null = null;
 
@@ -38,8 +39,8 @@ async function globalSetup(): Promise<void> {
       );
 
       // Set environment variable for tests to use
-      process.env["MOCK_API_PORT"] = mockServerPort.toString();
-      process.env["MOCK_API_URL"] = `http://localhost:${mockServerPort}`;
+      process.env['MOCK_API_PORT'] = mockServerPort.toString();
+      process.env['MOCK_API_URL'] = `http://localhost:${mockServerPort}`;
 
       // Wait for mock server to be ready with dynamic URL
       const mockServerUrl = `http://localhost:${mockServerPort}/api/health`;
@@ -57,8 +58,8 @@ async function globalSetup(): Promise<void> {
 
         try {
           mockServerPort = await startMockServer();
-          process.env["MOCK_API_PORT"] = mockServerPort.toString();
-          process.env["MOCK_API_URL"] = `http://localhost:${mockServerPort}`;
+          process.env['MOCK_API_PORT'] = mockServerPort.toString();
+          process.env['MOCK_API_URL'] = `http://localhost:${mockServerPort}`;
 
           const retryReady = await portManager.waitForService(
             'mock-api',
@@ -86,10 +87,10 @@ async function globalSetup(): Promise<void> {
     // Try to allocate gateway port for monitoring
     try {
       const gatewayPort = await portManager.allocatePort('gateway');
-      process.env["GATEWAY_PORT"] = gatewayPort.toString();
+      process.env['GATEWAY_PORT'] = gatewayPort.toString();
 
       const gatewayHealthUrl =
-        process.env["GATEWAY_HEALTH_URL"] ||
+        process.env['GATEWAY_HEALTH_URL'] ||
         `http://localhost:${gatewayPort}/api/auth/health`;
 
       console.log(`⏳ Waiting for gateway at ${gatewayHealthUrl}...`);
@@ -104,7 +105,7 @@ async function globalSetup(): Promise<void> {
 
       // Fall back to checking default port
       const fallbackUrl =
-        process.env["GATEWAY_HEALTH_URL"] ||
+        process.env['GATEWAY_HEALTH_URL'] ||
         'http://localhost:3000/api/auth/health';
       console.log(`⏳ Checking fallback gateway at ${fallbackUrl}...`);
       const ok = await waitForServerReady(fallbackUrl, 90);
@@ -119,8 +120,8 @@ async function globalSetup(): Promise<void> {
   if (skipWebServer) {
     // External server mode
     const externalBaseUrl =
-      process.env["PLAYWRIGHT_BASE_URL"] ||
-      process.env["E2E_EXTERNAL_BASE_URL"] ||
+      process.env['PLAYWRIGHT_BASE_URL'] ||
+      process.env['E2E_EXTERNAL_BASE_URL'] ||
       'http://localhost:4200';
     console.log(
       `🎯 Skipping dev server startup. Using external base URL: ${externalBaseUrl}`,

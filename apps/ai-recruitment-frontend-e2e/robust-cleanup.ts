@@ -7,7 +7,7 @@
 
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { portManager } from './port-manager';
+import { portManager } from './port-manager.js';
 
 const execAsync = promisify(exec);
 

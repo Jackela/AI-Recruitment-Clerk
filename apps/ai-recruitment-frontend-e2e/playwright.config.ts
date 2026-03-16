@@ -45,13 +45,13 @@ const projects = [
           '--no-sandbox', // For CI stability
           '--disable-dev-shm-usage', // For CI stability
         ],
-        headless: !process.env["CHROME_HEADED"],
+        headless: !process.env['CHROME_HEADED'],
       },
     },
   },
 ];
 
-if (process.env["E2E_ENABLE_FIREFOX"] === 'true') {
+if (process.env['E2E_ENABLE_FIREFOX'] === 'true') {
   projects.push({
     name: 'firefox',
     use: {
@@ -76,14 +76,14 @@ if (process.env["E2E_ENABLE_FIREFOX"] === 'true') {
           'browser.cache.memory.enable': true,
           'browser.cache.memory.capacity': 16384,
         },
-        headless: !process.env["FIREFOX_HEADED"],
+        headless: !process.env['FIREFOX_HEADED'],
       },
     },
   });
 }
 
 // WebKit / Safari support
-if (process.env["E2E_ENABLE_WEBKIT"] === 'true') {
+if (process.env['E2E_ENABLE_WEBKIT'] === 'true') {
   projects.push({
     name: 'webkit',
     use: {
@@ -101,7 +101,7 @@ if (process.env["E2E_ENABLE_WEBKIT"] === 'true') {
           '--disable-field-trial-config',
           '--no-first-run',
         ],
-        headless: !process.env["WEBKIT_HEADED"],
+        headless: !process.env['WEBKIT_HEADED'],
       },
       // @ts-expect-error contextOptions is not in base type but works for WebKit
       contextOptions: {
@@ -121,7 +121,7 @@ if (process.env["E2E_ENABLE_WEBKIT"] === 'true') {
       launchOptions: {
         timeout: 60000,
         args: ['--no-first-run'],
-        headless: !process.env["WEBKIT_HEADED"],
+        headless: !process.env['WEBKIT_HEADED'],
       },
       // @ts-expect-error contextOptions is not in base type but works for WebKit
       contextOptions: {
@@ -141,7 +141,7 @@ if (process.env["E2E_ENABLE_WEBKIT"] === 'true') {
       launchOptions: {
         timeout: 60000,
         args: ['--no-first-run'],
-        headless: !process.env["WEBKIT_HEADED"],
+        headless: !process.env['WEBKIT_HEADED'],
       },
       // @ts-expect-error contextOptions is not in base type but works for WebKit
       contextOptions: {
@@ -162,13 +162,18 @@ export default defineConfig({
     toHaveScreenshot: {
       maxDiffPixels: 100,
       threshold: 0.2,
+      // Allow updating snapshots when they don't exist or during intentional updates
+      animations: 'disabled',
+    },
+    toMatchSnapshot: {
+      maxDiffPixelRatio: 0.02,
     },
   },
   // Parallel execution optimized for modern CI and local environments
   fullyParallel: true,
-  forbidOnly: !!process.env["CI"],
-  retries: process.env["CI"] ? 2 : 1,
-  workers: process.env["CI"] ? 4 : undefined, // CI: fixed 4 workers, Local: auto-detect (50% CPUs)
+  forbidOnly: !!process.env['CI'],
+  retries: process.env['CI'] ? 2 : 1,
+  workers: process.env['CI'] ? 4 : undefined, // CI: fixed 4 workers, Local: auto-detect (50% CPUs)
   // Extended global timeout for comprehensive setup/teardown
   globalTimeout: 900000, // 15 minutes global timeout for robust cleanup and port management
   reporter: 'html',
@@ -201,11 +206,13 @@ export default defineConfig({
     ? {}
     : {
         webServer: {
-          // Build first, then serve with simple HTTP server (no Nx daemon needed)
-          command: `npx nx run ai-recruitment-frontend:build:production && npx serve dist/apps/ai-recruitment-frontend/browser -l ${devServerPort} -s`,
+          // Serve the pre-built frontend (build is done in CI before running tests)
+          command: `npx serve dist/apps/ai-recruitment-frontend/browser -l ${devServerPort} -s`,
           url: baseURL,
-          reuseExistingServer: !process.env["CI"],
-          timeout: 120 * 1000, // 120 seconds for build + server startup
+          reuseExistingServer: !process.env['CI'],
+          timeout: 30 * 1000, // 30 seconds for server startup (build is already done)
+          stdout: 'pipe',
+          stderr: 'pipe',
         },
       }),
   projects,

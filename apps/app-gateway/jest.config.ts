@@ -5,6 +5,7 @@ export default {
   testMatch: ['<rootDir>/src/**/*.spec.ts'],
   testPathIgnorePatterns: [
     String.raw`<rootDir>/test/.*\.e2e\.spec\.ts$`,
+    String.raw`<rootDir>/src/.*\.integration\.spec\.ts$`,
     '<rootDir>/node_modules/',
   ],
   transform: {

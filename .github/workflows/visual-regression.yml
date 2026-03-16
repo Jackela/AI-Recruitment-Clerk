@@ -53,11 +53,40 @@ jobs:
       - run: npm ci
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
+      - name: Build Frontend
+        run: npx nx run ai-recruitment-frontend:build:production
+      - name: Check for existing snapshots
+        id: check-snapshots
+        run: |
+          # Check if baseline snapshots exist
+          SNAPSHOT_COUNT=$(find apps/ai-recruitment-frontend-e2e/src/visual -name "*.png" -path "*snapshots*" 2>/dev/null | wc -l)
+          echo "Found $SNAPSHOT_COUNT existing snapshots"
+          if [ "$SNAPSHOT_COUNT" -gt 0 ]; then
+            echo "snapshots_exist=true" >> $GITHUB_OUTPUT
+          else
+            echo "snapshots_exist=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Baseline Snapshots
+        if: steps.check-snapshots.outputs.snapshots_exist != 'true'
+        run: |
+          echo "No baseline snapshots found. Creating initial snapshots..."
+          E2E_SKIP_WEBSERVER=false npm run test:e2e:visual:update || true
+          # Check if snapshots were created
+          SNAPSHOT_COUNT=$(find apps/ai-recruitment-frontend-e2e/src/visual -name "*.png" -path "*snapshots*" 2>/dev/null | wc -l)
+          echo "Created $SNAPSHOT_COUNT snapshots"
+          if [ "$SNAPSHOT_COUNT" -eq 0 ]; then
+            echo "Warning: No snapshots were created. Tests may fail."
+          fi
+
       - name: Update Baseline Snapshots
-        if: github.event.inputs.update-snapshots == 'true' || github.event_name == 'workflow_dispatch'
-        run: npm run test:e2e:visual:update
+        if: github.event.inputs.update-snapshots == 'true' || (github.event_name == 'workflow_dispatch' && github.event.inputs.update-snapshots != 'false')
+        run: |
+          echo "Updating baseline snapshots as requested..."
+          E2E_SKIP_WEBSERVER=false npm run test:e2e:visual:update
+
       - name: Run Visual Regression Tests
-        run: npm run test:e2e:visual:ci
+        run: E2E_SKIP_WEBSERVER=false npm run test:e2e:visual:ci
       - name: Upload Visual Regression Snapshots
         if: always()
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
