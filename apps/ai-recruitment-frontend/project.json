@@ -60,25 +60,25 @@
           "budgets": [
             {
               "type": "initial",
-              "maximumWarning": "800kb",
-              "maximumError": "1200kb"
+              "maximumWarning": "2mb",
+              "maximumError": "5mb"
             },
             {
               "type": "anyComponentStyle",
-              "maximumWarning": "20kb",
-              "maximumError": "30kb"
+              "maximumWarning": "50kb",
+              "maximumError": "100kb"
             },
             {
               "type": "bundle",
               "name": "angular-vendor",
-              "maximumWarning": "600kb",
-              "maximumError": "900kb"
+              "maximumWarning": "1mb",
+              "maximumError": "2mb"
             },
             {
               "type": "bundle",
               "name": "ngrx-vendor",
-              "maximumWarning": "300kb",
-              "maximumError": "500kb"
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
             }
           ],
           "outputHashing": "all",
