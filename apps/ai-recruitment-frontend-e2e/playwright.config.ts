@@ -210,7 +210,7 @@ export default defineConfig({
           command: `npx serve dist/apps/ai-recruitment-frontend/browser -l ${devServerPort} -s`,
           url: baseURL,
           reuseExistingServer: !process.env['CI'],
-          timeout: 30 * 1000, // 30 seconds for server startup (build is already done)
+          timeout: 60 * 1000, // 60 seconds for server startup (production builds take longer)
           stdout: 'pipe',
           stderr: 'pipe',
         },

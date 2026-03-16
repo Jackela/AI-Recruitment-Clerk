@@ -118,7 +118,7 @@ async function globalSetup(): Promise<void> {
   // Dev server is now managed by Playwright's webServer configuration
   // No need for manual startup anymore
   if (skipWebServer) {
-    // External server mode
+    // External server mode - verify server is ready
     const externalBaseUrl =
       process.env['PLAYWRIGHT_BASE_URL'] ||
       process.env['E2E_EXTERNAL_BASE_URL'] ||
@@ -126,6 +126,68 @@ async function globalSetup(): Promise<void> {
     console.log(
       `🎯 Skipping dev server startup. Using external base URL: ${externalBaseUrl}`,
     );
+
+    // Wait for external server to be ready with retry logic
+    console.log('⏳ Waiting for external server to be ready...');
+    const maxRetries = 30;
+    const retryDelay = 2000;
+    let serverReady = false;
+    let lastError: Error | null = null;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const response = await fetch(externalBaseUrl, {
+          signal: AbortSignal.timeout(5000),
+        });
+        if (response.ok) {
+          const text = await response.text();
+          // Verify it's actually the Angular app
+          if (text.includes('<app-root') || text.includes('arc-root')) {
+            console.log(
+              `✅ External server is ready (attempt ${attempt}/${maxRetries})`,
+            );
+            serverReady = true;
+            break;
+          } else {
+            console.warn(
+              `⚠️ Server responded but no Angular app detected (attempt ${attempt}/${maxRetries})`,
+            );
+          }
+        } else {
+          console.warn(
+            `⚠️ Server responded with status ${response.status} (attempt ${attempt}/${maxRetries})`,
+          );
+        }
+      } catch (error) {
+        lastError = error as Error;
+        console.log(
+          `⏳ Server not ready yet (attempt ${attempt}/${maxRetries}): ${(error as Error).message}`,
+        );
+      }
+
+      if (attempt < maxRetries) {
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
+      }
+    }
+
+    if (!serverReady) {
+      console.error(
+        '❌ External server failed to become ready after maximum retries',
+      );
+      if (lastError) {
+        console.error(`Last error: ${lastError.message}`);
+      }
+      console.error('📋 Troubleshooting:');
+      console.error('  1. Verify the server is running on the configured port');
+      console.error(
+        '  2. Check that the frontend build completed successfully',
+      );
+      console.error(
+        '  3. Ensure the server is serving the built files from the correct directory',
+      );
+      console.error('  4. Check server logs for startup errors');
+      throw new Error(`External server at ${externalBaseUrl} is not ready`);
+    }
   } else {
     console.log(
       '✅ Playwright webServer will manage dev server startup and readiness checks.',

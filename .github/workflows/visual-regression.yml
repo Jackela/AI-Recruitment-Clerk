@@ -8,10 +8,12 @@ on:
     paths:
       - 'apps/ai-recruitment-frontend/**'
       - 'apps/ai-recruitment-frontend-e2e/**'
+      - '.github/workflows/visual-regression.yml'
   pull_request:
     paths:
       - 'apps/ai-recruitment-frontend/**'
       - 'apps/ai-recruitment-frontend-e2e/**'
+      - '.github/workflows/visual-regression.yml'
   workflow_dispatch:
     inputs:
       update-snapshots:
@@ -23,16 +25,21 @@ on:
           - 'true'
           - 'false'
 
+env:
+  CI: true
+  NODE_OPTIONS: '--max-old-space-size=4096'
+
 jobs:
   visual_regression:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
       - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
         with:
-          node-version: '20'
+          node-version-file: '.nvmrc'
           cache: 'npm'
       - name: Cache Nx
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
@@ -54,12 +61,43 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
       - name: Build Frontend
-        run: npx nx run ai-recruitment-frontend:build:production
+        run: npx nx build ai-recruitment-frontend --configuration=production
+        env:
+          NODE_OPTIONS: '--max-old-space-size=4096'
+      - name: Verify build output
+        run: |
+          if [ ! -d "dist/apps/ai-recruitment-frontend/browser" ]; then
+            echo "Error: Build output not found at dist/apps/ai-recruitment-frontend/browser"
+            ls -la dist/apps/ai-recruitment-frontend/ 2>/dev/null || echo "Directory does not exist"
+            exit 1
+          fi
+          echo "Build output verified at dist/apps/ai-recruitment-frontend/browser"
+      - name: Start static server for Visual Tests
+        run: |
+          npx nx run ai-recruitment-frontend:serve-static --port 4200 > /tmp/server.log 2>&1 &
+          SERVER_PID=$!
+          echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
+          echo "Waiting for server to be ready..."
+          # Wait up to 60 seconds with exponential backoff
+          for i in {1..12}; do
+            if curl -s -f http://localhost:4200 > /dev/null 2>&1; then
+              echo "Server is ready after ${i}s!"
+              break
+            fi
+            echo "Waiting... ($i/12)"
+            sleep 5
+          done
+          # Verify server is actually ready
+          if ! curl -s -f http://localhost:4200 > /dev/null 2>&1; then
+            echo "Server failed to start. Log output:"
+            cat /tmp/server.log
+            exit 1
+          fi
       - name: Check for existing snapshots
         id: check-snapshots
         run: |
-          # Check if baseline snapshots exist
-          SNAPSHOT_COUNT=$(find apps/ai-recruitment-frontend-e2e/src/visual -name "*.png" -path "*snapshots*" 2>/dev/null | wc -l)
+          # Check if baseline snapshots exist (Playwright stores snapshots in *-snapshots directories)
+          SNAPSHOT_COUNT=$(find apps/ai-recruitment-frontend-e2e/src/visual -name "*.png" -path "*-snapshots*" 2>/dev/null | wc -l)
           echo "Found $SNAPSHOT_COUNT existing snapshots"
           if [ "$SNAPSHOT_COUNT" -gt 0 ]; then
             echo "snapshots_exist=true" >> $GITHUB_OUTPUT
@@ -71,22 +109,34 @@ jobs:
         if: steps.check-snapshots.outputs.snapshots_exist != 'true'
         run: |
           echo "No baseline snapshots found. Creating initial snapshots..."
-          E2E_SKIP_WEBSERVER=false npm run test:e2e:visual:update || true
+          npm run test:e2e:visual:update || true
           # Check if snapshots were created
-          SNAPSHOT_COUNT=$(find apps/ai-recruitment-frontend-e2e/src/visual -name "*.png" -path "*snapshots*" 2>/dev/null | wc -l)
+          SNAPSHOT_COUNT=$(find apps/ai-recruitment-frontend-e2e/src/visual -name "*.png" -path "*-snapshots*" 2>/dev/null | wc -l)
           echo "Created $SNAPSHOT_COUNT snapshots"
           if [ "$SNAPSHOT_COUNT" -eq 0 ]; then
             echo "Warning: No snapshots were created. Tests may fail."
           fi
+        env:
+          E2E_SKIP_WEBSERVER: true
 
       - name: Update Baseline Snapshots
         if: github.event.inputs.update-snapshots == 'true' || (github.event_name == 'workflow_dispatch' && github.event.inputs.update-snapshots != 'false')
         run: |
           echo "Updating baseline snapshots as requested..."
-          E2E_SKIP_WEBSERVER=false npm run test:e2e:visual:update
+          npm run test:e2e:visual:update
+        env:
+          E2E_SKIP_WEBSERVER: true
 
       - name: Run Visual Regression Tests
-        run: E2E_SKIP_WEBSERVER=false npm run test:e2e:visual:ci
+        run: npm run test:e2e:visual:ci
+        env:
+          E2E_SKIP_WEBSERVER: true
+      - name: Stop static server
+        if: always()
+        run: |
+          if [ -n "$SERVER_PID" ]; then
+            kill $SERVER_PID 2>/dev/null || true
+          fi
       - name: Upload Visual Regression Snapshots
         if: always()
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
@@ -94,6 +144,7 @@ jobs:
           name: visual-snapshots
           path: |
             apps/ai-recruitment-frontend-e2e/src/visual/**/*.png
+            apps/ai-recruitment-frontend-e2e/src/visual/**/*-snapshots/**/*.png
           if-no-files-found: ignore
       - name: Upload Diffs on Failure
         if: failure()
@@ -110,5 +161,7 @@ jobs:
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: playwright-visual-report
-          path: playwright-report/
+          path: |
+            apps/ai-recruitment-frontend-e2e/playwright-report
+            apps/ai-recruitment-frontend-e2e/test-results
           if-no-files-found: ignore
