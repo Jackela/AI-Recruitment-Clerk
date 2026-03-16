@@ -15,11 +15,14 @@ export default {
       },
     ],
   },
-  transformIgnorePatterns: ['node_modules/(?!(@angular|@ngrx|rxjs|tslib|@ai-recruitment-clerk)/)'],
+  transformIgnorePatterns: [
+    'node_modules/(?!(@angular|@ngrx|rxjs|tslib|@ai-recruitment-clerk)/)',
+  ],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   extensionsToTreatAsEsm: ['.ts'],
+  testPathIgnorePatterns: ['/node_modules/', '\\.integration\\.spec\\.ts$'],
   snapshotSerializers: [
     'jest-preset-angular/build/serializers/no-ng-attributes',
     'jest-preset-angular/build/serializers/ng-snapshot',

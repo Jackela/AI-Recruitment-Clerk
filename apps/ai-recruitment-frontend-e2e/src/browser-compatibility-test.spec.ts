@@ -76,7 +76,8 @@ test.describe('Cross-Browser Compatibility', () => {
     // Test JavaScript evaluation
     const result = await page.evaluate(() => {
       return {
-        hasAngular: typeof window.ng !== 'undefined',
+        hasAngular:
+          typeof (window as unknown as { ng?: unknown }).ng !== 'undefined',
         hasDocument: typeof document !== 'undefined',
         hasConsole: typeof console !== 'undefined',
         title: document.title,

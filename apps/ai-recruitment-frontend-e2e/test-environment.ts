@@ -20,29 +20,29 @@ export interface TestEnvironment {
  * Get current test environment configuration
  */
 export function getTestEnvironment(): TestEnvironment {
-  const mockApiPort = process.env.MOCK_API_PORT
-    ? parseInt(process.env.MOCK_API_PORT, 10)
+  const mockApiPort = process.env['MOCK_API_PORT']
+    ? parseInt(process.env['MOCK_API_PORT'], 10)
     : undefined;
-  const devServerPort = process.env.DEV_SERVER_PORT
-    ? parseInt(process.env.DEV_SERVER_PORT, 10)
+  const devServerPort = process.env['DEV_SERVER_PORT']
+    ? parseInt(process.env['DEV_SERVER_PORT'], 10)
     : undefined;
-  const gatewayPort = process.env.GATEWAY_PORT
-    ? parseInt(process.env.GATEWAY_PORT, 10)
+  const gatewayPort = process.env['GATEWAY_PORT']
+    ? parseInt(process.env['GATEWAY_PORT'], 10)
     : undefined;
 
   return {
     mockApiPort,
-    mockApiUrl: process.env.MOCK_API_URL,
+    mockApiUrl: process.env['MOCK_API_URL'],
     devServerPort,
     gatewayPort,
     playwrightBaseUrl:
-      process.env.PLAYWRIGHT_BASE_URL ||
+      process.env['PLAYWRIGHT_BASE_URL'] ||
       (devServerPort
         ? `http://localhost:${devServerPort}`
         : 'http://localhost:4200'),
-    useRealApi: process.env.E2E_USE_REAL_API === 'true',
-    skipWebServer: process.env.E2E_SKIP_WEBSERVER === 'true',
-    isCI: !!process.env.CI,
+    useRealApi: process.env['E2E_USE_REAL_API'] === 'true',
+    skipWebServer: process.env['E2E_SKIP_WEBSERVER'] === 'true',
+    isCI: !!process.env['CI'],
   };
 }
 

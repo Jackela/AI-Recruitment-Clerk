@@ -19,7 +19,7 @@ async function globalTeardown(): Promise<void> {
   }, 30000); // 30 second timeout for teardown
 
   try {
-    const useRealAPI = process.env.E2E_USE_REAL_API === 'true';
+    const useRealAPI = process.env["E2E_USE_REAL_API"] === 'true';
     const e2eDir = __dirname;
     const pidFile = path.join(e2eDir, '.gateway.pid');
     const devServerPidFile = path.join(e2eDir, '.devserver.pid');

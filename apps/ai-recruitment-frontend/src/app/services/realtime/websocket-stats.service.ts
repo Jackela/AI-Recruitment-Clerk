@@ -116,6 +116,10 @@ export class WebSocketStatsService {
   private mockMode = false;
   private mockInterval: ReturnType<typeof setInterval> | null = null;
 
+  // Delayed connection configuration
+  private connectionDelayMs = 5000;
+  private connectionCheckTimeout: ReturnType<typeof setTimeout> | null = null;
+
   /**
    * Initializes a new instance of the Web Socket Stats Service.
    */
@@ -124,16 +128,62 @@ export class WebSocketStatsService {
     this.stats$.subscribe((stats) => this.stats.set(stats));
     this.isConnected$.subscribe((connected) => this.isConnected.set(connected));
 
-    // Start connection
-    this.connect();
+    // Delay connection to avoid blocking page initialization
+    this.scheduleDelayedConnection();
+  }
 
-    // Setup fallback to mock data if connection fails
-    setTimeout(() => {
-      if (!this.isConnected()) {
-        console.warn('WebSocket connection failed, using mock data');
+  /**
+   * Schedules a delayed WebSocket connection to avoid blocking page initialization.
+   * This ensures the UI renders first before attempting backend connection.
+   */
+  private scheduleDelayedConnection(): void {
+    // Clear any existing timeout
+    if (this.connectionCheckTimeout) {
+      clearTimeout(this.connectionCheckTimeout);
+    }
+
+    // Delay connection to let page render first
+    this.connectionCheckTimeout = setTimeout(() => {
+      this.checkBackendAndConnect();
+    }, this.connectionDelayMs);
+  }
+
+  /**
+   * Checks backend availability before attempting WebSocket connection.
+   * Prevents blocking if backend is not available.
+   */
+  private checkBackendAndConnect(): void {
+    // Quick health check using fetch with short timeout
+    const healthCheckUrl = this.getHealthCheckUrl();
+
+    fetch(healthCheckUrl, {
+      method: 'HEAD',
+      mode: 'no-cors',
+      cache: 'no-cache',
+    })
+      .then(() => {
+        console.log('Backend available, connecting WebSocket');
+        this.connect();
+      })
+      .catch(() => {
+        console.log('Backend unavailable, using mock data mode');
+        this.connectionStatus.set('disconnected');
         this.enableMockMode();
-      }
-    }, 5000);
+      });
+  }
+
+  /**
+   * Gets the health check URL for backend availability check.
+   */
+  private getHealthCheckUrl(): string {
+    const protocol = window.location.protocol;
+    const host = window.location.host;
+
+    if (host.includes('localhost') || host.includes('127.0.0.1')) {
+      return `${protocol}//${host}/health`;
+    } else {
+      return `${protocol}//${host}/api/health`;
+    }
   }
 
   private connect(): void {
@@ -148,7 +198,19 @@ export class WebSocketStatsService {
       const wsUrl = this.getWebSocketUrl();
       this.ws = new WebSocket(wsUrl);
 
+      // Set connection timeout
+      const connectionTimeout = setTimeout(() => {
+        if (this.ws?.readyState !== WebSocket.OPEN) {
+          console.warn('WebSocket connection timeout');
+          this.ws?.close();
+          this.connectionStatus.set('error');
+          this.lastError.set('连接超时');
+          this.scheduleReconnect();
+        }
+      }, 10000); // 10 second timeout
+
       this.ws.onopen = () => {
+        clearTimeout(connectionTimeout);
         this.onOpen();
       };
 
@@ -157,10 +219,12 @@ export class WebSocketStatsService {
       };
 
       this.ws.onclose = (event) => {
+        clearTimeout(connectionTimeout);
         this.onClose(event);
       };
 
       this.ws.onerror = (error) => {
+        clearTimeout(connectionTimeout);
         this.onError(error);
       };
     } catch (error) {
@@ -316,17 +380,30 @@ export class WebSocketStatsService {
 
   private scheduleReconnect(): void {
     this.reconnectAttempts++;
-    const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
 
-    console.log(
-      `Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`,
+    // Exponential backoff with max 30 seconds
+    const delay = Math.min(
+      this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1),
+      30000,
     );
 
-    setTimeout(() => {
+    console.log(
+      `Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`,
+    );
+
+    // Clear any existing connection check timeout
+    if (this.connectionCheckTimeout) {
+      clearTimeout(this.connectionCheckTimeout);
+    }
+
+    this.connectionCheckTimeout = setTimeout(() => {
       if (this.reconnectAttempts <= this.maxReconnectAttempts) {
-        this.connect();
+        // Check backend availability again before reconnecting
+        this.checkBackendAndConnect();
       } else {
         console.error('Max reconnection attempts reached, enabling mock mode');
+        this.connectionStatus.set('disconnected');
+        this.lastError.set('无法连接到服务器，使用本地数据');
         this.enableMockMode();
       }
     }, delay);
@@ -479,8 +556,14 @@ export class WebSocketStatsService {
     if (this.ws) {
       this.ws.close();
     }
+
+    if (this.connectionCheckTimeout) {
+      clearTimeout(this.connectionCheckTimeout);
+      this.connectionCheckTimeout = null;
+    }
+
     this.reconnectAttempts = 0;
-    this.connect();
+    this.scheduleDelayedConnection();
   }
 
   /**
@@ -490,6 +573,11 @@ export class WebSocketStatsService {
     if (this.mockInterval) {
       clearInterval(this.mockInterval);
       this.mockInterval = null;
+    }
+
+    if (this.connectionCheckTimeout) {
+      clearTimeout(this.connectionCheckTimeout);
+      this.connectionCheckTimeout = null;
     }
 
     if (this.ws) {

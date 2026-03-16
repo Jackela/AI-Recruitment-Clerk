@@ -20,6 +20,7 @@ export enum ConsentStatus {
   DENIED = 'denied',
   PENDING = 'pending',
   WITHDRAWN = 'withdrawn',
+  EXPIRED = 'expired',
   NOT_APPLICABLE = 'not_applicable',
 }
 

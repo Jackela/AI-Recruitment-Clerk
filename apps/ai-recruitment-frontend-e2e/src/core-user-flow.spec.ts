@@ -1,80 +1,100 @@
 import { test, expect } from './fixtures';
-import type { Page } from '@playwright/test';
+import { JobsPage, DashboardPage } from './pages';
+import { setupJobsApiMocking, TEST_JOB_DATA } from './fixtures';
+import { gotoAndWait, setupErrorCollection } from './utils';
+
+/**
+ * Core User Flow - Job Creation to Report Viewing
+ * Refactored to use Page Object Model
+ */
 
 const BASE_URL = '/';
 const LANDING_PATH = '/jobs';
 
-async function gotoAndConfirmLanding(page: Page, url: string): Promise<void> {
-  await page.goto(url);
-  await page.waitForURL(
-    (location) => location.pathname.startsWith(url === '/' ? LANDING_PATH : url),
-    { timeout: 15_000 },
-  );
-  await page.waitForLoadState('domcontentloaded');
-}
-
-async function expectJobsLanding(page: Page): Promise<void> {
-  await page.waitForURL(
-    (location) => location.pathname.startsWith(LANDING_PATH),
-    { timeout: 15_000 },
-  );
-  await expect(page.locator('#app-title')).toBeVisible();
-  await expect(
-    page.locator('nav a').filter({ hasText: '岗位管理' }),
-  ).toBeVisible();
-}
-
 test.describe('Core User Flow - Job Creation to Report Viewing', () => {
   test('Complete job creation happy path (frontend only)', async ({ page }) => {
-    await gotoAndConfirmLanding(page, BASE_URL);
-    await expectJobsLanding(page);
+    // Setup error collection
+    const errors = setupErrorCollection(page);
 
-    await gotoAndConfirmLanding(page, `${BASE_URL}jobs/create`);
-    const form = page.locator('form');
-    await expect(form).toBeVisible();
+    // Setup API mocking
+    await setupJobsApiMocking(page);
 
-    await page
-      .locator('input[formControlName="jobTitle"]')
-      .fill('高级前端工程师');
-    await page
-      .locator('textarea[formControlName="jdText"]')
-      .fill('职位要求：熟悉主流前端框架，具备良好协作能力。');
+    // Initialize page objects
+    const jobsPage = new JobsPage(page);
+    const dashboardPage = new DashboardPage(page);
 
-    const submitButton = page
-      .locator('button[type="submit"]')
-      .or(
-        page
-          .locator('button')
-          .filter({ hasText: /提交|创建|Submit|Create/i }),
-      );
-    await expect(submitButton).toBeEnabled();
-    await submitButton.click();
+    // Navigate to landing page
+    await gotoAndWait(page, BASE_URL, { waitForNetworkIdle: true });
+    await page.waitForURL(
+      (location) => location.pathname.startsWith(LANDING_PATH),
+      {
+        timeout: 15000,
+      },
+    );
+    await jobsPage.waitForPageLoad();
 
-    await expect(form).toBeVisible();
+    // Navigate to job creation
+    await jobsPage.navigateToCreateJob();
 
-    await page.goto(`${BASE_URL}reports`);
+    // Fill and submit form
+    await jobsPage.fillJobForm(TEST_JOB_DATA);
+    await jobsPage.submitJobForm();
+
+    // Form should still be visible after submission (based on app behavior)
+    await expect(page.getByTestId('create-job-form')).toBeVisible();
+
+    // Navigate to reports
+    await dashboardPage.navigateToReports();
     await page.waitForLoadState('domcontentloaded');
     await expect(page).toHaveURL(/\/reports/);
 
-    await gotoAndConfirmLanding(page, BASE_URL);
-    await expectJobsLanding(page);
+    // Navigate back to home
+    await gotoAndWait(page, BASE_URL);
+    await page.waitForURL(
+      (location) => location.pathname.startsWith(LANDING_PATH),
+      {
+        timeout: 15000,
+      },
+    );
+    await jobsPage.waitForPageLoad();
+
+    // Log any errors
+    logErrors(errors);
   });
 
   test('Quick smoke test - navigation essentials', async ({ page }) => {
-    await gotoAndConfirmLanding(page, BASE_URL);
-    await expectJobsLanding(page);
+    const jobsPage = new JobsPage(page);
+    const dashboardPage = new DashboardPage(page);
 
-    await gotoAndConfirmLanding(page, `${BASE_URL}jobs/create`);
-    await expect(page.locator('form')).toBeVisible();
+    // Test landing page
+    await gotoAndWait(page, BASE_URL, { waitForNetworkIdle: true });
+    await page.waitForURL(
+      (location) => location.pathname.startsWith(LANDING_PATH),
+      {
+        timeout: 15000,
+      },
+    );
+    await jobsPage.waitForPageLoad();
 
-    await page.goto(`${BASE_URL}reports`);
+    // Test job creation page navigation
+    await jobsPage.navigateToCreateJob();
+
+    // Test reports page navigation
+    await dashboardPage.navigateToReports();
     await page.waitForLoadState('domcontentloaded');
     await expect(page).toHaveURL(/\/reports/);
   });
 
   test('Job creation form accessibility basics', async ({ page }) => {
-    await gotoAndConfirmLanding(page, `${BASE_URL}jobs/create`);
-    const inputs = page.locator('form input, form textarea, form select');
+    const jobsPage = new JobsPage(page);
+
+    await gotoAndWait(page, `${BASE_URL}jobs/create`);
+    await jobsPage.waitForPageLoad();
+
+    // Check form elements using Page Object
+    const inputs = page.locator(
+      '[data-testid="job-title-input"], [data-testid="jd-textarea"]',
+    );
 
     const sampleCount = Math.min(await inputs.count(), 3);
     for (let i = 0; i < sampleCount; i++) {
@@ -89,3 +109,16 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
     }
   });
 });
+
+// Helper function to log errors
+function logErrors(errors: {
+  consoleErrors: string[];
+  pageErrors: string[];
+}): void {
+  if (errors.consoleErrors.length > 0) {
+    console.log('💥 Console errors:', errors.consoleErrors);
+  }
+  if (errors.pageErrors.length > 0) {
+    console.log('🔥 Page errors:', errors.pageErrors);
+  }
+}

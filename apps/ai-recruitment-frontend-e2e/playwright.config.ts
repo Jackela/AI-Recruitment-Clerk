@@ -45,13 +45,13 @@ const projects = [
           '--no-sandbox', // For CI stability
           '--disable-dev-shm-usage', // For CI stability
         ],
-        headless: !process.env.CHROME_HEADED,
+        headless: !process.env['CHROME_HEADED'],
       },
     },
   },
 ];
 
-if (process.env.E2E_ENABLE_FIREFOX === 'true') {
+if (process.env['E2E_ENABLE_FIREFOX'] === 'true') {
   projects.push({
     name: 'firefox',
     use: {
@@ -76,7 +76,77 @@ if (process.env.E2E_ENABLE_FIREFOX === 'true') {
           'browser.cache.memory.enable': true,
           'browser.cache.memory.capacity': 16384,
         },
-        headless: !process.env.FIREFOX_HEADED,
+        headless: !process.env['FIREFOX_HEADED'],
+      },
+    },
+  });
+}
+
+// WebKit / Safari support
+if (process.env['E2E_ENABLE_WEBKIT'] === 'true') {
+  projects.push({
+    name: 'webkit',
+    use: {
+      ...devices['Desktop Safari'],
+      navigationTimeout: 90000,
+      actionTimeout: 30000,
+      launchOptions: {
+        timeout: 60000,
+        args: [
+          '--disable-web-security',
+          '--disable-features=VizDisplayCompositor',
+          '--disable-ipc-flooding-protection',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-renderer-backgrounding',
+          '--disable-field-trial-config',
+          '--no-first-run',
+        ],
+        headless: !process.env['WEBKIT_HEADED'],
+      },
+      // @ts-expect-error contextOptions is not in base type but works for WebKit
+      contextOptions: {
+        ignoreHTTPSErrors: true,
+        bypassCSP: true,
+      },
+    },
+  });
+
+  // Mobile Safari - iPhone
+  projects.push({
+    name: 'webkit-iphone',
+    use: {
+      ...devices['iPhone 14'],
+      navigationTimeout: 90000,
+      actionTimeout: 30000,
+      launchOptions: {
+        timeout: 60000,
+        args: ['--no-first-run'],
+        headless: !process.env['WEBKIT_HEADED'],
+      },
+      // @ts-expect-error contextOptions is not in base type but works for WebKit
+      contextOptions: {
+        ignoreHTTPSErrors: true,
+        bypassCSP: true,
+      },
+    },
+  });
+
+  // Mobile Safari - iPad
+  projects.push({
+    name: 'webkit-ipad',
+    use: {
+      ...devices['iPad Pro 11'],
+      navigationTimeout: 90000,
+      actionTimeout: 30000,
+      launchOptions: {
+        timeout: 60000,
+        args: ['--no-first-run'],
+        headless: !process.env['WEBKIT_HEADED'],
+      },
+      // @ts-expect-error contextOptions is not in base type but works for WebKit
+      contextOptions: {
+        ignoreHTTPSErrors: true,
+        bypassCSP: true,
       },
     },
   });
@@ -84,15 +154,26 @@ if (process.env.E2E_ENABLE_FIREFOX === 'true') {
 
 export default defineConfig({
   testDir: './src',
+  // Exclude debug/diagnostic tests from regular runs
+  testIgnore: ['**/debug/**', '**/*.debug.spec.ts'],
   timeout: 60000,
   expect: {
     timeout: 15000,
+    toHaveScreenshot: {
+      maxDiffPixels: 100,
+      threshold: 0.2,
+      // Allow updating snapshots when they don't exist or during intentional updates
+      animations: 'disabled',
+    },
+    toMatchSnapshot: {
+      maxDiffPixelRatio: 0.02,
+    },
   },
-  // Enhanced stability configuration for port management
-  fullyParallel: false,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 3 : 2, // Increased retries for infrastructure stability
-  workers: process.env.CI ? 1 : 1, // Use single worker to prevent port conflicts
+  // Parallel execution optimized for modern CI and local environments
+  fullyParallel: true,
+  forbidOnly: !!process.env['CI'],
+  retries: process.env['CI'] ? 2 : 1,
+  workers: process.env['CI'] ? 4 : undefined, // CI: fixed 4 workers, Local: auto-detect (50% CPUs)
   // Extended global timeout for comprehensive setup/teardown
   globalTimeout: 900000, // 15 minutes global timeout for robust cleanup and port management
   reporter: 'html',
@@ -125,11 +206,13 @@ export default defineConfig({
     ? {}
     : {
         webServer: {
-          // Build first, then serve with simple HTTP server (no Nx daemon needed)
-          command: `npx nx run ai-recruitment-frontend:build:production && npx serve dist/apps/ai-recruitment-frontend/browser -l ${devServerPort} -s`,
+          // Serve the pre-built frontend (build is done in CI before running tests)
+          command: `npx serve dist/apps/ai-recruitment-frontend/browser -l ${devServerPort} -s`,
           url: baseURL,
-          reuseExistingServer: !process.env.CI,
-          timeout: 120 * 1000, // 120 seconds for build + server startup
+          reuseExistingServer: !process.env['CI'],
+          timeout: 30 * 1000, // 30 seconds for server startup (build is already done)
+          stdout: 'pipe',
+          stderr: 'pipe',
         },
       }),
   projects,

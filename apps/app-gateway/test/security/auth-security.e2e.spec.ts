@@ -21,10 +21,10 @@ import * as jwt from 'jsonwebtoken';
 
 describe('🔐 Authentication & Authorization Security Tests', () => {
   let app: INestApplication;
-  let _jwtService: JwtService;
+  let jwtService: JwtService;
   let adminToken: string;
   let userToken: string;
-  let _hrToken: string;
+  let hrToken: string;
   let testUserId: string;
   let testOrganizationId: string;
 

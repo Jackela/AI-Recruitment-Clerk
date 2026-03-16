@@ -48,3 +48,6 @@ export const test = base.extend({
 });
 
 export { expect } from '@playwright/test';
+
+// Re-export fixtures from fixtures directory
+export * from './fixtures/index';

@@ -1,13 +1,13 @@
 import { test, expect } from './fixtures';
+import type { Page } from '@playwright/test';
 
 const LANDING_PATH = '/jobs';
 
-async function openJobsPage(page: Parameters<typeof test>[0]['page']) {
+async function openJobsPage(page: Page) {
   await page.goto('/');
-  await page.waitForURL(
-    (url) => url.pathname.startsWith(LANDING_PATH),
-    { timeout: 15_000 },
-  );
+  await page.waitForURL((url: URL) => url.pathname.startsWith(LANDING_PATH), {
+    timeout: 15_000,
+  });
   await page.waitForLoadState('domcontentloaded');
 }
 
@@ -23,11 +23,16 @@ test.describe('Error Scenarios and Form Validation', () => {
     const form = page.locator('form');
     const formCount = await form.count();
     // Skip test if form not available (backend features may be disabled)
-    test.skip(formCount === 0, 'Form not available; assuming backend features disabled.');
+    test.skip(
+      formCount === 0,
+      'Form not available; assuming backend features disabled.',
+    );
 
     await expect(form).toBeVisible({ timeout: 5_000 });
 
-    const validationMessages = await page.locator('.invalid-feedback').allTextContents();
+    const validationMessages = await page
+      .locator('.invalid-feedback')
+      .allTextContents();
     expect(validationMessages.length).toBeGreaterThanOrEqual(0);
   });
 
@@ -43,7 +48,10 @@ test.describe('Error Scenarios and Form Validation', () => {
 
     const form = page.locator('form');
     const formCount = await form.count();
-    test.skip(formCount === 0, 'Form not available; assuming backend features disabled.');
+    test.skip(
+      formCount === 0,
+      'Form not available; assuming backend features disabled.',
+    );
 
     await expect(form).toBeVisible({ timeout: 5_000 });
 
@@ -55,7 +63,10 @@ test.describe('Error Scenarios and Form Validation', () => {
     const submitButton = page.locator('button[type="submit"]');
     await expect(submitButton).toBeVisible();
     const isDisabled = await submitButton.isDisabled();
-    test.skip(isDisabled, 'Submit button is disabled; cannot proceed with test.');
+    test.skip(
+      isDisabled,
+      'Submit button is disabled; cannot proceed with test.',
+    );
 
     await submitButton.click();
 
@@ -113,7 +124,10 @@ test.describe('Error Scenarios and Form Validation', () => {
 
     const form = page.locator('form');
     const formCount = await form.count();
-    test.skip(formCount === 0, 'Form not available; assuming backend features disabled.');
+    test.skip(
+      formCount === 0,
+      'Form not available; assuming backend features disabled.',
+    );
 
     const jobTitle = page.locator('input[formControlName="jobTitle"]');
     const jobText = page.locator('textarea[formControlName="jdText"]');
@@ -122,26 +136,36 @@ test.describe('Error Scenarios and Form Validation', () => {
 
     const submitButton = page.locator('button[type="submit"]');
     const isDisabled = await submitButton.isDisabled();
-    test.skip(isDisabled, 'Submit button is disabled; cannot proceed with test.');
+    test.skip(
+      isDisabled,
+      'Submit button is disabled; cannot proceed with test.',
+    );
     await submitButton.click();
 
     await page
       .waitForResponse(
-        (response) => response.url().includes('/api/jobs') && response.status() === 400,
+        (response) =>
+          response.url().includes('/api/jobs') && response.status() === 400,
         { timeout: 10_000 },
       )
       .catch(() => null);
 
     const alert = page.locator('.alert-danger, .alert, [role="alert"]');
-    const alertVisible = await alert.first().isVisible().catch(() => false);
+    const alertVisible = await alert
+      .first()
+      .isVisible()
+      .catch(() => false);
     test.skip(!alertVisible, 'No validation alert rendered; feature disabled.');
 
-    const closeButton = alert.first().locator(
-      '.btn-close, [data-dismiss="alert"], [aria-label="Close"]',
-    );
+    const closeButton = alert
+      .first()
+      .locator('.btn-close, [data-dismiss="alert"], [aria-label="Close"]');
     const closeButtonCount = await closeButton.count();
     console.log('Close button count:', closeButtonCount);
-    test.skip(closeButtonCount === 0, 'Alert is not dismissible in this build.');
+    test.skip(
+      closeButtonCount === 0,
+      'Alert is not dismissible in this build.',
+    );
 
     await closeButton.first().click();
     await expect(alert.first()).toBeHidden({ timeout: 5_000 });

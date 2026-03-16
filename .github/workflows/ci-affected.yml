@@ -30,10 +30,10 @@ jobs:
         with:
           path: |
             .nx/cache
-            node_modules/.cache
-          key: ${{ runner.os }}-nx-${{ hashFiles('package-lock.json', '**/project.json') }}
+            node_modules/.cache/nx
+          key: nx-${{ runner.os }}-${{ hashFiles('**/package-lock.json', '**/project.json') }}
           restore-keys: |
-            ${{ runner.os }}-nx-
+            nx-${{ runner.os }}-
       - name: Cache Playwright browsers
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
@@ -46,12 +46,24 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Print affected graph
         run: npx nx show projects --affected --base=origin/main --head=HEAD
+      - name: Print affected projects
+        run: |
+          echo "Affected projects:"
+          npx nx show projects --affected --base=origin/main --head=HEAD
+          echo ""
+          echo "Affected projects with test target:"
+          npx nx print-affected --type=test --select=projects --base=origin/main --head=HEAD || echo "No test target projects affected"
       - name: Lint affected
-        run: npx nx affected -t lint --base=origin/main --head=HEAD
+        run: npx nx affected -t lint --base=origin/main --head=HEAD --parallel=4
       - name: Test affected
-        run: npx nx affected -t test --base=origin/main --head=HEAD
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            npx nx affected -t test --base=origin/main --head=HEAD --parallel=4 --runInBand=false
+          else
+            npx nx run-many -t test --all --parallel=4 --runInBand=false
+          fi
       - name: Build affected
-        run: npx nx affected -t build --base=origin/main --head=HEAD
+        run: npx nx affected -t build --base=origin/main --head=HEAD --parallel=4
       - name: Start static server for E2E
         run: |
           npx nx run ai-recruitment-frontend:serve-static --port 4200 > /tmp/server.log 2>&1 &
@@ -73,7 +85,7 @@ jobs:
           fi
       - name: E2E affected
         # Skip app-gateway-e2e due to complex service dependencies
-        run: npx nx affected -t e2e --base=origin/main --head=HEAD --exclude=app-gateway-e2e --configuration=ci
+        run: npx nx affected -t e2e --base=origin/main --head=HEAD --exclude=app-gateway-e2e --configuration=ci --parallel=2
         env:
           CI: true
           E2E_SKIP_WEBSERVER: true
