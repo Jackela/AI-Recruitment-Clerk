@@ -136,14 +136,79 @@ describe('QuestionnaireRules', () => {
       const submission = createMockSubmission();
       const result = QuestionnaireRules.isValidSubmission(submission);
 
-      expect(result.isValid()).toBe(true);
-      expect(result.getErrors()).toHaveLength(0);
+      expect(result.isValid).toBe(true);
+      expect(result.errors).toHaveLength(0);
     });
 
     it('should fail validation for missing role', () => {
       const submission = createMockSubmission({
         userProfile: { role: undefined },
       });
+      const result = QuestionnaireRules.isValidSubmission(submission);
+
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toContain(
+        'Required field missing: userProfile.role',
+      );
+    });
+
+    it('should fail validation for missing industry', () => {
+      const submission = createMockSubmission({
+        userProfile: { industry: undefined },
+      });
+      const result = QuestionnaireRules.isValidSubmission(submission);
+
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toContain(
+        'Required field missing: userProfile.industry',
+      );
+    });
+
+    it('should fail validation for missing satisfaction rating', () => {
+      const submission = createMockSubmission({
+        userExperience: { overallSatisfaction: undefined },
+      });
+      const result = QuestionnaireRules.isValidSubmission(submission);
+
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toContain(
+        'Required field missing: userExperience.overallSatisfaction',
+      );
+    });
+
+    it('should fail validation for invalid rating', () => {
+      const submission = createMockSubmission({
+        userExperience: { overallSatisfaction: 6 },
+      });
+      const result = QuestionnaireRules.isValidSubmission(submission);
+
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toContain('Overall satisfaction must be 1-5');
+    });
+
+    it('should fail validation for negative willingness to pay', () => {
+      const submission = createMockSubmission({
+        businessValue: { willingnessToPayMonthly: -10 },
+      });
+      const result = QuestionnaireRules.isValidSubmission(submission);
+
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toContain(
+        'Willingness to pay must be non-negative',
+      );
+    });
+
+    it('should fail validation for invalid time saving percentage', () => {
+      const submission = createMockSubmission({
+        businessValue: { timeSavingPercentage: 150 },
+      });
+      const result = QuestionnaireRules.isValidSubmission(submission);
+
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toContain(
+        'Time saving percentage must be 0-100',
+      );
+    });
       const result = QuestionnaireRules.isValidSubmission(submission);
 
       expect(result.isValid()).toBe(false);

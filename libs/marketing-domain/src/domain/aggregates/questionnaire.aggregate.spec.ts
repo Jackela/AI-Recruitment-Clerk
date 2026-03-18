@@ -154,8 +154,8 @@ describe('QuestionnaireRules', () => {
       const submission = createMockSubmission();
       const result = QuestionnaireRules.isValidSubmission(submission);
 
-      expect(result.isValid()).toBe(true);
-      expect(result.getErrors()).toHaveLength(0);
+      expect(result.isValid).toBe(true);
+      expect(result.errors).toHaveLength(0);
     });
 
     it('should fail validation for missing role', () => {
@@ -164,8 +164,8 @@ describe('QuestionnaireRules', () => {
       });
       const result = QuestionnaireRules.isValidSubmission(submission);
 
-      expect(result.isValid()).toBe(false);
-      expect(result.getErrors()).toContain(
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toContain(
         'Required field missing: userProfile.role',
       );
     });
@@ -176,8 +176,8 @@ describe('QuestionnaireRules', () => {
       });
       const result = QuestionnaireRules.isValidSubmission(submission);
 
-      expect(result.isValid()).toBe(false);
-      expect(result.getErrors()).toContain(
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toContain(
         'Required field missing: userProfile.industry',
       );
     });
@@ -188,8 +188,8 @@ describe('QuestionnaireRules', () => {
       });
       const result = QuestionnaireRules.isValidSubmission(submission);
 
-      expect(result.isValid()).toBe(false);
-      expect(result.getErrors()).toContain(
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toContain(
         'Required field missing: userExperience.overallSatisfaction',
       );
     });
@@ -200,8 +200,8 @@ describe('QuestionnaireRules', () => {
       });
       const result = QuestionnaireRules.isValidSubmission(submission);
 
-      expect(result.isValid()).toBe(false);
-      expect(result.getErrors()).toContain('Overall satisfaction must be 1-5');
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toContain('Overall satisfaction must be 1-5');
     });
 
     it('should fail validation for negative willingness to pay', () => {
@@ -210,8 +210,8 @@ describe('QuestionnaireRules', () => {
       });
       const result = QuestionnaireRules.isValidSubmission(submission);
 
-      expect(result.isValid()).toBe(false);
-      expect(result.getErrors()).toContain(
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toContain(
         'Willingness to pay must be non-negative',
       );
     });
@@ -222,10 +222,8 @@ describe('QuestionnaireRules', () => {
       });
       const result = QuestionnaireRules.isValidSubmission(submission);
 
-      expect(result.isValid()).toBe(false);
-      expect(result.getErrors()).toContain(
-        'Time saving percentage must be 0-100',
-      );
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toContain('Time saving percentage must be 0-100');
     });
   });
 
