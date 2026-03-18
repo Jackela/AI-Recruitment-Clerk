@@ -5,13 +5,14 @@ export default {
   transform: {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
   },
+  moduleFileExtensions: ['ts', 'js', 'html'],
   moduleNameMapper: {
+    '^@ai-recruitment-clerk/(.*)$': '<rootDir>/../../libs/$1/src/index.ts',
     '^\\./services/jd-extractor-nats.service$':
       '<rootDir>/src/services/jd-extractor-nats.service.stub.ts',
     '^\\.\\./services/jd-extractor-nats.service$':
       '<rootDir>/src/services/jd-extractor-nats.service.stub.ts',
   },
-  moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/apps/jd-extractor-svc',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   testMatch: ['**/*.spec.ts'],

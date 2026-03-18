@@ -11,6 +11,7 @@ import {Component,
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 
 // Import configuration
 import type {
@@ -70,6 +71,7 @@ export type TimesheetViewType = keyof typeof TIMESHEET_VIEW_CONFIGS;
     TimesheetRowComponent,
     TimesheetToolbarComponent,
     TimesheetPaginationComponent,
+    TranslatePipe,
   ],
   templateUrl: './timesheet-table.component.html',
   styleUrls: ['./timesheet-table.component.scss'],

@@ -1,12 +1,15 @@
 import type { OnInit, OnDestroy } from '@angular/core';
-import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import type { Observable } from 'rxjs';
-import { SharedModule } from '../../components/shared/shared.module';
 import type { BentoGridItem } from '../../components/shared/bento-grid/bento-grid-item.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { BentoGridComponent } from '../../components/shared/bento-grid/bento-grid.component';
-import type { DashboardStats, SystemHealth } from '../../services/dashboard-api.service';
+import type {
+  DashboardStats,
+  SystemHealth,
+} from '../../services/dashboard-api.service';
 import { DashboardService, type GuestStats } from './dashboard.service';
 import { StatsDisplayComponent } from './stats-display.component';
 import { MetricsComponent } from './metrics.component';
@@ -22,11 +25,11 @@ import { ChartsComponent } from './charts.component';
   imports: [
     CommonModule,
     RouterModule,
-    SharedModule,
     BentoGridComponent,
     StatsDisplayComponent,
     MetricsComponent,
     ChartsComponent,
+    TranslatePipe,
   ],
   template: `
     <div class="dashboard-container">
@@ -370,7 +373,8 @@ import { ChartsComponent } from './charts.component';
     `,
   ],
 
-  changeDetection: ChangeDetectionStrategy.OnPush,})
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
 export class EnhancedDashboardComponent implements OnInit, OnDestroy {
   public stats$!: Observable<DashboardStats>;
   public systemHealth$!: Observable<SystemHealth>;

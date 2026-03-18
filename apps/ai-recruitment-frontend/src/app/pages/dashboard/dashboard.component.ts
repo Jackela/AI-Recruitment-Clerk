@@ -4,7 +4,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
-import { SharedModule } from '../../components/shared/shared.module';
+import { DashboardCardComponent } from '../../components/shared/dashboard-card/dashboard-card.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 interface DashboardStats {
   totalJobs: number;
@@ -29,7 +30,7 @@ interface ActivityItem {
 @Component({
   selector: 'arc-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, SharedModule],
+  imports: [CommonModule, RouterModule, DashboardCardComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div

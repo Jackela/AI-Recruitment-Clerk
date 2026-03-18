@@ -15,7 +15,7 @@ import {
   normalizeStringArray,
   normalizeUrl,
 } from '../utils/analysis.utils';
-import type { FileUploadData, AnalysisResult } from '../types/analysis.types';
+import { FileUploadData, AnalysisResult } from '../types/analysis.types';
 
 @Injectable()
 export class AnalysisFlowService {

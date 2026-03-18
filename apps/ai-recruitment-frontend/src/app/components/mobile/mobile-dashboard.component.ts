@@ -3,6 +3,7 @@ import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Subject } from 'rxjs';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { takeUntil } from 'rxjs/operators';
 import type { MobileNavItem } from './mobile-navigation.component';
 import { MobileNavigationComponent } from './mobile-navigation.component';
@@ -44,6 +45,7 @@ import { MobileDashboardService } from '../../services/mobile/mobile-dashboard.s
     DashboardChartsComponent,
     MobileQuickActionsComponent,
     MobileActivityListComponent,
+    TranslatePipe,
   ],
   templateUrl: './mobile-dashboard.component.html',
   styleUrl: './mobile-dashboard.component.scss',

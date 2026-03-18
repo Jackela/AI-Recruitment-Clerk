@@ -1,12 +1,7 @@
 import { Injectable } from '@angular/core';
-import type {
-  HttpClient,
-  HttpEvent,
-  HttpErrorResponse} from '@angular/common/http';
-import {
-  HttpEventType
-} from '@angular/common/http';
-import type { Observable} from 'rxjs';
+import type { HttpEvent, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpEventType } from '@angular/common/http';
+import type { Observable } from 'rxjs';
 import { Subject, BehaviorSubject } from 'rxjs';
 import { catchError, map, finalize } from 'rxjs/operators';
 import { environment } from '../../environments/environment';

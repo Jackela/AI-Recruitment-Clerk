@@ -7,6 +7,7 @@ import { takeUntil, filter } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { DashboardCardComponent } from '../../../components/shared/dashboard-card/dashboard-card.component';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { I18nService } from '../../../services/i18n/i18n.service';
 import type { AppState } from '../../../store/app.state';
 import type { JobListItem, Job } from '../../../store/jobs/job.model';
@@ -64,7 +65,7 @@ export interface JobManagementStateWithWebSocket {
 @Component({
   selector: 'arc-jobs-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, DashboardCardComponent],
+  imports: [CommonModule, RouterModule, DashboardCardComponent, TranslatePipe],
   templateUrl: './jobs-list.component.html',
   styleUrl: './jobs-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

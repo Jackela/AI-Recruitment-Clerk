@@ -6,6 +6,9 @@ export default {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
+  moduleNameMapper: {
+    '^@ai-recruitment-clerk/(.*)$': '<rootDir>/../../libs/$1/src/index.ts',
+  },
   coverageDirectory: '../../coverage/apps/report-generator-svc',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   testMatch: ['**/*.spec.ts'],

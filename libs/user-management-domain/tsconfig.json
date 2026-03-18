@@ -5,7 +5,9 @@
     "moduleResolution": "node",
     "declaration": true,
     "outDir": "./dist",
-
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "strictPropertyInitialization": false,
     "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,

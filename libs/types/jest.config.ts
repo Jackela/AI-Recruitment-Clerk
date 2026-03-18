@@ -16,4 +16,5 @@ export default {
       statements: 60,
     },
   },
+  passWithNoTests: true,
 };

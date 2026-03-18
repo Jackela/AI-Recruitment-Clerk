@@ -18,6 +18,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 import type { PageEvent } from './data-table-pagination.component';
 import { DataTablePaginationComponent } from './data-table-pagination.component';
 import {
@@ -83,7 +84,12 @@ export interface SortEvent {
 @Component({
   selector: 'arc-data-table',
   standalone: true,
-  imports: [CommonModule, FormsModule, DataTablePaginationComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    DataTablePaginationComponent,
+    TranslatePipe,
+  ],
   templateUrl: './data-table.component.html',
   styleUrls: ['./data-table.component.scss'],
 

@@ -2,26 +2,20 @@ export default {
   displayName: 'app-gateway',
   preset: '../../jest.preset.cjs',
   testEnvironment: 'node',
-  testMatch: ['<rootDir>/src/**/*.spec.ts'],
-  testPathIgnorePatterns: [
-    String.raw`<rootDir>/test/.*\.e2e\.spec\.ts$`,
-    String.raw`<rootDir>/src/.*\.integration\.spec\.ts$`,
-    '<rootDir>/node_modules/',
-  ],
   transform: {
-    [String.raw`^.+\.[tj]s$`]: [
-      'ts-jest',
-      { tsconfig: '<rootDir>/tsconfig.spec.json' },
-    ],
+    '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/apps/app-gateway',
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  testMatch: ['**/*.spec.ts'],
+  testPathIgnorePatterns: ['/node_modules/', '\\.integration\\.spec\\.ts$'],
   coverageThreshold: {
     global: {
-      branches: 70,
-      functions: 70,
-      lines: 70,
-      statements: 70,
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
     },
   },
 };

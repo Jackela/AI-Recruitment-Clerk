@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import type { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import type { Observable, BehaviorSubject } from 'rxjs';
-import { throwError, of } from 'rxjs';
+import type { HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import type { Observable } from 'rxjs';
+import { throwError, of, BehaviorSubject } from 'rxjs';
 import {
   catchError,
   map,
