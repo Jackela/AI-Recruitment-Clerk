@@ -329,7 +329,7 @@ export async function measurePerformance(
 /**
  * Check Core Web Vitals against budgets
  */
-export function checkPerformanceBudget(
+export function checkCoreWebVitalsBudget(
   metrics: CoreWebVitals,
   budget: Partial<CoreWebVitals>,
 ): { passed: boolean; violations: string[] } {
@@ -380,9 +380,7 @@ export const PERFORMANCE_BUDGETS = {
 /**
  * Measure memory usage
  */
-export async function measureMemoryUsage(
-  page: Page,
-): Promise<{
+export async function measureMemoryUsage(page: Page): Promise<{
   usedJSHeapSize: number;
   totalJSHeapSize: number;
   jsHeapSizeLimit: number;

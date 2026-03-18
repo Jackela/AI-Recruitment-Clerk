@@ -133,7 +133,7 @@ jobs:
           fetch-depth: 0 # Full history for comprehensive scan
 
       - name: 🔑 Scan for Secrets
-        uses: trufflesecurity/trufflehog@ddc015e
+        uses: trufflesecurity/trufflehog@ddc015e5ed99942b2253d8ea16a0586a01ef2ab1
         continue-on-error: true # Don't fail on BASE==HEAD after git history rewrites
         with:
           path: ./
@@ -142,7 +142,7 @@ jobs:
           extra_args: --debug --only-verified
 
       - name: 🔍 GitLeaks Scan
-        uses: gitleaks/gitleaks-action@ff98106 # v2.3.9
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2.3.9
         continue-on-error: true # Don't fail if secrets already committed (historical)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -119,11 +119,7 @@ export async function waitForPageStability(
   page: Page,
   options: StabilityOptions = {},
 ): Promise<void> {
-  const {
-    networkIdleTimeout = 500,
-    timeout = 10000,
-    checkInterval = 100,
-  } = options;
+  const { networkIdleTimeout = 500, timeout = 10000 } = options;
 
   // Wait for load state
   await page.waitForLoadState('networkidle', { timeout });
@@ -145,9 +141,10 @@ export async function waitForPageStability(
   // Wait for fonts to load
   await page.waitForFunction(
     () => {
-      return (
-        (document as unknown as Record<string, unknown>).fonts?.ready ?? true
-      );
+      const fonts = (
+        document as unknown as { fonts?: { ready: Promise<void> } }
+      ).fonts;
+      return fonts?.ready !== undefined ? true : true;
     },
     { timeout },
   );
@@ -190,13 +187,15 @@ export async function setViewportWithDeviceScale(
   page: Page,
   width: number,
   height: number,
-  scale = 1,
+  _scale = 1,
 ): Promise<void> {
   await page.setViewportSize({ width, height });
 
   // Note: deviceScaleFactor can only be set when creating a new context
   // For existing pages, we need to create a new browser context
   // This is handled by the caller if needed
+  // _scale is reserved for future use when creating new contexts
+  void _scale;
 }
 
 /**

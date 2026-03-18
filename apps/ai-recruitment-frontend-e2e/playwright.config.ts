@@ -204,7 +204,6 @@ export default defineConfig({
     screenshot: {
       mode: 'only-on-failure',
       fullPage: false,
-      type: 'png',
     },
 
     // Context options for consistency

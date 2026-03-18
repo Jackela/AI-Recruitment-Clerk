@@ -15,20 +15,49 @@ if [ "$delete_only" -eq 1 ]; then
   exit 0
 fi
 
+# Allow skipping pre-push checks with environment variable
+if [ "$SKIP_PRE_PUSH" = "true" ]; then
+  echo "⏭️  Skipping pre-push checks (SKIP_PRE_PUSH=true)"
+  exit 0
+fi
+
+# Quick mode - only run essential checks (under 2 minutes)
+if [ "$QUICK_PUSH" = "true" ]; then
+  echo "🚀 Running QUICK pre-push checks..."
+  echo ""
+  
+  # 1. Lint affected only
+  echo "📋 Step 1/2: Linting affected projects..."
+  npx nx affected:lint --base=origin/main --head=HEAD --parallel=3
+  echo "✅ Lint passed"
+  echo ""
+  
+  # 2. Typecheck affected only
+  echo "🔍 Step 2/2: Type-checking affected projects..."
+  npx nx affected --target=typecheck --base=origin/main --head=HEAD --parallel=3
+  echo "✅ Typecheck passed"
+  echo ""
+  
+  echo "✅ Quick checks passed! Full CI will run on GitHub Actions."
+  exit 0
+fi
+
 echo "🚀 Running ENHANCED pre-push CI checks..."
 echo "⏱️  This will test ALL projects. May take 10-15 minutes."
+echo "   Tip: Use QUICK_PUSH=true for faster checks (2 minutes)"
+echo "   Or SKIP_PRE_PUSH=true to skip entirely"
 echo ""
 
 # Start time
 START_TIME=$(date +%s)
 
-# 1. Lint all (includes any-type check via @typescript-eslint/no-explicit-any)
-echo "📋 Step 1/8: Linting ALL projects (including any-type check)..."
-npm run lint
+# 1. Lint affected (not all - faster)
+echo "📋 Step 1/8: Linting affected projects (including any-type check)..."
+npx nx affected:lint --base=origin/main --head=HEAD --parallel=3
 echo "✅ Lint passed (no any types found)"
 echo ""
 
-# 2. Format check
+# 2. Format check affected only
 echo "🎨 Step 2/8: Checking code formatting..."
 npx prettier --check "{apps,libs}/**/*.{ts,html,scss,js,json,md}" || {
   echo "❌ Code formatting issues found. Run 'npm run format' to fix."
@@ -37,13 +66,13 @@ npx prettier --check "{apps,libs}/**/*.{ts,html,scss,js,json,md}" || {
 echo "✅ Format check passed"
 echo ""
 
-# 3. Typecheck all
-echo "🔍 Step 3/8: Type-checking ALL projects..."
-npm run typecheck
+# 3. Typecheck affected
+echo "🔍 Step 3/8: Type-checking affected projects..."
+npx nx affected --target=typecheck --base=origin/main --head=HEAD --parallel=3
 echo "✅ Typecheck passed"
 echo ""
 
-# 4. Security audit
+# 4. Security audit (quick mode - only high severity)
 echo "🔒 Step 4/8: Running security audit..."
 npm audit --audit-level=high || {
   echo "⚠️  Security vulnerabilities found. Review with: npm audit"
