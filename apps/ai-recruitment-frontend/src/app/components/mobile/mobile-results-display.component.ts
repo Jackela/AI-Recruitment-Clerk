@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import {Component, Input, Output, EventEmitter, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { CandidateResult } from './mobile-results-item.component';
 import { MobileResultsItemComponent } from './mobile-results-item.component';
@@ -90,7 +90,8 @@ import { MobileResultsLoadingComponent } from './mobile-results-loading.componen
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class MobileResultsDisplayComponent {
   @Input() public candidates: CandidateResult[] = [];
   @Input() public isLoading = false;

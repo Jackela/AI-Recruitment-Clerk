@@ -9,21 +9,44 @@
         [disabled]="creating$ | async"
         [attr.aria-label]="'common.back' | translate"
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path d="M19 12H5M12 19l-7-7 7-7" />
         </svg>
         <span>{{ 'common.back' | translate }}</span>
       </button>
       <div class="header-text">
-        <h1 id="page-title" class="page-title">{{ 'jobs.createJob.title' | translate }}</h1>
-        <p class="page-subtitle" role="doc-subtitle">创建新的招聘职位并开始接收候选人</p>
+        <h1 id="page-title" class="page-title">
+          {{ 'jobs.createJob.title' | translate }}
+        </h1>
+        <p class="page-subtitle" role="doc-subtitle">
+          {{ 'jobs.createJob.subtitle' | translate }}
+        </p>
       </div>
     </div>
   </header>
 
   <!-- Error Banner -->
-  <div *ngIf="error$ | async as error" class="error-banner alert-danger" role="alert" aria-live="assertive">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+  <div
+    *ngIf="error$ | async as error"
+    class="error-banner alert-danger"
+    role="alert"
+    aria-live="assertive"
+  >
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      aria-hidden="true"
+    >
       <circle cx="12" cy="12" r="10"></circle>
       <line x1="12" y1="8" x2="12" y2="12"></line>
       <line x1="12" y1="16" x2="12.01" y2="16"></line>
@@ -35,7 +58,14 @@
       (click)="onClearError()"
       [attr.aria-label]="'common.close' | translate"
     >
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        aria-hidden="true"
+      >
         <line x1="18" y1="6" x2="6" y2="18"></line>
         <line x1="6" y1="6" x2="18" y2="18"></line>
       </svg>
@@ -43,27 +73,55 @@
   </div>
 
   <!-- Create Job Form Bento Card -->
-  <article class="create-job-bento-card" role="main" aria-labelledby="form-heading">
+  <article
+    class="create-job-bento-card"
+    role="main"
+    aria-labelledby="form-heading"
+  >
     <div class="card-header">
       <div class="card-icon" aria-hidden="true">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+        >
           <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
           <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
         </svg>
       </div>
-      <h2 id="form-heading" class="card-title">{{ 'jobs.createJob.information' | translate }}</h2>
+      <h2 id="form-heading" class="card-title">
+        {{ 'jobs.createJob.information' | translate }}
+      </h2>
     </div>
     <div class="card-body">
-      <form [formGroup]="createJobForm" (ngSubmit)="onSubmit()" data-testid="create-job-form" novalidate>
+      <form
+        [formGroup]="createJobForm"
+        (ngSubmit)="onSubmit()"
+        data-testid="create-job-form"
+        novalidate
+      >
         <!-- Job Title Field -->
         <div class="form-field">
           <label for="jobTitle" class="field-label">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+              ></path>
               <polyline points="14,2 14,8 20,8"></polyline>
             </svg>
             {{ 'jobs.createJob.jobTitle.label' | translate }}
-            <span class="required-indicator" aria-label="必填" title="必填">*</span>
+            <span class="required-indicator" aria-label="必填" title="必填"
+              >*</span
+            >
           </label>
           <input
             type="text"
@@ -71,14 +129,29 @@
             class="field-input"
             formControlName="jobTitle"
             data-testid="job-title-input"
+            autocomplete="organization-title"
             [class.invalid]="hasFieldError('jobTitle')"
             [placeholder]="'jobs.createJob.jobTitle.placeholder' | translate"
             maxlength="100"
             [attr.aria-invalid]="hasFieldError('jobTitle')"
-            [attr.aria-describedby]="hasFieldError('jobTitle') ? 'jobTitle-error' : 'jobTitle-hint'"
+            [attr.aria-describedby]="
+              hasFieldError('jobTitle') ? 'jobTitle-error' : 'jobTitle-hint'
+            "
           />
-          <div *ngIf="getFieldError('jobTitle') as jobTitleError" class="field-error invalid-feedback" id="jobTitle-error" role="alert">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+          <div
+            *ngIf="getFieldError('jobTitle') as jobTitleError"
+            class="field-error invalid-feedback"
+            id="jobTitle-error"
+            role="alert"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
               <circle cx="12" cy="12" r="10"></circle>
               <line x1="12" y1="8" x2="12" y2="12"></line>
               <line x1="12" y1="16" x2="12.01" y2="16"></line>
@@ -93,15 +166,26 @@
         <!-- Job Description Field -->
         <div class="form-field">
           <label for="jdText" class="field-label">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+              ></path>
               <polyline points="14,2 14,8 20,8"></polyline>
               <line x1="16" y1="13" x2="8" y2="13"></line>
               <line x1="16" y1="17" x2="8" y2="17"></line>
               <polyline points="10,9 9,9 8,9"></polyline>
             </svg>
             {{ 'jobs.createJob.jobDescription.label' | translate }}
-            <span class="required-indicator" aria-label="必填" title="必填">*</span>
+            <span class="required-indicator" aria-label="必填" title="必填"
+              >*</span
+            >
           </label>
           <div class="textarea-wrapper">
             <textarea
@@ -109,21 +193,40 @@
               class="field-textarea"
               formControlName="jdText"
               data-testid="jd-textarea"
+              autocomplete="off"
               [class.invalid]="hasFieldError('jdText')"
-              [placeholder]="'jobs.createJob.jobDescription.placeholder' | translate"
+              [placeholder]="
+                'jobs.createJob.jobDescription.placeholder' | translate
+              "
               rows="12"
               maxlength="5000"
               [attr.aria-invalid]="hasFieldError('jdText')"
-              [attr.aria-describedby]="hasFieldError('jdText') ? 'jdText-error' : 'jdText-hint'"
+              [attr.aria-describedby]="
+                hasFieldError('jdText') ? 'jdText-error' : 'jdText-hint'
+              "
             ></textarea>
             <div class="character-count" aria-live="polite" aria-atomic="true">
-              <span class="count-current">{{ jdText?.value?.length || 0 }}</span>
+              <span class="count-current">{{
+                jdText?.value?.length || 0
+              }}</span>
               <span class="count-divider"> / </span>
               <span class="count-max">5000</span>
             </div>
           </div>
-          <div *ngIf="getFieldError('jdText') as jdTextError" class="field-error invalid-feedback" id="jdText-error" role="alert">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+          <div
+            *ngIf="getFieldError('jdText') as jdTextError"
+            class="field-error invalid-feedback"
+            id="jdText-error"
+            role="alert"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
               <circle cx="12" cy="12" r="10"></circle>
               <line x1="12" y1="8" x2="12" y2="12"></line>
               <line x1="12" y1="16" x2="12.01" y2="16"></line>
@@ -131,31 +234,72 @@
             {{ jdTextError.key | translate: jdTextError.params }}
           </div>
           <div class="field-hint" id="jdText-hint">
-            <p class="hint-title">{{ 'jobs.createJob.jobDescription.hint' | translate }}</p>
+            <p class="hint-title">
+              {{ 'jobs.createJob.jobDescription.hint' | translate }}
+            </p>
             <ul class="requirements-list">
               <li>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
-                {{ 'jobs.createJob.jobDescription.requirements.skills' | translate }}
+                {{
+                  'jobs.createJob.jobDescription.requirements.skills'
+                    | translate
+                }}
               </li>
               <li>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
-                {{ 'jobs.createJob.jobDescription.requirements.experience' | translate }}
+                {{
+                  'jobs.createJob.jobDescription.requirements.experience'
+                    | translate
+                }}
               </li>
               <li>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
-                {{ 'jobs.createJob.jobDescription.requirements.education' | translate }}
+                {{
+                  'jobs.createJob.jobDescription.requirements.education'
+                    | translate
+                }}
               </li>
               <li>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
-                {{ 'jobs.createJob.jobDescription.requirements.other' | translate }}
+                {{
+                  'jobs.createJob.jobDescription.requirements.other' | translate
+                }}
               </li>
             </ul>
           </div>
@@ -171,7 +315,14 @@
             [disabled]="creating$ | async"
             [attr.aria-label]="'jobs.createJob.actions.cancel' | translate"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
@@ -182,13 +333,33 @@
             class="btn-primary"
             data-testid="submit-button"
             [disabled]="!createJobForm.valid || (creating$ | async)"
-            [attr.aria-label]="(creating$ | async) ? ('jobs.createJob.actions.creating' | translate) : ('jobs.createJob.actions.create' | translate)"
+            [attr.aria-label]="
+              (creating$ | async)
+                ? ('jobs.createJob.actions.creating' | translate)
+                : ('jobs.createJob.actions.create' | translate)
+            "
           >
-            <svg *ngIf="(creating$ | async) === false" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <svg
+              *ngIf="(creating$ | async) === false"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
               <path d="M12 5v14M5 12h14"></path>
             </svg>
-            <span *ngIf="creating$ | async" class="spinner" aria-hidden="true"></span>
-            <span>{{ (creating$ | async) ? ('jobs.createJob.actions.creating' | translate) : ('jobs.createJob.actions.create' | translate) }}</span>
+            <span
+              *ngIf="creating$ | async"
+              class="spinner"
+              aria-hidden="true"
+            ></span>
+            <span>{{
+              (creating$ | async)
+                ? ('jobs.createJob.actions.creating' | translate)
+                : ('jobs.createJob.actions.create' | translate)
+            }}</span>
           </button>
         </div>
       </form>
@@ -196,27 +367,43 @@
   </article>
 
   <!-- Progress Tracking Bento Card -->
-  <article *ngIf="shouldShowProgress()" class="progress-tracking-bento-card" role="status" aria-live="polite" aria-atomic="false">
+  <article
+    *ngIf="shouldShowProgress()"
+    class="progress-tracking-bento-card"
+    role="status"
+    aria-live="polite"
+    aria-atomic="false"
+  >
     <div class="card-header">
       <div class="card-icon" aria-hidden="true">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+        >
           <circle cx="12" cy="12" r="10"></circle>
           <polyline points="12 6 12 12 16 14"></polyline>
         </svg>
       </div>
-      <h2 class="card-title">{{ 'jobs.createJob.progress.title' | translate }}</h2>
+      <h2 class="card-title">
+        {{ 'jobs.createJob.progress.title' | translate }}
+      </h2>
     </div>
     <div class="card-body">
       <!-- Progress Bar Section -->
       <div class="progress-section">
         <div class="progress-header">
           <span class="progress-label">{{ getCurrentStep() }}</span>
-          <span class="progress-percentage" aria-live="polite">{{ getProgressPercentage() }}%</span>
+          <span class="progress-percentage" aria-live="polite"
+            >{{ getProgressPercentage() }}%</span
+          >
         </div>
         <div class="progress-bar-wrapper">
           <div class="progress-bar-track">
-            <div 
-              class="progress-bar-fill" 
+            <div
+              class="progress-bar-fill"
               [style.width.%]="getProgressPercentage()"
               [attr.aria-valuenow]="getProgressPercentage()"
               [attr.aria-valuemin]="0"
@@ -232,35 +419,66 @@
       <div class="status-section">
         <div class="status-message">
           <div class="status-icon" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
               <polyline points="23 4 23 10 17 10"></polyline>
               <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
             </svg>
           </div>
-          <p class="status-text" aria-live="polite">{{ getProgressMessage() }}</p>
+          <p class="status-text" aria-live="polite">
+            {{ getProgressMessage() }}
+          </p>
         </div>
-        
+
         <!-- Estimated Time Remaining -->
         <div *ngIf="getEstimatedTimeRemaining()" class="time-remaining">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
             <circle cx="12" cy="12" r="10"></circle>
             <polyline points="12 6 12 12 16 14"></polyline>
           </svg>
-          <span class="time-label">{{ 'jobs.createJob.progress.estimatedTimeRemaining' | translate }}:</span>
-          <span class="time-value" aria-live="polite">{{ getEstimatedTimeRemaining() }} min</span>
+          <span class="time-label"
+            >{{
+              'jobs.createJob.progress.estimatedTimeRemaining' | translate
+            }}:</span
+          >
+          <span class="time-value" aria-live="polite"
+            >{{ getEstimatedTimeRemaining() }} min</span
+          >
         </div>
       </div>
 
       <!-- Progress Steps Indicator -->
       <div class="steps-indicator" role="list" aria-label="处理步骤">
-        <div class="step" 
-             *ngFor="let step of getProgressSteps(); let i = index"
-             [class.completed]="step.completed"
-             [class.active]="step.active"
-             role="listitem"
-             [attr.aria-current]="step.active ? 'step' : null">
+        <div
+          class="step"
+          *ngFor="let step of getProgressSteps(); let i = index"
+          [class.completed]="step.completed"
+          [class.active]="step.active"
+          role="listitem"
+          [attr.aria-current]="step.active ? 'step' : null"
+        >
           <div class="step-circle">
-            <svg *ngIf="step.completed" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <svg
+              *ngIf="step.completed"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
               <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
             <span *ngIf="!step.completed" aria-hidden="true">{{ i + 1 }}</span>

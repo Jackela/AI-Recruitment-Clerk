@@ -6,13 +6,14 @@ import type {
   HttpEvent,
   HttpErrorResponse,
 } from '@angular/common/http';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { throwError } from 'rxjs';
 import { catchError, retry, timeout } from 'rxjs/operators';
 import { ToastService } from '../services/toast.service';
 import { Router } from '@angular/router';
 import { ErrorCorrelationService } from '../services/error/error-correlation.service';
 import { APP_CONFIG } from '../../config/app.config';
+import { I18nService } from '../services/i18n/i18n.service';
 
 interface StructuredError {
   correlationId: string;
@@ -28,6 +29,7 @@ export class HttpErrorInterceptor implements HttpInterceptor {
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
   private readonly errorCorrelation = inject(ErrorCorrelationService);
+  private readonly i18n = inject(I18nService);
 
   /**
    * Performs the intercept operation.
@@ -84,7 +86,9 @@ export class HttpErrorInterceptor implements HttpInterceptor {
         this.logError(request, error, structuredError);
 
         // Report error to backend (async)
-        this.errorCorrelation.reportError(structuredError).catch(() => { /* intentionally ignored */ });
+        this.errorCorrelation.reportError(structuredError).catch(() => {
+          /* intentionally ignored */
+        });
 
         // Show user-friendly notification
         const userMessage = this.getErrorMessage(error.status, error);
@@ -109,35 +113,16 @@ export class HttpErrorInterceptor implements HttpInterceptor {
       return error.error.message;
     }
 
-    // Fall back to status-based messages
-    switch (status) {
-      case 0:
-        return '无法连接到服务器，请检查您的网络连接';
-      case 400:
-        return '请求参数错误，请检查输入信息';
-      case 401:
-        return '您的登录已过期，请重新登录';
-      case 403:
-        return '您没有权限执行此操作';
-      case 404:
-        return '请求的资源不存在';
-      case 409:
-        return '数据冲突，请刷新页面后重试';
-      case 422:
-        return '提交的数据验证失败';
-      case 429:
-        return '请求过于频繁，请稍后再试';
-      case 500:
-        return '服务器内部错误，请稍后再试';
-      case 502:
-        return '网关错误，服务暂时不可用';
-      case 503:
-        return '服务暂时不可用，请稍后再试';
-      case 504:
-        return '请求超时，请稍后再试';
-      default:
-        return `服务器错误 (${status})，请稍后再试`;
+    // Use i18n translation for status-based messages
+    const key = `errors.http.${status}`;
+    const translated = this.i18n.translate(key);
+
+    // If translation not found, use default message with status code
+    if (translated === key) {
+      return this.i18n.translate('errors.http.default', { status });
     }
+
+    return translated;
   }
 
   private showErrorNotification(
@@ -181,7 +166,10 @@ export class HttpErrorInterceptor implements HttpInterceptor {
     }
   }
 
-  private handleSpecificErrors(status: number, structuredError: StructuredError): void {
+  private handleSpecificErrors(
+    status: number,
+    structuredError: StructuredError,
+  ): void {
     switch (status) {
       case 401:
         // Unauthorized - redirect to login with correlation context
@@ -344,7 +332,11 @@ export class HttpErrorInterceptor implements HttpInterceptor {
  * Performs the provide http error interceptor operation.
  * @returns The result of the operation.
  */
-export function provideHttpErrorInterceptor(): { provide: string; useClass: typeof HttpErrorInterceptor; multi: boolean } {
+export function provideHttpErrorInterceptor(): {
+  provide: string;
+  useClass: typeof HttpErrorInterceptor;
+  multi: boolean;
+} {
   return {
     provide: 'HTTP_INTERCEPTORS',
     useClass: HttpErrorInterceptor,

@@ -3,14 +3,12 @@ import type {
   OnDestroy,
   ElementRef,
 } from '@angular/core';
-import {
-  Component,
+import {Component,
   Input,
   Output,
   EventEmitter,
   ViewChild,
-  effect,
-} from '@angular/core';
+  effect,, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { TemplateRef } from '@angular/core';
 import { Subject, fromEvent, animationFrameScheduler } from 'rxjs';
@@ -86,7 +84,8 @@ import { VirtualScrollEmptyComponent } from './virtual-scroll-empty.component';
     </div>
   `,
   styleUrls: ['./virtual-scroll.component.scss'],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
   @ViewChild('scrollContainer', { static: true })
   public scrollContainer!: ElementRef<HTMLDivElement>;

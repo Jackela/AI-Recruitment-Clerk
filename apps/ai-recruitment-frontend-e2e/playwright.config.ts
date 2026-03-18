@@ -162,8 +162,9 @@ export default defineConfig({
     toHaveScreenshot: {
       maxDiffPixels: 100,
       threshold: 0.2,
-      // Allow updating snapshots when they don't exist or during intentional updates
       animations: 'disabled',
+      caret: 'hide',
+      scale: 'device',
     },
     toMatchSnapshot: {
       maxDiffPixelRatio: 0.02,
@@ -182,7 +183,6 @@ export default defineConfig({
   use: {
     baseURL,
     trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
     video: 'retain-on-failure',
     // Enhanced connection stability settings for dynamic port environment
     navigationTimeout: 90000, // Extended for port allocation delays
@@ -195,10 +195,23 @@ export default defineConfig({
       'Cache-Control': 'no-cache', // Prevent caching during port transitions
       Connection: 'keep-alive', // Maintain connections for stability
     },
-    // Enhanced test isolation
+
+    // Consistent viewport and device scale
+    viewport: { width: 1280, height: 720 },
+    deviceScaleFactor: 1,
+
+    // Screenshot settings
+    screenshot: {
+      mode: 'only-on-failure',
+      fullPage: false,
+      type: 'png',
+    },
+
+    // Context options for consistency
     contextOptions: {
       ignoreHTTPSErrors: true,
       bypassCSP: true,
+      colorScheme: 'light',
     },
   },
   // Only start Playwright webServer when skipWebServer is false

@@ -1,11 +1,9 @@
 import type { OnInit } from '@angular/core';
-import {
-  Component,
+import {Component,
   Input,
   Output,
   EventEmitter,
-  inject,
-} from '@angular/core';
+  inject, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
@@ -413,7 +411,8 @@ import { MobileNavigationRouteService } from './mobile-navigation-route.service'
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class MobileNavigationMenuComponent implements OnInit {
   @Input() public isOpen = false;
   @Input() public menuItems: MobileNavItem[] = [];

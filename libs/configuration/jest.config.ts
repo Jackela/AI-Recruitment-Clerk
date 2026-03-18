@@ -6,6 +6,15 @@ const config: Config = {
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
   collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts'],
   passWithNoTests: true,
+  coverageDirectory: '../../coverage/libs/configuration',
+  coverageThreshold: {
+    global: {
+      branches: 60,
+      functions: 60,
+      lines: 60,
+      statements: 60,
+    },
+  },
 };
 
 export default config;

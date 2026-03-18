@@ -1,10 +1,8 @@
 import type { OnInit, OnDestroy } from '@angular/core';
-import {
-  Component,
+import {Component,
   Input,
   Output,
-  EventEmitter,
-} from '@angular/core';
+  EventEmitter,, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
@@ -276,7 +274,8 @@ export interface FilterOption {
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class MobileResultsFilterComponent implements OnInit, OnDestroy {
   @Input() public isOpen = false;
   @Input() public filters: ResultsFilter = {

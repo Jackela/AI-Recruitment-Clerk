@@ -1,9 +1,7 @@
-import {
-  Component,
+import {Component,
   Input,
   Output,
-  EventEmitter,
-} from '@angular/core';
+  EventEmitter,, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -101,7 +99,8 @@ export interface QuickActionMenuItem {
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class MobileQuickActionsMenuComponent {
   @Input() public visible = false;
   @Input() public actions: QuickActionMenuItem[] = [];

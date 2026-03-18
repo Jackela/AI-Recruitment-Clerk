@@ -1,5 +1,5 @@
 import type { OnInit, OnDestroy } from '@angular/core';
-import { Component, inject } from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import type { Observable } from 'rxjs';
@@ -369,7 +369,8 @@ import { ChartsComponent } from './charts.component';
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class EnhancedDashboardComponent implements OnInit, OnDestroy {
   public stats$!: Observable<DashboardStats>;
   public systemHealth$!: Observable<SystemHealth>;

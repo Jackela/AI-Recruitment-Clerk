@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, ChangeDetectionStrategy} from '@angular/core';
 
 /**
  * Represents the reports placeholder component.
@@ -12,5 +12,6 @@ import { Component } from '@angular/core';
       <p>该功能正在开发中，敬请期待！</p>
     </div>
   `,
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class ReportsPlaceholderComponent {}

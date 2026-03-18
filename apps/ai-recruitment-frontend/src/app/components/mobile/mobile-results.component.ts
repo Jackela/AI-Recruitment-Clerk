@@ -1,13 +1,11 @@
 import type {
   OnInit,
   OnDestroy} from '@angular/core';
-import {
-  Component,
+import {Component,
   Input,
   Output,
   EventEmitter,
-  inject,
-} from '@angular/core';
+  inject, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
@@ -144,7 +142,8 @@ import {
             *ngIf="selectedCandidates.length > 0"
             (click)="bulkAction('shortlist')"
           >
-            Shortlist ({{ selectedCandidates.length }})
+            Shortlist ({{ selectedCandidates.length }
+  changeDetection: ChangeDetectionStrategy.OnPush,})
           </button>
         </div>
       </div>

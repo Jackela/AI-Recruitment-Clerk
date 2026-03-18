@@ -1,5 +1,5 @@
 import type { OnInit, OnDestroy} from '@angular/core';
-import { Component, inject } from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import type { Observable} from 'rxjs';
@@ -194,7 +194,8 @@ import * as GuestActions from '../../store/guest/guest.actions';
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class GuestLimitModalComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
   private autoCloseTimer: ReturnType<typeof setTimeout> | null = null;

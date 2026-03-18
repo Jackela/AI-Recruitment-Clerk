@@ -85,5 +85,65 @@
     "confirmDelete": "Are you sure you want to delete?",
     "noData": "No data available",
     "networkError": "Network error, please try again later"
+  },
+  "charts": {
+    "bar_chart": "Bar Chart",
+    "pie_chart": "Pie Chart",
+    "donut_chart": "Donut Chart",
+    "label": "Label",
+    "value": "Value",
+    "bar_chart_description": "{{title}}, containing {{items}} data items"
+  },
+  "table": {
+    "search_label": "Search Table Data",
+    "search_placeholder": "Search...",
+    "clear_search": "Clear Search",
+    "export": "Export Data",
+    "select_all": "Select All",
+    "select_row": "Select This Row",
+    "actions": "Actions",
+    "row_actions": "Row Actions",
+    "view": "View",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "empty": {
+    "default": {
+      "title": "No Data",
+      "description": "There is no content to display at the moment"
+    },
+    "search": {
+      "title": "No Matching Results",
+      "description": "Try using different keywords or clearing the filters"
+    },
+    "error": {
+      "title": "Something Went Wrong",
+      "description": "An error occurred while loading data, please try again later"
+    },
+    "success": {
+      "title": "All Done",
+      "description": "All items have been processed"
+    },
+    "jobs": {
+      "title": "No Jobs Yet",
+      "description": "You haven't created any positions yet. Click the button below to create your first position!"
+    },
+    "resumes": {
+      "title": "No Resumes",
+      "description": "No resumes received yet. Start collecting by posting a job!"
+    },
+    "candidates": {
+      "title": "No Candidates",
+      "description": "No matching candidates found under the current filter conditions"
+    },
+    "notifications": {
+      "title": "No Notifications",
+      "description": "You have no new notifications at the moment"
+    }
+  },
+  "jobs": {
+    "button": {
+      "createNew": "Create New Position"
+    }
   }
 }

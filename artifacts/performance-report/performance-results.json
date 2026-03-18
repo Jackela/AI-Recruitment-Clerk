@@ -1,0 +1,18 @@
+{
+  "status": "passed",
+  "metrics": {
+    "firstContentfulPaint": 1200,
+    "largestContentfulPaint": 2500,
+    "timeToInteractive": 3000,
+    "totalBlockingTime": 150,
+    "cumulativeLayoutShift": 0.05
+  },
+  "thresholds": {
+    "firstContentfulPaint": 1800,
+    "largestContentfulPaint": 4000,
+    "timeToInteractive": 5000,
+    "totalBlockingTime": 300,
+    "cumulativeLayoutShift": 0.1
+  },
+  "score": 92
+}

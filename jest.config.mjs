@@ -18,6 +18,10 @@ const baseProjects = [
   '<rootDir>/libs/resume-processing-domain/jest.config.ts',
   '<rootDir>/libs/report-generation-domain/jest.config.ts',
   '<rootDir>/libs/shared-nats-client/jest.config.ts',
+  '<rootDir>/libs/configuration/jest.config.ts',
+  '<rootDir>/libs/resume-dto/jest.config.ts',
+  '<rootDir>/libs/service-base/jest.config.ts',
+  '<rootDir>/libs/types/jest.config.ts',
 ];
 
 export default {
@@ -32,4 +36,16 @@ export default {
   collectCoverage: false, // Set to false by default, enable via --coverage flag
   coverageReporters: ['json-summary', 'json', 'lcov', 'text'],
   reporters: ['default'],
+  // Global coverage patterns to ensure all source files are considered
+  collectCoverageFrom: [
+    'apps/*/src/**/*.{ts,js}',
+    'libs/*/src/**/*.{ts,js}',
+    '!**/*.spec.{ts,js}',
+    '!**/*.test.{ts,js}',
+    '!**/*.e2e-spec.{ts,js}',
+    '!**/*.d.ts',
+    '!**/node_modules/**',
+    '!**/dist/**',
+    '!**/index.ts',
+  ],
 };

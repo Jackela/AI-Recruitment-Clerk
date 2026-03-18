@@ -1,5 +1,5 @@
 import type { OnInit } from '@angular/core';
-import { Component, inject } from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { GuestUsageService } from '../../services/marketing/guest-usage.service';
@@ -146,7 +146,8 @@ import { GuestUsageService } from '../../services/marketing/guest-usage.service'
     </div>
   `,
   styleUrls: ['./campaign.component.scss'],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class CampaignComponent implements OnInit {
   public remainingUsage = 0;
   public usageCount = 0;

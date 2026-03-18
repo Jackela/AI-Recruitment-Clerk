@@ -52,7 +52,7 @@ jobs:
       - name: 🧪 Run Tests with Coverage
         run: |
           echo "🧪 Running tests with coverage reporting..."
-          npm run test:coverage || true
+          npm run test:coverage
         env:
           CI: true
 
@@ -78,17 +78,8 @@ jobs:
             echo "coverage_json={}" >> $GITHUB_OUTPUT
           fi
 
-      - name: 📈 Upload Coverage to Codecov
-        uses: codecov/codecov-action@v5
-        if: always()
-        with:
-          files: ./coverage/lcov.info
-          flags: unittests
-          name: ai-recruitment-clerk
-          fail_ci_if_error: false
-          verbose: true
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      # Coverage upload is handled by ci.yml workflow (test_coverage_merge job)
+      # This workflow only provides PR coverage comments to avoid duplicate uploads
 
       - name: 📊 Comment PR with Coverage
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
@@ -114,7 +105,7 @@ jobs:
               } else if (total.lines.pct >= 80) {
                 coverageComment += '✅ **Good coverage.** Consider adding more tests for critical paths.\n';
               } else {
-                coverageComment += '⚠️ **Coverage below target (80%).** Please add tests for new code.\n';
+                coverageComment += '⚠️ **Coverage below target (70%).** Please add tests for new code.\n';
               }
             } else {
               coverageComment += '⚠️ Coverage data not available. Tests may not have run successfully.\n';

@@ -1,6 +1,6 @@
 {
   "_comment": "TODO: Increase to 0.85 (85%) after coverage improvements - current target is achievable milestone",
-  "coverage": 0.65,
+  "coverage": 0.7,
   "lintErrors": 0,
   "typecheck": true,
   "requireE2ESmoke": false

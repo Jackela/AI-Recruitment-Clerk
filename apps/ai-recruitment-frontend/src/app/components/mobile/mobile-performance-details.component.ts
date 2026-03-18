@@ -1,4 +1,4 @@
-import { Component, inject, Input } from '@angular/core';
+import {Component, inject, Input, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { PerformanceMetrics } from '../../types/performance-metrics.type';
 import { MobilePerformanceService } from '../../services/mobile-performance.service';
@@ -268,7 +268,8 @@ import { MobilePerformanceService } from '../../services/mobile-performance.serv
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class MobilePerformanceDetailsComponent {
   protected readonly performanceService = inject(MobilePerformanceService);
 

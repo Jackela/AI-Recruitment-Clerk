@@ -1,5 +1,5 @@
 import type { OnChanges, SimpleChanges } from '@angular/core';
-import { Component, Input } from '@angular/core';
+import {Component, Input, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -248,7 +248,8 @@ import { CommonModule } from '@angular/common';
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class ScoreVisualizationComponent implements OnChanges {
   @Input() public score = 0;
   @Input() public summary = '';

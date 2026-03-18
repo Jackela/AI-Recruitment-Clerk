@@ -233,6 +233,22 @@ async function globalSetup(): Promise<void> {
     console.warn('⚠️ Environment validation warning:', error);
     // Continue even if validation fails
   }
+
+  // Test data cleanup and factory reset (from src/global-setup.ts)
+  try {
+    const { cleanupTestData } = await import('./src/utils/cleanup.js');
+    const { UserFactory } = await import('./src/factories/user.factory.js');
+    const { JobFactory } = await import('./src/factories/job.factory.js');
+    const { ResumeFactory } = await import('./src/factories/resume.factory.js');
+
+    await cleanupTestData();
+    UserFactory.resetCounter();
+    JobFactory.resetCounter();
+    ResumeFactory.resetCounter();
+    console.log('🧹 Test data cleanup and factory reset completed');
+  } catch (error) {
+    console.warn('⚠️ Test data cleanup failed (non-critical):', error);
+  }
 }
 
 export default globalSetup;

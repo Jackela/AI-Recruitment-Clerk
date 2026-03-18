@@ -1,4 +1,9 @@
-import { Component, Input, HostBinding } from '@angular/core';
+import {
+  Component,
+  Input,
+  computed,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { TimesheetColumn } from '../../../../lib/config/table-config';
 import type { TimesheetEntry } from './timesheet-table.component';
@@ -17,25 +22,25 @@ import type { TimesheetEntry } from './timesheet-table.component';
       <span *ngSwitchCase="'boolean'">
         <span
           class="badge"
-          [class.badge-success]="cellValue"
-          [class.badge-danger]="!cellValue"
+          [class.badge-success]="cellValue()"
+          [class.badge-danger]="!cellValue()"
         >
-          {{ cellValue ? '可计费' : '不计费' }}
+          {{ cellValue() ? '可计费' : '不计费' }}
         </span>
       </span>
 
       <!-- Date formatting -->
       <span *ngSwitchCase="'date'">
-        {{ cellValue | date: 'yyyy-MM-dd' }}
+        {{ cellValue() | date: 'yyyy-MM-dd' }}
       </span>
 
       <!-- Number formatting for duration -->
       <span *ngSwitchCase="'number'">
         <span *ngIf="column.key === 'duration'" class="duration-display">
-          {{ formatDuration(cellValue) }}
+          {{ formatDuration(cellValue()) }}
         </span>
         <span *ngIf="column.key !== 'duration'">
-          {{ cellValue | number: '1.0-2' }}
+          {{ cellValue() | number: '1.0-2' }}
         </span>
       </span>
 
@@ -44,61 +49,67 @@ import type { TimesheetEntry } from './timesheet-table.component';
         <span *ngSwitchCase="'status'">
           <span
             class="status-badge"
-            [class.status-draft]="cellValue === 'draft'"
-            [class.status-submitted]="cellValue === 'submitted'"
-            [class.status-approved]="cellValue === 'approved'"
-            [class.status-rejected]="cellValue === 'rejected'"
+            [class.status-draft]="cellValue() === 'draft'"
+            [class.status-submitted]="cellValue() === 'submitted'"
+            [class.status-approved]="cellValue() === 'approved'"
+            [class.status-rejected]="cellValue() === 'rejected'"
           >
-            {{ getStatusLabel(cellValue) }}
+            {{ getStatusLabel(cellValue()) }}
           </span>
         </span>
 
         <!-- Time formatting for start/end times -->
         <span *ngSwitchCase="'startTime'">
-          {{ formatTime(cellValue, column.timeFormat) }}
+          {{ formatTime(cellValue(), column.timeFormat) }}
         </span>
         <span *ngSwitchCase="'endTime'">
-          {{ formatTime(cellValue, column.timeFormat) }}
+          {{ formatTime(cellValue(), column.timeFormat) }}
         </span>
 
         <!-- Default text with truncation -->
         <span *ngSwitchDefault>
-          {{ truncatedValue }}
+          {{ truncatedValue() }}
         </span>
       </span>
     </span>
   `,
+  host: {
+    '[attr.title]': 'titleAttr()',
+    '[style.text-align]': 'textAlign()',
+    '[class]': 'columnClasses()',
+  },
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TimesheetCellComponent {
   @Input({ required: true }) public entry!: TimesheetEntry;
   @Input({ required: true }) public column!: TimesheetColumn;
 
-  @HostBinding('attr.title') public get titleAttr(): string | null {
-    return this.shouldShowTooltip() ? String(this.cellValue || '') : null;
-  }
+  // Signal-based computed properties
+  readonly cellValue = computed(() =>
+    this.getCellValue(this.entry, this.column.key),
+  );
 
-  @HostBinding('style.text-align') public get textAlign(): string {
-    return this.column.align || 'left';
-  }
-
-  @HostBinding('class') public get columnClasses(): string {
-    return this.getColumnClasses();
-  }
-
-  public get cellValue(): unknown {
-    return this.getCellValue(this.entry, this.column.key);
-  }
-
-  public get truncatedValue(): string {
-    const value = this.cellValue;
+  readonly truncatedValue = computed(() => {
+    const value = this.cellValue();
     const text = String(value || '');
 
-    if (this.column.truncateLength && text.length > this.column.truncateLength) {
+    if (
+      this.column.truncateLength &&
+      text.length > this.column.truncateLength
+    ) {
       return text.substring(0, this.column.truncateLength) + '...';
     }
 
     return text;
-  }
+  });
+
+  readonly titleAttr = computed(() => {
+    return this.shouldShowTooltip() ? String(this.cellValue() || '') : null;
+  });
+
+  readonly textAlign = computed(() => this.column.align || 'left');
+
+  readonly columnClasses = computed(() => this.getColumnClasses());
 
   public getCellValue(entry: TimesheetEntry, key: string): unknown {
     const keys = key.split('.');
@@ -134,7 +145,7 @@ export class TimesheetCellComponent {
   public shouldShowTooltip(): boolean {
     if (!this.column.truncateLength) return false;
 
-    const value = this.cellValue;
+    const value = this.cellValue();
     const text = String(value || '');
 
     return text.length > this.column.truncateLength;

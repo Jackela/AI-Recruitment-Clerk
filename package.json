@@ -10,6 +10,12 @@
     "node": ">=22.0.0 <23.0.0",
     "npm": ">=10.0.0"
   },
+  "config": {
+    "mongodb-memory-server": {
+      "version": "7.0.5",
+      "note": "MongoDB version used by mongodb-memory-server across all test files"
+    }
+  },
   "scripts": {
     "build": "npx nx build app-gateway --prod --parallel=1",
     "start": "node dist/apps/app-gateway/main.cjs",
@@ -54,6 +60,13 @@
     "test:performance:file-upload": "npx playwright test apps/ai-recruitment-frontend-e2e/src/performance/file-upload.spec.ts --project=chromium",
     "test:performance:analysis": "npx playwright test apps/ai-recruitment-frontend-e2e/src/performance/analysis.spec.ts --project=chromium",
     "test:performance:report": "npx playwright test apps/ai-recruitment-frontend-e2e/src/performance/ --project=chromium --reporter=html",
+    "test:ai-validation": "playwright test apps/ai-recruitment-frontend-e2e/src/ai-validation/",
+    "test:visual": "playwright test apps/ai-recruitment-frontend-e2e/src/visual-tests/",
+    "test:visual:update": "playwright test apps/ai-recruitment-frontend-e2e/src/visual-tests/ --update-snapshots",
+    "test:accessibility": "playwright test apps/ai-recruitment-frontend-e2e/src/accessibility/",
+    "test:comprehensive": "playwright test apps/ai-recruitment-frontend-e2e/src/comprehensive-validation.spec.ts",
+    "test:all": "npm run test:unit && npm run test:e2e && npm run test:ai-validation && npm run test:visual && npm run test:performance && npm run test:accessibility",
+    "test:ci:full": "npm run test:coverage && npm run test:ai-validation && npm run test:comprehensive",
     "test:integration": "cd apps/app-gateway && ./test/run-integration-tests.sh",
     "test:integration:api": "cd apps/app-gateway && npx jest --config=test/jest-integration.config.js test/api/",
     "test:integration:e2e": "cd apps/app-gateway && npx jest --config=test/jest-integration.config.js test/integration/",

@@ -1,15 +1,13 @@
 import type {
   OnInit,
   OnDestroy} from '@angular/core';
-import {
-  Component,
+import {Component,
   Input,
   Output,
   EventEmitter,
   HostListener,
   signal,
-  computed,
-} from '@angular/core';
+  computed,, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
@@ -75,7 +73,8 @@ export type TimesheetViewType = keyof typeof TIMESHEET_VIEW_CONFIGS;
   ],
   templateUrl: './timesheet-table.component.html',
   styleUrls: ['./timesheet-table.component.scss'],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class TimesheetTableComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 

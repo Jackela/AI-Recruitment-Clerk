@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, model } from '@angular/core';
+import {Component, Input, Output, EventEmitter, model, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import type { TimesheetViewType } from './timesheet-table.component';
@@ -97,7 +97,8 @@ import type { TimesheetViewType } from './timesheet-table.component';
             class="bulk-btn edit-bulk-btn"
             type="button"
           >
-            批量编辑 ({{ selectedCount }})
+            批量编辑 ({{ selectedCount }
+  changeDetection: ChangeDetectionStrategy.OnPush,})
           </button>
           <button
             (click)="bulkDelete.emit()"

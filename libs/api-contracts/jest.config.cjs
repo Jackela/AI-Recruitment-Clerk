@@ -6,7 +6,7 @@ module.exports = {
     '^.+\\.[tj]s$': [
       'ts-jest',
       {
-        tsconfig: '<rootDir>/tsconfig.json'
+        tsconfig: '<rootDir>/tsconfig.json',
       },
     ],
   },
@@ -15,9 +15,13 @@ module.exports = {
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
-  collectCoverageFrom: [
-    'src/**/*.ts',
-    '!src/**/*.d.ts',
-    '!src/**/index.ts'
-  ]
+  collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts', '!src/**/index.ts'],
+  coverageThreshold: {
+    global: {
+      branches: 60,
+      functions: 60,
+      lines: 60,
+      statements: 60,
+    },
+  },
 };

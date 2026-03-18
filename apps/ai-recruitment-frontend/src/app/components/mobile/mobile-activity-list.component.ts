@@ -1,9 +1,7 @@
-import {
-  Component,
+import {Component,
   Input,
   Output,
-  EventEmitter,
-} from '@angular/core';
+  EventEmitter,, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { ActivityItem } from '../../services/mobile/mobile-dashboard.service';
 
@@ -159,7 +157,8 @@ import type { ActivityItem } from '../../services/mobile/mobile-dashboard.servic
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class MobileActivityListComponent {
   @Input({ required: true })
   public activities!: ActivityItem[];

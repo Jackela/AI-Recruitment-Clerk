@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import {Component, Input, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import type { QuickAction } from '../../services/mobile/mobile-dashboard.service';
@@ -142,7 +142,8 @@ import type { QuickAction } from '../../services/mobile/mobile-dashboard.service
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class MobileQuickActionsComponent {
   @Input({ required: true })
   public quickActions!: QuickAction[];

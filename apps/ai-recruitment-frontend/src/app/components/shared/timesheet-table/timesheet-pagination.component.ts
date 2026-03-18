@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, computed } from '@angular/core';
+import {Component, Input, Output, EventEmitter, computed, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -67,7 +67,8 @@ import { FormsModule } from '@angular/forms';
     </div>
   `,
   styleUrls: ['./timesheet-pagination.component.scss'],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class TimesheetPaginationComponent {
   @Input({ required: true }) public currentPage!: number;
   @Input({ required: true }) public pageSize!: number;

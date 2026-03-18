@@ -1,12 +1,10 @@
 import type { OnInit, TemplateRef } from '@angular/core';
-import {
-  Component,
+import {Component,
   Input,
   Output,
   EventEmitter,
   signal,
-  computed,
-} from '@angular/core';
+  computed,, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { VirtualScrollConfig } from './virtual-scroll.types';
 
@@ -71,7 +69,8 @@ import type { VirtualScrollConfig } from './virtual-scroll.types';
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class VirtualScrollContentComponent<T = unknown> implements OnInit {
   @Input() public itemTemplate!: TemplateRef<unknown>;
   @Input() public items: T[] = [];

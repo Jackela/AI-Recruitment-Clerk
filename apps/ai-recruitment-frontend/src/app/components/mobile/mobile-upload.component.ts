@@ -1,11 +1,9 @@
 import type { OnInit, OnDestroy } from '@angular/core';
-import {
-  Component,
+import {Component,
   Input,
   Output,
   EventEmitter,
-  inject,
-} from '@angular/core';
+  inject, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -50,7 +48,8 @@ import { MobileUploadService } from '../../services/mobile/mobile-upload.service
       <!-- File List -->
       <div class="upload-list" *ngIf="files.length > 0">
         <h4 class="list-title">
-          Uploaded Files ({{ files.length }})
+          Uploaded Files ({{ files.length }
+  changeDetection: ChangeDetectionStrategy.OnPush,})
           <button
             class="clear-all"
             *ngIf="canClearAll"

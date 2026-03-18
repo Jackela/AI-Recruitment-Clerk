@@ -2,10 +2,8 @@ import type {
   OnInit,
   OnDestroy,
 } from '@angular/core';
-import {
-  Component,
-  Input,
-} from '@angular/core';
+import {Component,
+  Input,, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import type {
@@ -352,7 +350,8 @@ export interface SparklineMeta {
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class DashboardChartsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 

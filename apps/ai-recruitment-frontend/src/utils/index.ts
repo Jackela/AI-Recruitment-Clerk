@@ -134,36 +134,78 @@ export function formatDate(
     .replace('ss', seconds);
 }
 
+// 相对时间翻译接口
+export interface RelativeTimeTranslations {
+  just_now: string;
+  minutes_ago: string;
+  hours_ago: string;
+  days_ago: string;
+  weeks_ago: string;
+  months_ago: string;
+  years_ago: string;
+}
+
+// 默认中文翻译
+const defaultRelativeTimeTranslations: RelativeTimeTranslations = {
+  just_now: '刚刚',
+  minutes_ago: '{{count}} 分钟前',
+  hours_ago: '{{count}} 小时前',
+  days_ago: '{{count}} 天前',
+  weeks_ago: '{{count}} 周前',
+  months_ago: '{{count}} 个月前',
+  years_ago: '{{count}} 年前',
+};
+
 // 计算相对时间
 /**
  * Retrieves relative time.
  * @param date - The date.
+ * @param translations - Optional translations object or translation function.
  * @returns The string value.
  */
-export function getRelativeTime(date: Date | string): string {
+export function getRelativeTime(
+  date: Date | string,
+  translations?:
+    | RelativeTimeTranslations
+    | ((key: string, params?: Record<string, unknown>) => string),
+): string {
   const now = new Date();
   const target = typeof date === 'string' ? new Date(date) : date;
   const diffInSeconds = Math.floor((now.getTime() - target.getTime()) / 1000);
 
-  if (diffInSeconds < 60) return '刚刚';
+  const t =
+    typeof translations === 'function'
+      ? translations
+      : (key: string, params?: Record<string, unknown>) => {
+          const trans = translations || defaultRelativeTimeTranslations;
+          let text = trans[key as keyof RelativeTimeTranslations] || key;
+          if (params) {
+            Object.entries(params).forEach(([k, v]) => {
+              text = text.replace(new RegExp(`{{${k}}}`, 'g'), String(v));
+            });
+          }
+          return text;
+        };
+
+  if (diffInSeconds < 60) return t('just_now');
 
   const diffInMinutes = Math.floor(diffInSeconds / 60);
-  if (diffInMinutes < 60) return `${diffInMinutes} 分钟前`;
+  if (diffInMinutes < 60) return t('minutes_ago', { count: diffInMinutes });
 
   const diffInHours = Math.floor(diffInMinutes / 60);
-  if (diffInHours < 24) return `${diffInHours} 小时前`;
+  if (diffInHours < 24) return t('hours_ago', { count: diffInHours });
 
   const diffInDays = Math.floor(diffInHours / 24);
-  if (diffInDays < 7) return `${diffInDays} 天前`;
+  if (diffInDays < 7) return t('days_ago', { count: diffInDays });
 
   const diffInWeeks = Math.floor(diffInDays / 7);
-  if (diffInWeeks < 4) return `${diffInWeeks} 周前`;
+  if (diffInWeeks < 4) return t('weeks_ago', { count: diffInWeeks });
 
   const diffInMonths = Math.floor(diffInDays / 30);
-  if (diffInMonths < 12) return `${diffInMonths} 个月前`;
+  if (diffInMonths < 12) return t('months_ago', { count: diffInMonths });
 
   const diffInYears = Math.floor(diffInDays / 365);
-  return `${diffInYears} 年前`;
+  return t('years_ago', { count: diffInYears });
 }
 
 // 验证邮箱
@@ -249,7 +291,7 @@ export async function copyToClipboard(text: string): Promise<boolean> {
       return successful;
     }
   } catch (error) {
-    console.error('复制到剪贴板失败:', error);
+    console.error('Copy to clipboard failed:', error);
     return false;
   }
 }
@@ -283,7 +325,7 @@ export function withErrorHandling<T extends (...args: unknown[]) => unknown>(
           if (errorHandler) {
             errorHandler(error);
           } else {
-            console.error('函数执行错误:', error);
+            console.error('Function execution error:', error);
           }
           throw error;
         });
@@ -293,7 +335,7 @@ export function withErrorHandling<T extends (...args: unknown[]) => unknown>(
       if (errorHandler) {
         errorHandler(error as Error);
       } else {
-        console.error('函数执行错误:', error);
+        console.error('Function execution error:', error);
       }
       throw error;
     }

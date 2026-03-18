@@ -1,13 +1,11 @@
 import type {
   ElementRef} from '@angular/core';
-import {
-  Component,
+import {Component,
   EventEmitter,
   Output,
   ViewChild,
   signal,
-  Input,
-} from '@angular/core';
+  Input,, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -283,7 +281,8 @@ export interface FileUploadData {
     </div>
   `,
   styleUrls: ['./resume-file-upload.component.scss'],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class ResumeFileUploadComponent {
   @ViewChild('fileInput') public fileInput!: ElementRef<HTMLInputElement>;
 

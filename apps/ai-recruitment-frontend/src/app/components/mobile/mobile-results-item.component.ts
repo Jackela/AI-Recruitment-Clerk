@@ -2,12 +2,10 @@ import type {
   SwipeAction,
   SwipeEvent
 } from './mobile-swipe.component';
-import {
-  Component,
+import {Component,
   Input,
   Output,
-  EventEmitter,
-} from '@angular/core';
+  EventEmitter,, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -237,7 +235,8 @@ export interface CandidateResult {
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class MobileResultsItemComponent {
   @Input() public candidate!: CandidateResult;
   @Input() public isSelected = false;

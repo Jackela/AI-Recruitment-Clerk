@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import {Component, Input, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -183,7 +183,8 @@ export interface DashboardStat {
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class DashboardStatsComponent {
   // Multi-agent fix: template needs access to Math object
   protected readonly Math = Math;

@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import {Component, input, output, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -104,7 +104,8 @@ export interface ErrorDisplayData {
         </div>
 
         <div class="error-history" *ngIf="errorHistory().length > 1">
-          <h3>最近的错误 ({{ errorHistory().length }})</h3>
+          <h3>最近的错误 ({{ errorHistory().length }
+  changeDetection: ChangeDetectionStrategy.OnPush,})</h3>
           <ul>
             <li *ngFor="let error of errorHistory(); let i = index">
               <span class="error-time">{{

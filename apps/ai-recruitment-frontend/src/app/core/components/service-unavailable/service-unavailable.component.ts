@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ConnectionService } from '../../services/connection.service';
 
@@ -192,7 +192,8 @@ import { ConnectionService } from '../../services/connection.service';
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class ServiceUnavailableComponent {
   connectionService = inject(ConnectionService);
 

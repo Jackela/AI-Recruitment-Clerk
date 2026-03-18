@@ -30,4 +30,12 @@ module.exports = {
     '!<rootDir>/src/**/index.ts',
   ],
   coverageDirectory: '../../coverage/libs/shared-dtos',
+  coverageThreshold: {
+    global: {
+      branches: 60,
+      functions: 60,
+      lines: 60,
+      statements: 60,
+    },
+  },
 };

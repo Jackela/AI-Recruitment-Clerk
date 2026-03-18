@@ -1,0 +1,531 @@
+name: AI Automated Validation
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    - cron: '0 0 * * *' # 每日运行
+  workflow_dispatch: # 手动触发
+
+permissions:
+  contents: read
+  pull-requests: write
+  actions: read
+
+concurrency:
+  group: ai-validation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: true
+  NODE_OPTIONS: '--max-old-space-size=4096'
+
+jobs:
+  # 1. 单元测试
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Cache Nx
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: |
+            .nx/cache
+            node_modules/.cache
+          key: ${{ runner.os }}-nx-${{ hashFiles('package-lock.json', '**/project.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nx-
+
+      - name: Cache Jest
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: .jest-cache
+          key: ${{ runner.os }}-jest-${{ hashFiles('package-lock.json', '**/jest.config.*') }}
+          restore-keys: |
+            ${{ runner.os }}-jest-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Unit Tests (Shard ${{ matrix.shard }}/4)
+        run: npx nx run-many -t test --all --parallel=1 --shard=${{ matrix.shard }}/4 --coverage
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: coverage-shard-${{ matrix.shard }}
+          path: coverage/
+          retention-days: 1
+
+  # 1b. 合并覆盖率报告
+  coverage-merge:
+    name: Merge Coverage Reports
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    timeout-minutes: 10
+    outputs:
+      coverage_lines: ${{ steps.coverage.outputs.lines }}
+      coverage_statements: ${{ steps.coverage.outputs.statements }}
+      coverage_functions: ${{ steps.coverage.outputs.functions }}
+      coverage_branches: ${{ steps.coverage.outputs.branches }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download all coverage artifacts
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392443fae83e421467 # v4.1.9
+        with:
+          pattern: coverage-shard-*
+          path: coverage/
+          merge-multiple: true
+
+      - name: Merge Coverage Reports
+        run: |
+          npx nyc merge coverage/ coverage/merged-coverage.json
+          npx nyc report -t coverage --reporter=lcov --reporter=json-summary --reporter=html
+
+      - name: Extract Coverage Stats
+        id: coverage
+        run: |
+          if [ -f "coverage/coverage-summary.json" ]; then
+            LINES=$(node -e "console.log(Math.round(JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json', 'utf8')).total.lines.pct))")
+            STATEMENTS=$(node -e "console.log(Math.round(JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json', 'utf8')).total.statements.pct))")
+            FUNCTIONS=$(node -e "console.log(Math.round(JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json', 'utf8')).total.functions.pct))")
+            BRANCHES=$(node -e "console.log(Math.round(JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json', 'utf8')).total.branches.pct))")
+            echo "lines=$LINES" >> $GITHUB_OUTPUT
+            echo "statements=$STATEMENTS" >> $GITHUB_OUTPUT
+            echo "functions=$FUNCTIONS" >> $GITHUB_OUTPUT
+            echo "branches=$BRANCHES" >> $GITHUB_OUTPUT
+          else
+            echo "lines=0" >> $GITHUB_OUTPUT
+            echo "statements=0" >> $GITHUB_OUTPUT
+            echo "functions=0" >> $GITHUB_OUTPUT
+            echo "branches=0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload merged coverage report
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: coverage-report
+          path: |
+            coverage/lcov.info
+            coverage/coverage-summary.json
+            coverage/index.html
+          retention-days: 7
+
+  # 2. AI自主验证
+  ai-validation:
+    name: AI Validation
+    runs-on: ubuntu-latest
+    needs: coverage-merge
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Cache Nx
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: |
+            .nx/cache
+            node_modules/.cache
+          key: ${{ runner.os }}-nx-${{ hashFiles('package-lock.json', '**/project.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nx-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium
+
+      - name: Run AI Validation Tests
+        run: npm run test:ai-validation
+        continue-on-error: true
+
+      - name: Upload AI validation report
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: ai-validation-report
+          path: test-results/ai-validation-report.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # 3. 视觉回归测试
+  visual-regression:
+    name: Visual Regression Tests
+    runs-on: ubuntu-latest
+    needs: ai-validation
+    timeout-minutes: 25
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Cache Nx
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: |
+            .nx/cache
+            node_modules/.cache
+          key: ${{ runner.os }}-nx-${{ hashFiles('package-lock.json', '**/project.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nx-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium
+
+      - name: Run Visual Regression Tests
+        run: npm run test:e2e:visual:ci
+        continue-on-error: true
+
+      - name: Upload visual regression report
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: visual-regression-report
+          path: |
+            apps/ai-recruitment-frontend-e2e/playwright-report
+            apps/ai-recruitment-frontend-e2e/test-results
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # 4. 性能测试
+  performance-tests:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Cache Nx
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: |
+            .nx/cache
+            node_modules/.cache
+          key: ${{ runner.os }}-nx-${{ hashFiles('package-lock.json', '**/project.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nx-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium
+
+      - name: Run Performance Tests
+        run: npm run test:performance
+        continue-on-error: true
+
+      - name: Upload performance report
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: performance-report
+          path: test-results/performance/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # 5. 可访问性测试
+  accessibility-tests:
+    name: Accessibility Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Cache Nx
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: |
+            .nx/cache
+            node_modules/.cache
+          key: ${{ runner.os }}-nx-${{ hashFiles('package-lock.json', '**/project.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nx-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Accessibility Tests
+        run: npm run test:accessibility
+        continue-on-error: true
+
+      - name: Upload accessibility report
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: accessibility-report
+          path: test-results/accessibility/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # 6. 综合验证
+  comprehensive-validation:
+    name: Comprehensive Validation
+    runs-on: ubuntu-latest
+    needs: [coverage-merge, ai-validation]
+    timeout-minutes: 40
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Cache Nx
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: |
+            .nx/cache
+            node_modules/.cache
+          key: ${{ runner.os }}-nx-${{ hashFiles('package-lock.json', '**/project.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nx-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright Browsers
+        run: npx playwright install chromium firefox webkit
+
+      - name: Run Comprehensive Tests
+        run: npm run test:comprehensive
+        continue-on-error: true
+
+      - name: Upload comprehensive validation report
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: comprehensive-validation-report
+          path: test-results/validation-report.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # 7. 生成报告
+  generate-report:
+    name: Generate Consolidated Report
+    runs-on: ubuntu-latest
+    needs:
+      [
+        coverage-merge,
+        ai-validation,
+        visual-regression,
+        performance-tests,
+        accessibility-tests,
+        comprehensive-validation,
+      ]
+    if: always()
+    timeout-minutes: 10
+    outputs:
+      report_url: ${{ steps.upload.outputs.url }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392443fae83e421467 # v4.1.9
+        with:
+          path: artifacts/
+          merge-multiple: false
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate consolidated report
+        run: node scripts/generate-validation-report.js
+        env:
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REF: ${{ github.ref }}
+
+      - name: Upload consolidated report
+        id: upload
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: consolidated-validation-report
+          path: |
+            test-results/validation-report.json
+            test-results/validation-report.html
+            test-results/summary.md
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799fdea # v7.0.1
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            // Read summary report
+            const summaryPath = path.join(process.env.GITHUB_WORKSPACE, 'test-results', 'summary.md');
+            let summary = '';
+            try {
+              summary = fs.readFileSync(summaryPath, 'utf8');
+            } catch (e) {
+              summary = '## AI Automated Validation Report\n\n> ⚠️ 无法加载详细报告\n';
+            }
+
+            // Get job statuses
+            const jobs = [
+              { name: 'Unit Tests', job: 'unit-tests' },
+              { name: 'AI Validation', job: 'ai-validation' },
+              { name: 'Visual Regression', job: 'visual-regression' },
+              { name: 'Performance Tests', job: 'performance-tests' },
+              { name: 'Accessibility Tests', job: 'accessibility-tests' },
+              { name: 'Comprehensive Validation', job: 'comprehensive-validation' }
+            ];
+
+            const { data: checkRuns } = await github.rest.checks.listForRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.payload.pull_request.head.sha
+            });
+
+            let statusTable = '| 检查项 | 状态 |\n|--------|------|\n';
+            jobs.forEach(({ name, job }) => {
+              const check = checkRuns.check_runs.find(c => c.name.includes(job));
+              const status = check ? check.conclusion === 'success' ? '✅ 通过' : check.conclusion === 'failure' ? '❌ 失败' : '⏳ 进行中' : '⚪ 未知';
+              statusTable += `| ${name} | ${status} |\n`;
+            });
+
+            const body = `## 🤖 AI Automated Validation Report
+
+            ${statusTable}
+
+            <details>
+            <summary>📊 点击查看详细报告</summary>
+
+            ${summary}
+
+            </details>
+
+            ---
+            *由 GitHub Actions 自动生成* | [查看完整报告](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('AI Automated Validation Report')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }

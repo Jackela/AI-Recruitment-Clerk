@@ -1,5 +1,5 @@
 import type { OnInit, OnDestroy } from '@angular/core';
-import { Component, Input, inject } from '@angular/core';
+import {Component, Input, inject, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, BehaviorSubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -205,7 +205,8 @@ import type {
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class ProgressTrackerComponent implements OnInit, OnDestroy {
   private readonly webSocketService = inject(WebSocketService);
   private readonly toastService = inject(ToastService);

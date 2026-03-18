@@ -25,14 +25,12 @@ export default {
     '!src/report-generator/report.repository.ts', // Data repository
     '!src/app/reports.controller.ts', // Admin REST controller (requires full HTTP mocking)
   ],
-  // Coverage threshold lowered due to infrastructure-heavy code (Puppeteer, ExcelJS, LLM)
-  // Integration tests recommended for full coverage of PDF/Excel generation paths
   coverageThreshold: {
     global: {
-      branches: 40,
+      branches: 60,
       functions: 75,
-      lines: 55,
-      statements: 55,
+      lines: 60,
+      statements: 60,
     },
   },
 };

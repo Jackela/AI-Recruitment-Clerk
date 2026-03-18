@@ -31,16 +31,16 @@ jobs:
           path: |
             .nx/cache
             node_modules/.cache/nx
-          key: nx-${{ runner.os }}-${{ hashFiles('**/package-lock.json', '**/project.json') }}
+          key: ${{ runner.os }}-nx-${{ hashFiles('package-lock.json', '**/project.json') }}
           restore-keys: |
-            nx-${{ runner.os }}-
+            ${{ runner.os }}-nx-
       - name: Cache Playwright browsers
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: ~/.cache/ms-playwright
-          key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
           restore-keys: |
-            pw-${{ runner.os }}-
+            ${{ runner.os }}-playwright-
       - run: npm ci
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
@@ -64,34 +64,18 @@ jobs:
           fi
       - name: Build affected
         run: npx nx affected -t build --base=origin/main --head=HEAD --parallel=4
-      - name: Start static server for E2E
-        run: |
-          npx nx run ai-recruitment-frontend:serve-static --port 4200 > /tmp/server.log 2>&1 &
-          SERVER_PID=$!
-          echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
-          echo "Waiting for server to be ready..."
-          for i in {1..12}; do
-            if curl -s -f http://localhost:4200 > /dev/null 2>&1; then
-              echo "Server is ready after ${i}s!"
-              break
-            fi
-            echo "Waiting... ($i/12)"
-            sleep 5
-          done
-          if ! curl -s -f http://localhost:4200 > /dev/null 2>&1; then
-            echo "Server failed to start. Log output:"
-            cat /tmp/server.log
-            exit 1
-          fi
+      - name: Manage server lifecycle
+        uses: ./.github/actions/server-lifecycle
+        with:
+          port: 4200
+          build-command: 'echo "Build already done via Build affected"'
+          serve-command: 'npx nx run ai-recruitment-frontend:serve-static --port 4200'
+          health-check-url: 'http://localhost:4200'
+          health-check-timeout: '60000'
+          server-log-path: '/tmp/server.log'
       - name: E2E affected
         # Skip app-gateway-e2e due to complex service dependencies
         run: npx nx affected -t e2e --base=origin/main --head=HEAD --exclude=app-gateway-e2e --configuration=ci --parallel=2
         env:
           CI: true
           E2E_SKIP_WEBSERVER: true
-      - name: Stop static server
-        if: always()
-        run: |
-          if [ -n "$SERVER_PID" ]; then
-            kill $SERVER_PID || true
-          fi

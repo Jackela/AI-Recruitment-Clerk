@@ -1,5 +1,5 @@
 import type { OnInit, OnDestroy } from '@angular/core';
-import { Component, signal, computed, inject } from '@angular/core';
+import {Component, signal, computed, inject, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationGuideService } from '../../../services/navigation/navigation-guide.service';
 import { Subject } from 'rxjs';
@@ -108,7 +108,8 @@ interface HighlightPosition extends Position {
     </div>
   `,
   styleUrls: ['./guide-overlay.component.css'],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class GuideOverlayComponent implements OnInit, OnDestroy {
   private readonly guideService = inject(NavigationGuideService);
 

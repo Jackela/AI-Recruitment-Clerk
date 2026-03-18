@@ -1,5 +1,10 @@
 import type { OnDestroy } from '@angular/core';
-import { Component, signal, inject } from '@angular/core';
+import {
+  Component,
+  signal,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import type { HttpErrorResponse } from '@angular/common/http';
@@ -16,6 +21,7 @@ import { ProgressTrackerComponent } from '../../components/shared/progress-track
   selector: 'arc-upload-resume',
   standalone: true,
   imports: [CommonModule, FormsModule, ProgressTrackerComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="container">
       <h2>智能简历分析</h2>
@@ -498,7 +504,8 @@ export class UploadResumeComponent implements OnDestroy {
       .subscribe((completion) => {
         this.analysisComplete.set(true);
         this.reportUrl.set(
-          ((completion as { result?: { reportUrl?: string } })?.result?.reportUrl as string) || '',
+          ((completion as { result?: { reportUrl?: string } })?.result
+            ?.reportUrl as string) || '',
         );
         this.output.set(JSON.stringify(completion, null, 2));
       });

@@ -1,5 +1,5 @@
 import type { OnInit, OnDestroy } from '@angular/core';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
@@ -7,6 +7,7 @@ import { takeUntil, filter } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { DashboardCardComponent } from '../../../components/shared/dashboard-card/dashboard-card.component';
+import { I18nService } from '../../../services/i18n/i18n.service';
 import type { AppState } from '../../../store/app.state';
 import type { JobListItem, Job } from '../../../store/jobs/job.model';
 import * as JobActions from '../../../store/jobs/job.actions';
@@ -66,6 +67,7 @@ export interface JobManagementStateWithWebSocket {
   imports: [CommonModule, RouterModule, DashboardCardComponent],
   templateUrl: './jobs-list.component.html',
   styleUrl: './jobs-list.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class JobsListComponent implements OnInit, OnDestroy {
   // Using memoized selectors for better performance
@@ -98,6 +100,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
   private readonly sessionId = `jobs-list-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
   private readonly store = inject(Store<AppState>);
+  private readonly i18n = inject(I18nService);
 
   /**
    * Initializes a new instance of the Jobs List Component.
@@ -287,15 +290,10 @@ export class JobsListComponent implements OnInit, OnDestroy {
    * @returns Translated status string
    */
   public getStatusText(status: string): string {
-    const statusMap: Record<string, string> = {
-      processing: '处理中',
-      completed: '已完成',
-      active: '活跃',
-      draft: '草稿',
-      closed: '已关闭',
-      failed: '失败',
-    };
-    return statusMap[status] || status;
+    const key = `job.status.${status}`;
+    const translated = this.i18n.translate(key);
+    // Fallback to status if translation not found
+    return translated === key ? status : translated;
   }
 
   /**

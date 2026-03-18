@@ -31,33 +31,21 @@ jobs:
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: ~/.cache/ms-playwright
-          key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
           restore-keys: |
-            pw-${{ runner.os }}-
+            ${{ runner.os }}-playwright-
       - run: npm ci
+      - name: Manage server lifecycle
+        uses: ./.github/actions/server-lifecycle
+        with:
+          port: 4200
+          build-command: 'npx nx build ai-recruitment-frontend --configuration=production'
+          serve-command: 'npx nx run ai-recruitment-frontend:serve-static --port 4200'
+          health-check-url: 'http://localhost:4200'
+          health-check-timeout: '60000'
+          server-log-path: '/tmp/server.log'
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
-      - name: Build Frontend
-        run: npx nx build ai-recruitment-frontend --configuration=production
-      - name: Start static server for E2E
-        run: |
-          npx nx run ai-recruitment-frontend:serve-static --port 4200 > /tmp/server.log 2>&1 &
-          SERVER_PID=$!
-          echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
-          echo "Waiting for server to be ready..."
-          for i in {1..12}; do
-            if curl -s -f http://localhost:4200 > /dev/null 2>&1; then
-              echo "Server is ready after ${i}s!"
-              break
-            fi
-            echo "Waiting... ($i/12)"
-            sleep 5
-          done
-          if ! curl -s -f http://localhost:4200 > /dev/null 2>&1; then
-            echo "Server failed to start. Log output:"
-            cat /tmp/server.log
-            exit 1
-          fi
       - name: Run full E2E
         run: npm run test:e2e
         env:
@@ -66,12 +54,6 @@ jobs:
         run: npm run test:e2e:visual:ci
         env:
           E2E_SKIP_WEBSERVER: true
-      - name: Stop static server
-        if: always()
-        run: |
-          if [ -n "$SERVER_PID" ]; then
-            kill $SERVER_PID 2>/dev/null || true
-          fi
       - name: Upload Visual Regression Snapshots
         if: failure()
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
@@ -82,6 +64,7 @@ jobs:
             apps/ai-recruitment-frontend-e2e/src/visual/**/*-actual.png
             apps/ai-recruitment-frontend-e2e/src/visual/**/*-expected.png
           if-no-files-found: ignore
+          retention-days: 7
       - name: Upload Playwright report (if present)
         if: always()
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
@@ -91,3 +74,4 @@ jobs:
             apps/ai-recruitment-frontend-e2e/playwright-report
             apps/ai-recruitment-frontend-e2e/test-results
           if-no-files-found: ignore
+          retention-days: 7

@@ -25,7 +25,7 @@
         <line x1="12" y1="20" x2="12.01" y2="20"></line>
       </svg>
       <div class="offline-message">
-        <strong>离线模式</strong>
+        <strong>{{ 'jobs.offlineMode' | translate }}</strong>
         <span *ngIf="offlineStatus.message">{{ offlineStatus.message }}</span>
       </div>
       <button
@@ -34,7 +34,9 @@
         (click)="onRetryConnection()"
         [disabled]="(loading$ | async) || false"
       >
-        <span *ngIf="!(loading$ | async)">重试连接</span>
+        <span *ngIf="!(loading$ | async)">{{
+          'common.retryConnection' | translate
+        }}</span>
         <span *ngIf="loading$ | async" class="spinner-small"></span>
       </button>
     </div>
@@ -45,10 +47,10 @@
     <div class="header-content">
       <div class="header-text">
         <h1 id="page-title" class="page-title" data-testid="page-title">
-          岗位管理
+          {{ 'jobs.0062' | translate }}
         </h1>
         <p class="page-subtitle" role="doc-subtitle">
-          管理您的招聘职位和候选人
+          {{ 'jobs.0063' | translate }}
         </p>
       </div>
       <div class="header-actions">
@@ -76,13 +78,13 @@
             class="spinner"
             aria-hidden="true"
           ></span>
-          <span>刷新</span>
+          <span>{{ 'common.0139' | translate }}</span>
         </button>
         <a
           routerLink="/jobs/create"
           class="btn-primary"
           data-testid="create-job-button"
-          [attr.aria-label]="'创建新岗位'"
+          [attr.aria-label]="'jobs.0064' | translate"
         >
           <svg
             width="20"
@@ -96,7 +98,7 @@
             <line x1="12" y1="8" x2="12" y2="16"></line>
             <line x1="8" y1="12" x2="16" y2="12"></line>
           </svg>
-          <span>创建新岗位</span>
+          <span>{{ 'jobs.0064' | translate }}</span>
         </a>
       </div>
     </div>
@@ -108,50 +110,56 @@
     aria-labelledby="stats-heading"
     *ngIf="jobsStatistics$ | async as stats"
   >
-    <h2 id="stats-heading" class="sr-only">职位统计</h2>
-    <div class="stats-grid" role="group" aria-label="职位统计卡片">
+    <h2 id="stats-heading" class="sr-only">
+      {{ 'jobs.statistics' | translate }}
+    </h2>
+    <div
+      class="stats-grid"
+      role="group"
+      [attr.aria-label]="'jobs.statistics' | translate"
+    >
       <arc-dashboard-card
-        title="总职位数"
+        [title]="'jobs.totalJobs' | translate"
         [value]="stats.totalJobs.toString()"
-        subtitle="所有职位"
+        [subtitle]="'jobs.0068' | translate"
         icon="jobs"
         variant="primary"
         [trend]="{ type: 'up', value: '+12%' }"
         role="article"
-        [attr.aria-label]="'总职位数: ' + stats.totalJobs"
+        [attr.aria-label]="'jobs.totalJobs: ' + stats.totalJobs"
       ></arc-dashboard-card>
 
       <arc-dashboard-card
-        title="活跃职位"
+        [title]="'jobs.activeJobs' | translate"
         [value]="stats.activeJobs.toString()"
-        subtitle="正在招聘"
+        [subtitle]="'jobs.0070' | translate"
         icon="resumes"
         variant="success"
         [trend]="{ type: 'up', value: '+8%' }"
         role="article"
-        [attr.aria-label]="'活跃职位: ' + stats.activeJobs"
+        [attr.aria-label]="'jobs.activeJobs: ' + stats.activeJobs"
       ></arc-dashboard-card>
 
       <arc-dashboard-card
-        title="候选人总数"
+        [title]="'jobs.totalApplicants' | translate"
         [value]="stats.totalApplicants.toString()"
-        subtitle="所有简历"
+        [subtitle]="'jobs.0072' | translate"
         icon="matches"
         variant="info"
         [trend]="{ type: 'up', value: '+23%' }"
         role="article"
-        [attr.aria-label]="'候选人总数: ' + stats.totalApplicants"
+        [attr.aria-label]="'jobs.totalApplicants: ' + stats.totalApplicants"
       ></arc-dashboard-card>
 
       <arc-dashboard-card
-        title="平均招聘周期"
-        [value]="stats.avgTimeToHire + '天'"
-        subtitle="招聘效率"
+        [title]="'jobs.avgTimeToHire' | translate"
+        [value]="stats.avgTimeToHire + ('common.days' | translate)"
+        [subtitle]="'jobs.0075' | translate"
         icon="reports"
         variant="warning"
-        [trend]="{ type: 'down', value: '-3天' }"
+        [trend]="{ type: 'down', value: '-3' + ('common.days' | translate) }"
         role="article"
-        [attr.aria-label]="'平均招聘周期: ' + stats.avgTimeToHire + '天'"
+        [attr.aria-label]="'jobs.avgTimeToHire: ' + stats.avgTimeToHire"
       ></arc-dashboard-card>
     </div>
   </section>
@@ -180,9 +188,9 @@
     <button
       (click)="onRefresh()"
       class="error-retry"
-      [attr.aria-label]="'重试'"
+      [attr.aria-label]="'jobs.0077' | translate"
     >
-      重试
+      {{ 'jobs.0077' | translate }}
     </button>
   </div>
 
@@ -210,8 +218,10 @@
         </div>
       </div>
     </div>
-    <p class="text-center" aria-hidden="true">加载中</p>
-    <span class="sr-only">正在加载职位列表...</span>
+    <p class="text-center" aria-hidden="true">
+      {{ 'common.0001' | translate }}
+    </p>
+    <span class="sr-only">{{ 'common.0140' | translate }}</span>
   </div>
 
   <!-- Jobs Bento Grid -->
@@ -220,12 +230,12 @@
     class="jobs-section"
     aria-labelledby="jobs-heading"
   >
-    <h2 id="jobs-heading" class="sr-only">职位列表</h2>
+    <h2 id="jobs-heading" class="sr-only">{{ 'jobs.jobList' | translate }}</h2>
     <div
       class="jobs-bento-grid jobs-grid"
       data-testid="jobs-grid"
       role="grid"
-      aria-label="职位卡片网格"
+      [attr.aria-label]="'jobs.jobCardGrid' | translate"
     >
       <div
         *ngFor="let job of jobs$ | async; trackBy: trackByJobId"
@@ -264,7 +274,9 @@
         <!-- Card Content -->
         <div class="card-content">
           <h3 class="job-title">{{ job.title }}</h3>
-          <p class="job-department">{{ job.department || '未分类部门' }}</p>
+          <p class="job-department">
+            {{ job.department || ('jobs.uncategorizedDepartment' | translate) }}
+          </p>
 
           <div class="job-meta">
             <div
@@ -285,7 +297,8 @@
                 <polyline points="14,2 14,8 20,8"></polyline>
               </svg>
               <span
-                ><strong>{{ job.resumeCount }}</strong> 份简历</span
+                ><strong>{{ job.resumeCount }}</strong>
+                {{ 'jobs.0082' | translate }}</span
               >
             </div>
             <div
@@ -333,7 +346,8 @@
                   ></div>
                 </div>
                 <span class="progress-text">{{
-                  getCurrentStep(jobWithProgress) || '处理中...'
+                  getCurrentStep(jobWithProgress) ||
+                    ('common.processing' | translate)
                 }}</span>
               </div>
             </ng-container>
@@ -358,13 +372,13 @@
               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
               <circle cx="12" cy="12" r="3"></circle>
             </svg>
-            <span>查看详情</span>
+            <span>{{ 'jobs.viewDetails' | translate }}</span>
           </button>
           <button
             class="action-btn secondary"
             [routerLink]="['/reports']"
             [queryParams]="{ jobId: job.id }"
-            [attr.aria-label]="'查看 ' + job.title + ' 报告'"
+            [attr.aria-label]="'jobs.viewReport' | translate"
           >
             <svg
               width="16"
@@ -378,7 +392,7 @@
               <line x1="12" y1="20" x2="12" y2="4"></line>
               <line x1="6" y1="20" x2="6" y2="14"></line>
             </svg>
-            <span>查看报告</span>
+            <span>{{ 'jobs.viewReport' | translate }}</span>
           </button>
         </div>
       </div>
@@ -405,15 +419,15 @@
           <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
         </svg>
       </div>
-      <h3 class="empty-title">暂无岗位</h3>
-      <p class="empty-description">
-        您还没有创建任何职位。<br />
-        点击下方按钮创建您的第一个职位吧！
-      </p>
+      <h3 class="empty-title">{{ 'jobs.0091' | translate }}</h3>
+      <p
+        class="empty-description"
+        [innerHTML]="'jobs.emptyDescription' | translate"
+      ></p>
       <a
         routerLink="/jobs/create"
         class="btn-primary"
-        [attr.aria-label]="'创建第一个职位'"
+        [attr.aria-label]="'jobs.createFirstJob' | translate"
       >
         <svg
           width="20"
@@ -427,7 +441,7 @@
           <line x1="12" y1="8" x2="12" y2="16"></line>
           <line x1="8" y1="12" x2="16" y2="12"></line>
         </svg>
-        <span>创建新岗位</span>
+        <span>{{ 'jobs.0064' | translate }}</span>
       </a>
     </div>
   </section>

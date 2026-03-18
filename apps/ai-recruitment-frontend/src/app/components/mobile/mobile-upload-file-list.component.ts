@@ -1,9 +1,7 @@
-import {
-  Component,
+import {Component,
   Input,
   Output,
-  EventEmitter,
-} from '@angular/core';
+  EventEmitter,, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -32,7 +30,8 @@ export interface UploadFile {
   template: `
     <div class="upload-list" *ngIf="files.length > 0">
       <h4 class="list-title">
-        Uploaded Files ({{ files.length }})
+        Uploaded Files ({{ files.length }
+  changeDetection: ChangeDetectionStrategy.OnPush,})
         <button
           class="clear-all"
           *ngIf="canClearAll"
@@ -58,6 +57,8 @@ export interface UploadFile {
               [src]="file.preview"
               [alt]="file.name"
               class="preview-image"
+              loading="lazy"
+              decoding="async"
             />
             <div *ngIf="!file.preview" class="preview-placeholder">
               <svg

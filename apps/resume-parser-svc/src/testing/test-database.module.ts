@@ -1,4 +1,4 @@
-import type { DynamicModule} from '@nestjs/common';
+import type { DynamicModule } from '@nestjs/common';
 import { Module, Global } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
@@ -30,6 +30,9 @@ export class TestDatabaseModule {
       // Use in-memory MongoDB for unit tests
       if (!mongod) {
         mongod = await MongoMemoryServer.create({
+          binary: {
+            version: '7.0.5',
+          },
           instance: {
             dbName: 'resume-parser-test',
           },

@@ -1,8 +1,8 @@
 import type { OnInit } from '@angular/core';
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { SharedModule } from '../../components/shared/shared.module';
 
@@ -30,6 +30,7 @@ interface ActivityItem {
   selector: 'arc-dashboard',
   standalone: true,
   imports: [CommonModule, RouterModule, SharedModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
       class="dashboard-container"

@@ -191,7 +191,7 @@ jobs:
           fi
 
       - name: 📊 Upload Coverage to Codecov
-        uses: codecov/codecov-action@5e4f1a4f25f3c6a0f0e5b7c1f2b3c4d5e6f7a8b9c # v5
+        uses: codecov/codecov-action@0565863fc370e9ce6b6a387784c6a4529d9b0e01 # v5.4.0
         with:
           files: ./coverage/lcov.info
           flags: unittests
@@ -241,65 +241,20 @@ jobs:
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: ~/.cache/ms-playwright
-          key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
           restore-keys: |
-            pw-${{ runner.os }}-
+            ${{ runner.os }}-playwright-
       - run: npm ci
-      - name: Pre-test cleanup - kill processes on port 4200
-        run: |
-          echo "Cleaning up any existing processes on port 4200..."
-          # Find and kill any processes using port 4200
-          if command -v lsof &> /dev/null; then
-            PIDS=$(lsof -ti:4200 2>/dev/null || true)
-            if [ -n "$PIDS" ]; then
-              echo "Found processes on port 4200: $PIDS"
-              echo "$PIDS" | xargs -r kill -9 2>/dev/null || true
-              sleep 2
-            fi
-          elif command -v fuser &> /dev/null; then
-            fuser -k 4200/tcp 2>/dev/null || true
-            sleep 2
-          fi
-          # Verify port is free
-          if curl -s http://localhost:4200 > /dev/null 2>&1; then
-            echo "⚠️ Warning: Port 4200 is still in use after cleanup"
-          else
-            echo "✅ Port 4200 is free"
-          fi
-      - name: Build frontend for E2E tests
-        run: npx nx build ai-recruitment-frontend --configuration=production
-        env:
-          NODE_OPTIONS: '--max-old-space-size=4096'
-      - name: Verify build output exists
-        run: |
-          if [ ! -d "dist/apps/ai-recruitment-frontend/browser" ]; then
-            echo "❌ Error: Build output not found at dist/apps/ai-recruitment-frontend/browser"
-            echo "Contents of dist/apps/ai-recruitment-frontend/:"
-            ls -la dist/apps/ai-recruitment-frontend/ 2>/dev/null || echo "Directory does not exist"
-            exit 1
-          fi
-          echo "✅ Build output verified at dist/apps/ai-recruitment-frontend/browser"
-      - name: Start static server for E2E
-        run: |
-          echo "🚀 Starting static server on port 4200..."
-          npx nx run ai-recruitment-frontend:serve-static --port 4200 > /tmp/server.log 2>&1 &
-          SERVER_PID=$!
-          echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
-          echo "📋 Server PID: $SERVER_PID"
-          echo "⏳ Waiting for server to be ready..."
-          sleep 3  # Give the server a moment to start
-      - name: Health check - verify server is ready
-        run: |
-          echo "🏥 Running comprehensive health check..."
-          node scripts/health-check-server.mjs http://localhost:4200 --timeout 90000 --verbose
-          echo "✅ Health check passed!"
-      - name: Output server logs on health check failure
-        if: failure()
-        run: |
-          echo "❌ Health check failed. Server logs:"
-          echo "========================================"
-          cat /tmp/server.log || echo "No server logs available"
-          echo "========================================"
+      - name: Manage server lifecycle
+        uses: ./.github/actions/server-lifecycle
+        with:
+          port: 4200
+          build-command: 'NODE_OPTIONS="--max-old-space-size=4096" npx nx build ai-recruitment-frontend --configuration=production'
+          serve-command: 'npx serve dist/apps/ai-recruitment-frontend/browser -l 4200 -s'
+          health-check-url: 'http://localhost:4200'
+          health-check-timeout: '90000'
+          verify-build-output: 'dist/apps/ai-recruitment-frontend/browser'
+          server-log-path: '/tmp/server.log'
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
       - name: Run E2E Tests (Shard ${{ matrix.shard }}/4)
@@ -308,29 +263,6 @@ jobs:
         env:
           CI: true
           E2E_SKIP_WEBSERVER: true
-      - name: Stop static server
-        if: always()
-        run: |
-          echo "🛑 Stopping static server..."
-          if [ -n "$SERVER_PID" ]; then
-            echo "Sending TERM signal to PID $SERVER_PID..."
-            kill $SERVER_PID 2>/dev/null || true
-            sleep 2
-            # Force kill if still running
-            if kill -0 $SERVER_PID 2>/dev/null; then
-              echo "Force killing PID $SERVER_PID..."
-              kill -9 $SERVER_PID 2>/dev/null || true
-            fi
-            echo "✅ Server stopped"
-          else
-            echo "⚠️ No SERVER_PID found"
-          fi
-          # Verify port is released
-          if curl -s http://localhost:4200 > /dev/null 2>&1; then
-            echo "⚠️ Warning: Port 4200 is still in use after cleanup"
-          else
-            echo "✅ Port 4200 is released"
-          fi
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
@@ -340,6 +272,7 @@ jobs:
             apps/ai-recruitment-frontend-e2e/playwright-report
             apps/ai-recruitment-frontend-e2e/test-results
           if-no-files-found: ignore
+          retention-days: 7
 
   pii_scan:
     runs-on: ubuntu-latest

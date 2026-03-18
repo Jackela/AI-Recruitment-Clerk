@@ -1,42 +1,23 @@
-import type {
-  OnInit,
-  OnDestroy} from '@angular/core';
-import {
-  Component,
-  inject,
-} from '@angular/core';
+import type { OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import type {
-  MobileNavItem} from './mobile-navigation.component';
-import {
-  MobileNavigationComponent
-} from './mobile-navigation.component';
-import type {
-  SwipeEvent} from './mobile-swipe.component';
-import {
-  MobileSwipeComponent
-} from './mobile-swipe.component';
-import {
-  PullToRefreshDirective
-} from '../../directives/pull-to-refresh.directive';
+import type { MobileNavItem } from './mobile-navigation.component';
+import { MobileNavigationComponent } from './mobile-navigation.component';
+import type { SwipeEvent } from './mobile-swipe.component';
+import { MobileSwipeComponent } from './mobile-swipe.component';
+import { PullToRefreshDirective } from '../../directives/pull-to-refresh.directive';
 import type { DashboardStat } from './dashboard-stats.component';
 import { DashboardStatsComponent } from './dashboard-stats.component';
 import type {
   DashboardChart,
   ChartDataPoint,
 } from './dashboard-charts.component';
-import {
-  DashboardChartsComponent
-} from './dashboard-charts.component';
-import {
-  MobileQuickActionsComponent
-} from './mobile-quick-actions.component';
-import {
-  MobileActivityListComponent
-} from './mobile-activity-list.component';
+import { DashboardChartsComponent } from './dashboard-charts.component';
+import { MobileQuickActionsComponent } from './mobile-quick-actions.component';
+import { MobileActivityListComponent } from './mobile-activity-list.component';
 import type {
   DashboardCard,
   QuickAction,
@@ -44,9 +25,7 @@ import type {
   FabAction,
   DashboardState,
 } from '../../services/mobile/mobile-dashboard.service';
-import {
-  MobileDashboardService
-} from '../../services/mobile/mobile-dashboard.service';
+import { MobileDashboardService } from '../../services/mobile/mobile-dashboard.service';
 
 /**
  * Represents the mobile dashboard component.
@@ -68,6 +47,8 @@ import {
   ],
   templateUrl: './mobile-dashboard.component.html',
   styleUrl: './mobile-dashboard.component.scss',
+
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MobileDashboardComponent implements OnInit, OnDestroy {
   public pageTitle = 'Dashboard';
