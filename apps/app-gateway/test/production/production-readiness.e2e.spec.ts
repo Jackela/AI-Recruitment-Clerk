@@ -374,7 +374,7 @@ describe('🚀 Production Readiness Validation Tests', () => {
               )
               .send(endpoint.body || {});
           } else {
-            const _response = await request(app.getHttpServer())
+            _response = await request(app.getHttpServer())
               .get(endpoint.path)
               .set(
                 'Authorization',

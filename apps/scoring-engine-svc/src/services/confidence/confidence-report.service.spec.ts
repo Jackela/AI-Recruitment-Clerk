@@ -586,13 +586,15 @@ describe('ConfidenceReportService', () => {
     it('should cap min score at 0', () => {
       const componentScores = createMockComponentScores({
         skills: { score: 10, confidence: 0.9, evidenceStrength: 80 },
+        experience: { score: 10, confidence: 0.9, evidenceStrength: 80 },
+        culturalFit: { score: 10, confidence: 0.9, evidenceStrength: 80 },
       });
       const confidenceMetrics = createMockConfidenceMetrics({
         scoreVariance: {
           skillsVariance: 5,
           experienceVariance: 5,
           culturalFitVariance: 5,
-          overallVariance: 5,
+          overallVariance: 20,
           stabilityScore: 50,
         },
       });
@@ -608,13 +610,15 @@ describe('ConfidenceReportService', () => {
     it('should cap max score at 100', () => {
       const componentScores = createMockComponentScores({
         skills: { score: 95, confidence: 0.9, evidenceStrength: 80 },
+        experience: { score: 95, confidence: 0.9, evidenceStrength: 80 },
+        culturalFit: { score: 95, confidence: 0.9, evidenceStrength: 80 },
       });
       const confidenceMetrics = createMockConfidenceMetrics({
         scoreVariance: {
           skillsVariance: 5,
           experienceVariance: 5,
           culturalFitVariance: 5,
-          overallVariance: 5,
+          overallVariance: 20,
           stabilityScore: 50,
         },
       });

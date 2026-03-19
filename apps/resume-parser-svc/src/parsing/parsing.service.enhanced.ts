@@ -10,8 +10,7 @@ import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import type { VisionLlmService } from '../vision-llm/vision-llm.service';
 import type { GridFsService } from '../gridfs/gridfs.service';
 import type { FieldMapperService } from '../field-mapper/field-mapper.service';
-import type {
-  PredicateFunction} from '@ai-recruitment-clerk/infrastructure-shared';
+import type { PredicateFunction } from '@ai-recruitment-clerk/infrastructure-shared';
 import {
   RetryUtility,
   WithCircuitBreaker,
@@ -19,7 +18,7 @@ import {
   Ensures,
   Invariant,
   ContractValidators,
-  ContractViolationError
+  ContractViolationError,
 } from '@ai-recruitment-clerk/infrastructure-shared';
 import { createHash } from 'crypto';
 import type { ResumeDTO } from '@ai-recruitment-clerk/resume-dto';
@@ -68,9 +67,11 @@ export interface ParsingResult {
 @Injectable()
 @Invariant(
   ((instance: unknown) =>
-    !!((instance as ParsingService).visionLlmService &&
-    (instance as ParsingService).gridFsService &&
-    (instance as ParsingService).fieldMapperService)) as PredicateFunction,
+    !!(
+      (instance as ParsingService).visionLlmService &&
+      (instance as ParsingService).gridFsService &&
+      (instance as ParsingService).fieldMapperService
+    )) as PredicateFunction,
   'ParsingService must have all required dependencies initialized',
 )
 export class ParsingService {
@@ -179,30 +180,43 @@ export class ParsingService {
     'User ID must be non-empty string',
   )
   @Requires(
-    ((...args: unknown[]) => ContractValidators.isValidFileSize((args[0] as Buffer).length)) as PredicateFunction,
+    ((...args: unknown[]) =>
+      ContractValidators.isValidFileSize(
+        (args[0] as Buffer).length,
+      )) as PredicateFunction,
     'File size must be within acceptable limits (10MB max)',
   )
   @Ensures(
     ((result: unknown) =>
       result &&
       typeof result === 'object' &&
-      ['processing', 'completed', 'failed', 'partial'].includes((result as { status: string }).status)) as PredicateFunction,
+      ['processing', 'completed', 'failed', 'partial'].includes(
+        (result as { status: string }).status,
+      )) as PredicateFunction,
     'Result must have valid status',
   )
   @Ensures(
     ((result: unknown) =>
-      (result as { jobId: string }).jobId && ContractValidators.isNonEmptyString((result as { jobId: string }).jobId)) as PredicateFunction,
+      (result as { jobId: string }).jobId &&
+      ContractValidators.isNonEmptyString(
+        (result as { jobId: string }).jobId,
+      )) as PredicateFunction,
     'Result must include valid job ID',
   )
   @Ensures(
-    ((result: unknown) => Array.isArray((result as { warnings: unknown }).warnings)) as PredicateFunction,
+    ((result: unknown) =>
+      Array.isArray(
+        (result as { warnings: unknown }).warnings,
+      )) as PredicateFunction,
     'Result must include warnings array',
   )
   @Ensures(
     ((result: unknown) =>
       (result as { metadata: { duration: number } }).metadata &&
-      typeof (result as { metadata: { duration: number } }).metadata.duration === 'number' &&
-      (result as { metadata: { duration: number } }).metadata.duration > 0) as PredicateFunction,
+      typeof (result as { metadata: { duration: number } }).metadata
+        .duration === 'number' &&
+      (result as { metadata: { duration: number } }).metadata.duration >
+        0) as PredicateFunction,
     'Result must include valid processing duration',
   )
   @WithCircuitBreaker('resume-processing', {
@@ -271,7 +285,7 @@ export class ParsingService {
         fileUrl,
         warnings,
         metadata: {
-          duration: Date.now() - startTime,
+          duration: Math.max(1, Date.now() - startTime),
           confidence,
         },
       };
@@ -299,7 +313,7 @@ export class ParsingService {
         status: 'failed',
         warnings: [`Processing failed: ${error.message}`],
         metadata: {
-          duration: Date.now() - startTime,
+          duration: Math.max(1, Date.now() - startTime),
           error: error.message,
         },
       };
@@ -373,7 +387,9 @@ export class ParsingService {
     fileBuffer: Buffer,
     _userId: string,
   ): Promise<void> {
-    const fileHash = createHash('sha256').update(Uint8Array.from(fileBuffer)).digest('hex');
+    const fileHash = createHash('sha256')
+      .update(Uint8Array.from(fileBuffer))
+      .digest('hex');
     const existingProcessing = Array.from(this.processingFiles.values()).find(
       (p) => p.hash === fileHash,
     );
@@ -423,7 +439,9 @@ export class ParsingService {
    * @since 1.1.0
    */
   private trackProcessingAttempt(jobId: string, fileBuffer: Buffer): void {
-    const fileHash = createHash('sha256').update(Uint8Array.from(fileBuffer)).digest('hex');
+    const fileHash = createHash('sha256')
+      .update(Uint8Array.from(fileBuffer))
+      .digest('hex');
     this.processingFiles.set(jobId, {
       timestamp: Date.now(),
       hash: fileHash,
@@ -484,11 +502,17 @@ export class ParsingService {
     // Check for essential fields
     if (parsedData.contactInfo?.name) score += 0.2;
     if (parsedData.contactInfo?.email) score += 0.1;
-    if (parsedData.workExperience && parsedData.workExperience.length > 0) score += 0.1;
+    if (parsedData.workExperience && parsedData.workExperience.length > 0)
+      score += 0.1;
     if (parsedData.skills && parsedData.skills.length > 0) score += 0.1;
 
     // Check data quality indicators from raw extraction
-    if (rawData.confidence && typeof rawData.confidence === 'number' && rawData.confidence > 0.8) score += 0.1;
+    if (
+      rawData.confidence &&
+      typeof rawData.confidence === 'number' &&
+      rawData.confidence > 0.8
+    )
+      score += 0.1;
 
     return Math.min(score, 1.0);
   }

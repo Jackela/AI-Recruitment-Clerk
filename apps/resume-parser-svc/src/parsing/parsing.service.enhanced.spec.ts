@@ -197,13 +197,14 @@ describe('ParsingService Enhanced (parsing.service.enhanced.ts)', () => {
 
     it('should successfully parse a DOCX file', async () => {
       // Arrange
-      const { svc, gridFs, fieldMapper } = buildService();
+      const { svc, vision, gridFs, fieldMapper } = buildService();
       const docxBuffer = Buffer.concat([
         Buffer.from([0x50, 0x4b, 0x03, 0x04]), // ZIP magic bytes (DOCX)
         Buffer.from('DOCX content'),
       ]);
 
       gridFs.uploadFile.mockResolvedValue('gridfs://bucket/resume-456');
+      vision.parseResumePdf.mockResolvedValue(createValidResumeDTO());
       fieldMapper.normalizeToResumeDto.mockResolvedValue(
         createValidResumeDTO({
           contactInfo: {
@@ -229,10 +230,11 @@ describe('ParsingService Enhanced (parsing.service.enhanced.ts)', () => {
 
     it('should handle parsing with partial confidence (0.7-0.8)', async () => {
       // Arrange
-      const { svc, fieldMapper } = buildService();
+      const { svc, vision, fieldMapper } = buildService();
       const pdfBuffer = Buffer.from('%PDF-1.4');
 
       // Minimal parsed data that yields confidence ~0.7
+      vision.parseResumePdf.mockResolvedValue(createValidResumeDTO());
       fieldMapper.normalizeToResumeDto.mockResolvedValue(
         createValidResumeDTO({
           contactInfo: { name: 'Minimal User', email: null, phone: null },
@@ -256,10 +258,11 @@ describe('ParsingService Enhanced (parsing.service.enhanced.ts)', () => {
 
     it('should skip duplicate check when option is set', async () => {
       // Arrange
-      const { svc, gridFs } = buildService();
+      const { svc, vision, gridFs } = buildService();
       const pdfBuffer = Buffer.from('%PDF-1.4');
 
       gridFs.uploadFile.mockResolvedValue('gridfs://bucket/resume');
+      vision.parseResumePdf.mockResolvedValue(createValidResumeDTO());
 
       // Act
       const result = await svc.parseResumeFile(
@@ -405,13 +408,14 @@ describe('ParsingService Enhanced (parsing.service.enhanced.ts)', () => {
 
     it('should accept DOC files with valid signature', async () => {
       // Arrange
-      const { svc, gridFs } = buildService();
+      const { svc, vision, gridFs } = buildService();
       const docBuffer = Buffer.concat([
         Buffer.from([0xd0, 0xcf, 0x11, 0xe0]), // DOC magic bytes
         Buffer.from('document content'),
       ]);
 
       gridFs.uploadFile.mockResolvedValue('gridfs://bucket/doc');
+      vision.parseResumePdf.mockResolvedValue(createValidResumeDTO());
 
       // Act
       const result = await svc.parseResumeFile(
@@ -426,10 +430,11 @@ describe('ParsingService Enhanced (parsing.service.enhanced.ts)', () => {
 
     it('should be case-insensitive for file extensions', async () => {
       // Arrange
-      const { svc, gridFs } = buildService();
+      const { svc, vision, gridFs } = buildService();
       const pdfBuffer = Buffer.from('%PDF-1.4');
 
       gridFs.uploadFile.mockResolvedValue('gridfs://bucket/resume');
+      vision.parseResumePdf.mockResolvedValue(createValidResumeDTO());
 
       // Act
       const result = await svc.parseResumeFile(
@@ -447,10 +452,11 @@ describe('ParsingService Enhanced (parsing.service.enhanced.ts)', () => {
   describe('Duplicate Processing Check - checkDuplicateProcessing', () => {
     it('should throw error when same file is being processed', async () => {
       // Arrange
-      const { svc, gridFs } = buildService();
+      const { svc, vision, gridFs } = buildService();
       const pdfBuffer = Buffer.from('%PDF-1.4 duplicate test');
 
       gridFs.uploadFile.mockResolvedValue('gridfs://bucket/resume');
+      vision.parseResumePdf.mockResolvedValue(createValidResumeDTO());
 
       // Act - First call starts processing
       const firstCall = svc.parseResumeFile(
@@ -476,11 +482,12 @@ describe('ParsingService Enhanced (parsing.service.enhanced.ts)', () => {
 
     it('should track different files separately', async () => {
       // Arrange
-      const { svc, gridFs } = buildService();
+      const { svc, vision, gridFs } = buildService();
       const pdfBuffer1 = Buffer.from('%PDF-1.4 file 1');
       const pdfBuffer2 = Buffer.from('%PDF-1.4 file 2');
 
       gridFs.uploadFile.mockResolvedValue('gridfs://bucket/resume');
+      vision.parseResumePdf.mockResolvedValue(createValidResumeDTO());
 
       // Act
       const result1 = await svc.parseResumeFile(
@@ -504,9 +511,10 @@ describe('ParsingService Enhanced (parsing.service.enhanced.ts)', () => {
   describe('Confidence Calculation - calculateConfidence', () => {
     it('should return high confidence (>0.8) for complete data', async () => {
       // Arrange
-      const { svc, fieldMapper } = buildService();
+      const { svc, vision, fieldMapper } = buildService();
       const pdfBuffer = Buffer.from('%PDF-1.4');
 
+      vision.parseResumePdf.mockResolvedValue(createValidResumeDTO());
       fieldMapper.normalizeToResumeDto.mockResolvedValue(
         createValidResumeDTO(),
       );
@@ -525,9 +533,10 @@ describe('ParsingService Enhanced (parsing.service.enhanced.ts)', () => {
 
     it('should return medium confidence (0.7-0.8) for partial data', async () => {
       // Arrange
-      const { svc, fieldMapper } = buildService();
+      const { svc, vision, fieldMapper } = buildService();
       const pdfBuffer = Buffer.from('%PDF-1.4');
 
+      vision.parseResumePdf.mockResolvedValue(createValidResumeDTO());
       fieldMapper.normalizeToResumeDto.mockResolvedValue(
         createValidResumeDTO({
           contactInfo: { name: 'Jane', email: null, phone: null },
@@ -551,10 +560,11 @@ describe('ParsingService Enhanced (parsing.service.enhanced.ts)', () => {
 
     it('should return low confidence (<0.7) for minimal data', async () => {
       // Arrange
-      const { svc, fieldMapper } = buildService();
+      const { svc, vision, fieldMapper } = buildService();
       const pdfBuffer = Buffer.from('%PDF-1.4');
 
       // Minimal data - just base score
+      vision.parseResumePdf.mockResolvedValue(createValidResumeDTO());
       fieldMapper.normalizeToResumeDto.mockResolvedValue(
         createValidResumeDTO({
           contactInfo: { name: null, email: null, phone: null },
@@ -701,11 +711,12 @@ describe('ParsingService Enhanced (parsing.service.enhanced.ts)', () => {
   describe('GridFS Storage - storeFile', () => {
     it('should store file with correct metadata', async () => {
       // Arrange
-      const { svc, gridFs } = buildService();
+      const { svc, vision, gridFs } = buildService();
       const pdfBuffer = Buffer.from('%PDF-1.4 test content');
       const userId = 'user-123';
 
       gridFs.uploadFile.mockResolvedValue('gridfs://bucket/file-id-123');
+      vision.parseResumePdf.mockResolvedValue(createValidResumeDTO());
 
       // Act
       const result = await svc.parseResumeFile(pdfBuffer, 'resume.pdf', userId);
@@ -932,10 +943,11 @@ describe('ParsingService Enhanced (parsing.service.enhanced.ts)', () => {
   describe('Edge Cases and Boundary Tests', () => {
     it('should handle file name with multiple dots', async () => {
       // Arrange
-      const { svc, gridFs, fieldMapper } = buildService();
+      const { svc, vision, gridFs, fieldMapper } = buildService();
       const pdfBuffer = Buffer.from('%PDF-1.4');
 
       gridFs.uploadFile.mockResolvedValue('gridfs://bucket/file');
+      vision.parseResumePdf.mockResolvedValue(createValidResumeDTO());
       fieldMapper.normalizeToResumeDto.mockResolvedValue(
         createValidResumeDTO(),
       );
@@ -953,11 +965,12 @@ describe('ParsingService Enhanced (parsing.service.enhanced.ts)', () => {
 
     it('should handle very long file names', async () => {
       // Arrange
-      const { svc, gridFs, fieldMapper } = buildService();
+      const { svc, vision, gridFs, fieldMapper } = buildService();
       const pdfBuffer = Buffer.from('%PDF-1.4');
       const longFileName = 'a'.repeat(200) + '.pdf';
 
       gridFs.uploadFile.mockResolvedValue('gridfs://bucket/file');
+      vision.parseResumePdf.mockResolvedValue(createValidResumeDTO());
       fieldMapper.normalizeToResumeDto.mockResolvedValue(
         createValidResumeDTO(),
       );
@@ -975,10 +988,11 @@ describe('ParsingService Enhanced (parsing.service.enhanced.ts)', () => {
 
     it('should handle unicode characters in user ID', async () => {
       // Arrange
-      const { svc, gridFs, fieldMapper } = buildService();
+      const { svc, vision, gridFs, fieldMapper } = buildService();
       const pdfBuffer = Buffer.from('%PDF-1.4');
 
       gridFs.uploadFile.mockResolvedValue('gridfs://bucket/file');
+      vision.parseResumePdf.mockResolvedValue(createValidResumeDTO());
       fieldMapper.normalizeToResumeDto.mockResolvedValue(
         createValidResumeDTO(),
       );

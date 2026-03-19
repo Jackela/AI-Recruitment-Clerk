@@ -396,7 +396,11 @@ describe('MfaService', () => {
 
       await expect(
         service.verifyMfa('user-123', { token: '123456' }),
-      ).rejects.toThrow(new UnauthorizedException(/Account locked/));
+      ).rejects.toThrow(UnauthorizedException);
+
+      await expect(
+        service.verifyMfa('user-123', { token: '123456' }),
+      ).rejects.toThrow(/Account locked/);
     });
 
     it('should throw UnauthorizedException for invalid token', async () => {
