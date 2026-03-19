@@ -14,8 +14,15 @@ import { ParsingService, type ParsingResult } from './parsing.service.enhanced';
 import { ContractViolationError } from '@ai-recruitment-clerk/infrastructure-shared';
 import type { ResumeDTO } from '@ai-recruitment-clerk/resume-dto';
 
-// Mock infrastructure-shared
+// Mock infrastructure-shared with functional DBC decorators
 jest.mock('@ai-recruitment-clerk/infrastructure-shared', () => {
+  class ContractViolationError extends Error {
+    constructor(message: string) {
+      super(message);
+      this.name = 'ContractViolationError';
+    }
+  }
+
   return {
     RetryUtility: {
       withExponentialBackoff: jest.fn((fn) => fn()),
@@ -29,27 +36,44 @@ jest.mock('@ai-recruitment-clerk/infrastructure-shared', () => {
       ) =>
         descriptor,
     Requires:
-      () =>
+      (predicate: (...args: unknown[]) => boolean, message: string) =>
       (
         _target: unknown,
         _propertyKey: string,
         descriptor: PropertyDescriptor,
-      ) =>
-        descriptor,
+      ) => {
+        const originalMethod = descriptor.value;
+        descriptor.value = function (...args: unknown[]) {
+          if (!predicate(...args)) {
+            throw new ContractViolationError(message);
+          }
+          return originalMethod.apply(this, args);
+        };
+        return descriptor;
+      },
     Ensures:
-      () =>
+      (predicate: (result: unknown) => boolean, message: string) =>
       (
         _target: unknown,
         _propertyKey: string,
         descriptor: PropertyDescriptor,
-      ) =>
-        descriptor,
+      ) => {
+        const originalMethod = descriptor.value;
+        descriptor.value = async function (...args: unknown[]) {
+          const result = await originalMethod.apply(this, args);
+          if (!predicate(result)) {
+            throw new ContractViolationError(message);
+          }
+          return result;
+        };
+        return descriptor;
+      },
     Invariant: () => (_target: unknown) => undefined,
-    ContractViolationError: class ContractViolationError extends Error {
-      constructor(message: string) {
-        super(message);
-        this.name = 'ContractViolationError';
-      }
+    ContractViolationError,
+    ContractValidators: {
+      isNonEmptyString: (value: unknown) =>
+        typeof value === 'string' && value.trim().length > 0,
+      isValidFileSize: (size: number) => size > 0 && size <= 10 * 1024 * 1024,
     },
   };
 });

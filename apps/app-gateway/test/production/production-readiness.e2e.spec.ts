@@ -25,7 +25,7 @@ describe('🚀 Production Readiness Validation Tests', () => {
   let app: INestApplication;
   let adminToken: string;
   let userToken: string;
-  let _testUserId: string;
+  let testUserId: string;
   let testOrganizationId: string;
 
   const testAdmin = {

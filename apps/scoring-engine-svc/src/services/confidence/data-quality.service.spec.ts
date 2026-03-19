@@ -10,8 +10,6 @@ describe('DataQualityService', () => {
       name: 'John Doe',
       email: 'john@example.com',
       phone: '123-456-7890',
-      location: 'New York, NY',
-      linkedIn: 'linkedin.com/in/johndoe',
     },
     workExperience: [
       {
@@ -36,7 +34,6 @@ describe('DataQualityService', () => {
         school: 'University of Technology',
         degree: "Bachelor's Degree",
         major: 'Computer Science',
-        graduationDate: '2018-05-01',
       },
     ],
     skills: [
@@ -224,7 +221,6 @@ describe('DataQualityService', () => {
             school: '',
             degree: "Bachelor's Degree",
             major: 'Computer Science',
-            graduationDate: '2018-05-01',
           },
         ],
       });
@@ -729,7 +725,6 @@ describe('DataQualityService', () => {
             school: 'University',
             degree: "Bachelor's",
             major: 'Computer Science',
-            graduationDate: '2018-05-01',
           },
         ],
         skills: [],
@@ -748,7 +743,6 @@ describe('DataQualityService', () => {
             school: 'University',
             degree: "Bachelor's",
             major: '',
-            graduationDate: '2018-05-01',
           },
         ],
         skills: [],
@@ -825,13 +819,11 @@ describe('DataQualityService', () => {
             school: 'Uni',
             degree: 'BS',
             major: 'CS',
-            graduationDate: '2015-05',
           },
           {
             school: 'College',
             degree: 'AS',
             major: 'IT',
-            graduationDate: '2013-05',
           },
         ],
         skills: Array(15).fill('skill'),

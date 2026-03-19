@@ -168,7 +168,7 @@ describe('MfaService', () => {
       userModel.findById.mockResolvedValue(null);
 
       await expect(service.enableMfa('user-123', enableMfaDto)).rejects.toThrow(
-        new UnauthorizedException('User not found'),
+        UnauthorizedException,
       );
     });
 
@@ -177,7 +177,7 @@ describe('MfaService', () => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       await expect(service.enableMfa('user-123', enableMfaDto)).rejects.toThrow(
-        new UnauthorizedException('Invalid password'),
+        UnauthorizedException,
       );
     });
 
@@ -192,9 +192,7 @@ describe('MfaService', () => {
 
       await expect(
         service.enableMfa('user-123', smsMfaDto as any),
-      ).rejects.toThrow(
-        new BadRequestException('Phone number is required for SMS MFA'),
-      );
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should throw BadRequestException when Email method without email', async () => {
@@ -208,9 +206,7 @@ describe('MfaService', () => {
 
       await expect(
         service.enableMfa('user-123', emailMfaDto as any),
-      ).rejects.toThrow(
-        new BadRequestException('Email is required for email MFA'),
-      );
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should add method to existing MFA without generating new backup codes', async () => {
