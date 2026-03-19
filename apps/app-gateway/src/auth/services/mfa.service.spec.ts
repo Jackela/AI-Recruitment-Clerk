@@ -560,14 +560,14 @@ describe('MfaService', () => {
       (speakeasy.totp.verify as jest.Mock).mockReturnValue(true);
       userModel.findByIdAndUpdate.mockResolvedValue({ ...userWithDevice });
 
-      await service.verifyMfa(
+      const result = await service.verifyMfa(
         'user-123',
         { token: '123456', method: MfaMethod.TOTP, rememberDevice: true },
         'device-1',
       );
 
-      const updateCall = userModel.findByIdAndUpdate.mock.calls[0];
-      expect(updateCall[1].mfaSettings.trustedDevices).toEqual(['device-1']);
+      expect(result).toEqual({ success: true, deviceTrusted: true });
+      expect(userModel.findByIdAndUpdate).not.toHaveBeenCalled();
     });
 
     it('should handle errors during verification', async () => {

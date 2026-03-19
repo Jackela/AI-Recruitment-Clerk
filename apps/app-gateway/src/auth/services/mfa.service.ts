@@ -17,10 +17,9 @@ import type {
   DisableMfaDto,
   GenerateBackupCodesDto,
   MfaStatusDto,
-  MfaSetupResponseDto} from '../dto/mfa.dto';
-import {
-  MfaMethod
+  MfaSetupResponseDto,
 } from '../dto/mfa.dto';
+import { MfaMethod } from '../dto/mfa.dto';
 import { UserProfile } from '../../schemas/user-profile.schema';
 import type { EmailService } from './email.service';
 import type { SmsService } from './sms.service';
@@ -534,6 +533,10 @@ export class MfaService {
         message: `Verification code sent via ${method.toUpperCase()}`,
       };
     } catch (error) {
+      // If it's already a BadRequestException (e.g., from invalid method), re-throw as-is
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
       this.logger.error(
         `Failed to send MFA token: ${error instanceof Error ? error.message : String(error)}`,
         error instanceof Error ? error.stack : undefined,
@@ -549,7 +552,11 @@ export class MfaService {
     { token: string; expiresAt: Date }
   >();
 
-  private storeTemporaryToken(userId: string, token: string, expiresAt: Date): void {
+  private storeTemporaryToken(
+    userId: string,
+    token: string,
+    expiresAt: Date,
+  ): void {
     // Clean up expired tokens
     this.cleanupExpiredTokens();
 
