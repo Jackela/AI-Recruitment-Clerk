@@ -1,10 +1,13 @@
 import type { OnInit, TemplateRef } from '@angular/core';
-import {Component,
+import {
+  Component,
   Input,
   Output,
   EventEmitter,
   signal,
-  computed,, ChangeDetectionStrategy} from '@angular/core';
+  computed,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { VirtualScrollConfig } from './virtual-scroll.types';
 
@@ -24,7 +27,9 @@ import type { VirtualScrollConfig } from './virtual-scroll.types';
       [style.transform]="'translateY(' + contentOffset() + 'px)'"
       role="list"
     >
-      <ng-container *ngFor="let item of visibleItems(); let i = index; trackBy: trackByFn">
+      <ng-container
+        *ngFor="let item of visibleItems(); let i = index; trackBy: trackByFn"
+      >
         <div
           class="virtual-scroll-item"
           [style.height.px]="getItemHeight(item, i)"
@@ -42,7 +47,7 @@ import type { VirtualScrollConfig } from './virtual-scroll.types';
                 first: startIndex() + i === 0,
                 last: startIndex() + i === totalItems - 1,
                 even: (startIndex() + i) % 2 === 0,
-                odd: (startIndex() + i) % 2 === 1
+                odd: (startIndex() + i) % 2 === 1,
               }
             "
           ></ng-content>
@@ -70,7 +75,8 @@ import type { VirtualScrollConfig } from './virtual-scroll.types';
     `,
   ],
 
-  changeDetection: ChangeDetectionStrategy.OnPush,})
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
 export class VirtualScrollContentComponent<T = unknown> implements OnInit {
   @Input() public itemTemplate!: TemplateRef<unknown>;
   @Input() public items: T[] = [];
