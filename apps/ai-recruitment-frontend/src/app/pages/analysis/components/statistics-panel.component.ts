@@ -6,9 +6,9 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { StatCardComponent } from './stat-card/stat-card.component';
-import { TipsPanelComponent } from './tips-panel/tips-panel.component';
-import { InsightsPanelComponent } from './insights-panel/insights-panel.component';
+import { StatCardComponent } from './statistics-panel/stat-card/stat-card.component';
+import { TipsPanelComponent } from './statistics-panel/tips-panel/tips-panel.component';
+import { InsightsPanelComponent } from './statistics-panel/insights-panel/insights-panel.component';
 import {
   UsageStatistics,
   UsageTip,
