@@ -1,7 +1,10 @@
-import {Component,
+import {
+  Component,
   Input,
   Output,
-  EventEmitter,, ChangeDetectionStrategy} from '@angular/core';
+  EventEmitter,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -30,12 +33,7 @@ export interface QuickActionMenuItem {
         [class]="'action-' + action.color"
         (click)="onActionClick(action, $event)"
       >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-        >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
           <path [attr.d]="action.icon" />
         </svg>
         {{ action.label }}
@@ -100,7 +98,8 @@ export interface QuickActionMenuItem {
     `,
   ],
 
-  changeDetection: ChangeDetectionStrategy.OnPush,})
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
 export class MobileQuickActionsMenuComponent {
   @Input() public visible = false;
   @Input() public actions: QuickActionMenuItem[] = [];

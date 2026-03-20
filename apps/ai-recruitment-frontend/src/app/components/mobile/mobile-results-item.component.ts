@@ -1,22 +1,16 @@
-import type {
-  SwipeAction,
-  SwipeEvent
-} from './mobile-swipe.component';
-import {Component,
+import type { SwipeAction, SwipeEvent } from './mobile-swipe.component';
+import {
+  Component,
   Input,
   Output,
-  EventEmitter,, ChangeDetectionStrategy} from '@angular/core';
+  EventEmitter,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {
-  MobileSwipeComponent
-} from './mobile-swipe.component';
-import {
-  MobileCandidateCardComponent,
-} from './mobile-candidate-card.component';
-import {
-  MobileSkillTagsComponent,
-} from './mobile-skill-tags.component';
+import { MobileSwipeComponent } from './mobile-swipe.component';
+import { MobileCandidateCardComponent } from './mobile-candidate-card.component';
+import { MobileSkillTagsComponent } from './mobile-skill-tags.component';
 import {
   MobileQuickActionsMenuComponent,
   type QuickActionMenuItem,
@@ -104,14 +98,9 @@ export interface CandidateResult {
         </div>
 
         <div class="candidate-meta">
-          <span class="last-updated"
-            >Updated {{ candidate.lastUpdated }}</span
-          >
+          <span class="last-updated">Updated {{ candidate.lastUpdated }}</span>
           <div class="candidate-tags" *ngIf="candidate.tags.length > 0">
-            <span
-              *ngFor="let tag of candidate.tags.slice(0, 2)"
-              class="tag"
-            >
+            <span *ngFor="let tag of candidate.tags.slice(0, 2)" class="tag">
               {{ tag }}
             </span>
           </div>
@@ -236,7 +225,8 @@ export interface CandidateResult {
     `,
   ],
 
-  changeDetection: ChangeDetectionStrategy.OnPush,})
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
 export class MobileResultsItemComponent {
   @Input() public candidate!: CandidateResult;
   @Input() public isSelected = false;

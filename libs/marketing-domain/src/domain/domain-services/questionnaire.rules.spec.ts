@@ -205,16 +205,7 @@ describe('QuestionnaireRules', () => {
       const result = QuestionnaireRules.isValidSubmission(submission);
 
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain(
-        'Time saving percentage must be 0-100',
-      );
-    });
-      const result = QuestionnaireRules.isValidSubmission(submission);
-
-      expect(result.isValid()).toBe(false);
-      expect(result.getErrors()).toContain(
-        'Required field missing: userProfile.role',
-      );
+      expect(result.errors).toContain('Time saving percentage must be 0-100');
     });
 
     it('should fail validation for invalid rating', () => {

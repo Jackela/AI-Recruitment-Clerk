@@ -1,9 +1,10 @@
+import type { DomainEvent } from '../domain-events/base/domain-event.js';
 import {
   Incentive,
   IncentiveStatus,
   PaymentMethod,
-} from '../domain/aggregates/incentive.aggregate';
-import { ContactInfo } from '../domain/value-objects/contact-info.value-object';
+} from './incentive.aggregate';
+import { ContactInfo } from '../value-objects/contact-info.value-object.js';
 
 describe('Incentive Aggregate', () => {
   const mockContactInfo = ContactInfo.create({
@@ -84,7 +85,7 @@ describe('Incentive Aggregate', () => {
 
       const events = incentive.getUncommittedEvents();
       const createdEvent = events.find(
-        (e) => e.eventName === 'incentive.created',
+        (e: DomainEvent) => e.eventName === 'incentive.created',
       );
       expect(createdEvent).toBeDefined();
     });
@@ -115,7 +116,7 @@ describe('Incentive Aggregate', () => {
       incentive.validateEligibility();
       const events = incentive.getUncommittedEvents();
       const validatedEvent = events.find(
-        (e) => e.eventName === 'incentive.validated',
+        (e: DomainEvent) => e.eventName === 'incentive.validated',
       );
       expect(validatedEvent).toBeDefined();
     });
@@ -143,7 +144,7 @@ describe('Incentive Aggregate', () => {
       incentive.approveForProcessing('Manual approval');
       const events = incentive.getUncommittedEvents();
       const approvedEvent = events.find(
-        (e) => e.eventName === 'incentive.approved',
+        (e: DomainEvent) => e.eventName === 'incentive.approved',
       );
       expect(approvedEvent).toBeDefined();
     });
@@ -184,7 +185,7 @@ describe('Incentive Aggregate', () => {
       incentive.reject('Fraud detected');
       const events = incentive.getUncommittedEvents();
       const rejectedEvent = events.find(
-        (e) => e.eventName === 'incentive.rejected',
+        (e: DomainEvent) => e.eventName === 'incentive.rejected',
       );
       expect(rejectedEvent).toBeDefined();
     });
@@ -233,7 +234,9 @@ describe('Incentive Aggregate', () => {
 
       incentive.executePayment(PaymentMethod.WECHAT_PAY, 'txn-123456');
       const events = incentive.getUncommittedEvents();
-      const paidEvent = events.find((e) => e.eventName === 'incentive.paid');
+      const paidEvent = events.find(
+        (e: DomainEvent) => e.eventName === 'incentive.paid',
+      );
       expect(paidEvent).toBeDefined();
     });
 

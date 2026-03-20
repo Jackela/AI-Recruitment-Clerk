@@ -1,4 +1,4 @@
-import { Page, BrowserContext } from '@playwright/test';
+import type { Page, BrowserContext } from '@playwright/test';
 
 /**
  * Visual Testing Helpers

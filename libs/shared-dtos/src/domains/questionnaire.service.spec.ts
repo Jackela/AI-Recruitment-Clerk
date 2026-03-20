@@ -502,7 +502,7 @@ function createMockQuestionnaire(
   qualityScore: number,
   bonusEligible: boolean,
   willingnessToPay: number,
-  role: string = 'hr',
+  role = 'hr',
 ): Questionnaire {
   return {
     calculateQualityScore: jest.fn().mockReturnValue({ value: qualityScore }),

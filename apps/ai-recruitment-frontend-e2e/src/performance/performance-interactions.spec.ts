@@ -279,7 +279,11 @@ test.describe('交互性能测试', () => {
     const metrics = await page.evaluate(() => {
       return {
         data: (window as unknown as Record<string, unknown>)
-          .scrollMetrics as typeof scrollMetrics,
+          .scrollMetrics as Array<{
+          timestamp: number;
+          scrollY: number;
+          frameCount: number;
+        }>,
         totalFrames: (
           window as unknown as Record<string, () => number>
         ).getFrameCount(),

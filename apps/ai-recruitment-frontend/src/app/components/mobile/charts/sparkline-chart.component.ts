@@ -1,5 +1,4 @@
-import {Component,
-  Input,, ChangeDetectionStrategy} from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -52,7 +51,13 @@ export interface ChartDataPoint {
           class="sparkline-change"
           [class]="'sparkline-change--' + meta.changeType"
         >
-          {{ meta.changeType === 'increase' ? '↗' : meta.changeType === 'decrease' ? '↘' : '→' }}
+          {{
+            meta.changeType === 'increase'
+              ? '↗'
+              : meta.changeType === 'decrease'
+                ? '↘'
+                : '→'
+          }}
           {{ absChange }}%
         </span>
       </div>
@@ -113,7 +118,8 @@ export interface ChartDataPoint {
     `,
   ],
 
-  changeDetection: ChangeDetectionStrategy.OnPush,})
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
 export class SparklineChartComponent {
   @Input({ required: true })
   public data!: ChartDataPoint[];
