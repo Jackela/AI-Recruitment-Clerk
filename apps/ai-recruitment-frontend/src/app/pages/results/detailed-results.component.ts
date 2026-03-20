@@ -167,7 +167,15 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
   isSkillsExpanded = signal(false);
 
   radarChartData = () =>
-    getRadarChartData(this.analysisResult()?.skillAnalysis);
+    getRadarChartData(
+      this.analysisResult()?.skillAnalysis ?? {
+        technical: 0,
+        communication: 0,
+        problemSolving: 0,
+        teamwork: 0,
+        leadership: 0,
+      },
+    );
   overallMatch = () => getOverallMatch(this.radarChartData());
   formattedAnalysisTime = () =>
     getFormattedAnalysisTime(this.analysisResult()?.analysisTime);

@@ -8,7 +8,6 @@ import {
   HostListener,
   ChangeDetectionStrategy,
   signal,
-  effect,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 

@@ -13,7 +13,6 @@ import { AnalysisStepErrorComponent } from './components/analysis-step-error/ana
 import { StatisticsPanelComponent } from './components/statistics-panel.component';
 
 // Services
-import { GuestApiService } from '../../services/guest/guest-api.service';
 import { WebSocketService } from '../../services/websocket.service';
 import { ToastService } from '../../services/toast.service';
 import { AnalysisStateService } from './services/analysis-state.service';
@@ -22,7 +21,6 @@ import { AnalysisFlowService } from './services/analysis-flow.service';
 
 // Types
 import type {
-  FileUploadData,
   ResultAction,
   ErrorAction,
   ProgressUpdate,

@@ -5,7 +5,6 @@ import {
   EventEmitter,
   HostListener,
   ChangeDetectionStrategy,
-  inject,
   Pipe,
   PipeTransform,
   signal,
@@ -270,8 +269,6 @@ export class BarChartComponent {
   @HostListener('keydown', ['$event'])
   public handleKeyboardEvent(event: KeyboardEvent): void {
     if (!this.data.length) return;
-
-    const currentIndex = this.focusedIndex();
 
     switch (event.key) {
       case 'ArrowRight':

@@ -4,7 +4,6 @@ import {
   Output,
   EventEmitter,
   computed,
-  signal,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';

@@ -1,6 +1,5 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { StatCardData } from '../types/statistics.interface';
 
 @Component({
   selector: 'arc-stat-card',

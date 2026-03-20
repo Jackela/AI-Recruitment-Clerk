@@ -1,11 +1,12 @@
-import type {
-  OnInit,
-  OnDestroy} from '@angular/core';
-import {Component,
+import type { OnInit, OnDestroy } from '@angular/core';
+import {
+  Component,
   Input,
   Output,
   EventEmitter,
-  inject, ChangeDetectionStrategy} from '@angular/core';
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
@@ -32,7 +33,12 @@ import {
 @Component({
   selector: 'arc-mobile-results',
   standalone: true,
-  imports: [CommonModule, FormsModule, MobileResultsDisplayComponent, MobileResultsFilterComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MobileResultsDisplayComponent,
+    MobileResultsFilterComponent,
+  ],
   template: `
     <div class="mobile-results-container">
       <!-- Results Header -->
@@ -142,8 +148,7 @@ import {
             *ngIf="selectedCandidates.length > 0"
             (click)="bulkAction('shortlist')"
           >
-            Shortlist ({{ selectedCandidates.length }
-  changeDetection: ChangeDetectionStrategy.OnPush,})
+            Shortlist ({{ selectedCandidates.length }})
           </button>
         </div>
       </div>
@@ -332,6 +337,7 @@ import {
       }
     `,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MobileResultsComponent implements OnInit, OnDestroy {
   private readonly resultsService = inject(MobileResultsService);

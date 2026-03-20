@@ -9,7 +9,7 @@ import type {
 } from '../components/analysis-progress.component';
 import type { ErrorInfo as OriginalErrorInfo } from '../components/analysis-error.component';
 import type { FileUploadData as OriginalFileUploadData } from '../components/resume-file-upload.component';
-import type { UsageStatistics as OriginalUsageStatistics } from '../components/statistics-panel.component';
+import type { UsageStatistics as OriginalUsageStatistics } from '../components/statistics-panel/types/statistics.interface';
 
 // Re-export types from existing components
 export type AnalysisResult = OriginalAnalysisResult;

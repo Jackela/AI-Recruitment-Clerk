@@ -227,7 +227,7 @@ export class TipsPanelComponent {
     this.moreTipsRequested.emit();
   }
 
-  trackByTip(index: number, tip: UsageTip): string {
+  trackByTip(_index: number, tip: UsageTip): string {
     return `${tip.title}-${tip.description.slice(0, 20)}`;
   }
 }

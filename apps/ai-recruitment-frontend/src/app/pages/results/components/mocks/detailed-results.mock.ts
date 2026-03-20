@@ -1,8 +1,4 @@
-import {
-  ExperienceDetail,
-  EducationDetails,
-  DetailedAnalysisResult,
-} from '../../../interfaces/detailed-analysis.interface';
+import { DetailedAnalysisResult } from '../../../../interfaces/detailed-analysis.interface';
 
 /**
  * Mock analysis result for development/testing.

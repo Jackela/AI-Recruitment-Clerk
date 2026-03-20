@@ -1,8 +1,8 @@
 import {
   SkillTagStyle,
   RadarChartData,
-} from '../../../interfaces/detailed-analysis.interface';
-import type { DetailedAnalysisResult } from '../../../interfaces/detailed-analysis.interface';
+} from '../../../../interfaces/detailed-analysis.interface';
+import type { DetailedAnalysisResult } from '../../../../interfaces/detailed-analysis.interface';
 
 /**
  * Generates skill tag styles based on skill name.

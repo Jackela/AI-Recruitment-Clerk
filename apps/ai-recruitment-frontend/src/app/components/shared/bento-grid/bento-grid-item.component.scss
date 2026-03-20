@@ -1,4 +1,4 @@
-@use '../../../../../styles/design-system/mixins.scss' as mixins;
+@use '../../../../styles/design-system/mixins.scss' as mixins;
 
 .bento-item {
   @include mixins.card-base;

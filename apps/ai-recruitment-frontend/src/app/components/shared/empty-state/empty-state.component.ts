@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { EmptyStateAction, EmptyStateType } from './empty-state.types';
-import { TranslatePipe } from '../../pipes/translate.pipe';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 
 /**
  * 统一空状态组件

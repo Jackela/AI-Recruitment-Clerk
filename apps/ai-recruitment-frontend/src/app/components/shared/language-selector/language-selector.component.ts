@@ -1,4 +1,3 @@
-import type { OnDestroy } from '@angular/core';
 import {
   Component,
   computed,

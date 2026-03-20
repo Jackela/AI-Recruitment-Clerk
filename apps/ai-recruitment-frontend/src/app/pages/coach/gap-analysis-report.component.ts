@@ -1,4 +1,4 @@
-import {Component, Input, ChangeDetectionStrategy} from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { GapAnalysisResult } from '../../interfaces/gap-analysis.interface';
 
@@ -13,8 +13,7 @@ import type { GapAnalysisResult } from '../../interfaces/gap-analysis.interface'
     <div *ngIf="result; else empty">
       <h3>Diagnostic Report</h3>
       <div>
-        <strong>Matched Skills ({{ result.matchedSkills.length }
-  changeDetection: ChangeDetectionStrategy.OnPush,}):</strong>
+        <strong>Matched Skills ({{ result.matchedSkills.length }}):</strong>
         <span>{{ result.matchedSkills.join(', ') || 'None' }}</span>
       </div>
       <div style="margin-top: 8px;">
@@ -30,6 +29,7 @@ import type { GapAnalysisResult } from '../../interfaces/gap-analysis.interface'
       <p>No analysis yet. Submit a JD and resume to view gaps.</p>
     </ng-template>
   `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GapAnalysisReportComponent {
   @Input() public result: GapAnalysisResult | null = null;

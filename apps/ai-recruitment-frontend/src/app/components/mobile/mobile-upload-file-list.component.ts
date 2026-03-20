@@ -33,8 +33,7 @@ export interface UploadFile {
   template: `
     <div class="upload-list" *ngIf="files.length > 0">
       <h4 class="list-title">
-        Uploaded Files ({{ files.length } changeDetection:
-        ChangeDetectionStrategy.OnPush,})
+        Uploaded Files ({{ files.length }})
         <button
           class="clear-all"
           *ngIf="canClearAll"
@@ -335,6 +334,7 @@ export interface UploadFile {
       }
     `,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MobileUploadFileListComponent {
   @Input({ required: true })

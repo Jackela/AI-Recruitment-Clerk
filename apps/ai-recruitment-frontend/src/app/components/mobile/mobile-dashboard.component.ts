@@ -3,7 +3,7 @@ import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Subject } from 'rxjs';
-import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { takeUntil } from 'rxjs/operators';
 import type { MobileNavItem } from './mobile-navigation.component';
 import { MobileNavigationComponent } from './mobile-navigation.component';

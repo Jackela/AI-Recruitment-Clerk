@@ -95,16 +95,20 @@ export class AnalysisFlowService {
   ): void {
     this.steps.markAllCompleted();
 
-    const result = completion?.result ?? {};
-    const details = result.details ?? {};
+    const result =
+      completion?.result ??
+      ({} as import('../../../services/websocket.service').AnalysisResult);
 
     const analysisResult: AnalysisResult = {
       score: normalizeScore(result.score, 0),
       summary: normalizeString(result.summary, '分析已完成，但暂无摘要可显示'),
-      keySkills: normalizeStringArray(details.skills),
-      experience: normalizeString(details.experience, ''),
-      education: normalizeString(details.education, ''),
-      recommendations: normalizeStringArray(details.recommendations),
+      keySkills: normalizeStringArray(result.skills),
+      experience: normalizeString(
+        result.experience?.totalYears?.toString() ?? '',
+        '',
+      ),
+      education: '',
+      recommendations: normalizeStringArray(result.recommendations),
       reportUrl: normalizeUrl(result.reportUrl),
     };
 
