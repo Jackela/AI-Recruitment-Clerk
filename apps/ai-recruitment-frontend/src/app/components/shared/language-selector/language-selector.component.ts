@@ -1,5 +1,10 @@
 import type { OnDestroy } from '@angular/core';
-import {Component, computed, inject, ChangeDetectionStrategy} from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type {
   Language,
@@ -296,7 +301,8 @@ import { I18nService } from '../../../services/i18n/i18n.service';
     `,
   ],
 
-  changeDetection: ChangeDetectionStrategy.OnPush,})
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
 export class LanguageSelectorComponent {
   public dropdownOpen = false;
 
@@ -423,6 +429,6 @@ export class LanguageSelectorComponent {
 
         options[nextIndex]?.focus();
       }
-    });
+    };
   }
 }
