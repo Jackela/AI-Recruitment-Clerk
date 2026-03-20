@@ -24,26 +24,3 @@ export class HighlightPipe implements PipeTransform {
     return value.replace(regex, `<mark class="${highlightClass}">$1</mark>`);
   }
 }
-
-  /**
-   * Transforms text by wrapping matching search terms in highlight markup.
-   * @param value - The text to search within
-   * @param searchTerm - The term to highlight
-   * @param highlightClass - CSS class for highlighted text (default: 'highlight')
-   * @returns The text with highlighted search terms
-   */
-  public transform(
-    value: string | null | undefined,
-    searchTerm: string | null | undefined,
-    highlightClass = 'highlight',
-  ): string {
-    if (!value || !searchTerm) {
-      return value || '';
-    }
-
-    const escapedSearchTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(`(${escapedSearchTerm})`, 'gi');
-
-    return value.replace(regex, `<mark class="${highlightClass}">$1</mark>`);
-  }
-}
