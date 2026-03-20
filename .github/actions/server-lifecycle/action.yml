@@ -86,7 +86,7 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       run: |
         echo "🚀 Starting static server on port ${{ inputs.port }}..."
-        ${{ inputs.serve-command }} > ${{ inputs.server-log-path }} 2>&1 &
+        nohup bash -c "${{ inputs.serve-command }}" > ${{ inputs.server-log-path }} 2>&1 &
         SERVER_PID=$!
         echo "server-pid=$SERVER_PID" >> $GITHUB_OUTPUT
         echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
@@ -137,7 +137,7 @@ runs:
         echo "========================================"
 
     - name: Stop server (post cleanup)
-      if: always()
+      if: failure()
       shell: bash
       run: |
         SERVER_PID="${{ env.SERVER_PID }}"
