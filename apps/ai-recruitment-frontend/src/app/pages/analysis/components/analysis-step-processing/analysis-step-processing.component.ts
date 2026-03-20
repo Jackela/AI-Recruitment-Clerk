@@ -43,10 +43,10 @@ export class AnalysisStepProcessingComponent {
   @Output() public progressUpdate = new EventEmitter<ProgressUpdate>();
   @Output() public stepChange = new EventEmitter<string>();
   @Output() public analysisCompleted = new EventEmitter<
-    import('../../../services/websocket.service').CompletionData
+    import('../../../../services/websocket.service').CompletionData
   >();
   @Output() public analysisError = new EventEmitter<
-    import('../../../services/websocket.service').ErrorData
+    import('../../../../services/websocket.service').ErrorData
   >();
   @Output() public cancelRequested = new EventEmitter<void>();
 
@@ -59,13 +59,13 @@ export class AnalysisStepProcessingComponent {
   }
 
   public onAnalysisCompleted(
-    event: import('../../../services/websocket.service').CompletionData,
+    event: import('../../../../services/websocket.service').CompletionData,
   ): void {
     this.analysisCompleted.emit(event);
   }
 
   public onAnalysisError(
-    event: import('../../../services/websocket.service').ErrorData,
+    event: import('../../../../services/websocket.service').ErrorData,
   ): void {
     this.analysisError.emit(event);
   }

@@ -73,7 +73,7 @@ export class TooltipDirective implements OnInit, OnDestroy {
       this.arcTooltip(),
     );
 
-    document.body.appendChild(this.tooltipElement);
+    document.body.appendChild(this.tooltipElement!);
     this.positionTooltip();
   }
 
