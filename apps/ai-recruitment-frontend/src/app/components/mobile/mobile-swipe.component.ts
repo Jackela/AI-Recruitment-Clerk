@@ -398,7 +398,7 @@ export class MobileSwipeComponent<T = unknown> implements OnInit, OnDestroy {
         break;
 
       case 'Delete':
-      case 'Backspace':
+      case 'Backspace': {
         event.preventDefault();
         const deleteAction = this.actions.find(
           (a) => a.id === 'delete' || a.color === 'danger',
@@ -408,6 +408,7 @@ export class MobileSwipeComponent<T = unknown> implements OnInit, OnDestroy {
           this.keyboardAction.emit({ action: deleteAction, item: this.item });
         }
         break;
+      }
 
       case 'Escape':
         if (this.keyboardActionsVisible) {

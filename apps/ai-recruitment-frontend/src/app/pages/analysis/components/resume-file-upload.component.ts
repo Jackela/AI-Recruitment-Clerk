@@ -1,11 +1,13 @@
-import type {
-  ElementRef} from '@angular/core';
-import {Component,
+import type { ElementRef } from '@angular/core';
+import {
+  Component,
   EventEmitter,
   Output,
   ViewChild,
   signal,
-  Input,, ChangeDetectionStrategy} from '@angular/core';
+  Input,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -54,7 +56,13 @@ export interface FileUploadData {
             <div class="upload-column">
               <div class="section-header">
                 <div class="section-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                  >
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                     <polyline points="17,8 12,3 7,8"></polyline>
                     <line x1="12" y1="3" x2="12" y2="15"></line>
@@ -73,7 +81,11 @@ export interface FileUploadData {
                 (click)="fileInput.click()"
                 role="button"
                 tabindex="0"
-                [attr.aria-label]="selectedFile() ? '已选择文件: ' + selectedFile()?.name : '点击或拖拽上传简历文件'"
+                [attr.aria-label]="
+                  selectedFile()
+                    ? '已选择文件: ' + selectedFile()?.name
+                    : '点击或拖拽上传简历文件'
+                "
               >
                 <input
                   #fileInput
@@ -94,7 +106,9 @@ export interface FileUploadData {
                       stroke="currentColor"
                       aria-hidden="true"
                     >
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <path
+                        d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                      ></path>
                       <polyline points="17,8 12,3 7,8"></polyline>
                       <line x1="12" y1="3" x2="12" y2="15"></line>
                     </svg>
@@ -103,7 +117,9 @@ export interface FileUploadData {
                     <div class="sparkle sparkle-3"></div>
                   </div>
                   <h3 class="drop-title">拖拽文件到这里</h3>
-                  <p class="drop-text">或者 <span class="click-text">点击选择文件</span></p>
+                  <p class="drop-text">
+                    或者 <span class="click-text">点击选择文件</span>
+                  </p>
                   <div class="file-types">
                     <span class="file-badge">PDF</span>
                     <span class="file-badge">DOC</span>
@@ -122,13 +138,17 @@ export interface FileUploadData {
                       stroke="currentColor"
                       aria-hidden="true"
                     >
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <path
+                        d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                      ></path>
                       <polyline points="14,2 14,8 20,8"></polyline>
                     </svg>
                   </div>
                   <div class="file-info">
                     <h4 class="file-name">{{ selectedFile()?.name }}</h4>
-                    <p class="file-size">{{ formatFileSize(selectedFile()?.size || 0) }}</p>
+                    <p class="file-size">
+                      {{ formatFileSize(selectedFile()?.size || 0) }}
+                    </p>
                   </div>
                   <button
                     type="button"
@@ -136,7 +156,12 @@ export interface FileUploadData {
                     class="remove-btn"
                     aria-label="删除文件"
                   >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      aria-hidden="true"
+                    >
                       <line x1="18" y1="6" x2="6" y2="18"></line>
                       <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
@@ -149,7 +174,13 @@ export interface FileUploadData {
             <div class="info-column">
               <div class="section-header">
                 <div class="section-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                  >
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                     <circle cx="12" cy="7" r="4"></circle>
                   </svg>
@@ -161,8 +192,17 @@ export interface FileUploadData {
               <div class="info-grid">
                 <div class="input-group">
                   <label for="candidateName" class="input-label">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                      ></path>
                       <circle cx="12" cy="7" r="4"></circle>
                     </svg>
                     姓名
@@ -179,8 +219,17 @@ export interface FileUploadData {
 
                 <div class="input-group">
                   <label for="candidateEmail" class="input-label">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+                      ></path>
                       <polyline points="22,6 12,13 2,6"></polyline>
                     </svg>
                     邮箱
@@ -197,9 +246,25 @@ export interface FileUploadData {
 
                 <div class="input-group full-width">
                   <label for="targetPosition" class="input-label">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                      <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      aria-hidden="true"
+                    >
+                      <rect
+                        x="2"
+                        y="7"
+                        width="20"
+                        height="14"
+                        rx="2"
+                        ry="2"
+                      ></rect>
+                      <path
+                        d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"
+                      ></path>
                     </svg>
                     目标职位
                   </label>
@@ -214,8 +279,17 @@ export interface FileUploadData {
 
                 <div class="input-group full-width">
                   <label for="notes" class="input-label">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                      ></path>
                       <polyline points="14,2 14,8 20,8"></polyline>
                       <line x1="16" y1="13" x2="8" y2="13"></line>
                       <line x1="16" y1="17" x2="8" y2="17"></line>
@@ -254,7 +328,11 @@ export interface FileUploadData {
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                 <polyline points="22 4 12 14.01 9 11.01"></polyline>
               </svg>
-              <span *ngIf="isSubmitting" class="spinner" aria-hidden="true"></span>
+              <span
+                *ngIf="isSubmitting"
+                class="spinner"
+                aria-hidden="true"
+              ></span>
               <span>{{ isSubmitting ? '处理中...' : '开始AI分析' }}</span>
             </button>
             <button
@@ -282,7 +360,8 @@ export interface FileUploadData {
   `,
   styleUrls: ['./resume-file-upload.component.scss'],
 
-  changeDetection: ChangeDetectionStrategy.OnPush,})
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
 export class ResumeFileUploadComponent {
   @ViewChild('fileInput') public fileInput!: ElementRef<HTMLInputElement>;
 
