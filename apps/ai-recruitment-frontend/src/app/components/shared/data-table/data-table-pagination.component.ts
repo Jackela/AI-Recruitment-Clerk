@@ -1,4 +1,10 @@
-import {Component, Input, Output, EventEmitter, ChangeDetectionStrategy} from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -8,6 +14,7 @@ import { FormsModule } from '@angular/forms';
 export interface PageEvent {
   pageIndex: number;
   pageSize: number;
+  length?: number;
 }
 
 /**
@@ -217,7 +224,8 @@ export interface PageEvent {
     `,
   ],
 
-  changeDetection: ChangeDetectionStrategy.OnPush,})
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
 export class DataTablePaginationComponent {
   @Input() public totalItems = 0;
   @Input() public pageSize = 10;

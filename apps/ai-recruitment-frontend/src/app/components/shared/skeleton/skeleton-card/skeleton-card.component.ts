@@ -1,6 +1,7 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SkeletonTextComponent } from '../skeleton-text/skeleton-text.component';
+import { TranslatePipe } from '../../../../pipes/translate.pipe';
 
 /**
  * 骨架屏卡片占位符组件
@@ -9,12 +10,12 @@ import { SkeletonTextComponent } from '../skeleton-text/skeleton-text.component'
 @Component({
   selector: 'arc-skeleton-card',
   standalone: true,
-  imports: [CommonModule, SkeletonTextComponent],
+  imports: [CommonModule, SkeletonTextComponent, TranslatePipe],
   template: `
     <div
       class="skeleton-card"
       role="status"
-      [attr.aria-label]="'Loading card content' | i18n"
+      [attr.aria-label]="'Loading card content' | translate"
     >
       <!-- Header -->
       <div *ngIf="hasHeader" class="skeleton-header">

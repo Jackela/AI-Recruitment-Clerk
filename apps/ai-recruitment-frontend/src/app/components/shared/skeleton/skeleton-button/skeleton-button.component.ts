@@ -1,5 +1,6 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe } from '../../../../pipes/translate.pipe';
 
 /**
  * 骨架屏按钮占位符组件
@@ -8,7 +9,7 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'arc-skeleton-button',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   template: `
     <div
       class="skeleton-button shimmer"
@@ -18,7 +19,7 @@ import { CommonModule } from '@angular/common';
       [style.width]="width"
       [style.height]="height"
       role="status"
-      [attr.aria-label]="'Loading button' | i18n"
+      [attr.aria-label]="'Loading button' | translate"
     ></div>
   `,
   styles: [

@@ -7,8 +7,8 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TranslateModule } from '@ngx-translate/core';
 import type { EmptyStateAction, EmptyStateType } from './empty-state.types';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 /**
  * 统一空状态组件
@@ -36,7 +36,7 @@ import type { EmptyStateAction, EmptyStateType } from './empty-state.types';
 @Component({
   selector: 'arc-empty-state',
   standalone: true,
-  imports: [CommonModule, TranslateModule],
+  imports: [CommonModule, TranslatePipe],
   template: `
     <div
       class="empty-state"

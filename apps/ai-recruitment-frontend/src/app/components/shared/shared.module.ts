@@ -45,7 +45,7 @@ const STANDALONE_COMPONENTS = [
  */
 @NgModule({
   declarations: MODULE_COMPONENTS,
-  imports: [CommonModule, RouterModule, ...STANDALONE_COMPONENTS],
+  imports: [CommonModule, RouterModule],
   exports: [
     ...MODULE_COMPONENTS,
     ...STANDALONE_COMPONENTS,

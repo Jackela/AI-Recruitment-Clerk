@@ -8,3 +8,4 @@ export * from './content/bento-metric-item.component';
 export * from './trend/bento-trend-indicator.component';
 export * from './actions/bento-card-actions.component';
 export * from './bento-card.component';
+export * from './bento-grid.component';

@@ -34,22 +34,7 @@ import { PWAService } from '../../services/mobile/pwa.service';
  * - Responsive design system with mobile breakpoints
  */
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    RouterModule,
-    // Standalone components are imported directly
-    MobileNavigationComponent,
-    MobileUploadComponent,
-    MobileSwipeComponent,
-    MobileDashboardComponent,
-    DashboardStatsComponent,
-    DashboardChartsComponent,
-    MobileResultsComponent,
-    MobileResultsDisplayComponent,
-    MobileResultsFilterComponent,
-    MobilePerformanceComponent,
-  ],
+  imports: [CommonModule, FormsModule, RouterModule],
   exports: [
     // Export all mobile components for use in other modules
     MobileNavigationComponent,
@@ -73,7 +58,10 @@ export class MobileModule {
   /**
    * Initialize mobile module with optional configuration
    */
-  public static forRoot(): { ngModule: typeof MobileModule; providers: (typeof TouchGestureService | typeof PWAService)[] } {
+  public static forRoot(): {
+    ngModule: typeof MobileModule;
+    providers: (typeof TouchGestureService | typeof PWAService)[];
+  } {
     return {
       ngModule: MobileModule,
       providers: [TouchGestureService, PWAService],

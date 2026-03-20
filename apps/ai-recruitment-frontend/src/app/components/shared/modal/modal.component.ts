@@ -1,4 +1,4 @@
-import type { OnInit, OnDestroy, ElementRef, Renderer2 } from '@angular/core';
+import type { OnInit, OnDestroy, ElementRef } from '@angular/core';
 import {
   Component,
   Input,
@@ -364,13 +364,5 @@ export class ModalComponent implements OnInit, OnDestroy {
     if (this.closeOnBackdropClick && event.target === event.currentTarget) {
       this.close();
     }
-  }
-
-  private focusModal(): void {
-    setTimeout(() => {
-      if (this.modalContainer?.nativeElement) {
-        this.modalContainer.nativeElement.focus();
-      }
-    }, 0);
   }
 }

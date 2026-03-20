@@ -1,5 +1,6 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe } from '../../../../pipes/translate.pipe';
 
 /**
  * 骨架屏表格占位符组件
@@ -8,12 +9,12 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'arc-skeleton-table',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   template: `
     <div
       class="skeleton-table"
       role="status"
-      [attr.aria-label]="'Loading table content' | i18n"
+      [attr.aria-label]="'Loading table content' | translate"
     >
       <!-- Header Row -->
       <div *ngIf="hasHeader" class="skeleton-row skeleton-header">

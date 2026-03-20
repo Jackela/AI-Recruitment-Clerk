@@ -28,8 +28,8 @@ export class ConnectionService {
   /**
    * Gets the current connection status as a readonly signal.
    */
-  public getConnectionStatus() {
-    return this.connectionStatus.asReadonly();
+  public getConnectionStatus(): ConnectionStatus {
+    return this.connectionStatus();
   }
 
   /**

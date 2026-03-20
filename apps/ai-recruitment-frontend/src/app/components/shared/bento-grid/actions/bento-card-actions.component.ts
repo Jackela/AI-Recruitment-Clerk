@@ -6,7 +6,7 @@ import {
   EventEmitter,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BentoActionData, ActionIconName } from '../types/bento-card.types';
+import { BentoActionData } from '../types/bento-card.types';
 
 @Component({
   selector: 'arc-bento-card-actions',
