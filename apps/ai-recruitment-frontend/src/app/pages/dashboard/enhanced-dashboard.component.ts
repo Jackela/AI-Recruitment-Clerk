@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import type { Observable } from 'rxjs';
 import type { BentoGridItem } from '../../components/shared/bento-grid/bento-grid-item.component';
-import { TranslatePipe } from '../../pipes/translate.pipe';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { BentoGridComponent } from '../../components/shared/bento-grid/bento-grid.component';
 import type {
   DashboardStats,

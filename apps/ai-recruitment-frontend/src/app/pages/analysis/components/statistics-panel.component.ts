@@ -13,11 +13,11 @@ import {
   UsageStatistics,
   UsageTip,
   TipCategory,
-} from './types/statistics.interface';
+} from './statistics-panel/types/statistics.interface';
 import {
   createStatCards,
   getDailyProgressPercentage,
-} from './utils/statistics.utils';
+} from './statistics-panel/utils/statistics.utils';
 
 /**
  * Statistics panel with usage stats, tips, and insights.

@@ -1,6 +1,6 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import type { EducationDetails } from '../../../../interfaces/detailed-analysis.interface';
+import type { EducationDetail } from '../../../../interfaces/detailed-analysis.interface';
 
 @Component({
   selector: 'arc-education-card',
@@ -95,6 +95,6 @@ import type { EducationDetails } from '../../../../interfaces/detailed-analysis.
   ],
 })
 export class EducationCardComponent {
-  @Input() education: EducationDetails | null = null;
+  @Input() education: EducationDetail | null = null;
   @Input() matchLevel: string | null = null;
 }

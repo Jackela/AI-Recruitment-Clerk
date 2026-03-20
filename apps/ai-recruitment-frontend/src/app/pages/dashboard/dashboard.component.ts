@@ -5,7 +5,7 @@ import { RouterModule } from '@angular/router';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { DashboardCardComponent } from '../../components/shared/dashboard-card/dashboard-card.component';
-import { TranslatePipe } from '../../pipes/translate.pipe';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 
 interface DashboardStats {
   totalJobs: number;
