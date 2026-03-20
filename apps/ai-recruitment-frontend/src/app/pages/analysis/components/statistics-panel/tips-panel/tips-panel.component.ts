@@ -6,9 +6,10 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
+import type {
   UsageTip,
-  TipCategory,
+  TipCategory} from '../types/statistics.interface';
+import {
   CATEGORY_LABELS,
 } from '../types/statistics.interface';
 

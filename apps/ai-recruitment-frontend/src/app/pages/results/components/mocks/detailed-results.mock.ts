@@ -1,4 +1,4 @@
-import { DetailedAnalysisResult } from '../../../../interfaces/detailed-analysis.interface';
+import type { DetailedAnalysisResult } from '../../../../interfaces/detailed-analysis.interface';
 
 /**
  * Mock analysis result for development/testing.

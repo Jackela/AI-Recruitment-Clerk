@@ -1,4 +1,4 @@
-import {
+import type {
   SkillTagStyle,
   RadarChartData,
 } from '../../../../interfaces/detailed-analysis.interface';
