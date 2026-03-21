@@ -8,13 +8,13 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsc",
+        "command": "tsc -b",
         "cwd": "libs/shared-dtos"
       },
       "outputs": ["{projectRoot}/dist"],
       "configurations": {
         "production": {
-          "command": "tsc --project tsconfig.json"
+          "command": "tsc -b --project tsconfig.json"
         }
       }
     },
