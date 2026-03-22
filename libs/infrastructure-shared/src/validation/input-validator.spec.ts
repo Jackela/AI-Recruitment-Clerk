@@ -167,10 +167,9 @@ describe('InputValidator', () => {
 
       const result = InputValidator.validateResumeFile(file);
 
-      // Should not fail for missing mimetype, only checks if provided
-      expect(result.errors).not.toContain(
-        expect.stringContaining('Invalid mime type'),
-      );
+      // Should be valid when mimetype is missing (only validates if provided)
+      expect(result.isValid).toBe(true);
+      expect(result.errors).toBeUndefined();
     });
 
     it('should handle null buffer', () => {

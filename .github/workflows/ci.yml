@@ -220,6 +220,7 @@ jobs:
     env:
       NODE_OPTIONS: '--max-old-space-size=4096'
       CI: true
+      NX_NO_CACHED_BUILDS: 'true'
     strategy:
       fail-fast: false
       matrix:

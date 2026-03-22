@@ -1,10 +1,8 @@
 /**
  * Bootstrap Helper Tests
  */
-import { Test, TestingModule } from '@nestjs/testing';
 import {
   bootstrapNestJsMicroservice,
-  bootstrapNestJsGateway,
   bootstrapWithErrorHandling,
 } from './bootstrap.helper';
 import { Logger } from '@nestjs/common';

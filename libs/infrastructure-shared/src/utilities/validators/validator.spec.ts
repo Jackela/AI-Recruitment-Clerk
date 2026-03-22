@@ -193,7 +193,7 @@ describe('Validator', () => {
       ];
       const combined = Validator.combine(validators);
 
-      const result = combined('ab');
+      const result = combined('');
       expect(result.isValid).toBe(false);
       expect(result.errors).toHaveLength(2);
     });

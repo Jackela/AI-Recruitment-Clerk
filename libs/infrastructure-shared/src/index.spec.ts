@@ -1,14 +1,11 @@
 /**
  * Infrastructure Shared Module Integration Tests
  */
-import { Test, TestingModule } from '@nestjs/testing';
-import {
-  Logger,
-  INestApplication,
-  ValidationPipe,
-  BadRequestException,
-} from '@nestjs/common';
-import { DtoValidationPipe } from '../pipes/dto-validation.pipe';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type { INestApplication} from '@nestjs/common';
+import { Logger, BadRequestException } from '@nestjs/common';
+import { DtoValidationPipe } from './pipes/dto-validation.pipe';
 import { IsString, IsEmail, MinLength } from 'class-validator';
 
 class TestDto {
@@ -80,7 +77,7 @@ describe('Infrastructure Shared Integration', () => {
   describe('Export Verification', () => {
     it('should export all required utilities', async () => {
       // Verify that index exports all necessary items
-      const index = await import('../index');
+      const index = await import('./index');
 
       // Error handling exports
       expect(index.asyncErrorBoundary).toBeDefined();

@@ -1,9 +1,10 @@
+import type {
+  LogContext,
+  LoggerOptions} from './logger.service';
 import {
   Logger,
   createLogger,
-  logger,
-  LogContext,
-  LoggerOptions,
+  logger
 } from './logger.service';
 import { Logger as NestLogger } from '@nestjs/common';
 
@@ -223,15 +224,9 @@ describe('createLogger', () => {
 
 describe('logger', () => {
   let mockLog: jest.SpyInstance;
-  let mockError: jest.SpyInstance;
-  let mockWarn: jest.SpyInstance;
-  let mockDebug: jest.SpyInstance;
 
   beforeEach(() => {
     mockLog = jest.spyOn(NestLogger.prototype, 'log').mockImplementation();
-    mockError = jest.spyOn(NestLogger.prototype, 'error').mockImplementation();
-    mockWarn = jest.spyOn(NestLogger.prototype, 'warn').mockImplementation();
-    mockDebug = jest.spyOn(NestLogger.prototype, 'debug').mockImplementation();
   });
 
   afterEach(() => {

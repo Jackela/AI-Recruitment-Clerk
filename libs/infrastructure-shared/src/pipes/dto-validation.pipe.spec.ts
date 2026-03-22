@@ -1,7 +1,6 @@
 /**
  * DTO Validation Pipe Tests
  */
-import { Test, TestingModule } from '@nestjs/testing';
 import {
   DtoValidationPipe,
   createDtoValidationPipe,
@@ -51,10 +50,10 @@ describe('DtoValidationPipe', () => {
         age: 30,
       };
 
-      const result = await pipe.transform(value, {
+      const result = (await pipe.transform(value, {
         type: 'body',
         metatype: TestUserDto,
-      });
+      })) as TestUserDto;
 
       expect(result).toBeInstanceOf(TestUserDto);
       expect(result.name).toBe('John Doe');
@@ -68,10 +67,10 @@ describe('DtoValidationPipe', () => {
         email: 'jane@example.com',
       };
 
-      const result = await pipe.transform(value, {
+      const result = (await pipe.transform(value, {
         type: 'body',
         metatype: TestUserDto,
-      });
+      })) as TestUserDto;
 
       expect(result).toBeInstanceOf(TestUserDto);
       expect(result.name).toBe('Jane Doe');
@@ -235,10 +234,10 @@ describe('DtoValidationPipe', () => {
         },
       };
 
-      const result = await pipe.transform(value, {
+      const result = (await pipe.transform(value, {
         type: 'body',
         metatype: TestNestedDto,
-      });
+      })) as TestNestedDto;
 
       expect(result).toBeInstanceOf(TestNestedDto);
       expect(result.title).toBe('Test Title');
