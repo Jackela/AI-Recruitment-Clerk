@@ -1,275 +1,338 @@
-/**
- * Resume Processing Domain Events Tests
- */
-import {
+import type {
   ResumeSubmittedEvent,
   AnalysisResumeParsedEvent,
   JobResumeFailedEvent,
-} from './resume-events';
+  FileMetadata,
+} from '@ai-recruitment-clerk/resume-dto';
+import type { ResumeDTO } from '@ai-recruitment-clerk/resume-dto';
 
 describe('Resume Domain Events', () => {
-  describe('ResumeSubmittedEvent', () => {
-    it('should define ResumeSubmittedEvent type', () => {
-      // Verify the type is exported
-      const event: ResumeSubmittedEvent = {
-        resumeId: 'resume-123',
-        jobId: 'job-456',
-        timestamp: new Date(),
-        fileName: 'test-resume.pdf',
-        fileType: 'application/pdf',
-        fileSize: 1024,
-      };
+  describe('FileMetadata', () => {
+    it('should accept empty file metadata', () => {
+      const metadata: FileMetadata = {};
 
-      expect(event).toBeDefined();
-      expect(event.resumeId).toBe('resume-123');
-      expect(event.jobId).toBe('job-456');
-      expect(event.fileName).toBe('test-resume.pdf');
-      expect(event.fileType).toBe('application/pdf');
-      expect(event.fileSize).toBe(1024);
-      expect(event.timestamp).toBeInstanceOf(Date);
+      expect(metadata.mimeType).toBeUndefined();
+      expect(metadata.size).toBeUndefined();
+      expect(metadata.encoding).toBeUndefined();
     });
 
-    it('should accept optional fields', () => {
+    it('should accept complete file metadata', () => {
+      const metadata: FileMetadata = {
+        mimeType: 'application/pdf',
+        size: 102400,
+        encoding: 'utf-8',
+      };
+
+      expect(metadata.mimeType).toBe('application/pdf');
+      expect(metadata.size).toBe(102400);
+      expect(metadata.encoding).toBe('utf-8');
+    });
+
+    it('should accept partial file metadata', () => {
+      const metadata: FileMetadata = {
+        mimeType: 'application/pdf',
+      };
+
+      expect(metadata.mimeType).toBe('application/pdf');
+      expect(metadata.size).toBeUndefined();
+    });
+  });
+
+  describe('ResumeSubmittedEvent', () => {
+    it('should accept valid submitted event', () => {
       const event: ResumeSubmittedEvent = {
-        resumeId: 'resume-123',
         jobId: 'job-456',
-        timestamp: new Date(),
-        fileName: 'test-resume.pdf',
-        fileType: 'application/pdf',
-        fileSize: 1024,
-        candidateName: 'John Doe',
-        candidateEmail: 'john@example.com',
-        metadata: {
-          source: 'email',
-          submittedBy: 'hr@company.com',
+        resumeId: 'resume-123',
+        originalFilename: 'test-resume.pdf',
+        tempGridFsUrl: 'https://storage.example.com/temp/abc123',
+      };
+
+      expect(event.jobId).toBe('job-456');
+      expect(event.resumeId).toBe('resume-123');
+      expect(event.originalFilename).toBe('test-resume.pdf');
+      expect(event.tempGridFsUrl).toBe(
+        'https://storage.example.com/temp/abc123',
+      );
+    });
+
+    it('should accept event with optional organizationId', () => {
+      const event: ResumeSubmittedEvent = {
+        jobId: 'job-456',
+        resumeId: 'resume-123',
+        originalFilename: 'test-resume.pdf',
+        tempGridFsUrl: 'https://storage.example.com/temp/abc123',
+        organizationId: 'org-789',
+      };
+
+      expect(event.organizationId).toBe('org-789');
+    });
+
+    it('should accept event with file metadata', () => {
+      const event: ResumeSubmittedEvent = {
+        jobId: 'job-456',
+        resumeId: 'resume-123',
+        originalFilename: 'test-resume.pdf',
+        tempGridFsUrl: 'https://storage.example.com/temp/abc123',
+        fileMetadata: {
+          mimeType: 'application/pdf',
+          size: 102400,
+          encoding: 'utf-8',
         },
       };
 
-      expect(event.candidateName).toBe('John Doe');
-      expect(event.candidateEmail).toBe('john@example.com');
-      expect(event.metadata).toEqual({
-        source: 'email',
-        submittedBy: 'hr@company.com',
-      });
+      expect(event.fileMetadata).toBeDefined();
+      expect(event.fileMetadata?.mimeType).toBe('application/pdf');
+      expect(event.fileMetadata?.size).toBe(102400);
+    });
+
+    it('should accept event without optional fields', () => {
+      const event: ResumeSubmittedEvent = {
+        jobId: 'job-456',
+        resumeId: 'resume-123',
+        originalFilename: 'resume.pdf',
+        tempGridFsUrl: 'https://storage.example.com/temp/xyz',
+      };
+
+      expect(event.organizationId).toBeUndefined();
+      expect(event.fileMetadata).toBeUndefined();
     });
   });
 
   describe('AnalysisResumeParsedEvent', () => {
-    it('should define AnalysisResumeParsedEvent type', () => {
-      const event: AnalysisResumeParsedEvent = {
-        resumeId: 'resume-123',
-        jobId: 'job-456',
-        timestamp: new Date(),
-        extractedData: {
-          personalInfo: {
-            name: 'John Doe',
-            email: 'john@example.com',
-            phone: '+1234567890',
-          },
-          skills: ['JavaScript', 'TypeScript', 'Node.js'],
-          experience: [
-            {
-              company: 'Tech Corp',
-              position: 'Senior Developer',
-              duration: '2020-2023',
-            },
-          ],
-          education: [
-            {
-              institution: 'University',
-              degree: 'Bachelor',
-              field: 'Computer Science',
-              year: '2020',
-            },
-          ],
+    const validResumeDto: ResumeDTO = {
+      contactInfo: {
+        name: 'John Doe',
+        email: 'john@example.com',
+        phone: '+1234567890',
+      },
+      summary: 'Experienced developer',
+      skills: ['JavaScript', 'TypeScript'],
+      workExperience: [
+        {
+          company: 'Tech Corp',
+          position: 'Senior Developer',
+          startDate: '2020-01-01',
+          endDate: 'present',
+          summary: 'Led development',
         },
-        parsingConfidence: 0.95,
+      ],
+      education: [
+        {
+          school: 'MIT',
+          degree: 'Master of Science',
+          major: 'Computer Science',
+        },
+      ],
+    };
+
+    it('should accept valid parsed event', () => {
+      const event: AnalysisResumeParsedEvent = {
+        jobId: 'job-456',
+        resumeId: 'resume-123',
+        resumeDto: validResumeDto,
+        timestamp: '2024-01-15T10:30:00Z',
+        processingTimeMs: 1500,
       };
 
-      expect(event).toBeDefined();
-      expect(event.extractedData).toBeDefined();
-      expect(event.extractedData.personalInfo).toBeDefined();
-      expect(event.extractedData.skills).toHaveLength(3);
-      expect(event.parsingConfidence).toBe(0.95);
+      expect(event.jobId).toBe('job-456');
+      expect(event.resumeId).toBe('resume-123');
+      expect(event.resumeDto).toBeDefined();
+      expect(event.resumeDto.contactInfo.name).toBe('John Doe');
+      expect(event.timestamp).toBe('2024-01-15T10:30:00Z');
+      expect(event.processingTimeMs).toBe(1500);
     });
 
-    it('should accept event with minimal data', () => {
+    it('should accept event with ISO timestamp string', () => {
       const event: AnalysisResumeParsedEvent = {
-        resumeId: 'resume-123',
         jobId: 'job-456',
-        timestamp: new Date(),
-        extractedData: {
-          personalInfo: {
-            name: 'John Doe',
-            email: 'john@example.com',
-          },
-          skills: [],
-          experience: [],
-          education: [],
-        },
-        parsingConfidence: 0.5,
+        resumeId: 'resume-123',
+        resumeDto: validResumeDto,
+        timestamp: new Date().toISOString(),
+        processingTimeMs: 500,
       };
 
-      expect(event.extractedData.skills).toHaveLength(0);
-      expect(event.parsingConfidence).toBe(0.5);
+      expect(event.timestamp).toContain('T');
     });
 
-    it('should accept optional confidence score', () => {
-      const event: AnalysisResumeParsedEvent = {
-        resumeId: 'resume-123',
-        jobId: 'job-456',
-        timestamp: new Date(),
-        extractedData: {
-          personalInfo: {
-            name: 'John Doe',
-            email: 'john@example.com',
-          },
-          skills: [],
-          experience: [],
-          education: [],
-        },
+    it('should accept event with minimal resume', () => {
+      const minimalResume: ResumeDTO = {
+        contactInfo: { name: null, email: null, phone: null },
+        skills: [],
+        workExperience: [],
+        education: [],
       };
 
-      expect(event.parsingConfidence).toBeUndefined();
+      const event: AnalysisResumeParsedEvent = {
+        jobId: 'job-456',
+        resumeId: 'resume-123',
+        resumeDto: minimalResume,
+        timestamp: '2024-01-15T10:30:00Z',
+        processingTimeMs: 500,
+      };
+
+      expect(event.resumeDto.skills).toEqual([]);
+      expect(event.resumeDto.workExperience).toEqual([]);
+    });
+
+    it('should accept zero processing time', () => {
+      const event: AnalysisResumeParsedEvent = {
+        jobId: 'job-456',
+        resumeId: 'resume-123',
+        resumeDto: validResumeDto,
+        timestamp: '2024-01-15T10:30:00Z',
+        processingTimeMs: 0,
+      };
+
+      expect(event.processingTimeMs).toBe(0);
+    });
+
+    it('should accept large processing time', () => {
+      const event: AnalysisResumeParsedEvent = {
+        jobId: 'job-456',
+        resumeId: 'resume-123',
+        resumeDto: validResumeDto,
+        timestamp: '2024-01-15T10:30:00Z',
+        processingTimeMs: 300000,
+      };
+
+      expect(event.processingTimeMs).toBe(300000);
     });
   });
 
   describe('JobResumeFailedEvent', () => {
-    it('should define JobResumeFailedEvent type', () => {
+    it('should accept valid failed event', () => {
       const event: JobResumeFailedEvent = {
-        resumeId: 'resume-123',
         jobId: 'job-456',
-        timestamp: new Date(),
-        errorCode: 'PARSING_ERROR',
-        errorMessage: 'Failed to parse PDF file',
+        resumeId: 'resume-123',
+        originalFilename: 'test-resume.pdf',
+        error: 'Failed to parse PDF: corrupted content',
+        retryCount: 0,
+        timestamp: '2024-01-15T10:30:00Z',
       };
 
-      expect(event).toBeDefined();
-      expect(event.errorCode).toBe('PARSING_ERROR');
-      expect(event.errorMessage).toBe('Failed to parse PDF file');
+      expect(event.jobId).toBe('job-456');
+      expect(event.resumeId).toBe('resume-123');
+      expect(event.originalFilename).toBe('test-resume.pdf');
+      expect(event.error).toBe('Failed to parse PDF: corrupted content');
+      expect(event.retryCount).toBe(0);
+      expect(event.timestamp).toBe('2024-01-15T10:30:00Z');
     });
 
-    it('should accept optional error details', () => {
+    it('should accept event with retry count', () => {
       const event: JobResumeFailedEvent = {
-        resumeId: 'resume-123',
         jobId: 'job-456',
-        timestamp: new Date(),
-        errorCode: 'VALIDATION_ERROR',
-        errorMessage: 'Invalid file format',
-        errorDetails: {
-          field: 'fileType',
-          expected: 'application/pdf',
-          received: 'image/png',
-        },
+        resumeId: 'resume-123',
+        originalFilename: 'resume.pdf',
+        error: 'Timeout error',
+        retryCount: 3,
+        timestamp: '2024-01-15T10:30:00Z',
       };
 
-      expect(event.errorDetails).toEqual({
-        field: 'fileType',
-        expected: 'application/pdf',
-        received: 'image/png',
-      });
+      expect(event.retryCount).toBe(3);
     });
 
-    it('should accept different error codes', () => {
-      const errorCodes = [
-        'PARSING_ERROR',
-        'VALIDATION_ERROR',
-        'EXTRACTION_ERROR',
-        'FORMAT_ERROR',
-        'SIZE_LIMIT_ERROR',
-        'TIMEOUT_ERROR',
+    it('should accept various error messages', () => {
+      const errors = [
+        'PARSING_ERROR: Invalid PDF structure',
+        'VALIDATION_ERROR: File too large',
+        'EXTRACTION_ERROR: No text content found',
+        'FORMAT_ERROR: Unsupported file type',
       ];
 
-      errorCodes.forEach((code) => {
+      errors.forEach((errorMsg) => {
         const event: JobResumeFailedEvent = {
-          resumeId: 'resume-123',
           jobId: 'job-456',
-          timestamp: new Date(),
-          errorCode: code,
-          errorMessage: `Error: ${code}`,
+          resumeId: 'resume-123',
+          originalFilename: 'resume.pdf',
+          error: errorMsg,
+          retryCount: 0,
+          timestamp: '2024-01-15T10:30:00Z',
         };
 
-        expect(event.errorCode).toBe(code);
+        expect(event.error).toBe(errorMsg);
       });
+    });
+
+    it('should accept max retry count', () => {
+      const event: JobResumeFailedEvent = {
+        jobId: 'job-456',
+        resumeId: 'resume-123',
+        originalFilename: 'resume.pdf',
+        error: 'Max retries exceeded',
+        retryCount: 5,
+        timestamp: '2024-01-15T10:30:00Z',
+      };
+
+      expect(event.retryCount).toBe(5);
     });
   });
 
-  describe('Event Type Compatibility', () => {
-    it('should have compatible timestamp fields', () => {
-      const now = new Date();
+  describe('Event Relationships', () => {
+    const validResumeDto: ResumeDTO = {
+      contactInfo: { name: 'John Doe', email: 'john@example.com', phone: null },
+      skills: ['JavaScript'],
+      workExperience: [],
+      education: [],
+    };
+
+    it('should have consistent resumeId across events', () => {
+      const resumeId = 'resume-123';
 
       const submittedEvent: ResumeSubmittedEvent = {
-        resumeId: 'resume-123',
         jobId: 'job-456',
-        timestamp: now,
-        fileName: 'test.pdf',
-        fileType: 'application/pdf',
-        fileSize: 1024,
+        resumeId,
+        originalFilename: 'resume.pdf',
+        tempGridFsUrl: 'https://storage.example.com/temp/abc',
       };
 
       const parsedEvent: AnalysisResumeParsedEvent = {
-        resumeId: 'resume-123',
         jobId: 'job-456',
-        timestamp: now,
-        extractedData: {
-          personalInfo: {
-            name: 'John',
-            email: 'john@example.com',
-          },
-          skills: [],
-          experience: [],
-          education: [],
-        },
+        resumeId,
+        resumeDto: validResumeDto,
+        timestamp: '2024-01-15T10:30:00Z',
+        processingTimeMs: 1000,
       };
 
       const failedEvent: JobResumeFailedEvent = {
-        resumeId: 'resume-123',
         jobId: 'job-456',
-        timestamp: now,
-        errorCode: 'ERROR',
-        errorMessage: 'Error',
-      };
-
-      expect(submittedEvent.timestamp).toEqual(now);
-      expect(parsedEvent.timestamp).toEqual(now);
-      expect(failedEvent.timestamp).toEqual(now);
-    });
-
-    it('should have common resumeId and jobId fields', () => {
-      const submittedEvent: ResumeSubmittedEvent = {
-        resumeId: 'resume-123',
-        jobId: 'job-456',
-        timestamp: new Date(),
-        fileName: 'test.pdf',
-        fileType: 'application/pdf',
-        fileSize: 1024,
-      };
-
-      const parsedEvent: AnalysisResumeParsedEvent = {
-        resumeId: 'resume-123',
-        jobId: 'job-456',
-        timestamp: new Date(),
-        extractedData: {
-          personalInfo: {
-            name: 'John',
-            email: 'john@example.com',
-          },
-          skills: [],
-          experience: [],
-          education: [],
-        },
-      };
-
-      const failedEvent: JobResumeFailedEvent = {
-        resumeId: 'resume-123',
-        jobId: 'job-456',
-        timestamp: new Date(),
-        errorCode: 'ERROR',
-        errorMessage: 'Error',
+        resumeId,
+        originalFilename: 'resume.pdf',
+        error: 'Error',
+        retryCount: 0,
+        timestamp: '2024-01-15T10:30:00Z',
       };
 
       expect(submittedEvent.resumeId).toBe(parsedEvent.resumeId);
       expect(submittedEvent.resumeId).toBe(failedEvent.resumeId);
+    });
+
+    it('should have consistent jobId across events', () => {
+      const jobId = 'job-456';
+
+      const submittedEvent: ResumeSubmittedEvent = {
+        jobId,
+        resumeId: 'resume-123',
+        originalFilename: 'resume.pdf',
+        tempGridFsUrl: 'https://storage.example.com/temp/abc',
+      };
+
+      const parsedEvent: AnalysisResumeParsedEvent = {
+        jobId,
+        resumeId: 'resume-123',
+        resumeDto: validResumeDto,
+        timestamp: '2024-01-15T10:30:00Z',
+        processingTimeMs: 1000,
+      };
+
+      const failedEvent: JobResumeFailedEvent = {
+        jobId,
+        resumeId: 'resume-123',
+        originalFilename: 'resume.pdf',
+        error: 'Error',
+        retryCount: 0,
+        timestamp: '2024-01-15T10:30:00Z',
+      };
+
       expect(submittedEvent.jobId).toBe(parsedEvent.jobId);
       expect(submittedEvent.jobId).toBe(failedEvent.jobId);
     });
