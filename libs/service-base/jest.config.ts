@@ -9,7 +9,7 @@ export default {
   coverageDirectory: '../../coverage/libs/service-base',
   collectCoverageFrom: [
     'src/**/*.{ts,js}',
-    '!src/**/*.spec.ts',
+    '!src/**/*.d.ts',
     '!src/**/index.ts',
   ],
   coverageThreshold: {
