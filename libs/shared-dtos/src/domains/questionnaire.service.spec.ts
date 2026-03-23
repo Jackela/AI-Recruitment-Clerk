@@ -1,9 +1,5 @@
 import { QuestionnaireDomainService } from './questionnaire.service';
-import {
-  Questionnaire,
-  QuestionnaireSubmission,
-  QuestionnaireValidationResult,
-} from './questionnaire.dto';
+import type { Questionnaire } from './questionnaire.dto';
 import { QuestionnaireValidationFailedEvent } from './questionnaire-events.dto';
 import type {
   IQuestionnaireRepository,
@@ -494,7 +490,6 @@ import {
   QuestionnaireSubmissionResult,
   SubmissionTrendsAnalysis,
   IPSubmissionCheckResult,
-  UserSegmentation,
 } from './questionnaire.service';
 
 // Helper functions

@@ -1,16 +1,17 @@
+import type {
+  IQuestionnaireRepository,
+  IQuestionnaireTemplateService,
+  IDomainEventBus} from './questionnaire.domain-service.js';
 import {
   QuestionnaireDomainService,
   QuestionnaireSubmissionResult,
   SubmissionTrendsAnalysis,
   IPSubmissionCheckResult,
-  UserSegmentation,
-  IQuestionnaireRepository,
-  IQuestionnaireTemplateService,
-  IDomainEventBus,
+  UserSegmentation
 } from './questionnaire.domain-service.js';
 import { Questionnaire } from '../aggregates/questionnaire.aggregate.js';
 import { SubmissionMetadata } from '../value-objects/submission-metadata.value-object.js';
-import { RawSubmissionData } from '../../application/dtos/questionnaire.dto.js';
+import type { RawSubmissionData } from '../../application/dtos/questionnaire.dto.js';
 
 describe('QuestionnaireDomainService', () => {
   let mockRepository: jest.Mocked<IQuestionnaireRepository>;

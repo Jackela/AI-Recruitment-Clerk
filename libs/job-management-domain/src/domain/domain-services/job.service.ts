@@ -3,7 +3,8 @@
  * Domain service for job-related business logic
  */
 
-import { Job, JobStatus, CreateJobData } from '../entities/job.entity';
+import type { CreateJobData } from '../entities/job.entity';
+import { Job, JobStatus } from '../entities/job.entity';
 
 export interface JobFilter {
   status?: JobStatus | JobStatus[];

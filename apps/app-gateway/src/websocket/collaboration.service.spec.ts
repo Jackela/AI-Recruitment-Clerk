@@ -1,10 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import {
-  CollaborationService,
-  CollaborationRoom,
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type {
   Participant,
   CollaborationAction,
-  DocumentEdit,
+  DocumentEdit} from './collaboration.service';
+import {
+  CollaborationService,
+  CollaborationRoom
 } from './collaboration.service';
 import type { CacheService } from '../cache/cache.service';
 

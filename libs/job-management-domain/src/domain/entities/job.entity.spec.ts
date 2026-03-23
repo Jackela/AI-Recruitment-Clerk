@@ -1,4 +1,5 @@
-import { Job, JobStatus, JobType, CreateJobData } from './job.entity';
+import type { CreateJobData } from './job.entity';
+import { Job, JobStatus, JobType } from './job.entity';
 
 describe('JobEntity', () => {
   const validJobData: CreateJobData = {

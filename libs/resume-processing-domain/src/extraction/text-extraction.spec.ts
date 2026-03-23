@@ -1,11 +1,4 @@
-import {
-  TextExtractionService,
-  SectionInfo,
-  DateRange,
-  ContactInfo,
-  WorkExperience,
-  EducationEntry,
-} from './text-extraction';
+import { TextExtractionService } from './text-extraction';
 
 describe('TextExtractionService', () => {
   let service: TextExtractionService;

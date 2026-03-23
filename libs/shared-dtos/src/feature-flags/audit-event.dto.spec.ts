@@ -1,4 +1,4 @@
-import { AuditEventDto } from './audit-event.dto';
+import type { AuditEventDto } from './audit-event.dto';
 
 describe('AuditEventDto', () => {
   describe('AuditEventDto interface', () => {

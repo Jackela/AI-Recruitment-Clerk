@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import type { ComponentFixture} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { MobileUploadFileItemComponent } from './mobile-upload-file-item.component';
 import type { UploadFile } from '../../services/mobile/mobile-upload.service';
 

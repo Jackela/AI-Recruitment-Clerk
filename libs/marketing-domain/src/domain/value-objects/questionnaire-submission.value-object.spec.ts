@@ -1,6 +1,7 @@
+import type {
+  QuestionnaireSubmissionRestoreData} from './questionnaire-submission.value-object.js';
 import {
-  QuestionnaireSubmission,
-  QuestionnaireSubmissionRestoreData,
+  QuestionnaireSubmission
 } from './questionnaire-submission.value-object.js';
 import { UserProfile } from './user-profile.value-object.js';
 import { UserExperience } from './user-experience.value-object.js';
@@ -8,7 +9,7 @@ import { BusinessValue } from './business-value.value-object.js';
 import { OptionalInfo } from './optional-info.value-object.js';
 import { SubmissionSummary } from './submission-summary.value-object.js';
 import { Answer } from './answer.value-object.js';
-import { RawSubmissionData } from '../../application/dtos/questionnaire.dto.js';
+import type { RawSubmissionData } from '../../application/dtos/questionnaire.dto.js';
 
 describe('QuestionnaireSubmission', () => {
   describe('fromRawData', () => {

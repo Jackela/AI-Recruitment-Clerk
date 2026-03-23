@@ -1,9 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { ConfigService } from '@nestjs/config';
+import type {
+  SecurityEvent} from './security-monitor.service';
 import {
   SecurityMonitorService,
-  SecurityEvent,
   SecurityMetrics,
 } from './security-monitor.service';
 import { UserProfile } from '../schemas/user-profile.schema';

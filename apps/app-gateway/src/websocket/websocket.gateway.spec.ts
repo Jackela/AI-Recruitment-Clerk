@@ -1,4 +1,5 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { WebSocketGateway } from './websocket.gateway';
 import type { GuestUsageService } from '../guest/services/guest-usage.service';
 import type { CollaborationService } from './collaboration.service';

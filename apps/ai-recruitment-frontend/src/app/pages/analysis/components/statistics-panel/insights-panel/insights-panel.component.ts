@@ -1,6 +1,6 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { PerformanceInsight } from '../types/statistics.interface';
+import type { PerformanceInsight } from '../types/statistics.interface';
 
 @Component({
   selector: 'arc-insights-panel',

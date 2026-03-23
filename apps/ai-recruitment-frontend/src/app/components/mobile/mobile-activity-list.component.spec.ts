@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import type { ComponentFixture} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { MobileActivityListComponent } from './mobile-activity-list.component';
 import type { ActivityItem } from '../../services/mobile/mobile-dashboard.service';
 

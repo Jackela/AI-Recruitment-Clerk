@@ -2,7 +2,7 @@ import { SubmissionQuality } from './submission-quality.value-object.js';
 import { QuestionnaireSubmission } from './questionnaire-submission.value-object.js';
 import { QualityScore } from './quality-score.value-object.js';
 import { QualityMetrics } from './quality-metrics.value-object.js';
-import { RawSubmissionData } from '../../application/dtos/questionnaire.dto.js';
+import type { RawSubmissionData } from '../../application/dtos/questionnaire.dto.js';
 
 describe('SubmissionQuality', () => {
   const createMockSubmission = (

@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { BentoCardData } from './types/bento-card.types';
+import type { BentoCardData } from './types/bento-card.types';
 import { BentoCardHeaderComponent } from './header/bento-card-header.component';
 import { BentoStatDisplayComponent } from './content/bento-stat-display.component';
 import { BentoProgressBarComponent } from './content/bento-progress-bar.component';

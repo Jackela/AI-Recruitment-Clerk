@@ -1,4 +1,4 @@
-import type { OnInit, OnDestroy, ElementRef } from '@angular/core';
+import type { OnInit, OnDestroy, ElementRef , OnChanges} from '@angular/core';
 import {
   Component,
   Input,
@@ -6,7 +6,7 @@ import {
   EventEmitter,
   ViewChild,
   HostListener,
-  ChangeDetectionStrategy,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
@@ -161,7 +161,7 @@ import { Subject } from 'rxjs';
     `,
   ],
 })
-export class ModalComponent implements OnInit, OnDestroy {
+export class ModalComponent implements OnInit, OnDestroy, OnChanges {
   @ViewChild('modalContainer', { static: false })
   public modalContainer!: ElementRef<HTMLDivElement>;
   @ViewChild('closeButton', { static: false })

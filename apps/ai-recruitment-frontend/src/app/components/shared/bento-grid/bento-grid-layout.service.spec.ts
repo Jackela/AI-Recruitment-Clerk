@@ -2,9 +2,10 @@
  * Bento Grid Layout Service Tests
  */
 import { TestBed } from '@angular/core/testing';
+import type {
+  BentoGridLayoutConfig} from './bento-grid-layout.service';
 import {
-  BentoGridLayoutService,
-  BentoGridLayoutConfig,
+  BentoGridLayoutService
 } from './bento-grid-layout.service';
 
 describe('BentoGridLayoutService', () => {

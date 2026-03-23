@@ -11,7 +11,7 @@ import { BonusType } from '../../application/dtos/usage-limit.dto';
 import type { IUsageLimitRepository } from './usage-limit.domain-service';
 import type { IDomainEventBus } from './usage-limit.domain-service';
 import type { IAuditLogger } from './usage-limit.domain-service';
-import { UsageViolationReport, UsageEfficiency } from './usage-limit.rules';
+import { UsageEfficiency } from './usage-limit.rules';
 
 describe('UsageLimitDomainService', () => {
   let service: UsageLimitDomainService;

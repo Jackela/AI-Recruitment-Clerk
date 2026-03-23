@@ -4,7 +4,7 @@
  */
 
 import { Injectable, signal } from '@angular/core';
-import { AnalysisStep, StepConfig } from '../types/analysis.types';
+import type { AnalysisStep, StepConfig } from '../types/analysis.types';
 
 @Injectable({
   providedIn: 'root',

@@ -1,4 +1,5 @@
-import { EncryptionService, EncryptableData, UserPIIData } from './encryption';
+import type { EncryptableData, UserPIIData } from './encryption';
+import { EncryptionService } from './encryption';
 
 describe('EncryptionService', () => {
   describe('encrypt', () => {

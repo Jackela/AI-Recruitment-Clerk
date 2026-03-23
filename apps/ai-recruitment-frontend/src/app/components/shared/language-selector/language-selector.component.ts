@@ -1,8 +1,9 @@
+import type { OnDestroy} from '@angular/core';
 import {
   Component,
   computed,
   inject,
-  ChangeDetectionStrategy,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type {
@@ -302,7 +303,7 @@ import { I18nService } from '../../../services/i18n/i18n.service';
 
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LanguageSelectorComponent {
+export class LanguageSelectorComponent implements OnDestroy {
   public dropdownOpen = false;
 
   // Expose i18n service properties

@@ -601,7 +601,7 @@ test.describe('Module: Analysis - 分析模块', () => {
   test('查看分析结果', async ({ page }) => {
     await page.goto('/analysis');
 
-    const resultItems = await page
+    const resultItems = page
       .locator('[data-testid="analysis-result"]')
       .first();
     if (await resultItems.isVisible().catch(() => false)) {
@@ -664,7 +664,7 @@ test.describe('Module: Analysis - 分析模块', () => {
       .locator('[data-testid="delete-analysis"]')
       .count();
     if (deleteButtons > 0) {
-      await page.click('[data-testid="delete-analysis"]').first();
+      page.click('[data-testid="delete-analysis"]').first();
       await page.click('[data-testid="confirm-delete"]');
 
       await page.waitForTimeout(1000);
@@ -776,7 +776,7 @@ test.describe('Module: Reports - 报告模块', () => {
       .locator('[data-testid="delete-report"]')
       .count();
     if (deleteButtons > 0) {
-      await page.click('[data-testid="delete-report"]').first();
+      page.click('[data-testid="delete-report"]').first();
       await page.click('[data-testid="confirm-delete"]');
 
       await page.waitForTimeout(1000);
@@ -792,7 +792,7 @@ test.describe('Module: Reports - 报告模块', () => {
       .locator('[data-testid="preview-report"]')
       .count();
     if (previewButtons > 0) {
-      await page.click('[data-testid="preview-report"]').first();
+      page.click('[data-testid="preview-report"]').first();
 
       await page.waitForSelector('[data-testid="report-preview"]', {
         timeout: 5000,

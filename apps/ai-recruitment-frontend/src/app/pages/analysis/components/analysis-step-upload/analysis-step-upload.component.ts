@@ -11,9 +11,10 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import type {
+  FileUploadData} from '../resume-file-upload.component';
 import {
-  ResumeFileUploadComponent,
-  FileUploadData,
+  ResumeFileUploadComponent
 } from '../resume-file-upload.component';
 
 @Component({

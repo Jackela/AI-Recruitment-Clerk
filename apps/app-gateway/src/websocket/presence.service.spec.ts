@@ -1,9 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import {
-  PresenceService,
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type {
   PresenceInfo,
   UserActivity,
-  DeviceInfo,
+  DeviceInfo} from './presence.service';
+import {
+  PresenceService
 } from './presence.service';
 import type { CacheService } from '../cache/cache.service';
 

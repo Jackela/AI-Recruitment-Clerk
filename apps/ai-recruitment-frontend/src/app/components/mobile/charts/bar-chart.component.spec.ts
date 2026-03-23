@@ -1,5 +1,7 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BarChartComponent, ChartDataPoint } from './bar-chart.component';
+import type { ComponentFixture} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
+import type { ChartDataPoint } from './bar-chart.component';
+import { BarChartComponent } from './bar-chart.component';
 
 describe('BarChartComponent', () => {
   let component: BarChartComponent;

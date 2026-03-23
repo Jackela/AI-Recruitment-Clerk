@@ -1,3 +1,5 @@
+import type {
+  ErrorResponse} from './error-handler.util';
 import {
   AppError,
   ValidationError,
@@ -13,8 +15,7 @@ import {
   extractErrorInfo,
   isRetryableError,
   ErrorCategory,
-  ErrorSeverity,
-  ErrorResponse,
+  ErrorSeverity
 } from './error-handler.util';
 
 describe('Error Handler Utils', () => {

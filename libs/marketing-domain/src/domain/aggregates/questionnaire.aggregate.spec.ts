@@ -1,8 +1,10 @@
-import { Questionnaire, QuestionnaireData } from './questionnaire.aggregate';
+import type { QuestionnaireData } from './questionnaire.aggregate';
+import { Questionnaire } from './questionnaire.aggregate';
 import { SubmissionMetadata } from '../value-objects/submission-metadata.value-object';
+import type {
+  RawSubmissionData} from '../../application/dtos/questionnaire.dto';
 import {
-  QuestionnaireStatus,
-  RawSubmissionData,
+  QuestionnaireStatus
 } from '../../application/dtos/questionnaire.dto';
 
 describe('Questionnaire', () => {

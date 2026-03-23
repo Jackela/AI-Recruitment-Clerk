@@ -1,3 +1,5 @@
+import type {
+  PipeTransform} from '@angular/core';
 import {
   Component,
   Input,
@@ -6,7 +8,6 @@ import {
   HostListener,
   ChangeDetectionStrategy,
   Pipe,
-  PipeTransform,
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';

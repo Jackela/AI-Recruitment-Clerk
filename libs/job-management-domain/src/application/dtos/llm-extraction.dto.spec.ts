@@ -2,7 +2,7 @@
  * LLM Extraction DTOs - Unit Tests
  */
 
-import {
+import type {
   LlmExtractionRequest,
   LlmExtractionResponse,
 } from './llm-extraction.dto';

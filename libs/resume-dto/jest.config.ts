@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   displayName: 'resume-dto',
   preset: '../../jest.preset.cjs',
   testEnvironment: 'node',

@@ -1,7 +1,8 @@
+import type {
+  ScoringPromptOptions} from './scoring-templates.dto';
 import {
   ScoringPromptTemplates,
-  ScoringPromptBuilder,
-  ScoringPromptOptions,
+  ScoringPromptBuilder
 } from './scoring-templates.dto';
 
 describe('ScoringPromptTemplates', () => {

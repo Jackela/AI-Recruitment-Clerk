@@ -1,4 +1,5 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { AnalysisService } from './analysis.service';
 import type { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
 import type { AnalysisInitiatedResponseDto } from './dto/analysis-response.dto';

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BentoTrendData, TrendType } from '../types/bento-card.types';
+import type { BentoTrendData, TrendType } from '../types/bento-card.types';
 
 @Component({
   selector: 'arc-bento-trend-indicator',

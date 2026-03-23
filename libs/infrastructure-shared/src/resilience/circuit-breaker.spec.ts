@@ -1,4 +1,5 @@
-import { WithCircuitBreaker, CircuitBreakerConfig } from './circuit-breaker';
+import type { CircuitBreakerConfig } from './circuit-breaker';
+import { WithCircuitBreaker } from './circuit-breaker';
 
 describe('CircuitBreaker', () => {
   let consoleErrorSpy: jest.SpyInstance;

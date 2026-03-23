@@ -1,7 +1,9 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import type { ComponentFixture} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
+import type {
+  CandidateCardData} from './mobile-candidate-card.component';
 import {
-  MobileCandidateCardComponent,
-  CandidateCardData,
+  MobileCandidateCardComponent
 } from './mobile-candidate-card.component';
 
 describe('MobileCandidateCardComponent', () => {

@@ -2,7 +2,7 @@ import type { ExecutionContext } from '@nestjs/common';
 import { UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtStrategy } from './jwt.strategy';
-import { AuthService } from '../auth.service';
+import type { AuthService } from '../auth.service';
 
 describe('JwtStrategy', () => {
   let strategy: JwtStrategy;

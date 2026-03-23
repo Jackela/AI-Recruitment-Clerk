@@ -4,7 +4,7 @@
  */
 
 import { Injectable, signal, computed } from '@angular/core';
-import {
+import type {
   AnalysisState,
   AnalysisResult,
   ErrorInfo,

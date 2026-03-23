@@ -10,7 +10,6 @@ import { StructuredLoggerFactory } from './structured-logging';
 import { EnhancedAppException } from './enhanced-error-types';
 import { ErrorType } from '../common/error-handling.patterns';
 import type { ExecutionContext, CallHandler } from '@nestjs/common';
-import type { Observable } from 'rxjs';
 import { of, throwError } from 'rxjs';
 import type { Request, Response } from 'express';
 
@@ -120,7 +119,7 @@ describe('Error Interceptors', () => {
 
       try {
         await interceptor.intercept(mockContext, mockCallHandler).toPromise();
-      } catch (e) {
+      } catch (_e) {
         // Expected
       }
 
@@ -195,7 +194,7 @@ describe('Error Interceptors', () => {
 
       try {
         await interceptor.intercept(mockContext, mockCallHandler).toPromise();
-      } catch (e) {
+      } catch (_e) {
         // Expected
       }
 
@@ -220,7 +219,7 @@ describe('Error Interceptors', () => {
 
       try {
         await interceptor.intercept(mockContext, mockCallHandler).toPromise();
-      } catch (e) {
+      } catch (_e) {
         // Expected
       }
 
@@ -379,7 +378,7 @@ describe('Error Interceptors', () => {
       for (let i = 0; i < 3; i++) {
         try {
           await interceptor.intercept(mockContext, mockCallHandler).toPromise();
-        } catch (e) {
+        } catch (_e) {
           // Expected
         }
       }
@@ -407,7 +406,7 @@ describe('Error Interceptors', () => {
       for (let i = 0; i < 2; i++) {
         try {
           await interceptor.intercept(mockContext, mockCallHandler).toPromise();
-        } catch (e) {
+        } catch (_e) {
           // Expected
         }
       }

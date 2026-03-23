@@ -1,13 +1,10 @@
 import { PdfResumeParser } from '../parsers/resume-parser';
-import { TextExtractionService } from '../extraction/text-extraction';
 
 describe('PDF Text Extraction', () => {
   let parser: PdfResumeParser;
-  let extractionService: TextExtractionService;
 
   beforeEach(() => {
     parser = new PdfResumeParser();
-    extractionService = new TextExtractionService();
   });
 
   describe('PDF Header Validation', () => {

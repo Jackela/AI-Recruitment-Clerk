@@ -269,7 +269,7 @@ test.describe('屏幕阅读器可访问性测试', () => {
       const tabLists = await page.locator('[role="tablist"]').all();
 
       for (const tabList of tabLists) {
-        const selectedTab = await tabList
+        const selectedTab = tabList
           .locator('[aria-selected="true"]')
           .first();
         if (await selectedTab.isVisible().catch(() => false)) {

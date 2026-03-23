@@ -1,7 +1,8 @@
+import type {
+  PromptOptions} from './prompt-templates';
 import {
   PromptTemplates,
-  PromptBuilder,
-  PromptOptions,
+  PromptBuilder
 } from './prompt-templates';
 
 describe('PromptTemplates', () => {

@@ -1,7 +1,5 @@
 import { AnalyticsEventCollectionService } from './analytics-event-collection.service';
-import { AnalyticsEvent, EventType, MetricUnit } from './analytics.dto';
-import { AnalyticsRules } from './analytics.rules';
-import { EventCreationResult } from './analytics-result-classes';
+import { EventType, MetricUnit, ConsentStatus } from './analytics.dto';
 import type {
   IAnalyticsRepository,
   IDomainEventBus,
@@ -9,7 +7,6 @@ import type {
   IPrivacyService,
   ISessionTracker,
 } from './analytics-interfaces.dto';
-import { ConsentStatus } from './analytics.dto';
 
 // Mocks
 const mockRepository: jest.Mocked<IAnalyticsRepository> = {

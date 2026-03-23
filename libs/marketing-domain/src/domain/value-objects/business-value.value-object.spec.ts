@@ -1,5 +1,5 @@
 import { BusinessValue } from './business-value.value-object.js';
-import {
+import type {
   ScreeningMethod,
   Rating,
 } from '../../application/dtos/questionnaire.dto.js';

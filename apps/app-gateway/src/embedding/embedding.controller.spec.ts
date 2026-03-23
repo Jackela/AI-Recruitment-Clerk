@@ -1,5 +1,5 @@
 import { EmbeddingController } from './embedding.controller';
-import { EmbeddingService } from './embedding.service';
+import type { EmbeddingService } from './embedding.service';
 
 describe('EmbeddingController', () => {
   let controller: EmbeddingController;

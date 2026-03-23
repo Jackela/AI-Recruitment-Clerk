@@ -1,5 +1,4 @@
 import { UsageTracking } from './usage-tracking.value-object';
-import { UsageRecord } from './usage-record.value-object';
 
 describe('UsageTracking', () => {
   describe('createEmpty', () => {

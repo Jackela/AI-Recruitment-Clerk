@@ -1,4 +1,5 @@
-import { test, expect, Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { JobsPage } from '../pages/JobsPage';
 import { AnalysisPage } from '../pages/AnalysisPage';
 import { DashboardPage } from '../pages/DashboardPage';
@@ -103,7 +104,7 @@ async function measurePageLoadTime(page: Page, url: string): Promise<number> {
  */
 async function testKeyboardNavigation(page: Page): Promise<boolean> {
   try {
-    const focusableElements = await page.locator(
+    const focusableElements = page.locator(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
     );
     const count = await focusableElements.count();

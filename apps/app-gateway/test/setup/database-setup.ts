@@ -8,8 +8,9 @@
  * @since v1.0.0
  */
 
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { DataSource, DataSourceOptions, QueryRunner } from 'typeorm';
+import type { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import type { DataSourceOptions, QueryRunner } from 'typeorm';
+import { DataSource } from 'typeorm';
 
 /**
  * TypeORM configuration for test environment.

@@ -18,7 +18,7 @@ describe('UsageLimitRules', () => {
     });
   };
 
-  const createMockUsageLimit = (overrides = {}): UsageLimit => {
+  const createMockUsageLimit = (_overrides = {}): UsageLimit => {
     const policy = createMockPolicy();
     return UsageLimit.create('192.168.1.1', policy);
   };

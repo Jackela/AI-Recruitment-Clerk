@@ -1,5 +1,5 @@
 import { CacheWarmupService } from './cache-warmup.service';
-import { CacheService } from './cache.service';
+import type { CacheService } from './cache.service';
 
 describe('CacheWarmupService', () => {
   let service: CacheWarmupService;

@@ -11,10 +11,11 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  AnalysisProgressComponent,
+import type {
   AnalysisStep,
-  ProgressUpdate,
+  ProgressUpdate} from '../analysis-progress.component';
+import {
+  AnalysisProgressComponent
 } from '../analysis-progress.component';
 
 @Component({

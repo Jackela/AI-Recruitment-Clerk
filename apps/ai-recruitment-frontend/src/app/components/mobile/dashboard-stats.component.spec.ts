@@ -1,8 +1,10 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import {
-  DashboardStatsComponent,
+import type { ComponentFixture} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
+import type {
   DashboardStat,
-  StatChange,
+  StatChange} from './dashboard-stats.component';
+import {
+  DashboardStatsComponent
 } from './dashboard-stats.component';
 
 describe('DashboardStatsComponent', () => {

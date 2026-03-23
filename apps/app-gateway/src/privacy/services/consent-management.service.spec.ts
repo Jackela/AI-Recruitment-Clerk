@@ -1,17 +1,18 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { ConsentManagementService } from './consent-management.service';
 import { UserProfile } from '../../schemas/user-profile.schema';
 import {
   ConsentStatus,
   ConsentPurpose,
-  DataCategory,
-  ConsentRecord,
+  DataCategory
 } from '@ai-recruitment-clerk/shared-dtos';
 import type {
   CaptureConsentDto,
   WithdrawConsentDto,
-} from '@ai-recruitment-clerk/shared-dtos';
+
+  ConsentRecord} from '@ai-recruitment-clerk/shared-dtos';
 import type { Model } from 'mongoose';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
 

@@ -2,7 +2,7 @@
  * Job Description DTOs - Unit Tests
  */
 
-import {
+import type {
   JdDTO,
   LlmExtractionRequest,
   LlmExtractionResponse,

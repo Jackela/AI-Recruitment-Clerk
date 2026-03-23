@@ -1,7 +1,8 @@
+import type {
+  ReportPromptOptions} from '../../application/dtos/report-templates.dto';
 import {
   ReportPromptTemplates,
-  ReportPromptBuilder,
-  ReportPromptOptions,
+  ReportPromptBuilder
 } from '../../application/dtos/report-templates.dto';
 
 describe('ReportPromptTemplates Extended Coverage', () => {

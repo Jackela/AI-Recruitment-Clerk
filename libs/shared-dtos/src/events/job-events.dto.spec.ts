@@ -1,8 +1,8 @@
-import {
+import type {
   JobJdSubmittedEvent,
   AnalysisJdExtractedEvent,
 } from './job-events.dto';
-import { JdDTO } from '../dto/jd.dto';
+import type { JdDTO } from '../dto/jd.dto';
 
 describe('JobEventsDto', () => {
   describe('JobJdSubmittedEvent interface', () => {

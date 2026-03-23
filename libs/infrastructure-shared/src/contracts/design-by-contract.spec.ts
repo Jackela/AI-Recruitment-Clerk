@@ -10,6 +10,7 @@ describe('DesignByContract', () => {
   describe('Requires decorator', () => {
     it('should return descriptor unchanged', () => {
       const target = {};
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       const descriptor = { value: () => {} };
       const result = Requires(() => true, 'test message')(
         target,
@@ -23,6 +24,7 @@ describe('DesignByContract', () => {
   describe('Ensures decorator', () => {
     it('should return descriptor unchanged', () => {
       const target = {};
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       const descriptor = { value: () => {} };
       const result = Ensures(() => true, 'test message')(
         target,
@@ -36,6 +38,7 @@ describe('DesignByContract', () => {
   describe('Invariant decorator', () => {
     it('should return descriptor for method decorator', () => {
       const target = {};
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       const descriptor = { value: () => {} };
       const result = Invariant(() => true, 'test message')(
         target,

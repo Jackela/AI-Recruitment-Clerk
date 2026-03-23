@@ -1,5 +1,5 @@
 import { UserExperience } from './user-experience.value-object.js';
-import { Rating } from '../../application/dtos/questionnaire.dto.js';
+import type { Rating } from '../../application/dtos/questionnaire.dto.js';
 
 describe('UserExperience', () => {
   describe('constructor', () => {

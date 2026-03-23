@@ -14,7 +14,7 @@ import {
   PendingIncentivesResult,
 } from './incentive.dto';
 import { TriggerType } from '../../domain/aggregates/incentive.aggregate';
-import { IncentiveSummary } from '../../domain/value-objects/incentive-summary.value-object';
+import type { IncentiveSummary } from '../../domain/value-objects/incentive-summary.value-object';
 
 describe('IncentiveCreationResult', () => {
   describe('success', () => {

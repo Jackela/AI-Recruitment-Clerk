@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BentoIconComponent } from '../icons/bento-icon.component';
-import { BentoIconName, BentoStatus } from '../types/bento-card.types';
+import type { BentoIconName, BentoStatus } from '../types/bento-card.types';
 
 @Component({
   selector: 'arc-bento-card-header',

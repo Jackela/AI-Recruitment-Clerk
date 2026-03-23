@@ -11,7 +11,7 @@ describe('TestRateLimitBypassFilter', () => {
 
   const createMockHost = (
     exception: HttpException,
-    url: string = '/api/test',
+    url = '/api/test',
   ): ArgumentsHost => {
     const response = {
       status: jest.fn().mockReturnThis(),

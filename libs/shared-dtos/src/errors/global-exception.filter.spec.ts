@@ -15,7 +15,8 @@ import {
 } from './enhanced-error-types';
 import { ErrorCorrelationManager } from './error-correlation';
 import { StructuredLoggerFactory } from './structured-logging';
-import { HttpStatus, ArgumentsHost } from '@nestjs/common';
+import type { ArgumentsHost } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import { ThrottlerException } from '@nestjs/throttler';
 import { ValidationError } from 'class-validator';
 import type { Request, Response } from 'express';

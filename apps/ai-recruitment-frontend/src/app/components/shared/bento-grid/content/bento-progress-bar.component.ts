@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BentoProgressData } from '../types/bento-card.types';
+import type { BentoProgressData } from '../types/bento-card.types';
 
 @Component({
   selector: 'arc-bento-progress-bar',

@@ -3,7 +3,6 @@ import {
   CircuitBreaker,
   Retry,
   WithCircuitBreaker,
-  type RetryOptions,
   type CircuitBreakerOptions,
 } from './retry.utility';
 
@@ -399,7 +398,7 @@ describe('CircuitBreaker', () => {
       for (let i = 0; i < 3; i++) {
         try {
           await cb.execute(operation);
-        } catch (e) {
+        } catch (_e) {
           // Expected
         }
       }
@@ -423,7 +422,7 @@ describe('CircuitBreaker', () => {
       for (let i = 0; i < 3; i++) {
         try {
           await cb.execute(operation);
-        } catch (e) {
+        } catch (_e) {
           // Expected
         }
       }
@@ -436,7 +435,7 @@ describe('CircuitBreaker', () => {
       // Next call should attempt in HALF_OPEN state
       try {
         await cb.execute(operation);
-      } catch (e) {
+      } catch (_e) {
         // Expected to fail
       }
 
@@ -457,7 +456,7 @@ describe('CircuitBreaker', () => {
       for (let i = 0; i < 3; i++) {
         try {
           await cb.execute(failingOperation);
-        } catch (e) {
+        } catch (_e) {
           // Expected
         }
       }
@@ -487,7 +486,7 @@ describe('CircuitBreaker', () => {
 
       try {
         await cb.execute(operation);
-      } catch (e) {
+      } catch (_e) {
         // Expected
       }
 
@@ -495,7 +494,7 @@ describe('CircuitBreaker', () => {
 
       try {
         await cb.execute(operation);
-      } catch (e) {
+      } catch (_e) {
         // Expected
       }
 
@@ -512,7 +511,7 @@ describe('CircuitBreaker', () => {
       // One failure
       try {
         await cb.execute(failingOperation);
-      } catch (e) {
+      } catch (_e) {
         // Expected
       }
 

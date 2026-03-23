@@ -1,6 +1,7 @@
-import {
+import type {
   NatsStreamConfig,
-  NatsConsumerConfig,
+  NatsConsumerConfig} from './nats.config';
+import {
   NATS_STREAMS,
   NATS_CONNECTION_OPTIONS,
   CONSUMER_DEFAULTS,

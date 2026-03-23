@@ -11,10 +11,11 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  AnalysisResultsComponent,
+import type {
   AnalysisResult,
-  ResultAction,
+  ResultAction} from '../analysis-results.component';
+import {
+  AnalysisResultsComponent
 } from '../analysis-results.component';
 
 @Component({

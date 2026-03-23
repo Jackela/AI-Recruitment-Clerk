@@ -1,6 +1,6 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { LocalStrategy } from './local.strategy';
-import { AuthService } from '../auth.service';
+import type { AuthService } from '../auth.service';
 
 describe('LocalStrategy', () => {
   let strategy: LocalStrategy;

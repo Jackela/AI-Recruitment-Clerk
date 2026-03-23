@@ -2,8 +2,8 @@
  * Job Events - Unit Tests
  */
 
-import { JobJdSubmittedEvent, AnalysisJdExtractedEvent } from './job-events';
-import { JdDTO } from '../../application/dtos/job-description.dto';
+import type { JobJdSubmittedEvent, AnalysisJdExtractedEvent } from './job-events';
+import type { JdDTO } from '../../application/dtos/job-description.dto';
 
 describe('Job Events', () => {
   describe('JobJdSubmittedEvent', () => {

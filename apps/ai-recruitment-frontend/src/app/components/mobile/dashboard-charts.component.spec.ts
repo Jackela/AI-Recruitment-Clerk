@@ -1,9 +1,11 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import {
-  DashboardChartsComponent,
+import type { ComponentFixture} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
+import type {
   DashboardChart,
   ChartDataPoint,
-  ChartSeries,
+  ChartSeries} from './dashboard-charts.component';
+import {
+  DashboardChartsComponent
 } from './dashboard-charts.component';
 
 describe('DashboardChartsComponent', () => {

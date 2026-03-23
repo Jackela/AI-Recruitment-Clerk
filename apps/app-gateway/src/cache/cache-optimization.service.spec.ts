@@ -1,5 +1,5 @@
 import { CacheOptimizationService } from './cache-optimization.service';
-import { CacheService } from './cache.service';
+import type { CacheService } from './cache.service';
 
 describe('CacheOptimizationService', () => {
   let service: CacheOptimizationService;

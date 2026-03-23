@@ -1,8 +1,10 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import type { ComponentFixture} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
+import type {
+  ResultsFilter} from './mobile-results-filter.component';
 import {
   MobileResultsFilterComponent,
-  ResultsFilter,
   FilterOption,
 } from './mobile-results-filter.component';
 

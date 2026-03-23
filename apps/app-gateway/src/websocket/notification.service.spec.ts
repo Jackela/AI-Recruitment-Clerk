@@ -1,9 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import {
-  NotificationService,
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type {
   NotificationData,
   NotificationPreferences,
-  BroadcastMessage,
+  BroadcastMessage} from './notification.service';
+import {
+  NotificationService,
   NotificationTemplate,
 } from './notification.service';
 import type { CacheService } from '../cache/cache.service';

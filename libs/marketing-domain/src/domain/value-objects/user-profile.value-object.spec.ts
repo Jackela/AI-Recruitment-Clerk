@@ -1,5 +1,5 @@
 import { UserProfile } from './user-profile.value-object.js';
-import {
+import type {
   QuestionnaireUserRole,
   CompanySize,
 } from '../../application/dtos/questionnaire.dto.js';

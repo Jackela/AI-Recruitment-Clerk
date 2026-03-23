@@ -1,4 +1,4 @@
-import { UserRole, UserStatus } from '../index';
+import { UserStatus } from '../index';
 import { User } from './user.entity';
 
 describe('User Entity', () => {

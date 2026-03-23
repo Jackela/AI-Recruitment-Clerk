@@ -11,10 +11,11 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  AnalysisErrorComponent,
+import type {
   ErrorInfo,
-  ErrorAction,
+  ErrorAction} from '../analysis-error.component';
+import {
+  AnalysisErrorComponent
 } from '../analysis-error.component';
 
 @Component({

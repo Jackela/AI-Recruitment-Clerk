@@ -1,4 +1,4 @@
-import {
+import type {
   ResumeDTO,
   ResumeAnalysisDto,
   ResumeUploadDto,
@@ -6,7 +6,7 @@ import {
   ResumeSearchDto,
   ResumeSkillsAnalysisDto,
 } from './resume.dto';
-import {
+import type {
   FileMetadata,
   ResumeSubmittedEvent,
   AnalysisResumeParsedEvent,

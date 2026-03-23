@@ -1,12 +1,6 @@
 import { AnalyticsReportingService } from './analytics-reporting.service';
-import { EventStatus, AnalyticsEvent } from './analytics.dto';
-import { AnalyticsRules, ReportType, DataScope } from './analytics.rules';
-import {
-  PrivacyComplianceResult,
-  DataRetentionReportResult,
-  SessionAnalyticsResult,
-  ReportingAccessResult,
-} from './analytics-result-classes';
+import { EventStatus } from './analytics.dto';
+import { ReportType, DataScope } from './analytics.rules';
 import type {
   IAnalyticsRepository,
   IAuditLogger,

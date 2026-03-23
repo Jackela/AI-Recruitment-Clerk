@@ -1,8 +1,9 @@
+import type {
+  ErrorContext} from './domain-exceptions';
 import {
   ResumeParserException,
   JDExtractorException,
-  ReportGeneratorException,
-  ErrorContext,
+  ReportGeneratorException
 } from './domain-exceptions';
 
 describe('Domain Exceptions', () => {

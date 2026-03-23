@@ -1,7 +1,7 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { getSkillTagStyle } from '../utils/results.utils';
-import { SkillTagStyle } from '../../../../interfaces/detailed-analysis.interface';
+import type { SkillTagStyle } from '../../../../interfaces/detailed-analysis.interface';
 
 @Component({
   selector: 'arc-skill-tags',

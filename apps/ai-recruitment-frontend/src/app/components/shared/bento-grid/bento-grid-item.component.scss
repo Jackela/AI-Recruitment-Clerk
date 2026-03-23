@@ -337,15 +337,15 @@
   font-weight: 600;
 
   &.trend-up {
-    color: #10b981;
+    color: var(--color-success-700, #558b2f);
   }
 
   &.trend-down {
-    color: #ef4444;
+    color: var(--color-error-700, #c62828);
   }
 
   &.trend-neutral {
-    color: #6b7280;
+    color: var(--color-text-secondary, #616161);
   }
 }
 

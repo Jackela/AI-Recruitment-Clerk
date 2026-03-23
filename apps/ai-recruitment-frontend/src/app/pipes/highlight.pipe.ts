@@ -1,4 +1,5 @@
-import { PipeTransform, Pipe } from '@angular/core';
+import type { PipeTransform} from '@angular/core';
+import { Pipe } from '@angular/core';
 
 /**
  * Highlight pipe for highlighting search terms in text.

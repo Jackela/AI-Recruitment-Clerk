@@ -1,9 +1,4 @@
-import {
-  FormatDetectionService,
-  FileFormat,
-  EncodingInfo,
-  FormatValidationResult,
-} from './format-detection';
+import { FormatDetectionService } from './format-detection';
 import {
   ResumeParserException,
   ResumeParserErrorCode,

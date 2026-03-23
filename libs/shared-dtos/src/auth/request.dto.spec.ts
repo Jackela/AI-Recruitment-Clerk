@@ -1,4 +1,4 @@
-import { AuthenticatedRequest } from './request.dto';
+import type { AuthenticatedRequest } from './request.dto';
 import { UserRole, UserStatus } from './user.dto';
 
 describe('RequestDto', () => {

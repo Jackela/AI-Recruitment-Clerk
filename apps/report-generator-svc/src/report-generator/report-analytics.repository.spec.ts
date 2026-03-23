@@ -1,7 +1,8 @@
 /**
  * Report Analytics Repository Tests
  */
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { ReportAnalyticsRepository } from './report-analytics.repository';
 import { Report } from '../schemas/report.schema';

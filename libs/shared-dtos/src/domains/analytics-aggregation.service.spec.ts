@@ -1,11 +1,5 @@
 import { AnalyticsAggregationService } from './analytics-aggregation.service';
-import { EventStatus, ConsentStatus, UserSession } from './analytics.dto';
-import { AnalyticsRules } from './analytics.rules';
-import {
-  BatchProcessingResult,
-  EventProcessingMetricsResult,
-  DataPrivacyMetricsResult,
-} from './analytics-result-classes';
+import { EventStatus } from './analytics.dto';
 import type {
   IAnalyticsRepository,
   IDomainEventBus,

@@ -1,7 +1,8 @@
-import {
-  QuestionnaireTemplate,
+import type {
   QuestionSection,
-  QualityThreshold,
+  QualityThreshold} from './questionnaire-template.value-object.js';
+import {
+  QuestionnaireTemplate
 } from './questionnaire-template.value-object.js';
 
 describe('QuestionnaireTemplate', () => {

@@ -1,6 +1,7 @@
 import type { ComponentFixture } from '@angular/core/testing';
 import { TestBed } from '@angular/core/testing';
-import { Component, DebugElement } from '@angular/core';
+import type { DebugElement } from '@angular/core';
+import { Component } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { AccessibleCardDirective } from './accessible-card.directive';
 import { AccessibilityService } from '../../services/accessibility/accessibility.service';

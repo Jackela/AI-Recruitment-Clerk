@@ -1,8 +1,10 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import type { ComponentFixture} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import type {
+  CandidateResult} from './mobile-results-display.component';
 import {
-  MobileResultsDisplayComponent,
-  CandidateResult,
+  MobileResultsDisplayComponent
 } from './mobile-results-display.component';
 
 describe('MobileResultsDisplayComponent', () => {

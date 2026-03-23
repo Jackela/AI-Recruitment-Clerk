@@ -1,4 +1,5 @@
-import { InputValidator, FileValidationOptions } from './input-validator';
+import type { FileValidationOptions } from './input-validator';
+import { InputValidator } from './input-validator';
 
 describe('InputValidator', () => {
   describe('validateResumeFile', () => {

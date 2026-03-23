@@ -1,4 +1,5 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { PrivacyComplianceService } from './privacy-compliance.service';
 import type { ConsentManagementService } from './services/consent-management.service';
 import type { ConsentCascadeService } from './services/consent-cascade.service';

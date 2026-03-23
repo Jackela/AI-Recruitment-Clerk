@@ -1,5 +1,5 @@
 import { AnalysisController } from './analysis.controller';
-import { AnalysisService } from './analysis.service';
+import type { AnalysisService } from './analysis.service';
 import { ErrorUtils } from '@ai-recruitment-clerk/shared-dtos';
 
 jest.mock('@ai-recruitment-clerk/shared-dtos', () => ({

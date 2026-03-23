@@ -1,4 +1,4 @@
-import { JdDTO, LlmExtractionRequest, LlmExtractionResponse } from './jd.dto';
+import type { JdDTO, LlmExtractionRequest, LlmExtractionResponse } from './jd.dto';
 
 describe('JdDto', () => {
   describe('JdDTO interface', () => {

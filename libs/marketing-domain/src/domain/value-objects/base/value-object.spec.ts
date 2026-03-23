@@ -1,7 +1,8 @@
-import {
-  ValueObject,
+import type {
   RestoreData,
-  SerializedRestoreData,
+  SerializedRestoreData} from './value-object.js';
+import {
+  ValueObject
 } from './value-object.js';
 
 class TestValueObject extends ValueObject<{ name: string; value: number }> {

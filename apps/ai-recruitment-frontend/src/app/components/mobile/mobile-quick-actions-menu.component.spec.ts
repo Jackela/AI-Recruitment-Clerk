@@ -1,7 +1,9 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import type { ComponentFixture} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
+import type {
+  QuickActionMenuItem} from './mobile-quick-actions-menu.component';
 import {
-  MobileQuickActionsMenuComponent,
-  QuickActionMenuItem,
+  MobileQuickActionsMenuComponent
 } from './mobile-quick-actions-menu.component';
 
 describe('MobileQuickActionsMenuComponent', () => {

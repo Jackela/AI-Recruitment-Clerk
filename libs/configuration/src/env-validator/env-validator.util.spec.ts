@@ -4,7 +4,6 @@ import {
   EnvValidationError,
   createSchema,
   createValidator,
-  validateEnv,
   CommonEnvVars,
   ServiceSchemas,
 } from './env-validator.util';

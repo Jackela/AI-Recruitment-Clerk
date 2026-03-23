@@ -1,11 +1,13 @@
-import {
-  JobService,
+import type {
   JobRepository,
   JobFilter,
   PaginatedJobs,
-  PaginationOptions,
+  PaginationOptions} from './job.service';
+import {
+  JobService
 } from './job.service';
-import { Job, JobStatus, JobType, CreateJobData } from '../entities/job.entity';
+import type { Job, CreateJobData } from '../entities/job.entity';
+import { JobStatus, JobType } from '../entities/job.entity';
 
 // Mock repository implementation
 class MockJobRepository implements JobRepository {

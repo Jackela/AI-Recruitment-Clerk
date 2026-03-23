@@ -1,4 +1,4 @@
-import { FeatureFlagDto } from './feature-flag.dto';
+import type { FeatureFlagDto } from './feature-flag.dto';
 
 describe('FeatureFlagDto', () => {
   describe('FeatureFlagDto interface', () => {
