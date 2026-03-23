@@ -370,9 +370,9 @@
   }
 
   .variant-default & {
-    background: var(--color-background, #f8f9fa);
-    border-color: var(--color-border, #e9ecef);
-    color: var(--color-text, #495057);
+    background: var(--color-bg-primary);
+    border-color: var(--color-border-primary);
+    color: var(--color-text-primary);
 
     &:hover {
       background: var(--color-border, #e9ecef);

@@ -2,7 +2,7 @@
   padding: calc(var(--spacing-16, 4rem) + var(--spacing-2, 0.5rem))
     var(--spacing-4, 1rem) var(--spacing-20, 5rem);
   min-height: 100vh;
-  background: var(--color-background, #f8f9fa);
+  background: var(--color-bg-primary);
 }
 
 .pull-refresh-indicator {
@@ -99,7 +99,7 @@
           display: flex;
           align-items: center;
           justify-content: center;
-          background: var(--color-background, #f8f9fa);
+          background: var(--color-bg-primary);
           color: var(--color-text-secondary, #6c757d);
         }
 

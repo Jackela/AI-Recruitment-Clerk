@@ -6,16 +6,13 @@
   "tags": ["scope:shared", "type:utils"],
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
       "options": {
-        "command": "tsc -b",
-        "cwd": "libs/shared-dtos"
-      },
-      "outputs": ["{projectRoot}/dist"],
-      "configurations": {
-        "production": {
-          "command": "tsc -b --project tsconfig.json"
-        }
+        "outputPath": "dist/libs/shared-dtos",
+        "tsConfig": "libs/shared-dtos/tsconfig.json",
+        "packageJson": "libs/shared-dtos/package.json",
+        "main": "libs/shared-dtos/src/index.ts"
       }
     },
     "test": {
