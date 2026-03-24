@@ -4,8 +4,9 @@ const path = require('path');
 
 const PORT = process.env.PORT || 4200;
 const API_TARGET = process.env.API_TARGET || 'http://localhost:3000';
-const STATIC_DIR = path.join(
+const STATIC_DIR = path.resolve(
   __dirname,
+  '..',
   'dist/apps/ai-recruitment-frontend/browser',
 );
 
