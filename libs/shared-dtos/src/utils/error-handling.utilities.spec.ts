@@ -3,7 +3,7 @@
  * @module ErrorUtilsTests
  */
 
-import type { Logger} from '@nestjs/common';
+import type { Logger } from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common';
 import type {
   ErrorHandlingContext,
@@ -11,18 +11,15 @@ import type {
   ValidationEntry,
   SeverityLevel,
   BusinessImpactLevel,
-  UserImpactLevel} from './error-handling.utilities';
-import {
-  ErrorUtils
+  UserImpactLevel,
 } from './error-handling.utilities';
+import { ErrorUtils } from './error-handling.utilities';
 import {
   EnhancedAppException,
   ExtendedErrorType,
 } from '../errors/enhanced-error-types';
 import { DatabaseErrorCode } from '../errors/domain-errors';
-import {
-  ErrorCorrelationManager,
-} from '../errors/error-correlation';
+import { ErrorCorrelationManager } from '../errors/error-correlation';
 import { ErrorSeverity } from '../common/error-handling.patterns';
 
 jest.mock('../errors/error-correlation');
@@ -40,15 +37,15 @@ describe('ErrorUtils', () => {
     } as unknown as jest.Mocked<Logger>;
 
     // Reset ErrorCorrelationManager mocks
-    (
-      ErrorCorrelationManager.getContext as jest.Mock
-    ).mockReturnValue(undefined);
-    (
-      ErrorCorrelationManager.setContext as jest.Mock
-    ).mockReturnValue(undefined);
-    (
-      ErrorCorrelationManager.updateContext as jest.Mock
-    ).mockReturnValue(undefined);
+    (ErrorCorrelationManager.getContext as jest.Mock).mockReturnValue(
+      undefined,
+    );
+    (ErrorCorrelationManager.setContext as jest.Mock).mockReturnValue(
+      undefined,
+    );
+    (ErrorCorrelationManager.updateContext as jest.Mock).mockReturnValue(
+      undefined,
+    );
   });
 
   describe('createValidationError', () => {
@@ -65,7 +62,9 @@ describe('ErrorUtils', () => {
       );
 
       expect(error).toBeInstanceOf(EnhancedAppException);
-      expect(error.enhancedDetails.type).toBe(ExtendedErrorType.VALIDATION_ERROR);
+      expect(error.enhancedDetails.type).toBe(
+        ExtendedErrorType.VALIDATION_ERROR,
+      );
       expect(error.enhancedDetails.code).toBe('VALIDATION_FAILED');
       expect(error.enhancedDetails.message).toBe('Validation failed');
       expect(error.getStatus()).toBe(HttpStatus.BAD_REQUEST);
@@ -89,10 +88,9 @@ describe('ErrorUtils', () => {
     });
 
     it('should set appropriate severity and impact levels', () => {
-      const error = ErrorUtils.createValidationError(
-        'Test validation error',
-        { field: 'error' },
-      );
+      const error = ErrorUtils.createValidationError('Test validation error', {
+        field: 'error',
+      });
 
       expect(error.enhancedDetails.severity).toBe(ErrorSeverity.MEDIUM);
       expect(error.enhancedDetails.businessImpact).toBe('low');
@@ -100,15 +98,14 @@ describe('ErrorUtils', () => {
     });
 
     it('should include recovery strategies', () => {
-      const error = ErrorUtils.createValidationError(
-        'Validation error',
-        { email: 'invalid' },
-      );
+      const error = ErrorUtils.createValidationError('Validation error', {
+        email: 'invalid',
+      });
 
       expect(error.enhancedDetails.recoveryStrategies!).toHaveLength(3);
-      expect(
-        error.enhancedDetails.recoveryStrategies!,
-      ).toContain('Check input format and try again');
+      expect(error.enhancedDetails.recoveryStrategies!).toContain(
+        'Check input format and try again',
+      );
     });
 
     it('should work without field parameter', () => {
@@ -136,14 +133,15 @@ describe('ErrorUtils', () => {
     });
 
     it('should create authentication error with custom reason', () => {
-      const error = ErrorUtils.createAuthenticationError(
-        'Token expired',
-        { tokenExpiry: '2024-01-01' },
-      );
+      const error = ErrorUtils.createAuthenticationError('Token expired', {
+        tokenExpiry: '2024-01-01',
+      });
 
       expect(error.enhancedDetails.message).toBe('Token expired');
       // context param is passed as details (5th arg) to EnhancedAppException
-      expect((error.enhancedDetails.details as Record<string, unknown>)?.tokenExpiry).toBe('2024-01-01');
+      expect(
+        (error.enhancedDetails.details as Record<string, unknown>)?.tokenExpiry,
+      ).toBe('2024-01-01');
     });
 
     it('should set appropriate severity and impact levels', () => {
@@ -168,11 +166,9 @@ describe('ErrorUtils', () => {
 
   describe('createAuthorizationError', () => {
     it('should create authorization error with resource and action', () => {
-      const error = ErrorUtils.createAuthorizationError(
-        'users',
-        'delete',
-        { userId: 'user-123' },
-      );
+      const error = ErrorUtils.createAuthorizationError('users', 'delete', {
+        userId: 'user-123',
+      });
 
       expect(error).toBeInstanceOf(EnhancedAppException);
       expect(error.enhancedDetails.type).toBe(
@@ -186,10 +182,7 @@ describe('ErrorUtils', () => {
     });
 
     it('should include resource and action in error details', () => {
-      const error = ErrorUtils.createAuthorizationError(
-        'reports',
-        'generate',
-      );
+      const error = ErrorUtils.createAuthorizationError('reports', 'generate');
 
       // resource and action are stored in details (5th arg)
       const details = error.enhancedDetails.details as Record<string, unknown>;
@@ -211,22 +204,22 @@ describe('ErrorUtils', () => {
     it('should include recovery strategies for authorization', () => {
       const error = ErrorUtils.createAuthorizationError('resource', 'action');
 
-      expect(
-        error.enhancedDetails.recoveryStrategies,
-      ).toContain('Contact administrator for required permissions');
+      expect(error.enhancedDetails.recoveryStrategies).toContain(
+        'Contact administrator for required permissions',
+      );
     });
   });
 
   describe('createNotFoundError', () => {
     it('should create not found error with resource type and identifier', () => {
-      const error = ErrorUtils.createNotFoundError(
-        'Resume',
-        'resume-123',
-        { status: 'archived' },
-      );
+      const error = ErrorUtils.createNotFoundError('Resume', 'resume-123', {
+        status: 'archived',
+      });
 
       expect(error).toBeInstanceOf(EnhancedAppException);
-      expect(error.enhancedDetails.type).toBe(ExtendedErrorType.NOT_FOUND_ERROR);
+      expect(error.enhancedDetails.type).toBe(
+        ExtendedErrorType.NOT_FOUND_ERROR,
+      );
       expect(error.enhancedDetails.code).toBe('RESOURCE_NOT_FOUND');
       expect(error.enhancedDetails.message).toBe(
         "Resume with identifier 'resume-123' not found",
@@ -235,15 +228,21 @@ describe('ErrorUtils', () => {
     });
 
     it('should include search context in error details', () => {
-      const error = ErrorUtils.createNotFoundError(
-        'User',
-        'user-456',
-        { department: 'engineering' },
-      );
+      const error = ErrorUtils.createNotFoundError('User', 'user-456', {
+        department: 'engineering',
+      });
 
-      expect((error.enhancedDetails.details as Record<string, unknown>)?.resourceType).toBe('User');
-      expect((error.enhancedDetails.details as Record<string, unknown>)?.identifier).toBe('user-456');
-      expect((error.enhancedDetails.details as Record<string, unknown>)?.searchContext).toEqual({
+      expect(
+        (error.enhancedDetails.details as Record<string, unknown>)
+          ?.resourceType,
+      ).toBe('User');
+      expect(
+        (error.enhancedDetails.details as Record<string, unknown>)?.identifier,
+      ).toBe('user-456');
+      expect(
+        (error.enhancedDetails.details as Record<string, unknown>)
+          ?.searchContext,
+      ).toEqual({
         department: 'engineering',
       });
     });
@@ -272,7 +271,9 @@ describe('ErrorUtils', () => {
       });
 
       expect(error).toBeInstanceOf(EnhancedAppException);
-      expect(error.enhancedDetails.type).toBe(ExtendedErrorType.RATE_LIMIT_ERROR);
+      expect(error.enhancedDetails.type).toBe(
+        ExtendedErrorType.RATE_LIMIT_ERROR,
+      );
       expect(error.enhancedDetails.code).toBe('RATE_LIMIT_EXCEEDED');
       expect(error.enhancedDetails.message).toBe(
         'Rate limit of 100 requests exceeded',
@@ -285,18 +286,16 @@ describe('ErrorUtils', () => {
       const error = ErrorUtils.createRateLimitError(50, resetTime);
 
       // resetTime is stored in details, not context
-      const details = error.enhancedDetails.details as { resetTime: string; limit: number };
-      expect(details?.resetTime).toBe(
-        resetTime.toISOString(),
-      );
+      const details = error.enhancedDetails.details as {
+        resetTime: string;
+        limit: number;
+      };
+      expect(details?.resetTime).toBe(resetTime.toISOString());
       expect(details?.limit).toBe(50);
     });
 
     it('should set appropriate severity and impact levels', () => {
-      const error = ErrorUtils.createRateLimitError(
-        100,
-        new Date(),
-      );
+      const error = ErrorUtils.createRateLimitError(100, new Date());
 
       expect(error.enhancedDetails.severity).toBe(ErrorSeverity.LOW);
       expect(error.enhancedDetails.businessImpact).toBe('low');
@@ -342,19 +341,20 @@ describe('ErrorUtils', () => {
         originalError,
       );
 
-      expect((error.enhancedDetails.details as Record<string, unknown>)?.originalError).toBe(
-        'Service unavailable',
-      );
+      expect(
+        (error.enhancedDetails.details as Record<string, unknown>)
+          ?.originalError,
+      ).toBe('Service unavailable');
     });
 
     it('should work without original error', () => {
-      const error = ErrorUtils.createExternalServiceError(
-        'Redis',
-        'connect',
-      );
+      const error = ErrorUtils.createExternalServiceError('Redis', 'connect');
 
       expect(error).toBeDefined();
-      expect((error.enhancedDetails.details as Record<string, unknown>)?.originalError).toBeUndefined();
+      expect(
+        (error.enhancedDetails.details as Record<string, unknown>)
+          ?.originalError,
+      ).toBeUndefined();
     });
 
     it('should set appropriate severity and impact levels', () => {
@@ -392,7 +392,9 @@ describe('ErrorUtils', () => {
       );
 
       expect(error).toBeInstanceOf(EnhancedAppException);
-      expect(error.enhancedDetails.code).toBe(DatabaseErrorCode.OPERATION_FAILED);
+      expect(error.enhancedDetails.code).toBe(
+        DatabaseErrorCode.OPERATION_FAILED,
+      );
     });
 
     it('should include operation and table in error message', () => {
@@ -421,7 +423,10 @@ describe('ErrorUtils', () => {
         originalError,
       );
 
-      expect((error.enhancedDetails.details as Record<string, unknown>)?.originalError).toBe('Duplicate key');
+      expect(
+        (error.enhancedDetails.details as Record<string, unknown>)
+          ?.originalError,
+      ).toBe('Duplicate key');
     });
   });
 
@@ -459,9 +464,10 @@ describe('ErrorUtils', () => {
       ).rejects.toThrow(originalError);
 
       // withContext updates errorDetails.context (base class), not enhancedDetails.context
-      expect((originalError.errorDetails.context as Record<string, unknown>)?.operationName).toBe(
-        'failingOperation',
-      );
+      expect(
+        (originalError.errorDetails.context as Record<string, unknown>)
+          ?.operationName,
+      ).toBe('failingOperation');
     });
 
     it('should convert regular error to EnhancedAppException', async () => {
@@ -569,16 +575,19 @@ describe('ErrorUtils', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(EnhancedAppException);
         const enhanced = error as EnhancedAppException;
-        expect((enhanced.enhancedDetails.details as Record<string, unknown>)?.executionTime).toBeDefined();
+        expect(
+          (enhanced.enhancedDetails.details as Record<string, unknown>)
+            ?.executionTime,
+        ).toBeDefined();
       }
     });
   });
 
   describe('createCorrelationContext', () => {
     it('should create new context when none exists', () => {
-      (
-        ErrorCorrelationManager.getContext as jest.Mock
-      ).mockReturnValue(undefined);
+      (ErrorCorrelationManager.getContext as jest.Mock).mockReturnValue(
+        undefined,
+      );
 
       ErrorUtils.createCorrelationContext('testOperation', { key: 'value' });
 
@@ -602,9 +611,9 @@ describe('ErrorUtils', () => {
         metadata: { existing: 'data' },
       };
 
-      (
-        ErrorCorrelationManager.getContext as jest.Mock
-      ).mockReturnValue(existingContext);
+      (ErrorCorrelationManager.getContext as jest.Mock).mockReturnValue(
+        existingContext,
+      );
 
       ErrorUtils.createCorrelationContext('newOperation', {
         newKey: 'newValue',
@@ -620,9 +629,9 @@ describe('ErrorUtils', () => {
     });
 
     it('should work without additional context', () => {
-      (
-        ErrorCorrelationManager.getContext as jest.Mock
-      ).mockReturnValue(undefined);
+      (ErrorCorrelationManager.getContext as jest.Mock).mockReturnValue(
+        undefined,
+      );
 
       ErrorUtils.createCorrelationContext('simpleOperation');
 
@@ -630,9 +639,9 @@ describe('ErrorUtils', () => {
     });
 
     it('should generate trace IDs with correct format', () => {
-      (
-        ErrorCorrelationManager.getContext as jest.Mock
-      ).mockReturnValue(undefined);
+      (ErrorCorrelationManager.getContext as jest.Mock).mockReturnValue(
+        undefined,
+      );
 
       ErrorUtils.createCorrelationContext('operation');
 
@@ -847,10 +856,7 @@ describe('ErrorUtils', () => {
 
   describe('withRetry', () => {
     beforeEach(() => {
-      jest.useFakeTimers({
-        advanceTimers: true,
-        doNotFake: ['setTimeout', 'setInterval', 'setImmediate', 'clearTimeout', 'clearInterval']
-      });
+      jest.useFakeTimers();
     });
 
     afterEach(() => {
@@ -887,7 +893,7 @@ describe('ErrorUtils', () => {
       const resultPromise = ErrorUtils.withRetry(operation, options);
 
       // Advance time through all retry attempts: 100ms + 200ms = 300ms
-      await jest.advanceTimersByTimeAsync(300);
+      jest.advanceTimersByTime(300);
 
       const result = await resultPromise;
 
@@ -908,7 +914,7 @@ describe('ErrorUtils', () => {
       const resultPromise = ErrorUtils.withRetry(operation, options);
 
       // Advance time through all retry attempts: 10ms + 20ms + 40ms = 70ms
-      await jest.advanceTimersByTimeAsync(70);
+      jest.advanceTimersByTime(70);
 
       await expect(resultPromise).rejects.toThrow(EnhancedAppException);
 
@@ -990,7 +996,7 @@ describe('ErrorUtils', () => {
       const resultPromise = ErrorUtils.withRetry(operation, options);
 
       // Advance time for the single retry: 10ms
-      await jest.advanceTimersByTimeAsync(10);
+      jest.advanceTimersByTime(10);
 
       const result = await resultPromise;
 
@@ -1016,9 +1022,9 @@ describe('ErrorUtils', () => {
       const resultPromise = ErrorUtils.withRetry(operation, options);
 
       // First retry after 100ms
-      await jest.advanceTimersByTimeAsync(100);
+      jest.advanceTimersByTime(100);
       // Second retry after 200ms (exponential)
-      await jest.advanceTimersByTimeAsync(200);
+      jest.advanceTimersByTime(200);
 
       const result = await resultPromise;
 
@@ -1043,7 +1049,7 @@ describe('ErrorUtils', () => {
       const resultPromise = ErrorUtils.withRetry(operation, options);
 
       // Two retries, each after 100ms
-      await jest.advanceTimersByTimeAsync(200);
+      jest.advanceTimersByTime(200);
 
       const result = await resultPromise;
 
@@ -1063,7 +1069,7 @@ describe('ErrorUtils', () => {
       const resultPromise = ErrorUtils.withRetry(operation, options);
 
       // Advance time through both retry attempts: 10ms + 20ms = 30ms
-      await jest.advanceTimersByTimeAsync(30);
+      jest.advanceTimersByTime(30);
 
       try {
         await resultPromise;
@@ -1072,10 +1078,14 @@ describe('ErrorUtils', () => {
         expect(error).toBeInstanceOf(EnhancedAppException);
         const enhanced = error as EnhancedAppException;
         expect(enhanced.enhancedDetails.code).toBe('RETRY_EXHAUSTED');
-        expect((enhanced.enhancedDetails.details as Record<string, unknown>)?.retryAttempts).toBe(2);
-        expect((enhanced.enhancedDetails.details as Record<string, unknown>)?.operationName).toBe(
-          'contextOperation',
-        );
+        expect(
+          (enhanced.enhancedDetails.details as Record<string, unknown>)
+            ?.retryAttempts,
+        ).toBe(2);
+        expect(
+          (enhanced.enhancedDetails.details as Record<string, unknown>)
+            ?.operationName,
+        ).toBe('contextOperation');
       }
     });
 
@@ -1096,7 +1106,7 @@ describe('ErrorUtils', () => {
       const resultPromise = ErrorUtils.withRetry(operation, options);
 
       // Advance time through both retry attempts: 10ms + 20ms = 30ms
-      await jest.advanceTimersByTimeAsync(30);
+      jest.advanceTimersByTime(30);
 
       try {
         await resultPromise;
@@ -1104,7 +1114,10 @@ describe('ErrorUtils', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(EnhancedAppException);
         const enhanced = error as EnhancedAppException;
-        expect((enhanced.enhancedDetails.details as Record<string, unknown>)?.retryAttempts).toBe(2);
+        expect(
+          (enhanced.enhancedDetails.details as Record<string, unknown>)
+            ?.retryAttempts,
+        ).toBe(2);
       }
     });
 
@@ -1123,7 +1136,7 @@ describe('ErrorUtils', () => {
       const resultPromise = ErrorUtils.withRetry(operation, options);
 
       // Advance time for the single retry: 10ms
-      await jest.advanceTimersByTimeAsync(10);
+      jest.advanceTimersByTime(10);
 
       const result = await resultPromise;
 
@@ -1145,7 +1158,7 @@ describe('ErrorUtils', () => {
 
       const resultPromise = ErrorUtils.withRetry(operation, options);
 
-      await jest.advanceTimersByTimeAsync(100);
+      jest.advanceTimersByTime(100);
 
       await resultPromise;
 
@@ -1210,9 +1223,11 @@ describe('ErrorUtils', () => {
       const error = ErrorUtils.createValidationError('Test', {});
 
       expect(error).toBeDefined();
-      const details = error.enhancedDetails.details as {
-        validationDetails: Record<string, unknown>;
-      } | undefined;
+      const details = error.enhancedDetails.details as
+        | {
+            validationDetails: Record<string, unknown>;
+          }
+        | undefined;
       expect(details?.validationDetails).toEqual({});
     });
 
@@ -1247,17 +1262,16 @@ describe('ErrorUtils', () => {
         expect(error).toBeInstanceOf(EnhancedAppException);
         const enhanced = error as EnhancedAppException;
         // String errors are converted via String(error) and stored in details
-        const details = enhanced.enhancedDetails.details as { originalError: string };
+        const details = enhanced.enhancedDetails.details as {
+          originalError: string;
+        };
         expect(details?.originalError).toBe('string error');
       }
     });
 
     it('should include reset time in rate limit error details', () => {
       const resetTime = new Date();
-      const error = ErrorUtils.createRateLimitError(
-        100,
-        resetTime,
-      );
+      const error = ErrorUtils.createRateLimitError(100, resetTime);
 
       expect(error).toBeDefined();
       // resetTime is stored in details, not context
@@ -1266,7 +1280,9 @@ describe('ErrorUtils', () => {
     });
 
     it('should handle zero max retries', async () => {
-      const operation = jest.fn().mockRejectedValue(new Error('Immediate fail'));
+      const operation = jest
+        .fn()
+        .mockRejectedValue(new Error('Immediate fail'));
 
       const options: ErrorRetryOptions = {
         operationName: 'zeroRetries',

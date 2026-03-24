@@ -5,10 +5,9 @@ import type {
   CompletionData,
   ErrorData,
   JobUpdateEvent,
-  JobProgressEvent} from './websocket.service';
-import {
-  WebSocketService
+  JobProgressEvent,
 } from './websocket.service';
+import { WebSocketService } from './websocket.service';
 import { ToastService } from './toast.service';
 import { Subject } from 'rxjs';
 import { take, filter } from 'rxjs/operators';
@@ -88,14 +87,12 @@ describe('WebSocketService', () => {
       expect(mockSocket.disconnect).toHaveBeenCalled();
     });
 
-    it('should emit connection status changes', (done) => {
-      service
+    it('should emit connection status changes', async () => {
+      const result = await service
         .getConnectionStatus()
         .pipe(take(1))
-        .subscribe((status) => {
-          expect(status).toBe('disconnected');
-          done();
-        });
+        .toPromise();
+      expect(result).toBe('disconnected');
     });
 
     it('should handle connection error', fakeAsync(() => {
@@ -105,7 +102,8 @@ describe('WebSocketService', () => {
 
       // Get the connect_error handler
       const connectErrorHandler = mockSocket.on.mock.calls.find(
-        (call: [string, (...args: unknown[]) => void]) => call[0] === 'connect_error',
+        (call: [string, (...args: unknown[]) => void]) =>
+          call[0] === 'connect_error',
       )?.[1];
 
       if (connectErrorHandler) {
@@ -121,7 +119,7 @@ describe('WebSocketService', () => {
   });
 
   describe('Message Handling', () => {
-    it('should receive and emit WebSocket messages', (done) => {
+    it('should receive and emit WebSocket messages', async () => {
       const sessionId = 'test-session-123';
       const messageHandler = jest.fn();
 
@@ -129,7 +127,6 @@ describe('WebSocketService', () => {
         messageHandler(msg);
       });
 
-      // Get the message handler from socket.on
       const socketMessageHandler = mockSocket.on.mock.calls.find(
         (call: [string, (...args: unknown[]) => void]) => call[0] === 'message',
       )?.[1];
@@ -145,13 +142,11 @@ describe('WebSocketService', () => {
         socketMessageHandler(testMessage);
       }
 
-      setTimeout(() => {
-        expect(messageHandler).toHaveBeenCalled();
-        done();
-      }, 0);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(messageHandler).toHaveBeenCalled();
     });
 
-    it('should filter messages by session ID', (done) => {
+    it('should filter messages by session ID', async () => {
       const sessionId = 'test-session-123';
       const receivedMessages: WebSocketMessage[] = [];
 
@@ -163,7 +158,6 @@ describe('WebSocketService', () => {
         (call: [string, (...args: unknown[]) => void]) => call[0] === 'message',
       )?.[1];
 
-      // Message with correct session ID
       if (socketMessageHandler) {
         socketMessageHandler({
           type: 'progress',
@@ -172,7 +166,6 @@ describe('WebSocketService', () => {
           timestamp: new Date(),
         });
 
-        // Message with different session ID (should be filtered out)
         socketMessageHandler({
           type: 'progress',
           sessionId: 'different-session',
@@ -181,11 +174,9 @@ describe('WebSocketService', () => {
         });
       }
 
-      setTimeout(() => {
-        expect(receivedMessages.length).toBe(1);
-        expect(receivedMessages[0].sessionId).toBe('test-session-123');
-        done();
-      }, 0);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(receivedMessages.length).toBe(1);
+      expect(receivedMessages[0].sessionId).toBe('test-session-123');
     });
 
     it('should send messages to server', () => {
@@ -210,7 +201,7 @@ describe('WebSocketService', () => {
   });
 
   describe('Progress Updates', () => {
-    it('should emit progress updates', (done) => {
+    it('should emit progress updates', async () => {
       const sessionId = 'test-session-123';
       const progressData: ProgressUpdate = {
         progress: 75,
@@ -219,13 +210,6 @@ describe('WebSocketService', () => {
         estimatedTimeRemaining: 30,
       };
 
-      service.onProgress(sessionId).subscribe((update) => {
-        expect(update.progress).toBe(75);
-        expect(update.currentStep).toBe('processing');
-        done();
-      });
-
-      // Connect and trigger progress message
       service.connect(sessionId).subscribe();
 
       const socketMessageHandler = mockSocket.on.mock.calls.find(
@@ -240,15 +224,17 @@ describe('WebSocketService', () => {
           timestamp: new Date(),
         });
       }
+
+      const update = await service
+        .onProgress(sessionId)
+        .pipe(take(1))
+        .toPromise();
+      expect(update.progress).toBe(75);
+      expect(update.currentStep).toBe('processing');
     });
 
-    it('should handle progress completion', (done) => {
+    it('should handle progress completion', async () => {
       const sessionId = 'test-session-123';
-
-      service.onProgress(sessionId).subscribe((update) => {
-        expect(update.progress).toBe(100);
-        done();
-      });
 
       service.connect(sessionId).subscribe();
 
@@ -264,11 +250,17 @@ describe('WebSocketService', () => {
           timestamp: new Date(),
         });
       }
+
+      const update = await service
+        .onProgress(sessionId)
+        .pipe(take(1))
+        .toPromise();
+      expect(update.progress).toBe(100);
     });
   });
 
   describe('Completion Events', () => {
-    it('should emit completion data', (done) => {
+    it('should emit completion data', async () => {
       const sessionId = 'test-session-123';
       const completionData: CompletionData = {
         analysisId: 'analysis-123',
@@ -294,12 +286,6 @@ describe('WebSocketService', () => {
         processingTime: 5000,
       };
 
-      service.onCompletion(sessionId).subscribe((data) => {
-        expect(data.analysisId).toBe('analysis-123');
-        expect(data.processingTime).toBe(5000);
-        done();
-      });
-
       service.connect(sessionId).subscribe();
 
       const socketMessageHandler = mockSocket.on.mock.calls.find(
@@ -314,22 +300,23 @@ describe('WebSocketService', () => {
           timestamp: new Date(),
         });
       }
+
+      const data = await service
+        .onCompletion(sessionId)
+        .pipe(take(1))
+        .toPromise();
+      expect(data.analysisId).toBe('analysis-123');
+      expect(data.processingTime).toBe(5000);
     });
   });
 
   describe('Error Events', () => {
-    it('should emit error data', (done) => {
+    it('should emit error data', async () => {
       const sessionId = 'test-session-123';
       const errorData: ErrorData = {
         error: 'Processing failed',
         code: 'PROCESSING_ERROR',
       };
-
-      service.onError(sessionId).subscribe((data) => {
-        expect(data.error).toBe('Processing failed');
-        expect(data.code).toBe('PROCESSING_ERROR');
-        done();
-      });
 
       service.connect(sessionId).subscribe();
 
@@ -345,6 +332,10 @@ describe('WebSocketService', () => {
           timestamp: new Date(),
         });
       }
+
+      const data = await service.onError(sessionId).pipe(take(1)).toPromise();
+      expect(data.error).toBe('Processing failed');
+      expect(data.code).toBe('PROCESSING_ERROR');
     });
   });
 
@@ -385,7 +376,7 @@ describe('WebSocketService', () => {
       });
     });
 
-    it('should receive job update events', (done) => {
+    it('should receive job update events', async () => {
       const jobId = 'job-123';
       const jobUpdate: JobUpdateEvent = {
         jobId,
@@ -395,16 +386,11 @@ describe('WebSocketService', () => {
         updatedBy: 'user-1',
       };
 
-      service.onJobUpdated(jobId).subscribe((update) => {
-        expect(update.jobId).toBe(jobId);
-        expect(update.status).toBe('processing');
-        done();
-      });
-
       service.connect('session-123').subscribe();
 
       const jobUpdateHandler = mockSocket.on.mock.calls.find(
-        (call: [string, (...args: unknown[]) => void]) => call[0] === 'job_updated',
+        (call: [string, (...args: unknown[]) => void]) =>
+          call[0] === 'job_updated',
       )?.[1];
 
       if (jobUpdateHandler) {
@@ -414,9 +400,16 @@ describe('WebSocketService', () => {
           timestamp: new Date(),
         });
       }
+
+      const update = await service
+        .onJobUpdated(jobId)
+        .pipe(take(1))
+        .toPromise();
+      expect(update.jobId).toBe(jobId);
+      expect(update.status).toBe('processing');
     });
 
-    it('should receive job progress events', (done) => {
+    it('should receive job progress events', async () => {
       const jobId = 'job-123';
       const jobProgress: JobProgressEvent = {
         jobId,
@@ -426,16 +419,11 @@ describe('WebSocketService', () => {
         timestamp: new Date(),
       };
 
-      service.onJobProgress(jobId).subscribe((progress) => {
-        expect(progress.jobId).toBe(jobId);
-        expect(progress.progress).toBe(50);
-        done();
-      });
-
       service.connect('session-123').subscribe();
 
       const jobProgressHandler = mockSocket.on.mock.calls.find(
-        (call: [string, (...args: unknown[]) => void]) => call[0] === 'job_progress',
+        (call: [string, (...args: unknown[]) => void]) =>
+          call[0] === 'job_progress',
       )?.[1];
 
       if (jobProgressHandler) {
@@ -445,6 +433,13 @@ describe('WebSocketService', () => {
           timestamp: new Date(),
         });
       }
+
+      const progress = await service
+        .onJobProgress(jobId)
+        .pipe(take(1))
+        .toPromise();
+      expect(progress.jobId).toBe(jobId);
+      expect(progress.progress).toBe(50);
     });
 
     it('should handle job subscription confirmation', () => {
@@ -453,7 +448,8 @@ describe('WebSocketService', () => {
       service.connect('session-123').subscribe();
 
       const confirmationHandler = mockSocket.on.mock.calls.find(
-        (call: [string, (...args: unknown[]) => void]) => call[0] === 'job_subscription_confirmed',
+        (call: [string, (...args: unknown[]) => void]) =>
+          call[0] === 'job_subscription_confirmed',
       )?.[1];
 
       if (confirmationHandler) {
@@ -474,7 +470,8 @@ describe('WebSocketService', () => {
       service.connect('session-123').subscribe();
 
       const errorHandler = mockSocket.on.mock.calls.find(
-        (call: [string, (...args: unknown[]) => void]) => call[0] === 'job_subscription_error',
+        (call: [string, (...args: unknown[]) => void]) =>
+          call[0] === 'job_subscription_error',
       )?.[1];
 
       if (errorHandler) {
@@ -496,7 +493,8 @@ describe('WebSocketService', () => {
       service.connect('session-123').subscribe();
 
       const reconnectHandler = mockSocket.on.mock.calls.find(
-        (call: [string, (...args: unknown[]) => void]) => call[0] === 'reconnect',
+        (call: [string, (...args: unknown[]) => void]) =>
+          call[0] === 'reconnect',
       )?.[1];
 
       if (reconnectHandler) {
@@ -518,7 +516,8 @@ describe('WebSocketService', () => {
       service.connect('session-123').subscribe();
 
       const reconnectErrorHandler = mockSocket.on.mock.calls.find(
-        (call: [string, (...args: unknown[]) => void]) => call[0] === 'reconnect_error',
+        (call: [string, (...args: unknown[]) => void]) =>
+          call[0] === 'reconnect_error',
       )?.[1];
 
       if (reconnectErrorHandler) {
@@ -585,7 +584,7 @@ describe('WebSocketService', () => {
       expect(mockSocket.disconnect).toHaveBeenCalled();
     });
 
-    it('should complete all observables on destroy', (done) => {
+    it('should complete all observables on destroy', async () => {
       const completed: boolean[] = [];
 
       service.getConnectionStatus().subscribe({
@@ -598,10 +597,8 @@ describe('WebSocketService', () => {
 
       service.ngOnDestroy();
 
-      setTimeout(() => {
-        expect(completed.length).toBeGreaterThan(0);
-        done();
-      }, 0);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(completed.length).toBeGreaterThan(0);
     });
   });
 
@@ -678,7 +675,8 @@ describe('WebSocketService', () => {
       service.connect('session-123').subscribe();
 
       const jobUpdateHandler = mockSocket.on.mock.calls.find(
-        (call: [string, (...args: unknown[]) => void]) => call[0] === 'job_updated',
+        (call: [string, (...args: unknown[]) => void]) =>
+          call[0] === 'job_updated',
       )?.[1];
 
       if (jobUpdateHandler) {

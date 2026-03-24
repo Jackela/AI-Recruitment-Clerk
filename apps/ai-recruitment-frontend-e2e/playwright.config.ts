@@ -219,7 +219,7 @@ export default defineConfig({
     : {
         webServer: {
           // Serve the pre-built frontend (build is done in CI before running tests)
-          command: `npx serve dist/apps/ai-recruitment-frontend/browser -l ${devServerPort} -s`,
+          command: `npx serve dist/apps/ai-recruitment-frontend/browser -l ${devServerPort} -s --proxy /api=http://localhost:3000`,
           url: baseURL,
           reuseExistingServer: !process.env['CI'],
           timeout: 60 * 1000, // 60 seconds for server startup (production builds take longer)

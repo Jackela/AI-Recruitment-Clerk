@@ -121,7 +121,7 @@ echo ""
 
 # 7. Start static server for E2E in background
 echo "🌐 Starting static server for E2E..."
-npx serve dist/apps/ai-recruitment-frontend/browser -l 4200 -s > /tmp/e2e-server.log 2>&1 &
+npx serve dist/apps/ai-recruitment-frontend/browser -l 4200 -s --proxy /api=http://localhost:3000 > /tmp/e2e-server.log 2>&1 &
 SERVER_PID=$!
 echo "Server started with PID: $SERVER_PID"
 

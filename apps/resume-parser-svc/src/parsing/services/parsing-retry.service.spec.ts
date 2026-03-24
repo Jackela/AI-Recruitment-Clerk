@@ -109,52 +109,78 @@ describe('ParsingRetryService', () => {
 
   describe('shouldRetryProcessing', () => {
     it('should return true for timeout errors', () => {
-      expect(service.shouldRetryProcessing(new Error('Connection timeout'))).toBe(true);
+      expect(
+        service.shouldRetryProcessing(new Error('Connection timeout')),
+      ).toBe(true);
     });
 
     it('should return true for network errors', () => {
-      expect(service.shouldRetryProcessing(new Error('Network failure'))).toBe(true);
+      expect(service.shouldRetryProcessing(new Error('Network failure'))).toBe(
+        true,
+      );
     });
 
     it('should return true for connection errors', () => {
-      expect(service.shouldRetryProcessing(new Error('Connection lost'))).toBe(true);
+      expect(service.shouldRetryProcessing(new Error('Connection lost'))).toBe(
+        true,
+      );
     });
 
     it('should return true for rate limit errors', () => {
-      expect(service.shouldRetryProcessing(new Error('Rate limit exceeded'))).toBe(true);
+      expect(
+        service.shouldRetryProcessing(new Error('Rate limit exceeded')),
+      ).toBe(true);
     });
 
     it('should return true for temporary errors', () => {
-      expect(service.shouldRetryProcessing(new Error('Temporary failure'))).toBe(true);
+      expect(
+        service.shouldRetryProcessing(new Error('Temporary failure')),
+      ).toBe(true);
     });
 
     it('should return true for gridfs errors', () => {
-      expect(service.shouldRetryProcessing(new Error('GridFS download failed'))).toBe(true);
+      expect(
+        service.shouldRetryProcessing(new Error('GridFS download failed')),
+      ).toBe(true);
     });
 
     it('should return true for download errors', () => {
-      expect(service.shouldRetryProcessing(new Error('Download failed'))).toBe(true);
+      expect(service.shouldRetryProcessing(new Error('Download failed'))).toBe(
+        true,
+      );
     });
 
     it('should return false for validation errors', () => {
-      expect(service.shouldRetryProcessing(new Error('Invalid file format'))).toBe(false);
+      expect(
+        service.shouldRetryProcessing(new Error('Invalid file format')),
+      ).toBe(false);
     });
 
     it('should return false for validation failed errors', () => {
-      expect(service.shouldRetryProcessing(new Error('Validation failed for input'))).toBe(false);
+      expect(
+        service.shouldRetryProcessing(new Error('Validation failed for input')),
+      ).toBe(false);
     });
 
     it('should return false for corrupted errors', () => {
-      expect(service.shouldRetryProcessing(new Error('File is corrupted'))).toBe(false);
+      expect(
+        service.shouldRetryProcessing(new Error('File is corrupted')),
+      ).toBe(false);
     });
 
     it('should be case insensitive', () => {
-      expect(service.shouldRetryProcessing(new Error('TIMEOUT occurred'))).toBe(true);
-      expect(service.shouldRetryProcessing(new Error('INVALID data'))).toBe(false);
+      expect(service.shouldRetryProcessing(new Error('TIMEOUT occurred'))).toBe(
+        true,
+      );
+      expect(service.shouldRetryProcessing(new Error('INVALID data'))).toBe(
+        false,
+      );
     });
 
     it('should return false for unknown non-retryable errors', () => {
-      expect(service.shouldRetryProcessing(new Error('Unknown error'))).toBe(false);
+      expect(service.shouldRetryProcessing(new Error('Unknown error'))).toBe(
+        false,
+      );
     });
   });
 
@@ -354,7 +380,7 @@ describe('ParsingRetryService', () => {
       expect(retryCallback).not.toHaveBeenCalled();
 
       // Fast-forward timers
-      await jest.runAllTimersAsync();
+      jest.runAllTimers();
 
       expect(retryCallback).toHaveBeenCalled();
     });
@@ -371,7 +397,7 @@ describe('ParsingRetryService', () => {
         retryCallback,
       );
 
-      await jest.runAllTimersAsync();
+      jest.runAllTimers();
 
       expect(service.getRetryCount('resume-1')).toBe(1);
     });
@@ -417,7 +443,9 @@ describe('ParsingRetryService', () => {
 
     it('should handle retry callback errors', async () => {
       const error = new Error('Timeout error');
-      const retryCallback = jest.fn().mockRejectedValue(new Error('Retry failed'));
+      const retryCallback = jest
+        .fn()
+        .mockRejectedValue(new Error('Retry failed'));
 
       await service.handleProcessingError(
         error,
@@ -427,7 +455,7 @@ describe('ParsingRetryService', () => {
         retryCallback,
       );
 
-      await jest.runAllTimersAsync();
+      jest.runAllTimers();
 
       expect(Logger.prototype.error).toHaveBeenCalledWith(
         expect.stringContaining('Retry 1 failed'),
@@ -436,7 +464,9 @@ describe('ParsingRetryService', () => {
     });
 
     it('should not throw on handling errors', async () => {
-      mockEventService.publishProcessingError.mockRejectedValue(new Error('Publish failed'));
+      mockEventService.publishProcessingError.mockRejectedValue(
+        new Error('Publish failed'),
+      );
 
       const result = await service.handleProcessingError(
         new Error('Test error'),

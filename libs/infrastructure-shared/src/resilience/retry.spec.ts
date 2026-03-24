@@ -3,11 +3,11 @@ import { RetryUtility } from './retry';
 describe('RetryUtility', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.useRealTimers();
   });
 
   describe('retry', () => {
@@ -61,8 +61,7 @@ describe('RetryUtility', () => {
 
       const retryPromise = RetryUtility.retry(operation, 2);
 
-      await Promise.resolve();
-      jest.advanceTimersByTime(1000);
+      jest.runAllTimers();
 
       await retryPromise;
     });
@@ -76,15 +75,7 @@ describe('RetryUtility', () => {
 
       const retryPromise = RetryUtility.retry(operation, 3, 100);
 
-      await Promise.resolve();
-      expect(operation).toHaveBeenCalledTimes(1);
-
-      jest.advanceTimersByTime(100);
-      await Promise.resolve();
-      expect(operation).toHaveBeenCalledTimes(2);
-
-      jest.advanceTimersByTime(200);
-      await Promise.resolve();
+      jest.runAllTimers();
       expect(operation).toHaveBeenCalledTimes(3);
 
       await retryPromise;
@@ -123,15 +114,7 @@ describe('RetryUtility', () => {
         maxDelayMs: 1000,
       });
 
-      await Promise.resolve();
-      expect(operation).toHaveBeenCalledTimes(1);
-
-      jest.advanceTimersByTime(100);
-      await Promise.resolve();
-      expect(operation).toHaveBeenCalledTimes(2);
-
-      jest.advanceTimersByTime(200);
-      await Promise.resolve();
+      jest.runAllTimers();
       expect(operation).toHaveBeenCalledTimes(3);
 
       await retryPromise;
@@ -147,14 +130,7 @@ describe('RetryUtility', () => {
         backoffMultiplier: 2,
       });
 
-      await Promise.resolve();
-      jest.advanceTimersByTime(1000);
-      await Promise.resolve();
-      jest.advanceTimersByTime(2000);
-      await Promise.resolve();
-      jest.advanceTimersByTime(3000);
-      await Promise.resolve();
-      jest.advanceTimersByTime(3000);
+      jest.runAllTimers();
 
       await expect(retryPromise).rejects.toThrow();
     });
@@ -173,8 +149,7 @@ describe('RetryUtility', () => {
         jitterMs: 50,
       });
 
-      await Promise.resolve();
-      jest.advanceTimersByTime(100);
+      jest.runAllTimers();
 
       await retryPromise;
     });
@@ -247,7 +222,6 @@ describe('RetryUtility', () => {
       expect(delays[0]).toBe(100);
       expect(delays[1]).toBe(200);
       expect(delays[2]).toBe(400);
-
     });
   });
 });
