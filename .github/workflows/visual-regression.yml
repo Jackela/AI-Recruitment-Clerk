@@ -82,7 +82,7 @@ jobs:
         with:
           port: 4200
           build-command: 'NODE_OPTIONS="--max-old-space-size=4096" npx nx build ai-recruitment-frontend --configuration=production'
-          serve-command: 'node scripts/proxy-server.js'
+          serve-command: 'node scripts/proxy-server.cjs'
           health-check-url: 'http://localhost:4200'
           health-check-timeout: '60000'
           verify-build-output: 'dist/apps/ai-recruitment-frontend/browser'
