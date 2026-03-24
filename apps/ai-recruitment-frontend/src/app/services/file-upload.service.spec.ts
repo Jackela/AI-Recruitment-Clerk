@@ -4,8 +4,7 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { HttpEventType, HttpErrorResponse } from '@angular/common/http';
-import type {
-  UploadConfig} from './file-upload.service';
+import type { UploadConfig } from './file-upload.service';
 import {
   FileUploadService,
   UploadFile,
@@ -915,16 +914,10 @@ describe('FileUploadService', () => {
       expect(state.isUploading).toBe(false);
     });
 
-    it('should emit state changes through observable', (done) => {
-      let stateCount = 0;
-
-      service.uploadState$.subscribe((state) => {
-        stateCount++;
-        if (stateCount === 2) {
-          // Initial state + file added state
-          expect(state.files.length).toBe(1);
-          done();
-        }
+    it('should emit state changes through observable', async () => {
+      const states: { files: unknown[] }[] = [];
+      const subscription = service.uploadState$.subscribe((state) => {
+        states.push({ files: state.files });
       });
 
       const file = new File(['test'], 'test.pdf', { type: 'application/pdf' });
@@ -932,6 +925,15 @@ describe('FileUploadService', () => {
 
       const req = httpMock.expectOne(`${baseUrl}/upload`);
       req.flush({ success: true });
+
+      // Wait for async operations
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Check that we received at least the initial state and file added state
+      expect(states.length).toBeGreaterThanOrEqual(2);
+      expect(states[1].files.length).toBe(1);
+
+      subscription.unsubscribe();
     });
   });
 });

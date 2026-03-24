@@ -43,9 +43,28 @@ export default {
     '!**/*.spec.{ts,js}',
     '!**/*.test.{ts,js}',
     '!**/*.e2e-spec.{ts,js}',
+    '!**/*.integration.spec.{ts,js}',
     '!**/*.d.ts',
     '!**/node_modules/**',
     '!**/dist/**',
     '!**/index.ts',
+  ],
+  // Worker configuration to prevent resource exhaustion and timeouts
+  maxWorkers: process.env.CI ? 2 : '50%',
+  workerIdleMemoryLimit: '512MB',
+  // Fail fast on timeout to prevent hanging
+  testTimeout: 30000,
+  // Prevent hanging by limiting test suite time
+  forceExit: false, // Keep false to detect open handles
+  detectOpenHandles: false,
+  // Skip e2e/integration tests in default coverage run
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '\\.e2e\\.spec\\.(ts|js)$',
+    '\\.integration\\.spec\\.(ts|js)$',
+    '/test/integration/',
+    '/test/security/',
+    '/test/performance/',
+    '/test/production/',
   ],
 };

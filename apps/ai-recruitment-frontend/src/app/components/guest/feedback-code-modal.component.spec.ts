@@ -1,5 +1,5 @@
 import type { ComponentFixture } from '@angular/core/testing';
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -254,7 +254,7 @@ describe('FeedbackCodeModalComponent', () => {
       execCommandMock.mockRestore();
     });
 
-    it('should reset copied state after 2 seconds', (done) => {
+    it('should reset copied state after 2 seconds', fakeAsync(() => {
       const mockInput = {
         select: jest.fn(),
         setSelectionRange: jest.fn(),
@@ -265,11 +265,10 @@ describe('FeedbackCodeModalComponent', () => {
       component.copyFeedbackCode(mockInput);
       expect(component.copied).toBe(true);
 
-      setTimeout(() => {
-        expect(component.copied).toBe(false);
-        done();
-      }, 2100);
-    });
+      tick(2100);
+
+      expect(component.copied).toBe(false);
+    }));
 
     it('should show correct copied button class when copied', () => {
       component.copied = true;

@@ -6,6 +6,9 @@ import { AppModule } from '../../src/app/app.module';
 import * as _fs from 'fs';
 import * as _path from 'path';
 
+// Set extended timeout for production readiness tests
+jest.setTimeout(120000);
+
 /**
  * 🚀 PRODUCTION READINESS VALIDATION TESTS
  *

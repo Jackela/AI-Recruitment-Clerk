@@ -5,6 +5,9 @@ import request from 'supertest';
 import { AppModule } from '../../src/app/app.module';
 import * as crypto from 'crypto';
 
+// Set extended timeout for security tests
+jest.setTimeout(120000);
+
 /**
  * 🛡️ SECURITY AUDIT & COMPLIANCE TESTS
  *

@@ -10,8 +10,11 @@ module.exports = {
   testEnvironment: 'node',
   testTimeout: 30000,
 
-  // Allow configurable parallelism (default to full core usage unless overridden)
-  maxWorkers: process.env.JEST_MAX_WORKERS || '100%',
+  // Worker limits to prevent resource exhaustion and timeouts
+  // In CI, limit to 2 workers to prevent memory issues
+  // In local dev, use 50% of CPUs to leave resources for other processes
+  maxWorkers: process.env.CI ? 2 : process.env.JEST_MAX_WORKERS || '50%',
+  workerIdleMemoryLimit: process.env.CI ? '256MB' : '512MB',
 
   // Clean up between tests
   clearMocks: true,

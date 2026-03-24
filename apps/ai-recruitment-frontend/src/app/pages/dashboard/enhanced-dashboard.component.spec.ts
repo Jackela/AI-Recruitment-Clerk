@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { EnhancedDashboardComponent } from './enhanced-dashboard.component';
 import { DashboardService } from './dashboard.service';
 import { of } from 'rxjs';
+import { take } from 'rxjs/operators';
 import type { BentoGridItem } from '../../components/shared/bento-grid/bento-grid-item.component';
 import type {
   DashboardStats,
@@ -79,36 +80,28 @@ describe('EnhancedDashboardComponent', () => {
   });
 
   describe('数据流测试', () => {
-    it('should emit stats data', (done) => {
+    it('should emit stats data', async () => {
       component.ngOnInit();
-      component.stats$.subscribe((stats) => {
-        expect(stats).toEqual(mockStats);
-        done();
-      });
+      const stats = await component.stats$.pipe(take(1)).toPromise();
+      expect(stats).toEqual(mockStats);
     });
 
-    it('should emit system health data', (done) => {
+    it('should emit system health data', async () => {
       component.ngOnInit();
-      component.systemHealth$.subscribe((health) => {
-        expect(health).toEqual(mockSystemHealth);
-        done();
-      });
+      const health = await component.systemHealth$.pipe(take(1)).toPromise();
+      expect(health).toEqual(mockSystemHealth);
     });
 
-    it('should emit bento items data', (done) => {
+    it('should emit bento items data', async () => {
       component.ngOnInit();
-      component.bentoItems$.subscribe((items) => {
-        expect(items).toEqual(mockBentoItems);
-        done();
-      });
+      const items = await component.bentoItems$.pipe(take(1)).toPromise();
+      expect(items).toEqual(mockBentoItems);
     });
 
-    it('should emit guest stats data', (done) => {
+    it('should emit guest stats data', async () => {
       component.ngOnInit();
-      component.guestStats$.subscribe((stats) => {
-        expect(stats).toEqual(mockGuestStats);
-        done();
-      });
+      const stats = await component.guestStats$.pipe(take(1)).toPromise();
+      expect(stats).toEqual(mockGuestStats);
     });
   });
 

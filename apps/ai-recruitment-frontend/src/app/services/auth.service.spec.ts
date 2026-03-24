@@ -8,10 +8,9 @@ import type {
   UserProfile,
   LoginCredentials,
   RegistrationData,
-  PasswordResetRequest} from './auth.service';
-import {
-  AuthService
+  PasswordResetRequest,
 } from './auth.service';
+import { AuthService } from './auth.service';
 import { environment } from '../../environments/environment';
 
 describe('AuthService', () => {
@@ -620,17 +619,10 @@ describe('AuthService', () => {
       expect(state.user).toEqual(mockUser);
     });
 
-    it('should emit state changes through observable', (done) => {
-      let stateCount = 0;
-
-      service.authState$.subscribe((state) => {
-        stateCount++;
-        if (stateCount === 1) {
-          expect(state.isLoading).toBe(false);
-        } else if (stateCount === 2) {
-          expect(state.isLoading).toBe(true);
-          done();
-        }
+    it('should emit state changes through observable', async () => {
+      const states: { isLoading: boolean }[] = [];
+      const subscription = service.authState$.subscribe((state) => {
+        states.push({ isLoading: state.isLoading });
       });
 
       const credentials: LoginCredentials = {
@@ -655,6 +647,16 @@ describe('AuthService', () => {
         name: 'Test',
         roles: ['user'],
       });
+
+      // Wait for async operations
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Check that we received at least the initial state and loading state
+      expect(states.length).toBeGreaterThanOrEqual(2);
+      expect(states[0].isLoading).toBe(false);
+      expect(states[1].isLoading).toBe(true);
+
+      subscription.unsubscribe();
     });
   });
 

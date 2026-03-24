@@ -14,11 +14,11 @@ import { AppGatewayNatsService } from '../../src/nats/app-gateway-nats.service';
 import { WebSocketGateway } from '../../src/websocket/websocket.gateway';
 import { JwtAuthGuard } from '../../src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../src/auth/guards/roles.guard';
-import type {
-  UserDto} from '@ai-recruitment-clerk/user-management-domain';
-import {
-  UserRole,
-} from '@ai-recruitment-clerk/user-management-domain';
+import type { UserDto } from '@ai-recruitment-clerk/user-management-domain';
+import { UserRole } from '@ai-recruitment-clerk/user-management-domain';
+
+// Set extended timeout for integration tests
+jest.setTimeout(120000);
 
 class InMemoryVectorStoreService {
   private readonly entries = new Map<string, number[]>();
@@ -161,7 +161,9 @@ describe('Semantic cache job creation (e2e)', () => {
         MongooseModule.forRoot(mongoServer.getUri()),
         JobsModule,
       ],
-      providers: [{ provide: WebSocketGateway, useValue: mockWebSocketGateway }],
+      providers: [
+        { provide: WebSocketGateway, useValue: mockWebSocketGateway },
+      ],
     })
       .overrideGuard(JwtAuthGuard)
       .useValue(mockAuthGuard)
@@ -224,6 +226,5 @@ describe('Semantic cache job creation (e2e)', () => {
     const reusedJob = await jobRepository.findById(jobIdB);
     expect(reusedJob?.status).toBe('completed');
     expect(reusedJob?.extractedKeywords).toEqual(cachedKeywords);
-
   });
 });

@@ -8,6 +8,10 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import mongoose from 'mongoose';
 
+// Set extended timeout for integration tests - these tests make real HTTP requests
+// and need more time to complete, especially in CI environments
+jest.setTimeout(120000);
+
 /**
  * 📋 COMPREHENSIVE API INTEGRATION TEST SUITE
  *

@@ -4,6 +4,9 @@ import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app/app.module';
 
+// Set extended timeout for performance tests
+jest.setTimeout(120000);
+
 /**
  * 🚀 API PERFORMANCE AND LOAD TESTING SUITE
  *

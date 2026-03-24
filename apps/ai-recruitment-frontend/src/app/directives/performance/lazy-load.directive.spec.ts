@@ -129,30 +129,35 @@ describe('LazyLoadDirective - Image Element', () => {
     observerSpy.mockRestore();
   });
 
-  it('should handle image load success', (done) => {
+  it('should handle image load success', async () => {
     // Mock image load by setting the src directly
     imgElement.src = 'https://example.com/image.jpg';
 
-    imgElement.onload = () => {
-      expect(imgElement.classList.contains('lazy-loaded')).toBe(true);
-      done();
-    };
+    const loadPromise = new Promise<void>((resolve) => {
+      imgElement.onload = () => {
+        expect(imgElement.classList.contains('lazy-loaded')).toBe(true);
+        resolve();
+      };
+    });
 
     // Trigger load event
     imgElement.dispatchEvent(new Event('load'));
+    await loadPromise;
   });
 
-  it('should emit loaded event on successful load', (done) => {
+  it('should emit loaded event on successful load', async () => {
     component.config = { fadeIn: false };
     fixture.detectChanges();
 
     // Simulate the image loading
-    setTimeout(() => {
-      // The directive creates a temporary Image and loads it
-      // We need to test the loaded output emission
-      expect(component.loadedCount).toBeGreaterThanOrEqual(0);
-      done();
-    }, 100);
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        // The directive creates a temporary Image and loads it
+        // We need to test the loaded output emission
+        expect(component.loadedCount).toBeGreaterThanOrEqual(0);
+        resolve();
+      }, 100);
+    });
   });
 
   it('should preload image when preload is enabled', () => {
@@ -316,30 +321,34 @@ describe('LazyLoadDirective - Error Handling', () => {
     fixture.detectChanges();
   });
 
-  it('should retry loading on error', (done) => {
+  it('should retry loading on error', async () => {
     component.config = { retryCount: 3, retryDelay: 100 };
     fixture.detectChanges();
 
     // The directive should attempt retries
-    setTimeout(() => {
-      // After retries, should show error image or emit error
-      expect(component.config.retryCount).toBe(3);
-      done();
-    }, 500);
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        // After retries, should show error image or emit error
+        expect(component.config.retryCount).toBe(3);
+        resolve();
+      }, 500);
+    });
   });
 
-  it('should emit loadError after max retries', (done) => {
+  it('should emit loadError after max retries', async () => {
     component.config = { retryCount: 1, retryDelay: 50 };
     fixture.detectChanges();
 
-    setTimeout(() => {
-      // Error should be emitted after retries exhausted
-      expect(component.errorCount).toBeGreaterThanOrEqual(0);
-      done();
-    }, 300);
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        // Error should be emitted after retries exhausted
+        expect(component.errorCount).toBeGreaterThanOrEqual(0);
+        resolve();
+      }, 300);
+    });
   });
 
-  it('should show error image after failed load', (done) => {
+  it('should show error image after failed load', async () => {
     const directiveElement = fixture.debugElement.query(
       By.directive(LazyLoadDirective),
     );
@@ -348,14 +357,16 @@ describe('LazyLoadDirective - Error Handling', () => {
     component.config = { retryCount: 0 };
     fixture.detectChanges();
 
-    setTimeout(() => {
-      // After error, lazy-error class should be added
-      expect(
-        imgElement.classList.contains('lazy-error') ||
-          imgElement.classList.contains('lazy-loading'),
-      ).toBe(true);
-      done();
-    }, 100);
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        // After error, lazy-error class should be added
+        expect(
+          imgElement.classList.contains('lazy-error') ||
+            imgElement.classList.contains('lazy-loading'),
+        ).toBe(true);
+        resolve();
+      }, 100);
+    });
   });
 });
 

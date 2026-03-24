@@ -39,7 +39,7 @@ jobs:
         uses: ./.github/actions/server-lifecycle
         with:
           port: 4200
-          build-command: 'npx nx build ai-recruitment-frontend --configuration=production'
+          build-command: 'npx nx build ai-recruitment-frontend --configuration=webkit-test'
           serve-command: 'npx nx run ai-recruitment-frontend:serve-static --port 4200'
           health-check-url: 'http://localhost:4200'
           health-check-timeout: '60000'

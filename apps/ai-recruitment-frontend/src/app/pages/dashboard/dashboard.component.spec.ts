@@ -1,6 +1,7 @@
 import type { ComponentFixture } from '@angular/core/testing';
 import { TestBed } from '@angular/core/testing';
 import { DashboardComponent } from './dashboard.component';
+import { take } from 'rxjs/operators';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
@@ -39,12 +40,10 @@ describe('DashboardComponent', () => {
       });
     });
 
-    it('should have recent activity list', (done) => {
-      component.stats$.subscribe((stats) => {
-        expect(stats.recentActivity).toBeDefined();
-        expect(Array.isArray(stats.recentActivity)).toBe(true);
-        done();
-      });
+    it('should have recent activity list', async () => {
+      const stats = await component.stats$.pipe(take(1)).toPromise();
+      expect(stats.recentActivity).toBeDefined();
+      expect(Array.isArray(stats.recentActivity)).toBe(true);
     });
   });
 

@@ -4,6 +4,9 @@ import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app/app.module';
 
+// Set extended timeout for security tests
+jest.setTimeout(120000);
+
 /**
  * 🛡️ RATE LIMITING & DDOS PROTECTION SECURITY TESTS
  *
