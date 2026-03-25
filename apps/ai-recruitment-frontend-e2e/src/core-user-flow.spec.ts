@@ -31,6 +31,7 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
         timeout: 15000,
       },
     );
+    await page.waitForLoadState('networkidle');
     await jobsPage.waitForPageLoad();
 
     // Navigate to job creation
@@ -46,16 +47,18 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
     // Navigate to reports
     await dashboardPage.navigateToReports();
     await page.waitForLoadState('domcontentloaded');
+    await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/\/reports/);
 
     // Navigate back to home
-    await gotoAndWait(page, BASE_URL);
+    await gotoAndWait(page, BASE_URL, { waitForNetworkIdle: true });
     await page.waitForURL(
       (location) => location.pathname.startsWith(LANDING_PATH),
       {
         timeout: 15000,
       },
     );
+    await page.waitForLoadState('networkidle');
     await jobsPage.waitForPageLoad();
 
     // Log any errors
@@ -74,14 +77,17 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
         timeout: 15000,
       },
     );
+    await page.waitForLoadState('networkidle');
     await jobsPage.waitForPageLoad();
 
     // Test job creation page navigation
     await jobsPage.navigateToCreateJob();
+    await page.waitForLoadState('networkidle');
 
     // Test reports page navigation
     await dashboardPage.navigateToReports();
     await page.waitForLoadState('domcontentloaded');
+    await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/\/reports/);
   });
 

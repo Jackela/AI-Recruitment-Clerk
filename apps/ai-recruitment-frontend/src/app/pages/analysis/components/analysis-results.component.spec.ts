@@ -224,7 +224,7 @@ describe('AnalysisResultsComponent', () => {
     it('should emit start-new action', () => {
       const emitSpy = jest.spyOn(component.actionRequested, 'emit');
       component.onAction('start-new');
-      expect(compileSpy).toHaveBeenCalledWith({ type: 'start-new' });
+      expect(emitSpy).toHaveBeenCalledWith({ type: 'start-new' });
     });
   });
 

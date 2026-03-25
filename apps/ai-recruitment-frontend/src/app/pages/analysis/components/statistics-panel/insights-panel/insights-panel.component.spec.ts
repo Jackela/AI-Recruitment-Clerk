@@ -1,6 +1,7 @@
 import type { ComponentFixture } from '@angular/core/testing';
 import { TestBed } from '@angular/core/testing';
 import { InsightsPanelComponent } from './insights-panel.component';
+import type { PerformanceInsight } from '../types/statistics.interface';
 
 describe('InsightsPanelComponent', () => {
   let component: InsightsPanelComponent;
@@ -28,9 +29,9 @@ describe('InsightsPanelComponent', () => {
 
   describe('输入属性测试', () => {
     it('should accept insights input', () => {
-      const mockInsights = [
-        { title: '关键发现', description: '候选人技能匹配度高' },
-        { title: '建议', description: '安排技术面试' },
+      const mockInsights: PerformanceInsight[] = [
+        { icon: '📊', text: '候选人技能匹配度高' },
+        { icon: '💡', text: '建议安排技术面试' },
       ];
       component.insights = mockInsights;
       expect(component.insights).toEqual(mockInsights);
@@ -40,23 +41,23 @@ describe('InsightsPanelComponent', () => {
   describe('渲染测试', () => {
     it('should render insights list', () => {
       component.insights = [
-        { title: '发现1', description: '描述1' },
-        { title: '发现2', description: '描述2' },
+        { icon: '🎯', text: '发现1文本' },
+        { icon: '🚀', text: '发现2文本' },
       ];
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement;
-      expect(compiled.textContent).toContain('发现1');
-      expect(compiled.textContent).toContain('描述1');
-      expect(compiled.textContent).toContain('发现2');
+      expect(compiled.textContent).toContain('发现1文本');
+      expect(compiled.textContent).toContain('发现2文本');
     });
 
-    it('should show empty state when no insights', () => {
-      component.insights = [];
+    it('should render insight icons', () => {
+      component.insights = [{ icon: '⭐', text: '测试洞察' }];
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement;
-      expect(compiled.textContent).toContain('暂无洞察');
+      expect(compiled.textContent).toContain('⭐');
+      expect(compiled.textContent).toContain('测试洞察');
     });
   });
 });

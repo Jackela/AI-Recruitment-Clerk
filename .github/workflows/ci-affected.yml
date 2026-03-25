@@ -12,11 +12,14 @@ concurrency:
 
 env:
   CI: true
+  NX_SKIP_NATIVE_FILE_CACHE: 'true'
+  NX_DAEMON: 'false'
+  NODE_OPTIONS: '--max-old-space-size=4096'
 
 jobs:
   affected:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -30,10 +33,18 @@ jobs:
         with:
           path: |
             .nx/cache
-            node_modules/.cache/nx
+            node_modules/.cache
           key: ${{ runner.os }}-nx-${{ hashFiles('package-lock.json', '**/project.json') }}
           restore-keys: |
             ${{ runner.os }}-nx-
+      - name: Cache Jest
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: |
+            .jest-cache
+          key: ${{ runner.os }}-jest-${{ hashFiles('package-lock.json', '**/jest.config.*') }}
+          restore-keys: |
+            ${{ runner.os }}-jest-
       - name: Cache Playwright browsers
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
@@ -42,8 +53,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-playwright-
       - run: npm ci
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
       - name: Print affected graph
         run: npx nx show projects --affected --base=origin/main --head=HEAD
       - name: Print affected projects
@@ -54,16 +63,16 @@ jobs:
           echo "Affected projects with test target:"
           npx nx print-affected --type=test --select=projects --base=origin/main --head=HEAD || echo "No test target projects affected"
       - name: Lint affected
-        run: npx nx affected -t lint --base=origin/main --head=HEAD --parallel=4
+        run: npx nx affected -t lint --base=origin/main --head=HEAD --parallel=2
       - name: Test affected
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            npx nx affected -t test --base=origin/main --head=HEAD --parallel=4 --runInBand=false
+            npx nx affected -t test --base=origin/main --head=HEAD --parallel=1 --runInBand
           else
-            npx nx run-many -t test --all --parallel=4 --runInBand=false
+            npx nx run-many -t test --all --parallel=1 --runInBand
           fi
       - name: Build affected
-        run: npx nx affected -t build --base=origin/main --head=HEAD --parallel=4
+        run: npx nx affected -t build --base=origin/main --head=HEAD --parallel=2
       - name: Manage server lifecycle
         uses: ./.github/actions/server-lifecycle
         with:
@@ -71,11 +80,14 @@ jobs:
           build-command: 'echo "Build already done via Build affected"'
           serve-command: 'npx nx run ai-recruitment-frontend:serve-static --port 4200'
           health-check-url: 'http://localhost:4200'
-          health-check-timeout: '60000'
+          health-check-timeout: '90000'
+          verify-build-output: 'dist/apps/ai-recruitment-frontend/browser'
           server-log-path: '/tmp/server.log'
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
       - name: E2E affected
         # Skip app-gateway-e2e due to complex service dependencies
-        run: npx nx affected -t e2e --base=origin/main --head=HEAD --exclude=app-gateway-e2e --configuration=ci --parallel=2
+        run: npx nx affected -t e2e --base=origin/main --head=HEAD --exclude=app-gateway-e2e --configuration=ci --parallel=1
         env:
           CI: true
           E2E_SKIP_WEBSERVER: true

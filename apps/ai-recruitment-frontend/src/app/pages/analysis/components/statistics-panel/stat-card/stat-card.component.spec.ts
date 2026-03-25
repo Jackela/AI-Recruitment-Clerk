@@ -22,49 +22,77 @@ describe('StatCardComponent', () => {
     });
 
     it('should have default values', () => {
-      expect(component.title).toBe('');
       expect(component.value).toBe(0);
-      expect(component.change).toBe(0);
-      expect(component.icon).toBe('chart');
+      expect(component.label).toBe('');
+      expect(component.icon).toBe('calendar');
+      expect(component.type).toBe('today');
     });
   });
 
   describe('输入属性测试', () => {
-    it('should accept title input', () => {
-      component.title = '总分析数';
-      expect(component.title).toBe('总分析数');
-    });
-
     it('should accept value input', () => {
       component.value = 1000;
       expect(component.value).toBe(1000);
     });
 
-    it('should accept change input', () => {
-      component.change = 15;
-      expect(component.change).toBe(15);
+    it('should accept label input', () => {
+      component.label = '总分析数';
+      expect(component.label).toBe('总分析数');
     });
 
     it('should accept icon input', () => {
-      component.icon = 'users';
-      expect(component.icon).toBe('users');
+      component.icon = 'chart';
+      expect(component.icon).toBe('chart');
+    });
+
+    it('should accept type input', () => {
+      component.type = 'total';
+      expect(component.type).toBe('total');
+    });
+
+    it('should accept scoreClass input', () => {
+      component.scoreClass = 'high';
+      expect(component.scoreClass).toBe('high');
+    });
+
+    it('should accept suffix input', () => {
+      component.suffix = '%';
+      expect(component.suffix).toBe('%');
+    });
+
+    it('should accept title input', () => {
+      component.title = '总分析数标题';
+      expect(component.title).toBe('总分析数标题');
     });
   });
 
-  describe('趋势计算测试', () => {
-    it('should return positive trend for positive change', () => {
-      component.change = 10;
-      expect(component.getTrend()).toBe('positive');
+  describe('格式化测试', () => {
+    it('should format large values with K suffix', () => {
+      component.value = 1500;
+      expect(component.formattedValue).toBe('1.5K');
     });
 
-    it('should return negative trend for negative change', () => {
-      component.change = -5;
-      expect(component.getTrend()).toBe('negative');
+    it('should format very large values with M suffix', () => {
+      component.value = 2500000;
+      expect(component.formattedValue).toBe('2.5M');
     });
 
-    it('should return neutral trend for zero change', () => {
-      component.change = 0;
-      expect(component.getTrend()).toBe('neutral');
+    it('should return value as string for small values', () => {
+      component.value = 50;
+      expect(component.formattedValue).toBe('50');
+    });
+  });
+
+  describe('图标类测试', () => {
+    it('should return score class with score type', () => {
+      component.type = 'score';
+      component.scoreClass = 'high';
+      expect(component.getIconClass()).toBe('score high');
+    });
+
+    it('should return type only when not score', () => {
+      component.type = 'total';
+      expect(component.getIconClass()).toBe('total');
     });
   });
 });

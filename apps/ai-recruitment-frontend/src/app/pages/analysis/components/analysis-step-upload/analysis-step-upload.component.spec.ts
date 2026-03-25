@@ -1,6 +1,7 @@
 import type { ComponentFixture } from '@angular/core/testing';
 import { TestBed } from '@angular/core/testing';
 import { AnalysisStepUploadComponent } from './analysis-step-upload.component';
+import { ResumeFileUploadComponent } from '../resume-file-upload.component';
 
 describe('AnalysisStepUploadComponent', () => {
   let component: AnalysisStepUploadComponent;
@@ -8,7 +9,7 @@ describe('AnalysisStepUploadComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AnalysisStepUploadComponent],
+      imports: [AnalysisStepUploadComponent, ResumeFileUploadComponent],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AnalysisStepUploadComponent);
@@ -21,38 +22,51 @@ describe('AnalysisStepUploadComponent', () => {
       expect(component).toBeTruthy();
     });
 
-    it('should render upload title', () => {
-      const compiled = fixture.nativeElement;
-      expect(compiled.textContent).toContain('上传简历');
+    it('should initialize with default isSubmitting value', () => {
+      expect(component.isSubmitting).toBe(false);
     });
   });
 
-  describe('文件上传测试', () => {
-    it('should handle file selection', () => {
-      const file = new File(['test'], 'test.pdf', { type: 'application/pdf' });
-      const event = { target: { files: [file] } } as unknown as Event;
+  describe('输入属性测试', () => {
+    it('should accept isSubmitting input', () => {
+      component.isSubmitting = true;
+      expect(component.isSubmitting).toBe(true);
 
-      component.onFileSelected(event);
-      expect(component.selectedFile).toBe(file);
+      component.isSubmitting = false;
+      expect(component.isSubmitting).toBe(false);
+    });
+  });
+
+  describe('事件发射测试', () => {
+    it('should emit fileSubmitted event', () => {
+      const emitSpy = jest.spyOn(component.fileSubmitted, 'emit');
+      const mockFileData = {
+        file: new File(['test'], 'test.pdf', { type: 'application/pdf' }),
+        candidateInfo: {
+          name: 'Test User',
+          email: 'test@example.com',
+          targetPosition: 'Developer',
+          notes: 'Test notes',
+        },
+      };
+
+      component.onFileSubmitted(mockFileData);
+      expect(emitSpy).toHaveBeenCalledWith(mockFileData);
     });
 
-    it('should emit file upload event', () => {
-      const emitSpy = jest.spyOn(component.fileUploaded, 'emit');
-      const file = new File(['test'], 'test.pdf', { type: 'application/pdf' });
-      component.selectedFile = file;
+    it('should emit demoRequested event', () => {
+      const emitSpy = jest.spyOn(component.demoRequested, 'emit');
 
-      component.onUpload();
-      expect(emitSpy).toHaveBeenCalledWith(file);
+      component.onDemoRequested();
+      expect(emitSpy).toHaveBeenCalled();
     });
 
-    it('should validate file type', () => {
-      const invalidFile = new File(['test'], 'test.txt', {
-        type: 'text/plain',
-      });
-      const event = { target: { files: [invalidFile] } } as unknown as Event;
+    it('should emit fileValidationError event', () => {
+      const emitSpy = jest.spyOn(component.fileValidationError, 'emit');
+      const errorMessage = 'Invalid file type';
 
-      component.onFileSelected(event);
-      expect(component.errorMessage).toContain('不支持的文件格式');
+      component.onFileValidationError(errorMessage);
+      expect(emitSpy).toHaveBeenCalledWith(errorMessage);
     });
   });
 });

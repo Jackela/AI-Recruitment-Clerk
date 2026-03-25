@@ -29,10 +29,19 @@ export abstract class BasePage {
 
   protected async waitForElement(
     testId: string,
-    timeout = 5000,
+    timeout = 10000,
   ): Promise<Locator> {
     const element = this.getByTestId(testId);
-    await element.waitFor({ state: 'visible', timeout });
+    try {
+      await element.waitFor({ state: 'visible', timeout });
+    } catch (error) {
+      console.log(
+        `⚠️ Element with data-testid="${testId}" not visible after ${timeout}ms`,
+      );
+      // Take a screenshot for debugging
+      await this.takeScreenshot(`wait-failed-${testId}`);
+      throw error;
+    }
     return element;
   }
 

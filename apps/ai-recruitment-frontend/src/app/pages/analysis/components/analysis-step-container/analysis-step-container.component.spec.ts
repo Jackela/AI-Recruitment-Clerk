@@ -1,6 +1,7 @@
 import type { ComponentFixture } from '@angular/core/testing';
 import { TestBed } from '@angular/core/testing';
 import { AnalysisStepContainerComponent } from './analysis-step-container.component';
+import type { AnalysisState } from '../../types/analysis.types';
 
 describe('AnalysisStepContainerComponent', () => {
   let component: AnalysisStepContainerComponent;
@@ -28,14 +29,17 @@ describe('AnalysisStepContainerComponent', () => {
 
   describe('输入属性测试', () => {
     it('should accept currentState input', () => {
-      component.currentState = 'analyzing';
-      expect(component.currentState).toBe('analyzing');
+      const states: AnalysisState[] = [
+        'upload',
+        'analyzing',
+        'completed',
+        'error',
+      ];
 
-      component.currentState = 'completed';
-      expect(component.currentState).toBe('completed');
-
-      component.currentState = 'error';
-      expect(component.currentState).toBe('error');
+      for (const state of states) {
+        component.currentState = state;
+        expect(component.currentState).toBe(state);
+      }
     });
   });
 });

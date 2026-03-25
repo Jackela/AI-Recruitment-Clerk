@@ -1,4 +1,5 @@
 import { test, expect } from './fixtures';
+import { waitForAppHydration } from './test-utils/hydration';
 
 /**
  * Simple Debug Test - Direct Angular App Verification
@@ -12,18 +13,20 @@ test.describe('Simple Angular App Test', () => {
   }) => {
     console.log('Navigating to application...');
     await page.goto('/');
-    await page.waitForURL(
-      (url) => url.pathname.startsWith(LANDING_PATH),
-      { timeout: 15_000 },
-    );
+    await page.waitForURL((url) => url.pathname.startsWith(LANDING_PATH), {
+      timeout: 15_000,
+    });
 
     console.log('Waiting for network to settle...');
     await page.waitForLoadState('domcontentloaded');
 
     console.log('Waiting for Angular to bootstrap...');
-    await page.waitForFunction(() => document.readyState === 'complete', {
-      timeout: 5000,
-    });
+    await page.waitForLoadState('networkidle');
+
+    // Use hydration utility to ensure app is fully loaded
+    await waitForAppHydration(page);
+
+    console.log('App hydration complete...');
 
     // Check if arc-root exists
     const arcRootCount = await page.locator('arc-root').count();
@@ -43,7 +46,10 @@ test.describe('Simple Angular App Test', () => {
 
       // Look for the app header text
       const hasAppTitle =
-        (await page.locator('#app-title').filter({ hasText: 'AI 招聘助理' }).count()) > 0;
+        (await page
+          .locator('#app-title')
+          .filter({ hasText: 'AI 招聘助理' })
+          .count()) > 0;
       console.log('App title found:', hasAppTitle);
 
       if (hasAppTitle) {
@@ -59,8 +65,10 @@ test.describe('Simple Angular App Test', () => {
 
         // Even if header is not visible, check for jobs page content
         const hasJobsContent =
-          (await page.locator('nav a').filter({ hasText: '岗位管理' }).count()) >
-          0;
+          (await page
+            .locator('nav a')
+            .filter({ hasText: '岗位管理' })
+            .count()) > 0;
         console.log('Jobs page content found:', hasJobsContent);
 
         if (hasJobsContent) {

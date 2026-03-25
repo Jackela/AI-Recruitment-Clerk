@@ -8,10 +8,9 @@ const APP_TITLE_TEXT = /AI (招聘助理|Recruitment Assistant)/i;
 
 async function gotoLanding(page: Page) {
   await page.goto(APP_URL);
-  await page.waitForURL(
-    (url) => url.pathname.startsWith(LANDING_PATH),
-    { timeout: 15_000 },
-  );
+  await page.waitForURL((url) => url.pathname.startsWith(LANDING_PATH), {
+    timeout: 15_000,
+  });
   await page.waitForLoadState('domcontentloaded');
 }
 
@@ -19,13 +18,16 @@ test.describe('Basic Application Health', () => {
   test('application loads successfully', async ({ page }) => {
     await gotoLanding(page);
 
+    // Wait for app to be fully hydrated before checking elements
+    await page.waitForLoadState('networkidle');
+
     const appTitle = page.locator(APP_TITLE_SELECTOR);
-    await expect(appTitle).toBeVisible();
+    await expect(appTitle).toBeVisible({ timeout: 10000 });
     await expect(appTitle).toContainText(APP_TITLE_TEXT);
 
     await expect(
       page.locator('nav a').filter({ hasText: '岗位管理' }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 10000 });
 
     expect(new URL(page.url()).pathname).toContain('/jobs');
   });
@@ -55,16 +57,20 @@ test.describe('Basic Application Health', () => {
   test('basic navigation works', async ({ page }) => {
     await gotoLanding(page);
 
-    await expect(page.locator(APP_TITLE_SELECTOR)).toBeVisible();
+    await expect(page.locator(APP_TITLE_SELECTOR)).toBeVisible({
+      timeout: 10000,
+    });
 
     await page.goto('/jobs');
     await page.waitForLoadState('domcontentloaded');
+    await page.waitForLoadState('networkidle');
     await expect(
       page.locator('nav a').filter({ hasText: '岗位管理' }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 10000 });
 
     await page.goto('/jobs/create');
     await page.waitForLoadState('domcontentloaded');
+    await page.waitForLoadState('networkidle');
 
     const jobTitleInput = page.locator('input[formControlName="jobTitle"]');
     const jdTextarea = page.locator('textarea[formControlName="jdText"]');
@@ -78,14 +84,20 @@ test.describe('Basic Application Health', () => {
 
     await page.setViewportSize({ width: 375, height: 667 });
     await page.waitForLoadState('domcontentloaded');
-    await expect(page.locator(APP_TITLE_SELECTOR)).toBeVisible();
+    await expect(page.locator(APP_TITLE_SELECTOR)).toBeVisible({
+      timeout: 10000,
+    });
 
     await page.setViewportSize({ width: 768, height: 1024 });
     await page.waitForLoadState('domcontentloaded');
-    await expect(page.locator(APP_TITLE_SELECTOR)).toBeVisible();
+    await expect(page.locator(APP_TITLE_SELECTOR)).toBeVisible({
+      timeout: 10000,
+    });
 
     await page.setViewportSize({ width: 1920, height: 1080 });
     await page.waitForLoadState('domcontentloaded');
-    await expect(page.locator(APP_TITLE_SELECTOR)).toBeVisible();
+    await expect(page.locator(APP_TITLE_SELECTOR)).toBeVisible({
+      timeout: 10000,
+    });
   });
 });

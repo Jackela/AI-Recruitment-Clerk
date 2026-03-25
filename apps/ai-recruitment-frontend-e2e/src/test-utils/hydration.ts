@@ -26,20 +26,15 @@ async function waitForIdle(page: Page): Promise<void> {
 }
 
 export async function waitForAppHydration(page: Page): Promise<void> {
+  // Wait for arc-root to be attached
   await page.locator('arc-root').waitFor({ state: 'attached', timeout: 15000 });
 
+  // Wait for document to be complete
   await page.waitForFunction(() => document.readyState === 'complete', null, {
     timeout: 10000,
   });
 
-  await waitForIdle(page);
-  await waitForIdle(page);
-
-  await page.locator('body').waitFor({
-    state: 'visible',
-    timeout: 10000,
-  });
-
+  // Wait for Angular to bootstrap
   await page.waitForFunction(
     () => {
       const root = document.querySelector('arc-root');
@@ -48,38 +43,55 @@ export async function waitForAppHydration(page: Page): Promise<void> {
       );
     },
     null,
-    { timeout: 10000 },
+    { timeout: 15000 },
   );
 
+  // Wait for body to be visible
+  await page.locator('body').waitFor({
+    state: 'visible',
+    timeout: 10000,
+  });
+
+  // Wait for initial loading screen to disappear
   await page.waitForFunction(
     () => {
       const loading = document.getElementById('initial-loading');
       return !loading || loading.style.opacity === '0' || !loading.isConnected;
     },
     null,
-    { timeout: 5000 },
+    { timeout: 10000 },
   );
 
+  // Wait for idle periods
+  await waitForIdle(page);
+  await waitForIdle(page);
+
+  // Wait for fonts to load (optional)
   try {
     await page.evaluate(() => document.fonts.ready);
   } catch {
     /* ignore font timeout */
   }
 
-  await Promise.race([
-    page.waitForFunction(
+  // Wait for at least one Angular component to be rendered
+  // Use a longer timeout and don't race against a shorter timeout
+  try {
+    await page.waitForFunction(
       () => {
         return (
           document.querySelector(
-            'arc-language-selector, arc-theme-toggle, arc-aria-live',
+            'arc-language-selector, arc-theme-toggle, arc-aria-live, router-outlet, .app-container',
           ) !== null
         );
       },
       null,
-      { timeout: 5000 },
-    ),
-    new Promise<void>((resolve) => setTimeout(resolve, 2000)),
-  ]);
+      { timeout: 8000 },
+    );
+  } catch {
+    // If specific components aren't found, continue anyway
+    // The page might be on a simple route without these components
+    console.log('⚠️ Some Angular components not found, continuing anyway');
+  }
 }
 
 export async function waitForDeferredComponents(

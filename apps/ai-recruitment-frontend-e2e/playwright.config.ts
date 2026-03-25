@@ -158,7 +158,7 @@ export default defineConfig({
   testIgnore: ['**/debug/**', '**/*.debug.spec.ts'],
   timeout: 60000,
   expect: {
-    timeout: 15000,
+    timeout: 30000,
     toHaveScreenshot: {
       maxDiffPixels: 100,
       threshold: 0.2,

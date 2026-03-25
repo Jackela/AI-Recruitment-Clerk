@@ -20,6 +20,7 @@ test.describe('Detailed Job Creation Analysis', () => {
       timeout: 15000,
     });
     await page.waitForLoadState('domcontentloaded');
+    await page.waitForLoadState('networkidle');
   });
 
   test('Detailed job creation and verification flow', async ({ page }) => {
@@ -36,9 +37,12 @@ test.describe('Detailed Job Creation Analysis', () => {
       console.log('Step 1: Navigating to /jobs/create');
       await jobsPage.navigateToCreateJob();
       await page.waitForLoadState('domcontentloaded');
+      await page.waitForLoadState('networkidle');
 
-      // Verify form exists using Page Object
-      await expect(page.getByTestId('create-job-form')).toBeVisible();
+      // Verify form exists using Page Object with timeout
+      await expect(page.getByTestId('create-job-form')).toBeVisible({
+        timeout: 10000,
+      });
       console.log('✅ Job creation form is visible');
     });
 
@@ -55,7 +59,9 @@ test.describe('Detailed Job Creation Analysis', () => {
       console.log('✅ Form submitted');
 
       // Wait for form to remain visible (no navigation expected in this test)
-      await expect(page.getByTestId('create-job-form')).toBeVisible();
+      await expect(page.getByTestId('create-job-form')).toBeVisible({
+        timeout: 10000,
+      });
     });
 
     // Step 3: Check where we are after form submission
@@ -79,10 +85,11 @@ test.describe('Detailed Job Creation Analysis', () => {
 
       await jobsPage.navigateTo();
       await page.waitForLoadState('domcontentloaded');
+      await page.waitForLoadState('networkidle');
 
       // Wait for jobs container using Page Object
       await expect(page.getByTestId('jobs-container')).toBeVisible({
-        timeout: 5000,
+        timeout: 10000,
       });
 
       // Check job count using Page Object

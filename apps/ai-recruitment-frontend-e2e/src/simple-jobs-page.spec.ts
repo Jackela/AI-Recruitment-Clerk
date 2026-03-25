@@ -19,6 +19,7 @@ test.describe('Simple Jobs Page Test', () => {
 
     // Navigate using Page Object
     await jobsPage.navigateTo();
+    await page.waitForLoadState('domcontentloaded');
     await page.waitForLoadState('networkidle');
 
     // Use Page Object methods for verification
@@ -63,9 +64,20 @@ test.describe('Simple Jobs Page Test', () => {
 
     // Navigate to create job page using Page Object
     await jobsPage.navigateToCreateJob();
+    await page.waitForLoadState('domcontentloaded');
     await page.waitForLoadState('networkidle');
 
-    // Verify form elements using Page Object methods
+    // Verify form elements using Page Object methods with proper waits
+    await expect(page.getByTestId('job-title-input')).toBeVisible({
+      timeout: 10000,
+    });
+    await expect(page.getByTestId('jd-textarea')).toBeVisible({
+      timeout: 10000,
+    });
+    await expect(page.getByTestId('submit-button')).toBeVisible({
+      timeout: 10000,
+    });
+
     const formElements = await Promise.all([
       page.getByTestId('job-title-input').count(),
       page.getByTestId('jd-textarea').count(),

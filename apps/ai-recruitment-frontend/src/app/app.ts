@@ -23,6 +23,7 @@ import { SkipNavigationDirective } from './directives/accessibility/skip-navigat
 import { ServiceUnavailableComponent } from './core/components/service-unavailable/service-unavailable.component';
 import { APP_CONFIG } from '../config';
 import { getText } from '../config/i18n.config';
+import { environment } from '../environments/environment';
 import type { Subscription } from 'rxjs';
 
 /**
@@ -49,6 +50,7 @@ import type { Subscription } from 'rxjs';
 export class App implements OnInit, OnDestroy {
   protected readonly config = APP_CONFIG;
   protected readonly getText = getText;
+  protected readonly isTestMode = environment.testMode;
   protected settingsMenuOpen = signal(false);
 
   // Navigation guide service (preserved for future use)

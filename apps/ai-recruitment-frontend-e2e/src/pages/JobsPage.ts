@@ -31,8 +31,10 @@ export class JobsPage extends BasePage {
   }
 
   async waitForPageLoad(): Promise<void> {
-    await this.waitForElement(this.selectors.container);
-    await this.waitForElement(this.selectors.pageTitle);
+    // Wait for the page to be fully loaded - use a single longer timeout
+    await this.waitForElement(this.selectors.container, 15000);
+    // Page title should already be visible if container is visible, but double-check
+    await this.waitForElement(this.selectors.pageTitle, 10000);
   }
 
   async navigateToCreateJob(): Promise<void> {
