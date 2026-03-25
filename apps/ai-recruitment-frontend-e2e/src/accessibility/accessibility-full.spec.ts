@@ -1,5 +1,13 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { waitForAppHydration } from '../test-utils/hydration';
+
+/**
+ * 完整可访问性测试
+ * Enhanced with proper hydration waiting
+ */
+
+const DEFAULT_TIMEOUT = 30000;
 
 test.describe('完整可访问性测试', () => {
   const pages = [
@@ -14,16 +22,19 @@ test.describe('完整可访问性测试', () => {
 
   for (const { url, name } of pages) {
     test(`可访问性检查 - ${name} (${url})`, async ({ page }) => {
+      console.log(`🔄 Navigating to ${name} (${url})...`);
       await page.goto(url);
       await page.waitForLoadState('domcontentloaded');
+      await waitForAppHydration(page);
 
+      console.log(`🔍 Running accessibility scan on ${name}...`);
       const accessibilityScanResults = await new AxeBuilder({ page })
         .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
         .analyze();
 
       if (accessibilityScanResults.violations.length > 0) {
         console.log(
-          `可访问性问题在 ${url}:`,
+          `⚠️ 可访问性问题在 ${url}:`,
           accessibilityScanResults.violations.map((v) => ({
             rule: v.id,
             impact: v.impact,
@@ -31,6 +42,8 @@ test.describe('完整可访问性测试', () => {
             nodes: v.nodes.length,
           })),
         );
+      } else {
+        console.log(`✅ No accessibility violations found on ${name}`);
       }
 
       expect(accessibilityScanResults.violations).toEqual([]);
@@ -40,6 +53,7 @@ test.describe('完整可访问性测试', () => {
       await page.setViewportSize({ width: 375, height: 667 });
       await page.goto(url);
       await page.waitForLoadState('domcontentloaded');
+      await waitForAppHydration(page);
 
       const accessibilityScanResults = await new AxeBuilder({ page })
         .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
@@ -53,6 +67,7 @@ test.describe('完整可访问性测试', () => {
     test('登录流程可访问性', async ({ page }) => {
       await page.goto('/login');
       await page.waitForLoadState('domcontentloaded');
+      await waitForAppHydration(page);
 
       const results = await new AxeBuilder({ page })
         .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
@@ -67,6 +82,7 @@ test.describe('完整可访问性测试', () => {
     test('表单可访问性 - 创建职位', async ({ page }) => {
       await page.goto('/jobs/create');
       await page.waitForLoadState('domcontentloaded');
+      await waitForAppHydration(page);
 
       const results = await new AxeBuilder({ page })
         .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
@@ -83,6 +99,7 @@ test.describe('完整可访问性测试', () => {
     test('模态框可访问性', async ({ page }) => {
       await page.goto('/jobs');
       await page.waitForLoadState('domcontentloaded');
+      await waitForAppHydration(page);
 
       const openModalButton = page
         .locator('button')
@@ -107,6 +124,7 @@ test.describe('完整可访问性测试', () => {
     test('导航可访问性', async ({ page }) => {
       await page.goto('/');
       await page.waitForLoadState('domcontentloaded');
+      await waitForAppHydration(page);
 
       const results = await new AxeBuilder({ page })
         .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
@@ -122,6 +140,7 @@ test.describe('完整可访问性测试', () => {
     test('图片必须有替代文本', async ({ page }) => {
       await page.goto('/');
       await page.waitForLoadState('domcontentloaded');
+      await waitForAppHydration(page);
 
       const results = await new AxeBuilder({ page })
         .withRules(['image-alt', 'aria-required-attr'])
@@ -137,6 +156,7 @@ test.describe('完整可访问性测试', () => {
     test('表单元素必须有标签', async ({ page }) => {
       await page.goto('/jobs/create');
       await page.waitForLoadState('domcontentloaded');
+      await waitForAppHydration(page);
 
       const results = await new AxeBuilder({ page })
         .withRules(['label', 'aria-required-attr'])
@@ -152,6 +172,7 @@ test.describe('完整可访问性测试', () => {
     test('链接必须有可识别的文本', async ({ page }) => {
       await page.goto('/');
       await page.waitForLoadState('domcontentloaded');
+      await waitForAppHydration(page);
 
       const results = await new AxeBuilder({ page })
         .withRules(['link-name', 'aria-required-attr'])
@@ -167,6 +188,7 @@ test.describe('完整可访问性测试', () => {
     test('按钮必须有可访问的名称', async ({ page }) => {
       await page.goto('/');
       await page.waitForLoadState('domcontentloaded');
+      await waitForAppHydration(page);
 
       const results = await new AxeBuilder({ page })
         .withRules(['button-name', 'aria-required-attr'])
@@ -182,6 +204,7 @@ test.describe('完整可访问性测试', () => {
     test('语言属性必须正确设置', async ({ page }) => {
       await page.goto('/');
       await page.waitForLoadState('domcontentloaded');
+      await waitForAppHydration(page);
 
       const html = page.locator('html');
       const lang = await html.getAttribute('lang');
@@ -192,6 +215,7 @@ test.describe('完整可访问性测试', () => {
     test('页面标题必须存在且有意义', async ({ page }) => {
       await page.goto('/');
       await page.waitForLoadState('domcontentloaded');
+      await waitForAppHydration(page);
 
       const title = await page.title();
       expect(title).toBeTruthy();
@@ -204,6 +228,7 @@ test.describe('完整可访问性测试', () => {
     test('ARIA 属性必须有效', async ({ page }) => {
       await page.goto('/');
       await page.waitForLoadState('domcontentloaded');
+      await waitForAppHydration(page);
 
       const results = await new AxeBuilder({ page })
         .withRules([
@@ -226,6 +251,7 @@ test.describe('完整可访问性测试', () => {
     test('ARIA 角色必须有效', async ({ page }) => {
       await page.goto('/');
       await page.waitForLoadState('domcontentloaded');
+      await waitForAppHydration(page);
 
       const results = await new AxeBuilder({ page })
         .withRules(['aria-roles', 'aria-deprecated-role'])

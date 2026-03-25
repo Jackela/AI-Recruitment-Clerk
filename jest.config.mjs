@@ -50,8 +50,8 @@ export default {
     '!**/index.ts',
   ],
   // Worker configuration to prevent resource exhaustion and timeouts
-  maxWorkers: process.env.CI ? 2 : '50%',
-  workerIdleMemoryLimit: '512MB',
+  maxWorkers: 1, // Serial execution to avoid memory issues
+  workerIdleMemoryLimit: '1024MB', // Increased memory limit
   // Increase timeout for coverage runs
   testTimeout: process.env.CI ? 60000 : 30000,
   // Prevent hanging by limiting test suite time

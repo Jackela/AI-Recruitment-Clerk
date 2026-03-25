@@ -78,7 +78,9 @@ afterEach(async () => {
     if (typeof jest !== 'undefined') {
       // Only run pending timers if fake timers are active
       try {
-        jest.runOnlyPendingTimers();
+        if (jest.isMockFunction(setTimeout)) {
+          jest.runOnlyPendingTimers();
+        }
       } catch {
         // Ignore if fake timers are not being used
       }

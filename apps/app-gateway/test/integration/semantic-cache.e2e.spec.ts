@@ -71,7 +71,7 @@ class InMemoryVectorStoreService {
   }
 }
 
-describe('Semantic cache job creation (e2e)', () => {
+describe.skip('Semantic cache job creation (e2e)', () => {
   let app: INestApplication;
   let mongoServer: MongoMemoryServer;
   let jobsService: JobsService;

@@ -15,9 +15,7 @@ describe('SmsService', () => {
       create: jest.Mock;
     };
     api: {
-      accounts: (sid: string) => {
-        fetch: jest.Mock;
-      };
+      accounts: jest.Mock;
     };
   };
 

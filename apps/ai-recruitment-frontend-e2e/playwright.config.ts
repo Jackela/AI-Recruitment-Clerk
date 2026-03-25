@@ -222,7 +222,7 @@ export default defineConfig({
           command: `npx serve dist/apps/ai-recruitment-frontend/browser -l ${devServerPort} -s --proxy /api=http://localhost:3000`,
           url: baseURL,
           reuseExistingServer: !process.env['CI'],
-          timeout: 60 * 1000, // 60 seconds for server startup (production builds take longer)
+          timeout: 120000, // 2分钟启动等待 (production builds take longer)
           stdout: 'pipe',
           stderr: 'pipe',
         },

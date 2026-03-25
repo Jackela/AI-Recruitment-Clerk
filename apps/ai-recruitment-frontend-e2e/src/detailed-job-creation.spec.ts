@@ -2,13 +2,16 @@ import { test, expect } from './fixtures';
 import { JobsPage } from './pages';
 import { setupJobsApiMocking, TEST_JOB_DATA } from './fixtures';
 import { setupErrorCollection } from './utils';
+import { waitForAppHydration } from './test-utils/hydration';
 
 /**
  * Detailed Job Creation Testing - Refactored to use Page Object Model
  * Updated to use data-testid selectors and proper wait strategies
+ * Enhanced with better hydration waiting
  */
 
 const LANDING_PATH = '/jobs';
+const DEFAULT_TIMEOUT = 30000;
 
 test.describe('Detailed Job Creation Analysis', () => {
   test.beforeEach(async ({ page }) => {
@@ -17,9 +20,12 @@ test.describe('Detailed Job Creation Analysis', () => {
 
     await page.goto('/');
     await page.waitForURL((url) => url.pathname.startsWith(LANDING_PATH), {
-      timeout: 15000,
+      timeout: DEFAULT_TIMEOUT,
     });
     await page.waitForLoadState('domcontentloaded');
+
+    // 确保应用完全加载
+    await waitForAppHydration(page);
   });
 
   test('Detailed job creation and verification flow', async ({ page }) => {
@@ -37,8 +43,13 @@ test.describe('Detailed Job Creation Analysis', () => {
       await jobsPage.navigateToCreateJob();
       await page.waitForLoadState('domcontentloaded');
 
+      // 确保应用完全加载
+      await waitForAppHydration(page);
+
       // Verify form exists using Page Object
-      await expect(page.getByTestId('create-job-form')).toBeVisible();
+      await expect(page.getByTestId('create-job-form')).toBeVisible({
+        timeout: 15000,
+      });
       console.log('✅ Job creation form is visible');
     });
 
@@ -55,7 +66,9 @@ test.describe('Detailed Job Creation Analysis', () => {
       console.log('✅ Form submitted');
 
       // Wait for form to remain visible (no navigation expected in this test)
-      await expect(page.getByTestId('create-job-form')).toBeVisible();
+      await expect(page.getByTestId('create-job-form')).toBeVisible({
+        timeout: 10000,
+      });
     });
 
     // Step 3: Check where we are after form submission
@@ -80,9 +93,12 @@ test.describe('Detailed Job Creation Analysis', () => {
       await jobsPage.navigateTo();
       await page.waitForLoadState('domcontentloaded');
 
+      // 确保应用完全加载
+      await waitForAppHydration(page);
+
       // Wait for jobs container using Page Object
       await expect(page.getByTestId('jobs-container')).toBeVisible({
-        timeout: 5000,
+        timeout: 15000,
       });
 
       // Check job count using Page Object

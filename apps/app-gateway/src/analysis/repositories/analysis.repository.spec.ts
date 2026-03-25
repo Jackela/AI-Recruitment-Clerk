@@ -30,7 +30,6 @@ const createMockAnalysisDoc = (overrides = {}) =>
     save: jest.fn().mockResolvedValue(this),
     ...overrides,
   }) as unknown as ReturnType<Model<typeof AnalysisResult>['create']>;
- 
 
 describe('AnalysisRepository', () => {
   let repository: AnalysisRepository;
@@ -297,8 +296,8 @@ describe('AnalysisRepository', () => {
     it('should find batch results for job and resumes', async () => {
       // Arrange
       const resumeIds = ['r1', 'r2', 'r3'];
-      const mockResults = resumeIds.map(
-        (id = createMockAnalysisDoc({ resumeId: id })),
+      const mockResults = resumeIds.map((id) =>
+        createMockAnalysisDoc({ resumeId: id }),
       );
       mockExec.mockResolvedValueOnce(mockResults);
 

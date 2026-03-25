@@ -1,19 +1,12 @@
 import { Test } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { JobsEventService } from './jobs-event.service';
-import type { JobRepository } from '../../repositories/job.repository';
-import type { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
-import type { CacheService } from '../../cache/cache.service';
-import type { WebSocketGateway } from '../../websocket/websocket.gateway';
-import type { JobsSemanticCacheService } from './jobs-semantic-cache.service';
+import { JobRepository } from '../../repositories/job.repository';
+import { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
+import { CacheService } from '../../cache/cache.service';
+import { WebSocketGateway } from '../../websocket/websocket.gateway';
+import { JobsSemanticCacheService } from './jobs-semantic-cache.service';
 import type { JobDocument } from '../../schemas/job.schema';
-
-// Token constants
-const JOB_REPOSITORY_TOKEN = 'JobRepository';
-const NATS_CLIENT_TOKEN = 'AppGatewayNatsService';
-const CACHE_SERVICE_TOKEN = 'CacheService';
-const WEBSOCKET_GATEWAY_TOKEN = 'WebSocketGateway';
-const SEMANTIC_CACHE_SERVICE_TOKEN = 'JobsSemanticCacheService';
 
 const mockJobRepository = () => ({
   findById: jest.fn(),
@@ -79,34 +72,34 @@ describe('JobsEventService', () => {
       providers: [
         JobsEventService,
         {
-          provide: JOB_REPOSITORY_TOKEN,
+          provide: JobRepository,
           useValue: mockJobRepository(),
         },
         {
-          provide: NATS_CLIENT_TOKEN,
+          provide: AppGatewayNatsService,
           useValue: mockNatsClient(),
         },
         {
-          provide: CACHE_SERVICE_TOKEN,
+          provide: CacheService,
           useValue: mockCacheService(),
         },
         {
-          provide: WEBSOCKET_GATEWAY_TOKEN,
+          provide: WebSocketGateway,
           useValue: mockWebSocketGateway(),
         },
         {
-          provide: SEMANTIC_CACHE_SERVICE_TOKEN,
+          provide: JobsSemanticCacheService,
           useValue: mockSemanticCacheService(),
         },
       ],
     }).compile();
 
     service = module.get<JobsEventService>(JobsEventService);
-    jobRepository = module.get(JOB_REPOSITORY_TOKEN);
-    natsClient = module.get(NATS_CLIENT_TOKEN);
-    cacheService = module.get(CACHE_SERVICE_TOKEN);
-    webSocketGateway = module.get(WEBSOCKET_GATEWAY_TOKEN);
-    semanticCacheService = module.get(SEMANTIC_CACHE_SERVICE_TOKEN);
+    jobRepository = module.get(JobRepository);
+    natsClient = module.get(AppGatewayNatsService);
+    cacheService = module.get(CacheService);
+    webSocketGateway = module.get(WebSocketGateway);
+    semanticCacheService = module.get(JobsSemanticCacheService);
   });
 
   afterEach(() => {
