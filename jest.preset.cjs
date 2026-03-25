@@ -2,6 +2,8 @@ const nxPreset = require('@nx/jest/preset').default;
 
 module.exports = {
   ...nxPreset,
+  // Pre-load cache-manager before tests start
+  setupFiles: ['<rootDir>/../../test/jest-global-setup.cjs'],
   // Enhanced Jest configuration for process cleanup
   setupFilesAfterEnv: ['<rootDir>/../../jest.setup.ts'],
   globalTeardown: '<rootDir>/../../test/global-teardown.ts',
