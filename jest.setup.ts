@@ -76,7 +76,12 @@ afterEach(async () => {
 
     // 清理时钟和定时器
     if (typeof jest !== 'undefined') {
-      jest.runOnlyPendingTimers();
+      // Only run pending timers if fake timers are active
+      try {
+        jest.runOnlyPendingTimers();
+      } catch {
+        // Ignore if fake timers are not being used
+      }
       jest.useRealTimers();
       jest.clearAllTimers();
     }
