@@ -23,6 +23,8 @@ const MIME_TYPES = {
 };
 
 const server = http.createServer((req, res) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+
   if (req.url.startsWith('/api')) {
     const proxy = http.request(
       {
@@ -38,9 +40,11 @@ const server = http.createServer((req, res) => {
       },
     );
     proxy.on('error', (err) => {
-      console.error('Proxy error:', err.message);
-      res.writeHead(502, { 'Content-Type': 'text/plain' });
-      res.end('Bad Gateway');
+      console.error(`Proxy error for ${req.url}:`, err.message);
+      if (!res.headersSent) {
+        res.writeHead(502, { 'Content-Type': 'text/plain' });
+        res.end('Bad Gateway: API server not available');
+      }
     });
     req.pipe(proxy, { end: true });
   } else {
@@ -67,7 +71,19 @@ const server = http.createServer((req, res) => {
   }
 });
 
+server.on('error', (err) => {
+  console.error('Server error:', err.message);
+  process.exit(1);
+});
+
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Proxying /api/* to ${API_TARGET}`);
+  console.log(`Static directory: ${STATIC_DIR}`);
+
+  // Verify static directory exists
+  if (!fs.existsSync(STATIC_DIR)) {
+    console.error(`ERROR: Static directory ${STATIC_DIR} does not exist!`);
+    process.exit(1);
+  }
 });

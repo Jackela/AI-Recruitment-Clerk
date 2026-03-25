@@ -8,7 +8,8 @@ module.exports = {
 
   // Test environment configuration
   testEnvironment: 'node',
-  testTimeout: 30000,
+  // Increase timeout for coverage runs
+  testTimeout: process.env.CI ? 60000 : 30000,
 
   // Worker limits to prevent resource exhaustion and timeouts
   // In CI, limit to 2 workers to prevent memory issues

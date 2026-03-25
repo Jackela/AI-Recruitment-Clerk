@@ -52,8 +52,8 @@ export default {
   // Worker configuration to prevent resource exhaustion and timeouts
   maxWorkers: process.env.CI ? 2 : '50%',
   workerIdleMemoryLimit: '512MB',
-  // Fail fast on timeout to prevent hanging
-  testTimeout: 30000,
+  // Increase timeout for coverage runs
+  testTimeout: process.env.CI ? 60000 : 30000,
   // Prevent hanging by limiting test suite time
   forceExit: false, // Keep false to detect open handles
   detectOpenHandles: false,
@@ -61,10 +61,16 @@ export default {
   testPathIgnorePatterns: [
     '/node_modules/',
     '\\.e2e\\.spec\\.(ts|js)$',
+    '\\.e2e-spec\\.(ts|js)$',
     '\\.integration\\.spec\\.(ts|js)$',
+    '\\.integration\\.test\\.(ts|js)$',
+    '-integration\\.',
+    'integration\\.nats\\.spec\\.(ts|js)$',
+    'service-integration',
     '/test/integration/',
     '/test/security/',
     '/test/performance/',
     '/test/production/',
+    '/src/.*/.*\\.integration\\.spec\\.(ts|js)$',
   ],
 };

@@ -39,6 +39,47 @@ export async function waitForAppHydration(page: Page): Promise<void> {
     state: 'visible',
     timeout: 10000,
   });
+
+  await page.waitForFunction(
+    () => {
+      const root = document.querySelector('arc-root');
+      return (
+        root && (root.hasAttribute('ng-version') || root.children.length > 0)
+      );
+    },
+    null,
+    { timeout: 10000 },
+  );
+
+  await page.waitForFunction(
+    () => {
+      const loading = document.getElementById('initial-loading');
+      return !loading || loading.style.opacity === '0' || !loading.isConnected;
+    },
+    null,
+    { timeout: 5000 },
+  );
+
+  try {
+    await page.evaluate(() => document.fonts.ready);
+  } catch {
+    /* ignore font timeout */
+  }
+
+  await Promise.race([
+    page.waitForFunction(
+      () => {
+        return (
+          document.querySelector(
+            'arc-language-selector, arc-theme-toggle, arc-aria-live',
+          ) !== null
+        );
+      },
+      null,
+      { timeout: 5000 },
+    ),
+    new Promise<void>((resolve) => setTimeout(resolve, 2000)),
+  ]);
 }
 
 export async function waitForDeferredComponents(

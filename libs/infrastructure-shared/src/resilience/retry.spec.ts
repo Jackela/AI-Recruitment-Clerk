@@ -7,6 +7,7 @@ describe('RetryUtility', () => {
   });
 
   afterEach(() => {
+    jest.runOnlyPendingTimers();
     jest.useRealTimers();
   });
 
@@ -26,7 +27,9 @@ describe('RetryUtility', () => {
         .mockRejectedValueOnce(new Error('fail 2'))
         .mockResolvedValue('success');
 
-      const result = await RetryUtility.retry(operation, 3, 10);
+      const retryPromise = RetryUtility.retry(operation, 3, 10);
+      jest.runAllTimers();
+      const result = await retryPromise;
 
       expect(result).toBe('success');
       expect(operation).toHaveBeenCalledTimes(3);
@@ -35,17 +38,21 @@ describe('RetryUtility', () => {
     it('should throw error after max attempts', async () => {
       const operation = jest.fn().mockRejectedValue(new Error('always fails'));
 
-      await expect(RetryUtility.retry(operation, 3, 10)).rejects.toThrow(
-        'always fails',
-      );
+      const retryPromise = RetryUtility.retry(operation, 3, 10);
+      jest.runAllTimers();
+
+      await expect(retryPromise).rejects.toThrow('always fails');
       expect(operation).toHaveBeenCalledTimes(3);
     });
 
     it('should use default maxAttempts of 3', async () => {
       const operation = jest.fn().mockRejectedValue(new Error('fail'));
 
+      const retryPromise = RetryUtility.retry(operation);
+      jest.runAllTimers();
+
       try {
-        await RetryUtility.retry(operation);
+        await retryPromise;
       } catch {
         // expected
       }
@@ -157,8 +164,11 @@ describe('RetryUtility', () => {
     it('should use default options', async () => {
       const operation = jest.fn().mockRejectedValue(new Error('fail'));
 
+      const retryPromise = RetryUtility.withExponentialBackoff(operation);
+      jest.runAllTimers();
+
       try {
-        await RetryUtility.withExponentialBackoff(operation);
+        await retryPromise;
       } catch {
         // expected
       }
@@ -169,12 +179,13 @@ describe('RetryUtility', () => {
     it('should throw error after max attempts', async () => {
       const operation = jest.fn().mockRejectedValue(new Error('always fails'));
 
-      await expect(
-        RetryUtility.withExponentialBackoff(operation, {
-          maxAttempts: 2,
-          baseDelayMs: 10,
-        }),
-      ).rejects.toThrow('always fails');
+      const retryPromise = RetryUtility.withExponentialBackoff(operation, {
+        maxAttempts: 2,
+        baseDelayMs: 10,
+      });
+      jest.runAllTimers();
+
+      await expect(retryPromise).rejects.toThrow('always fails');
     });
 
     it('should throw generic error when no error is captured', async () => {
@@ -182,12 +193,15 @@ describe('RetryUtility', () => {
         throw undefined;
       });
 
-      await expect(
-        RetryUtility.withExponentialBackoff(operation, {
-          maxAttempts: 1,
-          baseDelayMs: 10,
-        }),
-      ).rejects.toThrow('Operation failed after maximum attempts');
+      const retryPromise = RetryUtility.withExponentialBackoff(operation, {
+        maxAttempts: 1,
+        baseDelayMs: 10,
+      });
+      jest.runAllTimers();
+
+      await expect(retryPromise).rejects.toThrow(
+        'Operation failed after maximum attempts',
+      );
     });
 
     it('should calculate backoff correctly', async () => {
