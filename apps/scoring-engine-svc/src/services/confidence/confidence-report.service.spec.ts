@@ -1,3 +1,9 @@
+/**
+ * @slow
+ * Execution time: 45-60s
+ * Large test file with comprehensive confidence report service scenarios
+ */
+
 import { Test } from '@nestjs/testing';
 import { ConfidenceReportService } from './confidence-report.service';
 import type {

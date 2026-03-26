@@ -1,4 +1,8 @@
 /**
+ * @slow
+ * Execution time: 45-60s
+ * Large test file with comprehensive privacy compliance scenarios
+ *
  * @fileoverview Privacy Compliance Controller Tests - Comprehensive test coverage for GDPR/privacy endpoints
  * @author AI Recruitment Team
  * @since v1.0.0

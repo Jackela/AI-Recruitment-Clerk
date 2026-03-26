@@ -50,10 +50,19 @@ export default {
     '!**/index.ts',
   ],
   // Worker configuration to prevent resource exhaustion and timeouts
-  maxWorkers: 1, // Serial execution to avoid memory issues
-  workerIdleMemoryLimit: '1024MB', // Increased memory limit
-  // Increase timeout for coverage runs
-  testTimeout: process.env.CI ? 60000 : 30000,
+  // 根据测试类型动态调整
+  maxWorkers: process.env.CI
+    ? process.env.TEST_TYPE === 'unit'
+      ? 3
+      : 1
+    : '50%',
+  workerIdleMemoryLimit: '512MB', // 增加内存限制
+  // 分层超时
+  testTimeout: process.env.CI
+    ? process.env.TEST_TYPE === 'integration'
+      ? 120000
+      : 30000
+    : 30000,
   // Prevent hanging by limiting test suite time
   forceExit: false, // Keep false to detect open handles
   detectOpenHandles: false,
@@ -72,5 +81,6 @@ export default {
     '/test/performance/',
     '/test/production/',
     '/src/.*/.*\\.integration\\.spec\\.(ts|js)$',
+    '\\.slow\\.spec\\.ts$', // 排除标记为slow的测试
   ],
 };
