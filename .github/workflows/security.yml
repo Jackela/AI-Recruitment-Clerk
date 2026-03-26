@@ -15,8 +15,6 @@ permissions:
   security-events: write
   actions: read
 
-env:
-
 jobs:
   codeql:
     name: 🔍 CodeQL Analysis

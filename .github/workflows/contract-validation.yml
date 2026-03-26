@@ -19,7 +19,6 @@ concurrency:
   group: contract-validation-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
 
 jobs:
   validate-contracts:
