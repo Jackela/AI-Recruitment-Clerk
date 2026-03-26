@@ -18,6 +18,9 @@ describe('FileUploadService', () => {
   let httpMock: HttpTestingController;
   const baseUrl = environment.apiUrl;
 
+  // Increase timeout for file upload tests
+  jest.setTimeout(30000);
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],

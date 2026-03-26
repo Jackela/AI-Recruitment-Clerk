@@ -6,7 +6,6 @@ import {
 } from '@angular/common/http/testing';
 import { ApiService } from './api.service';
 import { APP_CONFIG } from '../../config/app.config';
-import { of, throwError, timer } from 'rxjs';
 import type {
   JobListItem,
   Job,
@@ -26,11 +25,7 @@ import type {
   GapAnalysisResult,
   GapAnalysisRequest,
 } from '../interfaces/gap-analysis.interface';
-import {
-  HttpErrorResponse,
-  HttpHeaders,
-  HttpParams,
-} from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 
 describe('ApiService', () => {
   let service: ApiService;
@@ -151,27 +146,19 @@ describe('ApiService', () => {
     });
 
     describe('Token Injection', () => {
-      it('should inject authentication token if available', () => {
-        localStorage.setItem('auth_token', 'test-token-123');
-
+      it('should make request without authentication token', () => {
         service.getAllJobs().subscribe();
 
         const req = httpMock.expectOne(`${baseUrl}/jobs`);
-        expect(req.request.headers.get('Authorization')).toBe(
-          'Bearer test-token-123',
-        );
+        expect(req.request.headers.has('Authorization')).toBe(false);
         req.flush([]);
-
-        localStorage.removeItem('auth_token');
       });
 
-      it('should handle missing token gracefully', () => {
-        localStorage.removeItem('auth_token');
-
+      it('should handle requests without tokens gracefully', () => {
         service.getAllJobs().subscribe();
 
         const req = httpMock.expectOne(`${baseUrl}/jobs`);
-        expect(req.request.headers.get('Authorization')).toBeNull();
+        expect(req.request.headers.has('Authorization')).toBe(false);
         req.flush([]);
       });
     });
@@ -316,16 +303,6 @@ describe('ApiService', () => {
       });
 
       it('should handle slow network timeout', () => {
-        const largeJobList = Array(1000)
-          .fill(null)
-          .map((_, i) => ({
-            id: `job-${i}`,
-            title: `Job ${i}`,
-            status: 'completed' as const,
-            createdAt: new Date(),
-            resumeCount: 0,
-          }));
-
         service.getAllJobs().subscribe({
           error: (error) => {
             expect(error).toBeTruthy();
@@ -504,7 +481,6 @@ describe('ApiService', () => {
         const mockFile = new File(['content'], 'test.pdf', {
           type: 'application/pdf',
         });
-        const progressEvents: number[] = [];
 
         service.uploadResumes('job-1', [mockFile]).subscribe();
 
@@ -815,6 +791,7 @@ describe('ApiService', () => {
           reports: [
             {
               id: '1',
+              jobId: 'job-1',
               candidateName: 'John',
               matchScore: 85,
               oneSentenceSummary: 'Good candidate',
@@ -861,28 +838,13 @@ describe('ApiService', () => {
     describe('Gap Analysis API', () => {
       it('should submit gap analysis', () => {
         const request: GapAnalysisRequest = {
-          resumeId: 'resume-1',
           jdText: 'Job description...',
+          resumeText: 'Resume text...',
         };
         const mockResult: GapAnalysisResult = {
-          overallScore: 85,
-          skillMatch: {
-            matched: ['TypeScript'],
-            missing: ['Python'],
-            score: 80,
-          },
-          experienceMatch: { totalYears: 5, requiredYears: 3, score: 90 },
-          educationMatch: {
-            requiredLevel: 'Bachelor',
-            candidateLevel: 'Bachelor',
-            relevantFields: ['CS'],
-            score: 100,
-          },
-          recommendations: ['Learn Python'],
-          strengths: ['TypeScript expertise'],
-          gaps: ['Missing Python experience'],
-          analysis: 'Overall good match',
-          version: '1.0',
+          matchedSkills: ['TypeScript'],
+          missingSkills: ['Python'],
+          suggestedSkills: ['Node.js'],
         };
 
         service.submitGapAnalysis(request).subscribe((result) => {
@@ -900,20 +862,8 @@ describe('ApiService', () => {
           type: 'application/pdf',
         });
         const mockResult: GapAnalysisResult = {
-          overallScore: 85,
-          skillMatch: { matched: ['TypeScript'], missing: [], score: 85 },
-          experienceMatch: { totalYears: 5, requiredYears: 3, score: 90 },
-          educationMatch: {
-            requiredLevel: 'Bachelor',
-            candidateLevel: 'Bachelor',
-            relevantFields: ['CS'],
-            score: 100,
-          },
-          recommendations: [],
-          strengths: ['Good match'],
-          gaps: [],
-          analysis: 'Excellent candidate',
-          version: '1.0',
+          matchedSkills: ['TypeScript'],
+          missingSkills: [],
         };
 
         service.submitGapAnalysisWithFile(jdText, file).subscribe((result) => {

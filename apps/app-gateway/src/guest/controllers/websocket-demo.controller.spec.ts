@@ -1,10 +1,10 @@
-import { WebsocketDemoController } from './websocket-demo.controller';
+import { WebSocketDemoController } from './websocket-demo.controller';
 
-describe('WebsocketDemoController', () => {
-  let controller: WebsocketDemoController;
+describe('WebSocketDemoController', () => {
+  let controller: WebSocketDemoController;
 
   beforeEach(() => {
-    controller = new WebsocketDemoController({} as any);
+    controller = new WebSocketDemoController({} as any);
   });
 
   describe('getDemoStatus', () => {

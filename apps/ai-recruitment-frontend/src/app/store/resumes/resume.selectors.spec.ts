@@ -1,15 +1,18 @@
 import * as ResumeSelectors from './resume.selectors';
-import type { ResumeState} from './resume.state';
+import type { ResumeState } from './resume.state';
 import { initialResumeState as _initialResumeState } from './resume.state';
 import type { ResumeListItem, ResumeDetail } from './resume.model';
 import type { AppState } from '../app.state';
 
 describe('Resume Selectors', () => {
   type BaseResumeStatus = ResumeListItem['status'];
-  type ExtendedResumeAnalysis =
-    NonNullable<ResumeListItem['analysis']> & {
-      skills?: string[];
-    };
+  type ExtendedResumeAnalysis = NonNullable<ResumeListItem['analysis']> & {
+    skills?: string[];
+  };
+  type ExtendedResumeListItem = Omit<ResumeListItem, 'analysis'> & {
+    uploadedAt: Date;
+    analysis?: ExtendedResumeAnalysis;
+  };
   type ExtendedResumeListItem = Omit<ResumeListItem, 'status' | 'analysis'> & {
     status: BaseResumeStatus | 'processed' | 'processing';
     uploadedAt: Date;
@@ -21,7 +24,7 @@ describe('Resume Selectors', () => {
       id: 'resume1',
       jobId: 'job1',
       originalFilename: 'john_doe_resume.pdf',
-      status: 'processed',
+      status: 'completed',
       matchScore: 85,
       candidateName: 'John Doe',
       createdAt: new Date('2024-01-01'),
@@ -38,7 +41,7 @@ describe('Resume Selectors', () => {
       id: 'resume2',
       jobId: 'job1',
       originalFilename: 'jane_smith_resume.pdf',
-      status: 'processing',
+      status: 'parsing',
       matchScore: 92,
       candidateName: 'Jane Smith',
       createdAt: new Date('2024-01-02'),
@@ -55,7 +58,7 @@ describe('Resume Selectors', () => {
       id: 'resume3',
       jobId: 'job1',
       originalFilename: 'bob_johnson_resume.docx',
-      status: 'processed',
+      status: 'completed',
       matchScore: 78,
       candidateName: 'Bob Johnson',
       createdAt: new Date('2024-01-03'),
@@ -139,6 +142,8 @@ describe('Resume Selectors', () => {
       webSocketConnected: false,
       webSocketStatus: 'disconnected',
       jobProgress: {},
+      isOffline: false,
+      connectionMessage: null,
     },
     reports: {
       reports: [],
@@ -228,30 +233,54 @@ describe('Resume Selectors', () => {
 
   describe('Derived Selectors', () => {
     it('should select resumes count', () => {
-      const result =
-        ResumeSelectors.selectResumesCount.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = ResumeSelectors.selectResumesCount.projector(
+        mockResumeListItems as ResumeListItem[],
+      );
       expect(result).toBe(4);
     });
 
     it('should select resume by ID', () => {
       const selectorFunction = ResumeSelectors.selectResumeById('resume2');
-      const result = selectorFunction.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = selectorFunction.projector(
+        mockResumeListItems as ResumeListItem[],
+      );
       expect(result).toEqual(mockResumeListItems[1]);
       expect(result!.candidateName).toBe('Jane Smith');
     });
 
     it('should return undefined for non-existent resume ID', () => {
       const selectorFunction = ResumeSelectors.selectResumeById('nonexistent');
-      const result = selectorFunction.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = selectorFunction.projector(
+        mockResumeListItems as ResumeListItem[],
+      );
+      expect(result).toBeUndefined();
+    });
+
+    it('should select resume by ID', () => {
+      const selectorFunction = ResumeSelectors.selectResumeById('resume2');
+      const result = selectorFunction.projector(
+        mockResumeListItems as unknown as ResumeListItem[],
+      );
+      expect(result).toEqual(mockResumeListItems[1]);
+      expect(result!.candidateName).toBe('Jane Smith');
+    });
+
+    it('should return undefined for non-existent resume ID', () => {
+      const selectorFunction = ResumeSelectors.selectResumeById('nonexistent');
+      const result = selectorFunction.projector(
+        mockResumeListItems as unknown as ResumeListItem[],
+      );
       expect(result).toBeUndefined();
     });
 
     it('should select resumes by status', () => {
-      const processedResumesSelector =
-        ResumeSelectors.selectResumesByStatus('processed');
-      const result = processedResumesSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const completedResumesSelector =
+        ResumeSelectors.selectResumesByStatus('completed');
+      const result = completedResumesSelector.projector(
+        mockResumeListItems as ResumeListItem[],
+      );
       expect(result).toHaveLength(2);
-      expect(result.every((resume) => resume.status === 'processed')).toBe(
+      expect(result.every((resume) => resume.status === 'completed')).toBe(
         true,
       );
       expect(result.map((resume) => resume.candidateName)).toEqual([
@@ -261,17 +290,21 @@ describe('Resume Selectors', () => {
     });
 
     it('should return empty array for non-existent status', () => {
-      const nonExistentStatusSelector =
-        ResumeSelectors.selectResumesByStatus('archived');
-      const result = nonExistentStatusSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const nonExistentStatusSelector = ResumeSelectors.selectResumesByStatus(
+        'archived' as ResumeListItem['status'],
+      );
+      const result = nonExistentStatusSelector.projector(
+        mockResumeListItems as ResumeListItem[],
+      );
       expect(result).toEqual([]);
     });
 
     it('should select processed resumes', () => {
-      const result =
-        ResumeSelectors.selectProcessedResumes.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = ResumeSelectors.selectProcessedResumes.projector(
+        mockResumeListItems as ResumeListItem[],
+      );
       expect(result).toHaveLength(2);
-      expect(result.every((resume) => resume.status === 'processed')).toBe(
+      expect(result.every((resume) => resume.status === 'completed')).toBe(
         true,
       );
     });
@@ -279,7 +312,7 @@ describe('Resume Selectors', () => {
     it('should select pending resumes', () => {
       const resumesWithPending = [
         { ...mockResumeListItems[0], status: 'pending' as const },
-        { ...mockResumeListItems[1], status: 'processing' as const },
+        { ...mockResumeListItems[1], status: 'parsing' as const },
         mockResumeListItems[2],
         mockResumeListItems[3],
       ];
@@ -289,7 +322,7 @@ describe('Resume Selectors', () => {
       expect(
         result.every(
           (resume) =>
-            resume.status === 'pending' || resume.status === 'processing',
+            resume.status === 'pending' || resume.status === 'parsing',
         ),
       ).toBe(true);
     });
@@ -298,7 +331,7 @@ describe('Resume Selectors', () => {
   describe('Recent Resumes Selector', () => {
     it('should select recent resumes with default limit', () => {
       const recentResumesSelector = ResumeSelectors.selectRecentResumes();
-      const result = recentResumesSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = recentResumesSelector.projector(mockResumeListItems as ResumeListItem[]);
 
       expect(result).toHaveLength(4); // All resumes since we only have 4
       // Should be sorted by most recent first
@@ -310,7 +343,7 @@ describe('Resume Selectors', () => {
 
     it('should respect custom limit', () => {
       const recentResumesSelector = ResumeSelectors.selectRecentResumes(2);
-      const result = recentResumesSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = recentResumesSelector.projector(mockResumeListItems as ResumeListItem[]);
 
       expect(result).toHaveLength(2);
       expect(result[0].uploadedAt).toEqual(new Date('2024-01-04'));
@@ -326,7 +359,35 @@ describe('Resume Selectors', () => {
     it('should not mutate original array', () => {
       const originalResumes = [...mockResumeListItems];
       const recentResumesSelector = ResumeSelectors.selectRecentResumes();
-      recentResumesSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      recentResumesSelector.projector(mockResumeListItems as ResumeListItem[]);
+
+      expect(mockResumeListItems).toEqual(originalResumes);
+    });
+  });
+
+    it('should respect custom limit', () => {
+      const recentResumesSelector = ResumeSelectors.selectRecentResumes(2);
+      const result = recentResumesSelector.projector(
+        mockResumeListItems as unknown as ResumeListItem[],
+      );
+
+      expect(result).toHaveLength(2);
+      expect(result[0].uploadedAt).toEqual(new Date('2024-01-04'));
+      expect(result[1].uploadedAt).toEqual(new Date('2024-01-03'));
+    });
+
+    it('should handle empty resumes array', () => {
+      const recentResumesSelector = ResumeSelectors.selectRecentResumes();
+      const result = recentResumesSelector.projector([]);
+      expect(result).toEqual([]);
+    });
+
+    it('should not mutate original array', () => {
+      const originalResumes = [...mockResumeListItems];
+      const recentResumesSelector = ResumeSelectors.selectRecentResumes();
+      recentResumesSelector.projector(
+        mockResumeListItems as unknown as ResumeListItem[],
+      );
 
       expect(mockResumeListItems).toEqual(originalResumes);
     });
@@ -335,19 +396,20 @@ describe('Resume Selectors', () => {
   describe('High-Scoring Resumes Selector', () => {
     it('should select high-scoring resumes with default threshold', () => {
       const highScoringSelector = ResumeSelectors.selectHighScoringResumes();
-      const result = highScoringSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = highScoringSelector.projector(mockResumeListItems as ResumeListItem[]);
 
       expect(result).toHaveLength(3); // 85, 92, 88 are >= 75
       expect(
         result.every(
-          (resume) => resume.analysis && resume.analysis.overallScore >= 75,
+          (resume) =>
+            resume.analysis && resume.analysis.overallScore >= 80,
         ),
       ).toBe(true);
     });
 
     it('should respect custom threshold', () => {
       const highScoringSelector = ResumeSelectors.selectHighScoringResumes(90);
-      const result = highScoringSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = highScoringSelector.projector(mockResumeListItems as ResumeListItem[]);
 
       expect(result).toHaveLength(1); // Only 92 is >= 90
       expect(result[0].candidateName).toBe('Jane Smith');
@@ -362,14 +424,14 @@ describe('Resume Selectors', () => {
       ];
 
       const highScoringSelector = ResumeSelectors.selectHighScoringResumes();
-      const result = highScoringSelector.projector(resumesWithoutAnalysis);
+      const result = highScoringSelector.projector(resumesWithoutAnalysis as ResumeListItem[]);
 
       expect(result).toHaveLength(2); // Only items with analysis
     });
 
     it('should return empty array when no resumes meet threshold', () => {
       const highScoringSelector = ResumeSelectors.selectHighScoringResumes(95);
-      const result = highScoringSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = highScoringSelector.projector(mockResumeListItems as ResumeListItem[]);
 
       expect(result).toEqual([]);
     });
@@ -472,22 +534,22 @@ describe('Resume Selectors', () => {
   describe('Complex Derived Selectors', () => {
     it('should calculate resume statistics correctly', () => {
       const result =
-        ResumeSelectors.selectResumeStatistics.projector(mockResumeListItems as unknown as ResumeListItem[]);
+        ResumeSelectors.selectResumeStatistics.projector(mockResumeListItems as ResumeListItem[]);
 
       expect(result.total).toBe(4);
       expect(result.processed).toBe(2);
-      expect(result.processing).toBe(1); // pending + processing
+      expect(result.processing).toBe(1); // parsing
       expect(result.failed).toBe(1);
-      expect(result.averageScore).toBe(81.5); // (85 + 78) / 2 = 81.5 (only processed resumes)
+      expect(result.averageScore).toBe(81.5); // (85 + 78) / 2 = 81.5 (only completed resumes)
       expect(result.processingRate).toBe(50); // 2/4 * 100 = 50%
       expect(result.topSkills).toBeDefined();
     });
 
     it('should calculate top skills correctly', () => {
       const result =
-        ResumeSelectors.selectResumeStatistics.projector(mockResumeListItems as unknown as ResumeListItem[]);
+        ResumeSelectors.selectResumeStatistics.projector(mockResumeListItems as ResumeListItem[]);
 
-      expect(result.topSkills).toHaveLength(6); // Unique skills from processed resumes
+      expect(result.topSkills).toHaveLength(6); // Unique skills from completed resumes
       expect(result.topSkills[0]).toEqual({ skill: 'JavaScript', count: 1 });
       expect(result.topSkills[1]).toEqual({ skill: 'TypeScript', count: 1 });
     });
@@ -505,12 +567,12 @@ describe('Resume Selectors', () => {
     });
 
     it('should handle resumes without analysis in statistics', () => {
-      const resumesWithoutAnalysis = [
-        { ...mockResumeListItems[0], analysis: undefined },
-        { ...mockResumeListItems[1], analysis: undefined },
+      const resumesWithoutAnalysis: ResumeListItem[] = [
+        { ...(mockResumeListItems[0] as ResumeListItem), analysis: undefined },
+        { ...(mockResumeListItems[1] as ResumeListItem), analysis: undefined },
         {
-          ...mockResumeListItems[2],
-          status: 'processed' as const,
+          ...(mockResumeListItems[2] as ResumeListItem),
+          status: 'completed' as const,
           analysis: undefined,
         },
       ];
@@ -530,7 +592,7 @@ describe('Resume Selectors', () => {
         80,
         90,
       );
-      const result = scoreRangeSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = scoreRangeSelector.projector(mockResumeListItems as ResumeListItem[]);
 
       expect(result).toHaveLength(2); // 85 and 88 are in range 80-90
       expect(result.map((resume) => resume.candidateName)).toEqual([
@@ -544,7 +606,7 @@ describe('Resume Selectors', () => {
         78,
         85,
       );
-      const result = scoreRangeSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = scoreRangeSelector.projector(mockResumeListItems as ResumeListItem[]);
 
       expect(result).toHaveLength(2); // 78 and 85 (inclusive)
       expect(
@@ -560,7 +622,7 @@ describe('Resume Selectors', () => {
         95,
         100,
       );
-      const result = scoreRangeSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = scoreRangeSelector.projector(mockResumeListItems as ResumeListItem[]);
 
       expect(result).toEqual([]);
     });
@@ -586,7 +648,7 @@ describe('Resume Selectors', () => {
     it('should select resumes by skill query', () => {
       const skillSearchSelector =
         ResumeSelectors.selectResumesBySkill('JavaScript');
-      const result = skillSearchSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = skillSearchSelector.projector(mockResumeListItems as ResumeListItem[]);
 
       expect(result).toHaveLength(1);
       expect(result[0].candidateName).toBe('John Doe');
@@ -595,7 +657,7 @@ describe('Resume Selectors', () => {
     it('should handle case-insensitive search', () => {
       const skillSearchSelector =
         ResumeSelectors.selectResumesBySkill('typescript');
-      const result = skillSearchSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = skillSearchSelector.projector(mockResumeListItems as ResumeListItem[]);
 
       expect(result).toHaveLength(2); // John Doe and Alice Williams have TypeScript
     });
@@ -603,21 +665,21 @@ describe('Resume Selectors', () => {
     it('should handle partial skill matching', () => {
       const skillSearchSelector =
         ResumeSelectors.selectResumesBySkill('Script');
-      const result = skillSearchSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = skillSearchSelector.projector(mockResumeListItems as ResumeListItem[]);
 
       expect(result).toHaveLength(2); // JavaScript and TypeScript contain 'Script'
     });
 
     it('should return empty array for empty query', () => {
       const skillSearchSelector = ResumeSelectors.selectResumesBySkill('');
-      const result = skillSearchSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = skillSearchSelector.projector(mockResumeListItems as ResumeListItem[]);
 
       expect(result).toEqual([]);
     });
 
     it('should return empty array for whitespace-only query', () => {
       const skillSearchSelector = ResumeSelectors.selectResumesBySkill('   ');
-      const result = skillSearchSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = skillSearchSelector.projector(mockResumeListItems as ResumeListItem[]);
 
       expect(result).toEqual([]);
     });
@@ -636,7 +698,7 @@ describe('Resume Selectors', () => {
 
     it('should return empty array when no skills match', () => {
       const skillSearchSelector = ResumeSelectors.selectResumesBySkill('Rust');
-      const result = skillSearchSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = skillSearchSelector.projector(mockResumeListItems as ResumeListItem[]);
 
       expect(result).toEqual([]);
     });
@@ -710,23 +772,26 @@ describe('Resume Selectors', () => {
     });
 
     it('should return new reference for different inputs', () => {
-      const modifiedState = {
+      const newResume: ResumeListItem = {
+        id: 'resume5',
+        jobId: 'job1',
+        originalFilename: 'new_resume.pdf',
+        status: 'completed',
+        candidateName: 'New Candidate',
+        createdAt: new Date(),
+        uploadedAt: new Date(),
+        analysis: {
+          overallScore: 90,
+          skillsMatch: 85,
+          experienceMatch: 88,
+          educationMatch: 82,
+        },
+      };
+      const modifiedState: ResumeState = {
         ...mockResumeState,
         resumes: [
-          ...mockResumeListItems,
-          {
-            id: 'resume5',
-            jobId: 'job1',
-            originalFilename: 'new_resume.pdf',
-            status: 'processed' as const,
-            candidateName: 'New Candidate',
-            createdAt: new Date(),
-            uploadedAt: new Date(),
-            analysis: {
-              overallScore: 90,
-              skills: ['Vue.js', 'MongoDB'],
-            },
-          } as ExtendedResumeListItem,
+          ...mockResumeListItems as ResumeListItem[],
+          newResume,
         ],
       };
 
@@ -857,28 +922,28 @@ describe('Resume Selectors', () => {
     });
 
     it('should efficiently filter resumes by status', () => {
-      const largeResumesList: ExtendedResumeListItem[] = Array.from(
+      const largeResumesList: ResumeListItem[] = Array.from(
         { length: 1000 },
         (_, i) => ({
           id: `resume${i}`,
           jobId: 'job1',
           originalFilename: `resume${i}.pdf`,
           status:
-            i % 3 === 0 ? 'processed' : i % 3 === 1 ? 'processing' : 'failed',
+            i % 3 === 0 ? 'completed' : i % 3 === 1 ? 'parsing' : 'failed',
           candidateName: `Candidate ${i}`,
           createdAt: new Date(),
           uploadedAt: new Date(),
         }),
       );
 
-      const processedSelector =
-        ResumeSelectors.selectResumesByStatus('processed');
+      const completedSelector =
+        ResumeSelectors.selectResumesByStatus('completed');
       const start = performance.now();
-      const result = processedSelector.projector(largeResumesList);
+      const result = completedSelector.projector(largeResumesList);
       const end = performance.now();
 
       expect(result.length).toBeGreaterThan(300);
-      expect(result.every((resume) => resume.status === 'processed')).toBe(
+      expect(result.every((resume) => resume.status === 'completed')).toBe(
         true,
       );
       expect(end - start).toBeLessThan(50); // Should be very fast
@@ -916,13 +981,13 @@ describe('Resume Selectors', () => {
     });
 
     it('should efficiently search by skills', () => {
-      const largeResumesList: ExtendedResumeListItem[] = Array.from(
+      const largeResumesList: ResumeListItem[] = Array.from(
         { length: 1000 },
         (_, i) => ({
           id: `resume${i}`,
           jobId: 'job1',
           originalFilename: `resume${i}.pdf`,
-          status: 'processed',
+          status: 'completed',
           candidateName: `Candidate ${i}`,
           createdAt: new Date(),
           uploadedAt: new Date(),
@@ -946,7 +1011,7 @@ describe('Resume Selectors', () => {
       expect(result.length).toBe(100); // Every 10th resume has JavaScript
       expect(
         result.every((resume) =>
-          resume.analysis?.skills?.some((skill) =>
+          (resume.analysis as ExtendedAnalysis)?.skills?.some((skill) =>
             skill.toLowerCase().includes('javascript'),
           ),
         ),

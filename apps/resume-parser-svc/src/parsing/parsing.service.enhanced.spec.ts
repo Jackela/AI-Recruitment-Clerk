@@ -73,7 +73,10 @@ jest.mock('@ai-recruitment-clerk/infrastructure-shared', () => {
     ContractValidators: {
       isNonEmptyString: (value: unknown) =>
         typeof value === 'string' && value.trim().length > 0,
-      isValidFileSize: (size: number) => size > 0 && size <= 10 * 1024 * 1024,
+      isValidFileSize: (size: number, maxSizeBytes?: number) => {
+        const max = maxSizeBytes || 10 * 1024 * 1024;
+        return typeof size === 'number' && size >= 0 && size <= max;
+      },
     },
   };
 });

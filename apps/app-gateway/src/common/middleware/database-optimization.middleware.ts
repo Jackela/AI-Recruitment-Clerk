@@ -3,7 +3,7 @@
  * AI Recruitment Clerk - 数据库连接池与查询性能优化
  */
 
-import type { NestMiddleware} from '@nestjs/common';
+import type { NestMiddleware } from '@nestjs/common';
 import { Injectable, Logger } from '@nestjs/common';
 import type { Request, Response, NextFunction } from 'express';
 import type { Connection } from 'mongoose';
@@ -39,7 +39,9 @@ interface DatabaseRequest extends Request {
  */
 @Injectable()
 export class DatabaseOptimizationMiddleware implements NestMiddleware {
-  private readonly logger: Logger = new Logger(DatabaseOptimizationMiddleware.name);
+  private readonly logger: Logger = new Logger(
+    DatabaseOptimizationMiddleware.name,
+  );
 
   private metrics: DatabaseMetrics = {
     activeConnections: 0,
@@ -83,7 +85,11 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
    * @param next - The next.
    * @returns The result of the operation.
    */
-  public async use(req: DatabaseRequest, res: Response, next: NextFunction): Promise<void> {
+  public async use(
+    req: DatabaseRequest,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     const queryStartTime = Date.now();
 
     // 设置数据库查询监控
@@ -97,13 +103,19 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
     // 连接池状态检查
     await this.checkConnectionPoolHealth();
 
-    res.on('finish', () => {
-      const totalQueryTime = Date.now() - queryStartTime;
-      req.dbQueryTime = totalQueryTime;
+    if (typeof res.on === 'function') {
+      res.on('finish', () => {
+        const totalQueryTime = Date.now() - queryStartTime;
+        req.dbQueryTime = totalQueryTime;
 
-      this.updateMetrics(req, totalQueryTime);
-      this.logQueryPerformance(req, totalQueryTime);
-    });
+        this.updateMetrics(req, totalQueryTime);
+        this.logQueryPerformance(req, totalQueryTime);
+      });
+    } else {
+      this.logger.debug(
+        'Response object does not support event listeners, skipping metrics collection',
+      );
+    }
 
     next();
   }
@@ -197,7 +209,10 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
     req.dbQueryCount = (req.dbQueryCount || 0) + 1;
   }
 
-  private logQueryPerformance(req: DatabaseRequest, totalQueryTime: number): void {
+  private logQueryPerformance(
+    req: DatabaseRequest,
+    totalQueryTime: number,
+  ): void {
     const { method, path } = req;
     const queryCount = req.dbQueryCount || 0;
     const slowQueries = req.dbSlowQueries || 0;
@@ -239,7 +254,8 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
         }
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.warn('Failed to collect database metrics:', errorMessage);
     }
   }
@@ -363,7 +379,8 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
       // 这里应该实现真实的索引分析逻辑
       // 例如：分析查询日志，识别缺失索引
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.warn('Index analysis failed:', errorMessage);
     }
 
@@ -378,7 +395,8 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
       // 这里应该实现会话清理逻辑
       // 例如：关闭空闲连接，清理过期会话
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.warn('Session cleanup failed:', errorMessage);
     }
   }

@@ -9,7 +9,7 @@ describe('ProductionSecurityValidator', () => {
 
   describe('validate', () => {
     it('should validate production security', () => {
-      const result = validator.validate();
+      const result = validator.validateSecurityConfiguration();
 
       expect(result).toHaveProperty('valid');
     });
