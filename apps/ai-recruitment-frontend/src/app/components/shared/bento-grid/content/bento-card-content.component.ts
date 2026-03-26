@@ -50,7 +50,7 @@ export class BentoCardContentComponent<T = unknown> {
   @ContentChild(TemplateRef) contentTemplate?: TemplateRef<{ $implicit: T }>;
   @Output() contentClick = new EventEmitter<void>();
 
-  getContentClasses(): string {
+  public getContentClasses(): string {
     return this.centered ? 'card-content content-center' : 'card-content';
   }
 }

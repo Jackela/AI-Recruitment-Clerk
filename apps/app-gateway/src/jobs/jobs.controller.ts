@@ -55,7 +55,9 @@ export class JobsController {
    * Initializes a new instance of the Jobs Controller.
    * @param jobsService - The jobs service.
    */
-  constructor(private readonly jobsService: JobsService) {}
+  constructor(private readonly jobsService: JobsService) {
+  // Intentionally empty
+}
 
   /**
    * Creates job.

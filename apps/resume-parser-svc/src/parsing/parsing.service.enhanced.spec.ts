@@ -18,7 +18,7 @@ import type { ResumeDTO } from '@ai-recruitment-clerk/resume-dto';
 jest.mock('@ai-recruitment-clerk/infrastructure-shared', () => {
   class ContractViolationError extends Error {
     constructor(message: string) {
-      super(message);
+      public super(message);
       this.name = 'ContractViolationError';
     }
   }
@@ -73,6 +73,8 @@ jest.mock('@ai-recruitment-clerk/infrastructure-shared', () => {
     ContractValidators: {
       isNonEmptyString: (value: unknown) =>
         typeof value === 'string' && value.trim().length > 0,
+      isValidFileType: (type: string) =>
+        ['pdf', 'doc', 'docx', 'txt'].includes(type.toLowerCase()),
       isValidFileSize: (size: number, maxSizeBytes?: number) => {
         const max = maxSizeBytes || 10 * 1024 * 1024;
         return typeof size === 'number' && size >= 0 && size <= max;

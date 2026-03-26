@@ -539,7 +539,7 @@ describe('Retry decorator', () => {
       attemptCount = 0;
 
       @Retry({ maxAttempts: 3, baseDelayMs: 10, jitterMs: 0 })
-      async retryableMethod() {
+      public async retryableMethod() {
         this.attemptCount++;
         if (this.attemptCount < 3) {
           const error = Object.assign(new Error('Not yet'), { status: 503 });
@@ -559,7 +559,7 @@ describe('Retry decorator', () => {
   it('should eventually fail after max attempts', async () => {
     class TestClass {
       @Retry({ maxAttempts: 2, baseDelayMs: 10, jitterMs: 0 })
-      async alwaysFailingMethod() {
+      public async alwaysFailingMethod() {
         const error = Object.assign(new Error('Always fails'), { status: 503 });
         throw error;
       }
@@ -575,7 +575,7 @@ describe('Retry decorator', () => {
   it('should use default options', async () => {
     class TestClass {
       @Retry()
-      async methodWithDefaults() {
+      public async methodWithDefaults() {
         return 'success';
       }
     }
@@ -595,7 +595,7 @@ describe('WithCircuitBreaker decorator', () => {
         recoveryTimeout: 1000,
         monitoringPeriod: 5000,
       })
-      async protectedMethod() {
+      public async protectedMethod() {
         return 'success';
       }
     }
@@ -609,7 +609,7 @@ describe('WithCircuitBreaker decorator', () => {
   it('should use default options', async () => {
     class TestClass {
       @WithCircuitBreaker('test-operation')
-      async methodWithDefaults() {
+      public async methodWithDefaults() {
         return 'success';
       }
     }

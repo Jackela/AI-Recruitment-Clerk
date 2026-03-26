@@ -33,7 +33,7 @@ describe('CircuitBreaker', () => {
 
       class TestClass {
         @WithCircuitBreaker()
-        async errorMethod(): Promise<void> {
+        public async errorMethod(): Promise<void> {
           throw error;
         }
       }
@@ -47,7 +47,7 @@ describe('CircuitBreaker', () => {
     it('should work with property key parameter', async () => {
       class TestClass {
         @WithCircuitBreaker('customKey')
-        async method(): Promise<string> {
+        public async method(): Promise<string> {
           return 'result';
         }
       }
@@ -67,7 +67,7 @@ describe('CircuitBreaker', () => {
 
       class TestClass {
         @WithCircuitBreaker('testKey', config)
-        async method(): Promise<string> {
+        public async method(): Promise<string> {
           return 'result';
         }
       }
@@ -83,7 +83,7 @@ describe('CircuitBreaker', () => {
         private value = 'test';
 
         @WithCircuitBreaker()
-        async method(): Promise<string> {
+        public async method(): Promise<string> {
           return this.value;
         }
       }
@@ -97,7 +97,7 @@ describe('CircuitBreaker', () => {
     it('should pass method arguments', async () => {
       class TestClass {
         @WithCircuitBreaker()
-        async method(arg1: string, arg2: number): Promise<string> {
+        public async method(arg1: string, arg2: number): Promise<string> {
           return `${arg1}-${arg2}`;
         }
       }
@@ -113,7 +113,7 @@ describe('CircuitBreaker', () => {
 
       class TestClass {
         @WithCircuitBreaker()
-        async increment(): Promise<number> {
+        public async increment(): Promise<number> {
           callCount++;
           return callCount;
         }
@@ -132,7 +132,7 @@ describe('CircuitBreaker', () => {
 
       class TestClass {
         @WithCircuitBreaker()
-        async conditionalMethod(): Promise<string> {
+        public async conditionalMethod(): Promise<string> {
           if (shouldFail) {
             throw new Error('Conditional error');
           }
@@ -167,7 +167,7 @@ describe('CircuitBreaker', () => {
     it('should log error with method name', async () => {
       class TestClass {
         @WithCircuitBreaker()
-        async myMethodName(): Promise<void> {
+        public async myMethodName(): Promise<void> {
           throw new Error('Specific error');
         }
       }
@@ -189,7 +189,7 @@ describe('CircuitBreaker', () => {
 
       class TestClass {
         @WithCircuitBreaker()
-        async method(): Promise<void> {
+        public async method(): Promise<void> {
           throw customError;
         }
       }

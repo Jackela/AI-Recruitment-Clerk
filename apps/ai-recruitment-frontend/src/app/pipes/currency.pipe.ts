@@ -11,7 +11,8 @@ import { Pipe } from '@angular/core';
 })
 export class CurrencyPipe implements PipeTransform {
   private readonly currencySymbols: Record<string, string> = {
-    USD: '$',
+    USD: '
+},
     EUR: '€',
     GBP: '£',
     JPY: '¥',

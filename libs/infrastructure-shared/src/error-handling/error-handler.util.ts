@@ -85,7 +85,7 @@ export class AppError extends Error {
  */
 export class ValidationError extends AppError {
   constructor(message: string, details?: unknown) {
-    super(message, 'VALIDATION_ERROR', ErrorCategory.VALIDATION, ErrorSeverity.LOW, details);
+    public super(message, 'VALIDATION_ERROR', ErrorCategory.VALIDATION, ErrorSeverity.LOW, details);
     this.name = 'ValidationError';
   }
 }
@@ -95,7 +95,7 @@ export class ValidationError extends AppError {
  */
 export class NotFoundError extends AppError {
   constructor(message: string, details?: unknown) {
-    super(message, 'NOT_FOUND', ErrorCategory.NOT_FOUND, ErrorSeverity.LOW, details);
+    public super(message, 'NOT_FOUND', ErrorCategory.NOT_FOUND, ErrorSeverity.LOW, details);
     this.name = 'NotFoundError';
   }
 }
@@ -105,7 +105,7 @@ export class NotFoundError extends AppError {
  */
 export class AuthenticationError extends AppError {
   constructor(message: string, details?: unknown) {
-    super(message, 'AUTHENTICATION_ERROR', ErrorCategory.AUTHENTICATION, ErrorSeverity.HIGH, details);
+    public super(message, 'AUTHENTICATION_ERROR', ErrorCategory.AUTHENTICATION, ErrorSeverity.HIGH, details);
     this.name = 'AuthenticationError';
   }
 }
@@ -115,7 +115,7 @@ export class AuthenticationError extends AppError {
  */
 export class AuthorizationError extends AppError {
   constructor(message: string, details?: unknown) {
-    super(message, 'AUTHORIZATION_ERROR', ErrorCategory.AUTHORIZATION, ErrorSeverity.HIGH, details);
+    public super(message, 'AUTHORIZATION_ERROR', ErrorCategory.AUTHORIZATION, ErrorSeverity.HIGH, details);
     this.name = 'AuthorizationError';
   }
 }
@@ -125,7 +125,7 @@ export class AuthorizationError extends AppError {
  */
 export class ConfigurationError extends AppError {
   constructor(message: string, details?: unknown) {
-    super(message, 'CONFIGURATION_ERROR', ErrorCategory.UNKNOWN, ErrorSeverity.CRITICAL, details);
+    public super(message, 'CONFIGURATION_ERROR', ErrorCategory.UNKNOWN, ErrorSeverity.CRITICAL, details);
     this.name = 'ConfigurationError';
   }
 }
@@ -135,7 +135,7 @@ export class ConfigurationError extends AppError {
  */
 export class ExternalServiceError extends AppError {
   constructor(message: string, details?: unknown) {
-    super(message, 'EXTERNAL_SERVICE_ERROR', ErrorCategory.EXTERNAL_SERVICE, ErrorSeverity.MEDIUM, details);
+    public super(message, 'EXTERNAL_SERVICE_ERROR', ErrorCategory.EXTERNAL_SERVICE, ErrorSeverity.MEDIUM, details);
     this.name = 'ExternalServiceError';
   }
 }

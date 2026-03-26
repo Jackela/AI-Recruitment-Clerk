@@ -23,5 +23,7 @@ export class IncentivePaidEvent implements DomainEvent {
     public readonly paymentMethod: PaymentMethod,
     public readonly transactionId: string,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }

@@ -37,7 +37,9 @@ export class Incentive {
     private readonly createdAt: Date,
     private processedAt?: Date,
     private paidAt?: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   // 工厂方法 - 创建问卷完成激励
   /**

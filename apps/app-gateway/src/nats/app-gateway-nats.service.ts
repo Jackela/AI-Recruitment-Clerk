@@ -32,7 +32,9 @@ export class AppGatewayNatsService {
    * Initializes a new instance of the App Gateway NATS Service.
    * @param natsClient - The nats client.
    */
-  constructor(private readonly natsClient: NatsClientService) {}
+  constructor(private readonly natsClient: NatsClientService) {
+  // Intentionally empty
+}
 
   /**
    * Publish a job description submitted event
@@ -142,11 +144,11 @@ export class AppGatewayNatsService {
       if (this.natsClient.isConnected) {
         // Simulate successful response for testing compatibility
         setTimeout(() => {
-          clearTimeout(timer);
-          resolve({} as T);
+          public clearTimeout(timer);
+          public resolve({} as T);
         }, 100);
       } else {
-        clearTimeout(timer);
+        public clearTimeout(timer);
         reject(new Error('NATS connection not available'));
       }
     });

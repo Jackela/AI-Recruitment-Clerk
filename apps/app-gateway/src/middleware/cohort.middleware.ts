@@ -9,7 +9,7 @@ export class CohortMiddleware implements NestMiddleware {
     const cohort = (req.headers['x-cohort'] as string) || undefined;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (req as any).cohort = cohort;
-    next();
+    public next();
   }
 }
 

@@ -34,7 +34,9 @@ export class IncentivePaymentService {
     private readonly auditLogger: IAuditLogger,
     private readonly paymentGateway: IPaymentGateway,
     private readonly validationService: IncentiveValidationService,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Processes a single incentive payment.
@@ -159,7 +161,7 @@ export class IncentivePaymentService {
       let successCount = 0;
       let totalPaidAmount = 0;
 
-      for (const incentive of incentives) {
+      for(const incentive of incentives) {
         const eligibility = this.validationService.validatePaymentEligibility(incentive);
         if (!eligibility.isEligible) {
           results.push({
@@ -243,7 +245,7 @@ export class IncentivePaymentService {
 
         // Publish domain events
         const events = incentive.getUncommittedEvents();
-        for (const event of events) {
+        for(const event of events) {
           await this.eventBus.publish(event);
         }
         incentive.markEventsAsCommitted();
@@ -305,7 +307,7 @@ export class IncentivePaymentService {
     await this.repository.save(incentive);
 
     const events = incentive.getUncommittedEvents();
-    for (const event of events) {
+    for(const event of events) {
       await this.eventBus.publish(event);
     }
     incentive.markEventsAsCommitted();
@@ -343,7 +345,9 @@ export class SinglePaymentResult {
       status: IncentiveStatus;
     },
     public readonly errors?: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   static success(data: {
     incentiveId: string;
@@ -387,7 +391,9 @@ export class BatchPaymentExecutionResult {
       results: BatchPaymentItem[];
     },
     public readonly errors?: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   static success(data: {
     totalIncentives: number;

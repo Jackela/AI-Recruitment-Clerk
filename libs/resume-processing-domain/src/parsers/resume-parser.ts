@@ -211,7 +211,7 @@ export class PdfResumeParser extends ResumeParser {
     if (experienceSection) {
       const lines = experienceSection[0].split('\n').filter((l) => l.trim());
 
-      for (let i = 0; i < lines.length; i++) {
+      for(let i = 0; i < lines.length; i++) {
         const dateMatch = lines[i].match(/(\d{4})\s*-\s*(\d{4}|present)/i);
         if (dateMatch && i > 0) {
           experiences.push({
@@ -250,7 +250,7 @@ export class PdfResumeParser extends ResumeParser {
     if (educationSection) {
       const lines = educationSection[0].split('\n').filter((l) => l.trim());
 
-      for (let i = 0; i < lines.length; i++) {
+      for(let i = 0; i < lines.length; i++) {
         const degreeMatch = lines[i].match(
           /(Bachelor|Master|PhD|Doctorate|BS|BA|MS|MBA|MD)/i,
         );

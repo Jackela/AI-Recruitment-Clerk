@@ -77,7 +77,7 @@ export class FormatDetectionService {
     let detectedMimeType = 'application/octet-stream';
     let confidence = 0;
 
-    for (const { mimeType, signature, offset } of this.magicNumbers) {
+    for(const { mimeType, signature, offset } of this.magicNumbers) {
       if (this.checkMagicNumber(buffer, signature, offset)) {
         detectedMimeType = mimeType;
         confidence = 0.95;
@@ -132,7 +132,7 @@ export class FormatDetectionService {
       return false;
     }
 
-    for (let i = 0; i < signature.length; i++) {
+    for(let i = 0; i < signature.length; i++) {
       if (buffer[offset + i] !== signature[i]) {
         return false;
       }
@@ -220,7 +220,7 @@ export class FormatDetectionService {
 
   private isValidUtf8(buffer: Buffer): boolean {
     let i = 0;
-    while (i < buffer.length) {
+    while(i < buffer.length) {
       const byte = buffer[i];
 
       if (byte <= 0x7f) {

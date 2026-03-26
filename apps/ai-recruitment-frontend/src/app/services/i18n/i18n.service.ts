@@ -65,7 +65,8 @@ export class I18nService {
       numberFormat: {
         decimal: '.',
         thousands: ',',
-        currency: '$',
+        currency: '
+},
       },
     },
     'zh-TW': {
@@ -78,7 +79,8 @@ export class I18nService {
       numberFormat: {
         decimal: '.',
         thousands: ',',
-        currency: 'NT$',
+        currency: 'NT
+},
       },
     },
     'ja-JP': {
@@ -286,7 +288,7 @@ export class I18nService {
     const keys = key.split('.');
     let value: unknown = translations;
 
-    for (const k of keys) {
+    for(const k of keys) {
       if (typeof value === 'object' && value !== null) {
         value = (value as Record<string, unknown>)[k];
       } else {

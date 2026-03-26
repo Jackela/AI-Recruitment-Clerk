@@ -231,7 +231,7 @@ export class DataTableComponent<T = Record<string, unknown>>
   public getCellValue(row: T, key: string): unknown {
     const keys = key.split('.');
     let value: unknown = row;
-    for (const k of keys) {
+    for(const k of keys) {
       value = (value as Record<string, unknown>)?.[k];
     }
     return value;
@@ -384,7 +384,7 @@ export class DataTableComponent<T = Record<string, unknown>>
     const currentRow = this.focusedRowIndex();
     const currentCol = this.focusedColumnIndex();
 
-    switch (event.key) {
+    switch(event.key) {
       case 'ArrowDown':
         if (currentRow < paginatedData.length - 1) {
           this.focusedRowIndex.set(currentRow + 1);

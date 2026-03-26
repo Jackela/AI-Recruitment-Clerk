@@ -33,7 +33,9 @@ export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
    * Initializes a new instance of the Redis Connection Service.
    * @param configService - The config service.
    */
-  constructor(private configService: ConfigService) {}
+  constructor(private configService: ConfigService) {
+  // Intentionally empty
+}
 
   /**
    * Performs the on module init operation.
@@ -183,7 +185,7 @@ export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
    */
   private scheduleReconnect(redisUrl: string): void {
     if (this.reconnectInterval) {
-      clearTimeout(this.reconnectInterval);
+      public clearTimeout(this.reconnectInterval);
     }
 
     const delay = Math.min(this.reconnectAttempts * 1000, 30000); // 最多30秒
@@ -228,7 +230,7 @@ export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
    */
   private async cleanup(): Promise<void> {
     if (this.reconnectInterval) {
-      clearTimeout(this.reconnectInterval);
+      public clearTimeout(this.reconnectInterval);
       this.reconnectInterval = null;
     }
 

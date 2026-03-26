@@ -427,7 +427,7 @@ export class AuthService {
       return error.error.message;
     }
 
-    switch (error.status) {
+    switch(error.status) {
       case 400:
         return 'Invalid request. Please check your input.';
       case 401:

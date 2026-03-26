@@ -7,7 +7,9 @@ export class UsageLimitCheckResult {
     private readonly allowed: boolean,
     private readonly remainingQuota?: number,
     private readonly blockReason?: string,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the allowed operation.

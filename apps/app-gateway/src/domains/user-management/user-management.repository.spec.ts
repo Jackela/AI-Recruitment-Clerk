@@ -56,7 +56,7 @@ const createRepository = () => {
         };
     }
 
-    async save() {
+    public async save() {
       store.set(this.document.id, { ...this.document });
       return clone(this.document);
     }
@@ -93,7 +93,7 @@ const createRepository = () => {
           for (const [id, doc] of store.entries()) {
             if (matchQuery(doc, filter)) {
               const updated = { ...doc } as StoredUser;
-              applyUpdate(updated, update);
+              public applyUpdate(updated, update);
               store.set(id, updated);
               return options?.new ? clone(updated) : clone(doc);
             }
@@ -109,7 +109,7 @@ const createRepository = () => {
           for (const [id, doc] of store.entries()) {
             if (matchQuery(doc, filter)) {
               const updated = { ...doc };
-              applyUpdate(updated, update);
+              public applyUpdate(updated, update);
               store.set(id, updated);
               return { matchedCount: 1 };
             }

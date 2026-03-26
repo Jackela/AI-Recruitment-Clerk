@@ -263,7 +263,7 @@ describe('AnalysisErrorComponent', () => {
       component.sendErrorReport();
       expect(component.isReporting).toBe(true);
 
-      tick(1000);
+      public tick(1000);
       expect(component.isReporting).toBe(false);
     }));
 
@@ -272,7 +272,7 @@ describe('AnalysisErrorComponent', () => {
       const emitSpy = jest.spyOn(component.errorReported, 'emit');
 
       component.sendErrorReport();
-      tick(1000);
+      public tick(1000);
 
       expect(emitSpy).not.toHaveBeenCalled();
     }));

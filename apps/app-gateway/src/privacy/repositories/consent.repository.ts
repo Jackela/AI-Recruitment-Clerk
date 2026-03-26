@@ -72,7 +72,7 @@ export class ConsentRepository {
   ) {}
 
   // Consent Record Storage Methods
-  async createConsentRecord(
+  public async createConsentRecord(
     recordData: Omit<ConsentRecord, 'id' | 'createdAt' | 'updatedAt'>,
   ): Promise<ConsentRecordDocument> {
     const record = new this.consentRecordModel({
@@ -86,14 +86,14 @@ export class ConsentRepository {
     return record;
   }
 
-  async getConsentRecordByUserAndPurpose(
+  public async getConsentRecordByUserAndPurpose(
     userId: string,
     purpose: ConsentPurpose,
   ): Promise<ConsentRecordDocument | null> {
     return this.consentRecordModel.findOne({ userId, purpose }).exec();
   }
 
-  async getConsentRecordsByUser(
+  public async getConsentRecordsByUser(
     userId: string,
   ): Promise<ConsentRecordDocument[]> {
     return this.consentRecordModel
@@ -102,7 +102,7 @@ export class ConsentRepository {
       .exec();
   }
 
-  async updateConsentStatus(
+  public async updateConsentStatus(
     userId: string,
     purpose: ConsentPurpose,
     newStatus: ConsentStatus,
@@ -131,14 +131,14 @@ export class ConsentRepository {
     return record;
   }
 
-  async deleteConsentRecord(recordId: string): Promise<boolean> {
+  public async deleteConsentRecord(recordId: string): Promise<boolean> {
     const result = await this.consentRecordModel
       .deleteOne({ id: recordId })
       .exec();
     return result.deletedCount > 0;
   }
 
-  async getActiveConsentsByUser(
+  public async getActiveConsentsByUser(
     userId: string,
   ): Promise<ConsentRecordDocument[]> {
     return this.consentRecordModel
@@ -153,7 +153,7 @@ export class ConsentRepository {
       .exec();
   }
 
-  async hasValidConsent(
+  public async hasValidConsent(
     userId: string,
     purpose: ConsentPurpose,
   ): Promise<boolean> {
@@ -172,7 +172,7 @@ export class ConsentRepository {
   }
 
   // Consent Version Tracking Methods
-  async createConsentVersion(
+  public async createConsentVersion(
     versionData: Omit<ConsentVersionRecord, 'id' | 'createdAt'>,
   ): Promise<ConsentVersionRecord> {
     const version: ConsentVersionRecord = {
@@ -192,7 +192,7 @@ export class ConsentRepository {
     return version;
   }
 
-  async getConsentVersionsByPurpose(
+  public async getConsentVersionsByPurpose(
     purpose: ConsentPurpose,
   ): Promise<ConsentVersionRecord[]> {
     const versions = this.consentVersionStore.get(purpose) || [];
@@ -201,7 +201,7 @@ export class ConsentRepository {
     );
   }
 
-  async getActiveConsentVersion(
+  public async getActiveConsentVersion(
     purpose: ConsentPurpose,
   ): Promise<ConsentVersionRecord | null> {
     const versions = this.consentVersionStore.get(purpose) || [];
@@ -209,7 +209,7 @@ export class ConsentRepository {
     return versions.find((v) => v.isActive && v.effectiveDate <= now) || null;
   }
 
-  async deactivateConsentVersion(
+  public async deactivateConsentVersion(
     versionId: string,
   ): Promise<ConsentVersionRecord | null> {
     for (const [purpose, versions] of this.consentVersionStore.entries()) {
@@ -224,7 +224,7 @@ export class ConsentRepository {
   }
 
   // Withdrawal Records Methods
-  async recordWithdrawal(
+  public async recordWithdrawal(
     withdrawalData: Omit<WithdrawalRecord, 'id' | 'createdAt'>,
   ): Promise<WithdrawalRecord> {
     const withdrawal: WithdrawalRecord = {
@@ -244,14 +244,14 @@ export class ConsentRepository {
     return withdrawal;
   }
 
-  async getWithdrawalsByUser(userId: string): Promise<WithdrawalRecord[]> {
+  public async getWithdrawalsByUser(userId: string): Promise<WithdrawalRecord[]> {
     const withdrawals = this.withdrawalStore.get(userId) || [];
     return withdrawals.sort(
       (a, b) => b.withdrawalDate.getTime() - a.withdrawalDate.getTime(),
     );
   }
 
-  async getWithdrawalsByPurpose(
+  public async getWithdrawalsByPurpose(
     purpose: ConsentPurpose,
   ): Promise<WithdrawalRecord[]> {
     const allWithdrawals: WithdrawalRecord[] = [];
@@ -265,7 +265,7 @@ export class ConsentRepository {
     );
   }
 
-  async getWithdrawalStatistics(): Promise<{
+  public async getWithdrawalStatistics(): Promise<{
     totalWithdrawals: number;
     byPurpose: Record<ConsentPurpose, number>;
     byMonth: Record<string, number>;
@@ -278,7 +278,7 @@ export class ConsentRepository {
     const byPurpose: Record<string, number> = {};
     const byMonth: Record<string, number> = {};
 
-    for (const withdrawal of allWithdrawals) {
+    for(const withdrawal of allWithdrawals) {
       byPurpose[withdrawal.purpose] = (byPurpose[withdrawal.purpose] || 0) + 1;
       const monthKey = withdrawal.withdrawalDate.toISOString().slice(0, 7); // YYYY-MM
       byMonth[monthKey] = (byMonth[monthKey] || 0) + 1;
@@ -292,7 +292,7 @@ export class ConsentRepository {
   }
 
   // Audit Logs Methods
-  async createAuditLog(
+  public async createAuditLog(
     auditData: Omit<ConsentAuditEntry, 'id'>,
   ): Promise<ConsentAuditLogDocument> {
     const auditLog = new this.consentAuditLogModel({
@@ -306,7 +306,7 @@ export class ConsentRepository {
     return auditLog;
   }
 
-  async getAuditLogsByUser(
+  public async getAuditLogsByUser(
     userId: string,
     limit = 100,
   ): Promise<ConsentAuditLogDocument[]> {
@@ -317,7 +317,7 @@ export class ConsentRepository {
       .exec();
   }
 
-  async getAuditLogsByPurpose(
+  public async getAuditLogsByPurpose(
     purpose: ConsentPurpose,
     limit = 100,
   ): Promise<ConsentAuditLogDocument[]> {
@@ -328,7 +328,7 @@ export class ConsentRepository {
       .exec();
   }
 
-  async getAuditLogsByAction(
+  public async getAuditLogsByAction(
     action: ConsentAuditEntry['action'],
     limit = 100,
   ): Promise<ConsentAuditLogDocument[]> {
@@ -339,7 +339,7 @@ export class ConsentRepository {
       .exec();
   }
 
-  async getAuditLogsByDateRange(
+  public async getAuditLogsByDateRange(
     startDate: Date,
     endDate: Date,
     limit = 1000,
@@ -357,7 +357,7 @@ export class ConsentRepository {
   }
 
   // Cookie Consent Methods
-  async createCookieConsent(
+  public async createCookieConsent(
     cookieData: Omit<CookieConsent, 'createdAt' | 'updatedAt'>,
   ): Promise<CookieConsentDocument> {
     const cookieConsent = new this.cookieConsentModel({
@@ -370,13 +370,13 @@ export class ConsentRepository {
     return cookieConsent;
   }
 
-  async getCookieConsentByDevice(
+  public async getCookieConsentByDevice(
     deviceId: string,
   ): Promise<CookieConsentDocument | null> {
     return this.cookieConsentModel.findOne({ deviceId }).exec();
   }
 
-  async updateCookieConsent(
+  public async updateCookieConsent(
     deviceId: string,
     updates: Partial<
       Omit<CookieConsent, 'deviceId' | 'createdAt' | 'updatedAt'>
@@ -396,7 +396,7 @@ export class ConsentRepository {
   }
 
   // GDPR Compliance Methods
-  async deleteAllUserConsentData(userId: string): Promise<void> {
+  public async deleteAllUserConsentData(userId: string): Promise<void> {
     // Delete consent records
     await this.consentRecordModel.deleteMany({ userId }).exec();
 
@@ -423,7 +423,7 @@ export class ConsentRepository {
     );
   }
 
-  async exportUserConsentData(userId: string): Promise<{
+  public async exportUserConsentData(userId: string): Promise<{
     consentRecords: ConsentRecordDocument[];
     auditLogs: ConsentAuditLogDocument[];
     withdrawals: WithdrawalRecord[];
@@ -442,7 +442,7 @@ export class ConsentRepository {
     };
   }
 
-  async validateConsentCompliance(userId: string): Promise<{
+  public async validateConsentCompliance(userId: string): Promise<{
     isCompliant: boolean;
     issues: string[];
   }> {
@@ -450,21 +450,21 @@ export class ConsentRepository {
     const records = await this.getConsentRecordsByUser(userId);
 
     // Check for missing legal basis
-    for (const record of records) {
+    for(const record of records) {
       if (!record.legalBasis) {
         issues.push(`Missing legal basis for purpose ${record.purpose}`);
       }
     }
 
     // Check for missing consent text
-    for (const record of records) {
+    for(const record of records) {
       if (!record.consentText) {
         issues.push(`Missing consent text for purpose ${record.purpose}`);
       }
     }
 
     // Check for missing consent method
-    for (const record of records) {
+    for(const record of records) {
       if (!record.consentMethod) {
         issues.push(`Missing consent method for purpose ${record.purpose}`);
       }
@@ -472,7 +472,7 @@ export class ConsentRepository {
 
     // Check for expired consents without renewal
     const now = new Date();
-    for (const record of records) {
+    for(const record of records) {
       if (
         record.expiryDate &&
         record.expiryDate < now &&
@@ -490,7 +490,7 @@ export class ConsentRepository {
     };
   }
 
-  async cleanupExpiredConsents(): Promise<number> {
+  public async cleanupExpiredConsents(): Promise<number> {
     const now = new Date();
     const result = await this.consentRecordModel
       .updateMany(

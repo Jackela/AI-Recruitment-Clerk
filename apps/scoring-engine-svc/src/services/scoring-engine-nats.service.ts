@@ -24,7 +24,7 @@ export class ScoringEngineNatsService extends BaseMicroserviceService {
     connectionManager: NatsConnectionManager,
     streamManager: NatsStreamManager,
   ) {
-    super(configService, connectionManager, streamManager, 'scoring-engine-svc');
+    public super(configService, connectionManager, streamManager, 'scoring-engine-svc');
   }
 
   /**

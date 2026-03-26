@@ -100,7 +100,9 @@ export class FileUploadService {
     retryDelay: 1000,
   };
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+  // Intentionally empty
+}
 
   /**
    * Upload a single file with progress tracking.

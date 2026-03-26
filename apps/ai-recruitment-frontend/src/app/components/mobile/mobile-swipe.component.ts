@@ -355,7 +355,7 @@ export class MobileSwipeComponent<T = unknown> implements OnInit, OnDestroy {
       return;
     }
 
-    switch (event.key) {
+    switch(event.key) {
       case 'Tab':
         if (this.actions.length > 0) {
           event.preventDefault();

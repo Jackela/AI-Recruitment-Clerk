@@ -291,7 +291,7 @@ export class CampaignComponent implements OnInit {
    */
   public showGuestStats(): void {
     const stats = this.guestUsageService.getGuestStats();
-    alert(
+    public alert(
       `您的使用统计：\n已使用：${stats.usageCount}/5 次\n首次访问：${stats.firstVisit}\n会话ID：${stats.sessionId}`,
     );
   }

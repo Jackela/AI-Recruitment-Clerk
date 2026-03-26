@@ -101,7 +101,7 @@ export class FlagsController {
   @Get(':key')
   @Permissions(Permission.SYSTEM_CONFIG)
   public get(@Param('key') key: string): FeatureFlag {
-    validateFlagKey(key);
+    public validateFlagKey(key);
     const flag = FlagsStore.get(key);
     if (!flag) throw new NotFoundException('Flag not found');
     // Data is already validated when stored
@@ -112,7 +112,7 @@ export class FlagsController {
   @Permissions(Permission.SYSTEM_CONFIG)
   public upsert(@Body() body: FeatureFlag): FeatureFlag {
     // Validate the key before using it
-    validateFlagKey(body.key);
+    public validateFlagKey(body.key);
 
     // Validate and sanitize string fields at input time
     // This prevents malicious data from ever being stored
@@ -137,7 +137,7 @@ export class FlagsController {
   @HttpCode(204)
   @Permissions(Permission.SYSTEM_CONFIG)
   public remove(@Param('key') key: string): void {
-    validateFlagKey(key);
+    public validateFlagKey(key);
     const existed = FlagsStore.delete(key);
     if (!existed) throw new NotFoundException('Flag not found');
   }

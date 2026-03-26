@@ -208,7 +208,7 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
     icon: string;
     badge?: number;
   }): void {
-    switch (action.id) {
+    switch(action.id) {
       case 'notifications':
         break;
       default:
@@ -229,7 +229,7 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
    * Performs the on card swipe operation.
    */
   public onCardSwipe(event: SwipeEvent): void {
-    switch (event.action.id) {
+    switch(event.action.id) {
       case 'view':
       case 'process':
       case 'review':
@@ -244,7 +244,7 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
    * Performs the on activity click operation.
    */
   public onActivityClick(activity: ActivityItem): void {
-    switch (activity.type) {
+    switch(activity.type) {
       case 'success':
       case 'info':
       case 'warning':

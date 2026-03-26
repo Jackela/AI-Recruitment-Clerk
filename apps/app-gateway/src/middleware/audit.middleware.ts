@@ -30,7 +30,7 @@ export class AuditMiddleware implements NestMiddleware {
       ensureDir(dir);
       fs.appendFileSync(path.join(dir, `audit-${new Date().toISOString().slice(0,10)}.jsonl`), line + '\n');
     });
-    next();
+    public next();
   }
 }
 

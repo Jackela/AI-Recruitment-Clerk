@@ -582,7 +582,7 @@ export class IncentiveContractViolation extends Error {
    * @param message - The message.
    */
   constructor(message: string) {
-    super(message);
+    public super(message);
     this.name = 'IncentiveContractViolation';
   }
 }

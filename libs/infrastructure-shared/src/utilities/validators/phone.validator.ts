@@ -145,7 +145,7 @@ export class PhoneValidator {
   ): string {
     const digitsOnly = phone.replace(/\D/g, '');
 
-    switch (format) {
+    switch(format) {
       case 'CN':
         // Format as 1XX XXXX XXXX
         if (digitsOnly.length === 11 && digitsOnly.startsWith('1')) {

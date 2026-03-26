@@ -165,7 +165,9 @@ describe('ServiceUnavailableComponent', () => {
     });
 
     it('should show config alert when config button is clicked', () => {
-      const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
+      const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {
+  // Intentionally empty
+});
       fixture.detectChanges();
 
       const configButton = fixture.nativeElement.querySelector('.config-btn');
@@ -179,7 +181,9 @@ describe('ServiceUnavailableComponent', () => {
     });
 
     it('should show configuration tips in alert', () => {
-      const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
+      const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {
+  // Intentionally empty
+});
       fixture.detectChanges();
 
       const configButton = fixture.nativeElement.querySelector('.config-btn');

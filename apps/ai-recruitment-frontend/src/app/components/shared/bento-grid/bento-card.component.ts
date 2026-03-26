@@ -84,11 +84,11 @@ export class BentoCardComponent {
     return classes.join(' ');
   }
 
-  onActionClick(action: NonNullable<BentoCardData['actions']>[0]): void {
+  public onActionClick(action: NonNullable<BentoCardData['actions']>[0]): void {
     this.actionClick.emit([action]);
   }
 
-  trackByMetricLabel(
+  public trackByMetricLabel(
     _index: number,
     metric: NonNullable<BentoCardData['metrics']>[0],
   ): string {

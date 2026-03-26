@@ -32,7 +32,7 @@ class PDFGenerator {
     };
   }
 
-  addPage(content: string, styles?: Record<string, unknown>): void {
+  public addPage(content: string, styles?: Record<string, unknown>): void {
     this.document.pages.push({
       content,
       images: [],
@@ -40,24 +40,24 @@ class PDFGenerator {
     });
   }
 
-  addImage(pageIndex: number, imageData: string): void {
+  public addImage(pageIndex: number, imageData: string): void {
     if (this.document.pages[pageIndex]) {
       this.document.pages[pageIndex].images.push(imageData);
     }
   }
 
-  generate(): Buffer {
+  public generate(): Buffer {
     if (this.document.pages.length === 0) {
       throw new Error('Cannot generate PDF with no pages');
     }
     return Buffer.from(JSON.stringify(this.document));
   }
 
-  getPageCount(): number {
+  public getPageCount(): number {
     return this.document.pages.length;
   }
 
-  getMetadata(): PDFDocument['metadata'] {
+  public getMetadata(): PDFDocument['metadata'] {
     return { ...this.document.metadata };
   }
 }

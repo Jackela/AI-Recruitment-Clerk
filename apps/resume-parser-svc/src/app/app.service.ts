@@ -43,7 +43,9 @@ export class AppService
     private readonly gridFsService: GridFsService,
     private readonly natsService: ResumeParserNatsService,
     private readonly parsingService: ParsingService,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Retrieves data.
@@ -122,7 +124,7 @@ export class AppService
           'function'
       ) {
         await (this.natsService as unknown as ServiceWithResumeSubscriptions).subscribeToResumeSubmissions(
-          async (event: ResumeSubmittedEvent): Promise<void> => {
+          public async (event: ResumeSubmittedEvent): Promise<void> => {
             // Handle resume submission through parsing service
             if (this.parsingService && event) {
               await this.parsingService.handleResumeSubmitted(event);

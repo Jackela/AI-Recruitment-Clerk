@@ -181,7 +181,7 @@ export class Job {
   /**
    * Check if a status transition is valid
    */
-  canTransitionTo(newStatus: JobStatus): boolean {
+  public canTransitionTo(newStatus: JobStatus): boolean {
     const validTransitions = Job.VALID_STATUS_TRANSITIONS[this.status];
     return validTransitions.includes(newStatus);
   }
@@ -189,7 +189,7 @@ export class Job {
   /**
    * Transition job to a new status
    */
-  transitionTo(newStatus: JobStatus): { success: boolean; errors?: string[] } {
+  public transitionTo(newStatus: JobStatus): { success: boolean; errors?: string[] } {
     if (!this.canTransitionTo(newStatus)) {
       return {
         success: false,
@@ -215,21 +215,21 @@ export class Job {
   /**
    * Activate the job (from draft to active)
    */
-  activate(): { success: boolean; errors?: string[] } {
+  public activate(): { success: boolean; errors?: string[] } {
     return this.transitionTo(JobStatus.ACTIVE);
   }
 
   /**
    * Close the job
    */
-  close(): { success: boolean; errors?: string[] } {
+  public close(): { success: boolean; errors?: string[] } {
     return this.transitionTo(JobStatus.CLOSED);
   }
 
   /**
    * Update job details
    */
-  update(
+  public update(
     data: Partial<Omit<CreateJobData, 'id' | 'postedBy' | 'organizationId'>>,
   ): { success: boolean; errors?: string[] } {
     // Cannot update if archived
@@ -298,7 +298,7 @@ export class Job {
   /**
    * Convert job to plain object
    */
-  toObject(): CreateJobData {
+  public toObject(): CreateJobData {
     return {
       id: this.id,
       title: this.title,

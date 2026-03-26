@@ -201,8 +201,8 @@ export class ServiceUnavailableComponent {
     await this.connectionService.retryConnection();
   }
 
-  showConfig(): void {
-    alert(
+  public showConfig(): void {
+    public alert(
       '请检查以下配置：\n\n' +
         '1. 后端服务是否已启动\n' +
         '2. 环境变量是否正确设置\n' +

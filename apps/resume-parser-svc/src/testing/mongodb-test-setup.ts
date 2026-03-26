@@ -137,7 +137,7 @@ export class MongodbTestSetup {
     }
 
     const collections = connection.collections;
-    for (const key in collections) {
+    for(const key in collections) {
       if (Object.prototype.hasOwnProperty.call(collections, key)) {
         await collections[key].deleteMany({});
       }

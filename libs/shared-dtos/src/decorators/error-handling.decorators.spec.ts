@@ -15,7 +15,7 @@ describe('ErrorHandlingDecorators', () => {
     it('should be applicable to methods', () => {
       class TestService {
         @HandleErrors({ logErrors: false })
-        async testMethod(): Promise<string> {
+        public async testMethod(): Promise<string> {
           return 'success';
         }
       }
@@ -45,7 +45,7 @@ describe('ErrorHandlingDecorators', () => {
     it('should be applicable to methods with retry config', () => {
       class TestService {
         @RetryWithErrorHandling({ maxRetries: 2 })
-        async retriableMethod(): Promise<string> {
+        public async retriableMethod(): Promise<string> {
           return 'success after retry';
         }
       }
@@ -63,7 +63,7 @@ describe('ErrorHandlingDecorators', () => {
     it('should be applicable to methods with config', () => {
       class TestService {
         @MonitorPerformance({ slowThreshold: 1000 })
-        async monitoredMethod(): Promise<string> {
+        public async monitoredMethod(): Promise<string> {
           return 'performance monitored';
         }
       }

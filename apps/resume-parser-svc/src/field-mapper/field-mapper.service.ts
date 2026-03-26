@@ -257,7 +257,7 @@ export class FieldMapperService {
 
       const mappedExperience: ResumeDTO['workExperience'] = [];
 
-      for (const rawExp of rawWorkExperience) {
+      for(const rawExp of rawWorkExperience) {
         if (!rawExp || typeof rawExp !== 'object') {
           continue;
         }
@@ -320,7 +320,7 @@ export class FieldMapperService {
 
       const mappedEducation: ResumeDTO['education'] = [];
 
-      for (const rawEdu of rawEducation) {
+      for(const rawEdu of rawEducation) {
         if (!rawEdu || typeof rawEdu !== 'object') {
           continue;
         }
@@ -376,7 +376,7 @@ export class FieldMapperService {
       const normalizedSkills = new Set<string>();
       const skillGroups = new Set<string>();
 
-      for (const rawSkill of skillsArray) {
+      for(const rawSkill of skillsArray) {
         if (!rawSkill || typeof rawSkill !== 'string') {
           continue;
         }
@@ -517,7 +517,7 @@ export class FieldMapperService {
         confidence: number;
       }[] = [];
 
-      for (const pattern of dateRangePatterns) {
+      for(const pattern of dateRangePatterns) {
         let match;
         while ((match = pattern.exec(text)) !== null) {
           const startDate = await this.normalizeDates(match[1]);

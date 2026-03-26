@@ -259,7 +259,7 @@ export class DataTablePaginationComponent {
       start = Math.max(0, end - maxVisible);
     }
 
-    for (let i = start; i < end; i++) {
+    for(let i = start; i < end; i++) {
       pages.push(i);
     }
 

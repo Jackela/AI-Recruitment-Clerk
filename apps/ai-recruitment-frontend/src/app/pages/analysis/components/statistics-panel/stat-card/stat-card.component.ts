@@ -164,7 +164,7 @@ export class StatCardComponent {
     return this.value.toString();
   }
 
-  getIconClass(): string {
+  public getIconClass(): string {
     if (this.type === 'score' && this.scoreClass) {
       return `score ${this.scoreClass}`;
     }

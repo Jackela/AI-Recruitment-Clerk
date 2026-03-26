@@ -73,7 +73,7 @@ export class ReportGeneratorNatsService extends BaseMicroserviceService {
     connectionManager: NatsConnectionManager,
     streamManager: NatsStreamManager,
   ) {
-    super(configService, connectionManager, streamManager, 'report-generator-svc');
+    public super(configService, connectionManager, streamManager, 'report-generator-svc');
   }
 
   /**

@@ -282,7 +282,7 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
   private async triggerOptimization(reason: string): Promise<void> {
     this.logger.log(`🚀 Triggering database optimization: ${reason}`);
 
-    switch (reason) {
+    switch(reason) {
       case 'high_query_time':
         await this.optimizeQueryPerformance();
         break;

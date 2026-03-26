@@ -170,7 +170,7 @@ export class HttpErrorInterceptor implements HttpInterceptor {
     status: number,
     structuredError: StructuredError,
   ): void {
-    switch (status) {
+    switch(status) {
       case 401:
         // Unauthorized - redirect to login with correlation context
         if (

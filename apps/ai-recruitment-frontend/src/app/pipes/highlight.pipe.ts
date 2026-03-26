@@ -19,7 +19,31 @@ export class HighlightPipe implements PipeTransform {
       return value || '';
     }
 
+    const escapedSearchTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\
+      return value || '';
+    }
+
+    const escapedSearchTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\
+      return value || '';
+    }
+
+    const escapedSearchTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\
+      return value || '';
+    }
+
     const escapedSearchTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escapedSearchTerm})`, 'gi');
+
+    return value.replace(regex, `<mark class="${highlightClass}">$1</mark>`);
+  }');
+    const regex = new RegExp(`(${escapedSearchTerm})`, 'gi');
+
+    return value.replace(regex, `<mark class="${highlightClass}">$1</mark>`);
+  }');
+    const regex = new RegExp(`(${escapedSearchTerm})`, 'gi');
+
+    return value.replace(regex, `<mark class="${highlightClass}">$1</mark>`);
+  }');
     const regex = new RegExp(`(${escapedSearchTerm})`, 'gi');
 
     return value.replace(regex, `<mark class="${highlightClass}">$1</mark>`);

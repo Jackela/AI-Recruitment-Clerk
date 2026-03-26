@@ -127,7 +127,7 @@ export class ScoringService {
     const extra: string[] = [];
 
     // Check required skills
-    for (const required of normalizedRequiredSkills) {
+    for(const required of normalizedRequiredSkills) {
       if (normalizedCandidateSkills.includes(required)) {
         matched.push(required);
       } else {
@@ -136,7 +136,7 @@ export class ScoringService {
     }
 
     // Check preferred skills (count as half points)
-    for (const preferred of normalizedPreferredSkills) {
+    for(const preferred of normalizedPreferredSkills) {
       if (
         normalizedCandidateSkills.includes(preferred) &&
         !matched.includes(preferred)
@@ -146,7 +146,7 @@ export class ScoringService {
     }
 
     // Find extra skills
-    for (const candidateSkill of normalizedCandidateSkills) {
+    for(const candidateSkill of normalizedCandidateSkills) {
       if (
         !normalizedRequiredSkills.includes(candidateSkill) &&
         !normalizedPreferredSkills.includes(candidateSkill)
@@ -310,7 +310,7 @@ export class ScoringService {
     const normalizedRequired = requiredCerts.map((c) => c.toLowerCase().trim());
 
     let matchedCount = 0;
-    for (const required of normalizedRequired) {
+    for(const required of normalizedRequired) {
       if (
         normalizedCandidate.some(
           (c) => c.includes(required) || required.includes(c),
@@ -341,7 +341,7 @@ export class ScoringService {
     );
 
     let matchedCount = 0;
-    for (const required of normalizedRequired) {
+    for(const required of normalizedRequired) {
       if (normalizedCandidate.includes(required)) {
         matchedCount++;
       }

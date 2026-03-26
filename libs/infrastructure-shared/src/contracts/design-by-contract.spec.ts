@@ -11,7 +11,9 @@ describe('DesignByContract', () => {
     it('should return descriptor unchanged', () => {
       const target = {};
       // eslint-disable-next-line @typescript-eslint/no-empty-function
-      const descriptor = { value: () => {} };
+      const descriptor = { value: () => {
+  // Intentionally empty
+} };
       const result = Requires(() => true, 'test message')(
         target,
         'method',
@@ -25,7 +27,9 @@ describe('DesignByContract', () => {
     it('should return descriptor unchanged', () => {
       const target = {};
       // eslint-disable-next-line @typescript-eslint/no-empty-function
-      const descriptor = { value: () => {} };
+      const descriptor = { value: () => {
+  // Intentionally empty
+} };
       const result = Ensures(() => true, 'test message')(
         target,
         'method',
@@ -39,7 +43,9 @@ describe('DesignByContract', () => {
     it('should return descriptor for method decorator', () => {
       const target = {};
       // eslint-disable-next-line @typescript-eslint/no-empty-function
-      const descriptor = { value: () => {} };
+      const descriptor = { value: () => {
+  // Intentionally empty
+} };
       const result = Invariant(() => true, 'test message')(
         target,
         'method',

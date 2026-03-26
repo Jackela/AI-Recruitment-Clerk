@@ -216,7 +216,7 @@ export class GuideOverlayComponent implements OnInit, OnDestroy {
     let top = 0;
     let left = 0;
 
-    switch (position) {
+    switch(position) {
       case 'top':
         top = rect.top - tooltipHeight - gap;
         left = rect.left + rect.width / 2 - tooltipWidth / 2;

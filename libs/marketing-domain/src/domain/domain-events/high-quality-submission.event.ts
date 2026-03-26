@@ -18,5 +18,7 @@ export class HighQualitySubmissionEvent implements DomainEvent {
     public readonly qualityScore: number,
     public readonly qualityReasons: string[],
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }

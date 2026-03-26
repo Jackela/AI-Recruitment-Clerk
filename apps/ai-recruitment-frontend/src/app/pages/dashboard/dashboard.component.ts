@@ -359,7 +359,7 @@ export class DashboardComponent implements OnInit {
    * @returns The string value.
    */
   public getStatusText(status: string): string {
-    switch (status) {
+    switch(status) {
       case 'processing':
         return '处理中';
       case 'completed':

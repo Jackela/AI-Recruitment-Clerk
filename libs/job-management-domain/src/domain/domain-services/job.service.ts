@@ -53,12 +53,14 @@ export interface JobRepository {
 }
 
 export class JobService {
-  constructor(private readonly repository: JobRepository) {}
+  constructor(private readonly repository: JobRepository) {
+  // Intentionally empty
+}
 
   /**
    * Create a new job
    */
-  async createJob(
+  public async createJob(
     data: CreateJobData,
   ): Promise<{ success: boolean; job?: Job; errors?: string[] }> {
     // Validate job data
@@ -85,7 +87,7 @@ export class JobService {
   /**
    * Update an existing job
    */
-  async updateJob(
+  public async updateJob(
     jobId: string,
     data: Partial<CreateJobData>,
   ): Promise<{ success: boolean; job?: Job; errors?: string[] }> {
@@ -119,7 +121,7 @@ export class JobService {
   /**
    * Delete a job
    */
-  async deleteJob(
+  public async deleteJob(
     jobId: string,
   ): Promise<{ success: boolean; errors?: string[] }> {
     // Find the job
@@ -157,14 +159,14 @@ export class JobService {
   /**
    * Get a job by ID
    */
-  async getJobById(jobId: string): Promise<Job | null> {
+  public async getJobById(jobId: string): Promise<Job | null> {
     return this.repository.findById(jobId);
   }
 
   /**
    * Find jobs by status
    */
-  async findJobsByStatus(
+  public async findJobsByStatus(
     status: JobStatus | JobStatus[],
     options: PaginationOptions = { page: 1, limit: 20 },
   ): Promise<PaginatedJobs> {
@@ -177,7 +179,7 @@ export class JobService {
   /**
    * Find jobs by organization
    */
-  async findJobsByOrganization(
+  public async findJobsByOrganization(
     organizationId: string,
     options: PaginationOptions = { page: 1, limit: 20 },
   ): Promise<PaginatedJobs> {
@@ -190,7 +192,7 @@ export class JobService {
   /**
    * Search jobs with filters
    */
-  async searchJobs(
+  public async searchJobs(
     filters: JobFilter,
     options: PaginationOptions = { page: 1, limit: 20 },
   ): Promise<PaginatedJobs> {
@@ -200,7 +202,7 @@ export class JobService {
   /**
    * Activate a job
    */
-  async activateJob(
+  public async activateJob(
     jobId: string,
   ): Promise<{ success: boolean; job?: Job; errors?: string[] }> {
     const job = await this.repository.findById(jobId);
@@ -229,7 +231,7 @@ export class JobService {
   /**
    * Close a job
    */
-  async closeJob(
+  public async closeJob(
     jobId: string,
   ): Promise<{ success: boolean; job?: Job; errors?: string[] }> {
     const job = await this.repository.findById(jobId);
@@ -258,7 +260,7 @@ export class JobService {
   /**
    * Archive a job
    */
-  async archiveJob(
+  public async archiveJob(
     jobId: string,
   ): Promise<{ success: boolean; job?: Job; errors?: string[] }> {
     const job = await this.repository.findById(jobId);
@@ -287,14 +289,14 @@ export class JobService {
   /**
    * Count jobs by filters
    */
-  async countJobs(filters?: JobFilter): Promise<number> {
+  public async countJobs(filters?: JobFilter): Promise<number> {
     return this.repository.count(filters);
   }
 
   /**
    * Get active jobs count
    */
-  async getActiveJobsCount(organizationId?: string): Promise<number> {
+  public async getActiveJobsCount(organizationId?: string): Promise<number> {
     const filters: JobFilter = {
       status: JobStatus.ACTIVE,
       isActive: true,

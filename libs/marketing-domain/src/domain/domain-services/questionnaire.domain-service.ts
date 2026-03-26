@@ -17,7 +17,9 @@ export class QuestionnaireDomainService {
     private readonly repository: IQuestionnaireRepository,
     private readonly templateService: IQuestionnaireTemplateService,
     private readonly eventBus: IDomainEventBus,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the submit questionnaire operation.
@@ -63,7 +65,7 @@ export class QuestionnaireDomainService {
 
       // 发布领域事件（事件已在聚合根中创建）
       const events = questionnaire.getUncommittedEvents();
-      for (const event of events) {
+      for(const event of events) {
         await this.eventBus.publish(event);
       }
       questionnaire.markEventsAsCommitted();
@@ -225,7 +227,9 @@ export class QuestionnaireSubmissionResult {
       summary: any;
     },
     public readonly errors?: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the success operation.
@@ -272,7 +276,9 @@ export class SubmissionTrendsAnalysis {
     public readonly topPainPoints: string[],
     public readonly averageWillingnessToPay: number,
     public readonly userSegmentation: UserSegmentation,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Creates the entity.
@@ -325,7 +331,9 @@ export class IPSubmissionCheckResult {
     public readonly allowed: boolean,
     public readonly blocked: boolean,
     public readonly reason?: string,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the allowed operation.
@@ -359,7 +367,9 @@ export class UserSegmentation {
       byIndustry: { [key: string]: number };
       bySatisfaction: { high: number; medium: number; low: number };
     },
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 // 接口定义

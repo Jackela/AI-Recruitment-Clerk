@@ -232,7 +232,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
    * @returns CSS class string
    */
   public getStatusBadgeClass(status: string): string {
-    switch (status) {
+    switch(status) {
       case 'completed':
         return 'badge-success';
       case 'processing':

@@ -42,7 +42,7 @@ export class UsageLimitRules {
    * 计算奖励配额数量
    */
   public static calculateBonusQuota(bonusType: BonusType): number {
-    switch (bonusType) {
+    switch(bonusType) {
       case BonusType.QUESTIONNAIRE:
         return this.QUESTIONNAIRE_BONUS;
       case BonusType.PAYMENT:
@@ -308,7 +308,9 @@ export class RiskScore {
   constructor(
     public readonly score: number,
     public readonly factors: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 export enum ViolationType {
@@ -344,7 +346,9 @@ export class UsageViolationReport {
       recommendedAction: RecommendedAction;
       nextAllowedTime: Date;
     },
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the ip operation.
@@ -404,7 +408,9 @@ export class BonusValidationResult {
     public readonly isValid: boolean,
     public readonly errors: string[],
     public readonly approvedAmount: number,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -422,7 +428,9 @@ export class UsageEfficiency {
       overallEfficiency: number;
       wasteageScore: number;
     },
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the base utilization operation.

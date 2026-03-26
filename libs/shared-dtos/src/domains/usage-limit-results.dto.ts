@@ -6,7 +6,9 @@ export class UsageLimitCheckResult {
     private readonly allowed: boolean,
     private readonly remainingQuota?: number,
     private readonly blockReason?: string,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Creates an allowed result.
@@ -60,7 +62,9 @@ export class UsageRecordResult {
     private readonly currentUsage?: number,
     private readonly remainingQuota?: number,
     private readonly error?: string,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Creates a success result.

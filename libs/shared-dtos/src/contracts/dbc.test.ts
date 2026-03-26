@@ -31,7 +31,7 @@ class TestService {
     (_email: string) => ContractValidators.isValidEmail(_email),
     'Email must be valid format',
   )
-  async validateEmail(_email: string): Promise<boolean> {
+  public async validateEmail(_email: string): Promise<boolean> {
     return true;
   }
 }

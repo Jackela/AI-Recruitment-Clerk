@@ -26,11 +26,11 @@ class TestImageHostComponent {
   errorCount = 0;
   lastError: Error | null = null;
 
-  onLoaded(): void {
+  public onLoaded(): void {
     this.loadedCount++;
   }
 
-  onError(error: Error): void {
+  public onError(error: Error): void {
     this.errorCount++;
     this.lastError = error;
   }
@@ -57,11 +57,11 @@ class TestDivHostComponent {
   errorCount = 0;
   lastError: Error | null = null;
 
-  onLoaded(): void {
+  public onLoaded(): void {
     this.loadedCount++;
   }
 
-  onError(error: Error): void {
+  public onError(error: Error): void {
     this.errorCount++;
     this.lastError = error;
   }
@@ -136,7 +136,7 @@ describe('LazyLoadDirective - Image Element', () => {
     const loadPromise = new Promise<void>((resolve) => {
       imgElement.onload = () => {
         expect(imgElement.classList.contains('lazy-loaded')).toBe(true);
-        resolve();
+        public resolve();
       };
     });
 
@@ -155,7 +155,7 @@ describe('LazyLoadDirective - Image Element', () => {
         // The directive creates a temporary Image and loads it
         // We need to test the loaded output emission
         expect(component.loadedCount).toBeGreaterThanOrEqual(0);
-        resolve();
+        public resolve();
       }, 100);
     });
   });

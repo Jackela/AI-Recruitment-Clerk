@@ -93,7 +93,9 @@ export class GuestResumeController {
     private readonly guestUsageService: GuestUsageService,
     private readonly natsClient: AppGatewayNatsService,
     private readonly gridFsService: GridFsService,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the analyze resume operation.

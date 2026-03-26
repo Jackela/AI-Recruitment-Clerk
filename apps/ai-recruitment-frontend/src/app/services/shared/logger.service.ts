@@ -176,7 +176,7 @@ export class LoggerService {
     const contextStr = entry.context ? ` [${entry.context}]` : '';
     const fullMessage = `${prefix}${contextStr} ${entry.message}`;
 
-    switch (entry.level) {
+    switch(entry.level) {
       case LogLevel.DEBUG:
         console.debug(fullMessage, entry.data);
         break;

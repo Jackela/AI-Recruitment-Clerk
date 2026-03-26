@@ -86,7 +86,9 @@ export class AnalyticsEvent {
     private readonly createdAt: Date,
     private processedAt?: Date,
     private retentionExpiry?: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   // 工厂方法 - 创建用户交互事件
   /**

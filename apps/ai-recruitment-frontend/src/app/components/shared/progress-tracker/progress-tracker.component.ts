@@ -314,7 +314,7 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
     const t: ProgressMessage['type'] = allowed.includes(msgType) ? msgType : 'info';
     this.addMessage(t, message.data?.message || '状态更新');
 
-    switch (message.type) {
+    switch(message.type) {
       case 'step_change':
         if (message.data?.currentStep) {
           const progressValue = message.data['progress'];
@@ -430,7 +430,7 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
    * @returns The string value.
    */
   public getStatusText(status: string | null): string {
-    switch (status) {
+    switch(status) {
       case 'connected':
         return '已连接';
       case 'connecting':

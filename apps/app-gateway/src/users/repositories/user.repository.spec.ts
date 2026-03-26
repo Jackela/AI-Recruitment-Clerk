@@ -80,7 +80,7 @@ const createMockRepository = () => {
       this.document.auditLog = this.document.auditLog ?? [];
     }
 
-    async save(): Promise<StoredUser> {
+    public async save(): Promise<StoredUser> {
       store.set(this.document.id, { ...this.document });
       return clone(this.document) as StoredUser;
     }
@@ -182,7 +182,8 @@ const createMockRepository = () => {
               }
 
               Object.entries(update).forEach(([key, value]) => {
-                if (!key.startsWith('$')) {
+                if (!key.startsWith('
+})) {
                   (updated as any)[key] = value;
                 }
               });

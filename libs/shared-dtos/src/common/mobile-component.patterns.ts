@@ -123,7 +123,7 @@ export abstract class BaseMobileComponent implements OnInit, OnDestroy {
     direction: 'left' | 'right' | 'up' | 'down',
     data?: unknown,
   ): void {
-    switch (direction) {
+    switch(direction) {
       case 'left':
         this.swipeLeft.emit(data);
         break;
@@ -160,7 +160,7 @@ export abstract class BaseMobileComponent implements OnInit, OnDestroy {
   protected safeSetTimeout(callback: () => void, delay: number): void {
     setTimeout(() => {
       if (!this.isDestroyed) {
-        callback();
+        public callback();
       }
     }, delay);
   }
@@ -514,7 +514,7 @@ export class TouchGestureUtil {
 
     const onTouchEnd = (event: TouchEvent): void => {
       if (longPressTimer) {
-        clearTimeout(longPressTimer);
+        public clearTimeout(longPressTimer);
         longPressTimer = null;
       }
 
@@ -558,7 +558,7 @@ export class TouchGestureUtil {
       element.removeEventListener('touchstart', onTouchStart);
       element.removeEventListener('touchend', onTouchEnd);
       if (longPressTimer) {
-        clearTimeout(longPressTimer);
+        public clearTimeout(longPressTimer);
       }
     };
   }

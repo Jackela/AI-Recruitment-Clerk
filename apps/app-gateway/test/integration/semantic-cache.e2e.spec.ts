@@ -27,11 +27,11 @@ class InMemoryVectorStoreService {
     return;
   }
 
-  async addVector(key: string, vector: number[]): Promise<void> {
+  public async addVector(key: string, vector: number[]): Promise<void> {
     this.entries.set(key, vector);
   }
 
-  async findSimilar(
+  public async findSimilar(
     vector: number[],
     threshold: number,
     count: number,
@@ -55,7 +55,7 @@ class InMemoryVectorStoreService {
     let normA = 0;
     let normB = 0;
 
-    for (let i = 0; i < length; i++) {
+    for(let i = 0; i < length; i++) {
       const av = a[i] ?? 0;
       const bv = b[i] ?? 0;
       dot += av * bv;

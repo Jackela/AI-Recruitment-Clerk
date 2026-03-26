@@ -212,7 +212,7 @@ export class RoleService {
     const assignments = await this.assignmentRepository.findByUserId(userId);
     const roles: Role[] = [];
 
-    for (const assignment of assignments) {
+    for(const assignment of assignments) {
       const role = await this.roleRepository.findById(assignment.roleId);
       if (role) {
         roles.push(role);
@@ -316,7 +316,7 @@ export class RoleService {
       },
     ];
 
-    for (const roleData of defaultRoles) {
+    for(const roleData of defaultRoles) {
       const existing = await this.roleRepository.findByKey(roleData.key);
       if (!existing) {
         await this.roleRepository.create({

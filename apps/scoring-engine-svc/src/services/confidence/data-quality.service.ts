@@ -152,14 +152,14 @@ export class DataQualityService {
     let score = 0;
 
     // Work experience detail
-    for (const exp of resume.workExperience) {
+    for(const exp of resume.workExperience) {
       if (exp.summary && exp.summary.length > 50) score += 25;
       else if (exp.summary && exp.summary.length > 20) score += 15;
       else if (exp.summary) score += 5;
     }
 
     // Education detail
-    for (const edu of resume.education) {
+    for(const edu of resume.education) {
       if (edu.major) score += 15;
       else score += 5;
     }
@@ -212,7 +212,7 @@ export class DataQualityService {
   ): number {
     let inconsistencies = 0;
 
-    for (const exp of workExperience) {
+    for(const exp of workExperience) {
       const startDate = new Date(exp.startDate);
       const endDate =
         exp.endDate === 'present' ? new Date() : new Date(exp.endDate);
@@ -249,7 +249,7 @@ export class DataQualityService {
 
     // Check for overlapping positions (might indicate inconsistency)
     let overlaps = 0;
-    for (let i = 1; i < sorted.length; i++) {
+    for(let i = 1; i < sorted.length; i++) {
       const prevEnd =
         sorted[i - 1].endDate === 'present'
           ? new Date()

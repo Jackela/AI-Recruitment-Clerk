@@ -93,7 +93,7 @@ export class TextExtractionService {
     const lines = text.split('\n');
     let currentSection: SectionInfo | null = null;
 
-    for (let i = 0; i < lines.length; i++) {
+    for(let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
       const sectionType = this.detectSectionType(line);
 
@@ -125,7 +125,7 @@ export class TextExtractionService {
     const lowerLine = line.toLowerCase().trim();
 
     for (const [type, headers] of Object.entries(this.sectionHeaders)) {
-      for (const header of headers) {
+      for(const header of headers) {
         if (
           lowerLine === header ||
           lowerLine.startsWith(header + ' ') ||
@@ -154,7 +154,7 @@ export class TextExtractionService {
     const lines = text.split('\n').slice(0, 30);
     let name: string | null = null;
 
-    for (const line of lines) {
+    for(const line of lines) {
       const trimmed = line.trim();
       if (
         trimmed.length > 0 &&
@@ -200,7 +200,7 @@ export class TextExtractionService {
       /(\d{4})\s*[-–to]+\s*(\d{4}|present)/i,
     ];
 
-    for (const pattern of patterns) {
+    for(const pattern of patterns) {
       const match = text.match(pattern);
       if (match) {
         const isPresent =
@@ -262,9 +262,9 @@ export class TextExtractionService {
 
     const bullets: string[] = [];
 
-    for (const pattern of bulletPatterns) {
+    for(const pattern of bulletPatterns) {
       const matches = text.matchAll(pattern);
-      for (const match of matches) {
+      for(const match of matches) {
         if (match[1]) {
           bullets.push(match[1].trim());
         }
@@ -283,7 +283,7 @@ export class TextExtractionService {
 
     const lines = experienceSection.content.split('\n').filter((l) => l.trim());
 
-    for (let i = 0; i < lines.length; i++) {
+    for(let i = 0; i < lines.length; i++) {
       const dateRange = this.parseDateRange(lines[i]);
 
       if (dateRange) {
@@ -337,7 +337,7 @@ export class TextExtractionService {
       'jd',
     ];
 
-    for (let i = 0; i < lines.length; i++) {
+    for(let i = 0; i < lines.length; i++) {
       const line = lines[i].toLowerCase();
       const hasDegree = degreeKeywords.some((kw) => line.includes(kw));
 

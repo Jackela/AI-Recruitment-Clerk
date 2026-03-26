@@ -102,7 +102,7 @@ export class TooltipDirective implements OnInit, OnDestroy {
     let top = 0;
     let left = 0;
 
-    switch (position) {
+    switch(position) {
       case 'top':
         top = hostRect.top - tooltipRect.height - 8;
         left = hostRect.left + (hostRect.width - tooltipRect.width) / 2;

@@ -326,7 +326,9 @@ export class ReportTemplatesService implements OnModuleDestroy {
    * Initializes a new instance of the Report Templates Service.
    * @param gridFsService - The grid fs service.
    */
-  constructor(private readonly gridFsService: GridFsService) {}
+  constructor(private readonly gridFsService: GridFsService) {
+  // Intentionally empty
+}
 
   /**
    * Cleanup browser instance when the module is destroyed.
@@ -574,7 +576,7 @@ export class ReportTemplatesService implements OnModuleDestroy {
       let extension: string;
 
       try {
-        switch (format) {
+        switch(format) {
           case 'markdown':
             content = await this.generateMarkdownReport(templateType, variables);
             mimeType = 'text/markdown';
@@ -1761,8 +1763,8 @@ export class ReportTemplatesService implements OnModuleDestroy {
 
       // Add borders to the table
       const tableEndRow = 3 + variables.candidates.length;
-      for (let i = 3; i <= tableEndRow; i++) {
-        for (let j = 1; j <= 5; j++) {
+      for(let i = 3; i <= tableEndRow; i++) {
+        for(let j = 1; j <= 5; j++) {
           const cell = sheet.getRow(i).getCell(j);
           cell.border = {
             top: { style: 'thin' as BorderStyle },
@@ -1868,7 +1870,7 @@ export class ReportTemplatesService implements OnModuleDestroy {
   }
 
   private getMarkdownTemplate(templateType: string): string {
-    switch (templateType) {
+    switch(templateType) {
       case 'individual':
         return `# {{reportTitle}}
 

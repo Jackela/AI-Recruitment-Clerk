@@ -144,7 +144,7 @@ export class BentoCardActionsComponent {
     }
   }
 
-  trackByActionLabel(_index: number, action: BentoActionData): string {
+  public trackByActionLabel(_index: number, action: BentoActionData): string {
     return action.label;
   }
 }

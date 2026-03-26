@@ -17,7 +17,7 @@ class MockJobRepository implements JobRepository {
     return this.jobs.get(id) || null;
   }
 
-  async findByOrganization(
+  public async findByOrganization(
     organizationId: string,
     options?: PaginationOptions,
   ): Promise<PaginatedJobs> {
@@ -27,7 +27,7 @@ class MockJobRepository implements JobRepository {
     return this.paginateResults(allJobs, options);
   }
 
-  async findByStatus(
+  public async findByStatus(
     status: JobStatus,
     options?: PaginationOptions,
   ): Promise<PaginatedJobs> {
@@ -37,7 +37,7 @@ class MockJobRepository implements JobRepository {
     return this.paginateResults(allJobs, options);
   }
 
-  async findByFilters(
+  public async findByFilters(
     filters: JobFilter,
     options?: PaginationOptions,
   ): Promise<PaginatedJobs> {
@@ -90,21 +90,21 @@ class MockJobRepository implements JobRepository {
     return this.paginateResults(allJobs, options);
   }
 
-  async save(job: Job): Promise<Job> {
+  public async save(job: Job): Promise<Job> {
     this.jobs.set(job.id, job);
     return job;
   }
 
-  async update(job: Job): Promise<Job> {
+  public async update(job: Job): Promise<Job> {
     this.jobs.set(job.id, job);
     return job;
   }
 
-  async delete(id: string): Promise<boolean> {
+  public async delete(id: string): Promise<boolean> {
     return this.jobs.delete(id);
   }
 
-  async count(filters?: JobFilter): Promise<number> {
+  public async count(filters?: JobFilter): Promise<number> {
     if (!filters) return this.jobs.size;
 
     let count = 0;
@@ -149,7 +149,7 @@ class MockJobRepository implements JobRepository {
     };
   }
 
-  clear(): void {
+  public clear(): void {
     this.jobs.clear();
   }
 }

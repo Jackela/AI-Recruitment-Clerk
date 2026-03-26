@@ -100,8 +100,8 @@ export class BentoTrendIndicatorComponent {
     return `Trend: ${direction} by ${this.trend.value}`;
   }
 
-  getTrendIcon(type: TrendType): string {
-    switch (type) {
+  public getTrendIcon(type: TrendType): string {
+    switch(type) {
       case 'up':
         return 'trending_up';
       case 'down':

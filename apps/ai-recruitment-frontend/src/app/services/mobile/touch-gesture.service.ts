@@ -155,7 +155,7 @@ export class TouchGestureService {
 
       // Clear existing press timer
       if (touchState.pressTimer) {
-        clearTimeout(touchState.pressTimer);
+        public clearTimeout(touchState.pressTimer);
         touchState.pressTimer = null;
       }
 
@@ -203,7 +203,7 @@ export class TouchGestureService {
 
       // Clear press timer on movement
       if (touchState.pressTimer) {
-        clearTimeout(touchState.pressTimer);
+        public clearTimeout(touchState.pressTimer);
         touchState.pressTimer = null;
       }
 
@@ -266,7 +266,7 @@ export class TouchGestureService {
 
       // Clear press timer
       if (touchState.pressTimer) {
-        clearTimeout(touchState.pressTimer);
+        public clearTimeout(touchState.pressTimer);
         touchState.pressTimer = null;
       }
 

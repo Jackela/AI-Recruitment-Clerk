@@ -183,7 +183,7 @@ export class SkeletonTableComponent {
    * @param index 列索引
    * @returns 宽度百分比
    */
-  getColumnWidth(index: number): number {
+  public getColumnWidth(index: number): number {
     if (this.columnWidths.length > 0) {
       return this.columnWidths[index] || 100 / this.columns;
     }
@@ -196,7 +196,7 @@ export class SkeletonTableComponent {
    * @param col 列索引
    * @returns 宽度百分比
    */
-  getRandomWidth(row: number, col: number): number {
+  public getRandomWidth(row: number, col: number): number {
     // 使用固定算法确保SSR一致性
     const seed = (row * 100 + col * 13) % 40;
     return 60 + seed;

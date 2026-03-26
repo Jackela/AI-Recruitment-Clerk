@@ -26,7 +26,7 @@ class TranslatePipe implements PipeTransform {
     'charts.navigation_hint': '使用方向键浏览数据点，按Enter或空格键选择',
   };
 
-  transform(key: string): string {
+  public transform(key: string): string {
     return this.translations[key] || key;
   }
 }
@@ -325,7 +325,7 @@ export class PieChartComponent {
   public handleKeyboardEvent(event: KeyboardEvent): void {
     if (!this.data.length) return;
 
-    switch (event.key) {
+    switch(event.key) {
       case 'ArrowRight':
       case 'ArrowDown':
         this.nextSlice();

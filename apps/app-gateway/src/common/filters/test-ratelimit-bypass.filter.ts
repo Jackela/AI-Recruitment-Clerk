@@ -18,7 +18,7 @@ export class TestRateLimitBypassFilter implements ExceptionFilter {
    * @param host - The host.
    * @returns The result of the operation.
    */
-  public catch(exception: HttpException, host: ArgumentsHost): void {
+  catch(exception: HttpException, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const request = ctx.getRequest();

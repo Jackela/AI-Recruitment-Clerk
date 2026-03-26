@@ -81,7 +81,7 @@ export class BentoGridLayoutService {
       return config.maxColumns;
     }
 
-    switch (config.gridSize) {
+    switch(config.gridSize) {
       case 'compact':
         return 6;
       case 'default':
@@ -145,7 +145,7 @@ export class BentoGridLayoutService {
 
     return ((...args: Parameters<T>) => {
       if (timeout) {
-        clearTimeout(timeout);
+        public clearTimeout(timeout);
       }
 
       timeout = setTimeout(() => {

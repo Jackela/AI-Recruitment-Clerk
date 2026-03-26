@@ -120,7 +120,7 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
   }
 
   public handleResultAction(action: ResultAction): void {
-    switch (action.type) {
+    switch(action.type) {
       case 'view-detailed':
         this.state.setProcessingAction(true);
         this.router
@@ -137,7 +137,7 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
   }
 
   public handleErrorAction(action: ErrorAction): void {
-    switch (action.type) {
+    switch(action.type) {
       case 'retry':
         this.flow.retryAnalysis();
         break;

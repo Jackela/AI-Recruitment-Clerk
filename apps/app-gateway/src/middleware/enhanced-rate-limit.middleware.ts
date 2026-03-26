@@ -261,7 +261,7 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
       if (this.configService.get<string>('NODE_ENV') !== 'production') {
         throw error;
       }
-      next();
+      public next();
     }
   }
 
@@ -575,7 +575,7 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
       }>,
     };
 
-    for (const key of keys) {
+    for(const key of keys) {
       const recordStr = await this.redis?.get(key);
       if (recordStr) {
         const record: SecurityRateLimitRecord = JSON.parse(recordStr);
@@ -644,7 +644,7 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
       reason?: string;
     }> = [];
 
-    for (const key of keys) {
+    for(const key of keys) {
       const lockInfo = await this.redis.get(key);
       if (lockInfo) {
         const parsed = JSON.parse(lockInfo) as { lockedUntil?: number; reason?: string };

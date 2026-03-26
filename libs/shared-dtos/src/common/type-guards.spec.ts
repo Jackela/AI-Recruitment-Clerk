@@ -51,9 +51,13 @@ describe('Type Guards', () => {
     it('should return true for functions (typeof function is object in some contexts)', () => {
       // Note: typeof function === 'function', not 'object', so this should return false
       // eslint-disable-next-line @typescript-eslint/no-empty-function
-      expect(isNonNullObject(() => {})).toBe(false);
+      expect(isNonNullObject(() => {
+  // Intentionally empty
+})).toBe(false);
       // eslint-disable-next-line @typescript-eslint/no-empty-function
-      expect(isNonNullObject(function () {})).toBe(false);
+      expect(isNonNullObject(function () {
+  // Intentionally empty
+})).toBe(false);
     });
   });
 
@@ -150,7 +154,7 @@ describe('Type Guards', () => {
 
     it('should return true for objects with toString method', () => {
       expect(hasToStringMethod({ toString: () => 'custom' })).toBe(true);
-      expect(
+      public expect(
         hasToStringMethod({
           toString: function () {
             return 'custom';

@@ -63,10 +63,18 @@ describe('JobsEventService', () => {
     // Silence logger during tests
     loggerSpy = jest
       .spyOn(Logger.prototype, 'log')
-      .mockImplementation(() => {});
-    jest.spyOn(Logger.prototype, 'error').mockImplementation(() => {});
-    jest.spyOn(Logger.prototype, 'warn').mockImplementation(() => {});
-    jest.spyOn(Logger.prototype, 'debug').mockImplementation(() => {});
+      .mockImplementation(() => {
+  // Intentionally empty
+});
+    jest.spyOn(Logger.prototype, 'error').mockImplementation(() => {
+  // Intentionally empty
+});
+    jest.spyOn(Logger.prototype, 'warn').mockImplementation(() => {
+  // Intentionally empty
+});
+    jest.spyOn(Logger.prototype, 'debug').mockImplementation(() => {
+  // Intentionally empty
+});
 
     const module = await Test.createTestingModule({
       providers: [

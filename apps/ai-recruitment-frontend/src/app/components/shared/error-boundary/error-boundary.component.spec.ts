@@ -142,7 +142,9 @@ describe('ErrorBoundaryComponent', () => {
     it('should call window.location.reload when reload is called', () => {
       const reloadSpy = jest
         .spyOn(window.location, 'reload')
-        .mockImplementation(() => {});
+        .mockImplementation(() => {
+  // Intentionally empty
+});
 
       component.reload();
 

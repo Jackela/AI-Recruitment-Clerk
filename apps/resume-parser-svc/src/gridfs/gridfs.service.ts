@@ -125,7 +125,7 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
           );
           const fileBuffer = Buffer.allocUnsafe(totalLength);
           let offset = 0;
-          for (const chunk of chunks) {
+          for(const chunk of chunks) {
             fileBuffer.set(chunk, offset);
             offset += chunk.byteLength;
           }

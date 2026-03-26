@@ -94,7 +94,9 @@ export class CacheOptimizationService implements OnModuleInit {
    * Initializes a new instance of the Cache Optimization Service.
    * @param cacheService - The cache service.
    */
-  constructor(private readonly cacheService: CacheService) {}
+  constructor(private readonly cacheService: CacheService) {
+  // Intentionally empty
+}
 
   /**
    * Performs the on module init operation.
@@ -154,7 +156,7 @@ export class CacheOptimizationService implements OnModuleInit {
     let recommendation = baseStrategies[accessPattern];
 
     // 根据数据类型进行细化调整
-    switch (dataType) {
+    switch(dataType) {
       case 'user-profile':
         recommendation = {
           ttl: 1800000,
@@ -203,7 +205,7 @@ export class CacheOptimizationService implements OnModuleInit {
     try {
       this.logger.debug('🔄 Starting cache preload cycle...');
 
-      for (const rule of this.config.preloadRules) {
+      for(const rule of this.config.preloadRules) {
         await this.executePreloadRule(rule);
       }
 
@@ -220,7 +222,7 @@ export class CacheOptimizationService implements OnModuleInit {
     dependencies?: string[];
   }): Promise<void> {
     try {
-      switch (rule.pattern) {
+      switch(rule.pattern) {
         case 'jobs:list':
           await this.preloadJobsList();
           break;
@@ -308,7 +310,7 @@ export class CacheOptimizationService implements OnModuleInit {
     action: 'increase_ttl' | 'decrease_ttl' | 'add_preload' | 'remove_preload',
   ): Promise<void> {
     try {
-      switch (action) {
+      switch(action) {
         case 'increase_ttl':
           this.config.strategies.ttl = Math.min(
             this.config.strategies.ttl * 1.5,
@@ -349,7 +351,7 @@ export class CacheOptimizationService implements OnModuleInit {
    * 开始性能监控
    */
   private startPerformanceMonitoring(): void {
-    setInterval(async (): Promise<void> => {
+    public setInterval(async (): Promise<void> => {
       try {
         const metrics = this.cacheService.getMetrics();
 
@@ -395,8 +397,8 @@ export class CacheOptimizationService implements OnModuleInit {
     try {
       this.logger.log('🔥 Starting cache warmup...');
 
-      for (const pattern of patterns) {
-        switch (pattern) {
+      for(const pattern of patterns) {
+        switch(pattern) {
           case 'critical':
             await this.preloadHealthCheck();
             preloadedKeys++;

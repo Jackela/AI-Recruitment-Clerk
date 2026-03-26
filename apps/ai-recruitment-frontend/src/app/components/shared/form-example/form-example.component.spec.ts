@@ -78,7 +78,7 @@ describe('FormExampleComponent', () => {
   describe('Template-Driven Form Validation', () => {
     it('should validate required name field', fakeAsync(() => {
       fixture.detectChanges();
-      tick();
+      public tick();
 
       const nameInput = fixture.debugElement.query(By.css('#name'));
       nameInput.nativeElement.value = '';
@@ -95,7 +95,7 @@ describe('FormExampleComponent', () => {
 
     it('should validate min length for name field', fakeAsync(() => {
       fixture.detectChanges();
-      tick();
+      public tick();
 
       const nameInput = fixture.debugElement.query(By.css('#name'));
       nameInput.nativeElement.value = 'A';
@@ -111,7 +111,7 @@ describe('FormExampleComponent', () => {
 
     it('should pass validation for valid name', fakeAsync(() => {
       fixture.detectChanges();
-      tick();
+      public tick();
 
       const nameInput = fixture.debugElement.query(By.css('#name'));
       nameInput.nativeElement.value = '张三';
@@ -127,7 +127,7 @@ describe('FormExampleComponent', () => {
 
     it('should validate required email field', fakeAsync(() => {
       fixture.detectChanges();
-      tick();
+      public tick();
 
       const emailInput = fixture.debugElement.query(By.css('#email'));
       emailInput.nativeElement.value = '';
@@ -143,7 +143,7 @@ describe('FormExampleComponent', () => {
 
     it('should validate email format', fakeAsync(() => {
       fixture.detectChanges();
-      tick();
+      public tick();
 
       const emailInput = fixture.debugElement.query(By.css('#email'));
       emailInput.nativeElement.value = 'invalid-email';
@@ -159,7 +159,7 @@ describe('FormExampleComponent', () => {
 
     it('should validate phone number format', fakeAsync(() => {
       fixture.detectChanges();
-      tick();
+      public tick();
 
       const phoneInput = fixture.debugElement.query(By.css('#phone'));
       phoneInput.nativeElement.value = '123';
@@ -175,7 +175,7 @@ describe('FormExampleComponent', () => {
 
     it('should pass validation for valid phone number', fakeAsync(() => {
       fixture.detectChanges();
-      tick();
+      public tick();
 
       const phoneInput = fixture.debugElement.query(By.css('#phone'));
       phoneInput.nativeElement.value = '13800138000';
@@ -193,7 +193,7 @@ describe('FormExampleComponent', () => {
   describe('Template-Driven Form Submission', () => {
     it('should call onTemplateSubmit when form is valid', fakeAsync(() => {
       fixture.detectChanges();
-      tick();
+      public tick();
 
       const submitSpy = jest.spyOn(component, 'onTemplateSubmit');
 
@@ -208,7 +208,7 @@ describe('FormExampleComponent', () => {
 
     it('should show success toast on template form submit', fakeAsync(() => {
       fixture.detectChanges();
-      tick();
+      public tick();
 
       component.onTemplateSubmit({
         name: '张三',
@@ -329,7 +329,7 @@ describe('FormExampleComponent', () => {
   describe('Reactive Form Submission', () => {
     it('should show success toast when form is valid', fakeAsync(() => {
       fixture.detectChanges();
-      tick();
+      public tick();
 
       component.reactiveForm.patchValue({
         company: 'ABC公司',
@@ -344,7 +344,7 @@ describe('FormExampleComponent', () => {
 
     it('should show warning toast when form is invalid', fakeAsync(() => {
       fixture.detectChanges();
-      tick();
+      public tick();
 
       component.reactiveForm.patchValue({
         company: '',
@@ -359,7 +359,7 @@ describe('FormExampleComponent', () => {
 
     it('should not submit when form is invalid', fakeAsync(() => {
       fixture.detectChanges();
-      tick();
+      public tick();
 
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
@@ -377,7 +377,7 @@ describe('FormExampleComponent', () => {
 
     it('should log form value when submitted successfully', fakeAsync(() => {
       fixture.detectChanges();
-      tick();
+      public tick();
 
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
@@ -404,7 +404,7 @@ describe('FormExampleComponent', () => {
   describe('Form State Styling', () => {
     it('should apply error class to invalid touched input', fakeAsync(() => {
       fixture.detectChanges();
-      tick();
+      public tick();
 
       const companyControl = component.reactiveForm.get('company');
       companyControl?.setValue('');
@@ -419,7 +419,7 @@ describe('FormExampleComponent', () => {
 
     it('should apply success class to valid touched input', fakeAsync(() => {
       fixture.detectChanges();
-      tick();
+      public tick();
 
       const companyControl = component.reactiveForm.get('company');
       companyControl?.setValue('ABC公司');
@@ -436,7 +436,7 @@ describe('FormExampleComponent', () => {
 
     it('should not apply error class to pristine input', fakeAsync(() => {
       fixture.detectChanges();
-      tick();
+      public tick();
 
       const companyInput = fixture.debugElement.query(By.css('#company'));
       expect(companyInput.nativeElement.classList.contains('error')).toBe(
@@ -506,7 +506,7 @@ describe('FormExampleComponent', () => {
   describe('Custom Error Messages', () => {
     it('should display custom error message for required company', fakeAsync(() => {
       fixture.detectChanges();
-      tick();
+      public tick();
 
       const companyControl = component.reactiveForm.get('company');
       companyControl?.setValue('');

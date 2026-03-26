@@ -209,7 +209,7 @@ export class TipsPanelComponent {
     return CATEGORY_LABELS[category] || category;
   }
 
-  getFilteredTips(): UsageTip[] {
+  public getFilteredTips(): UsageTip[] {
     if (!this.showCategories) {
       return this.tips;
     }
@@ -220,15 +220,15 @@ export class TipsPanelComponent {
     );
   }
 
-  onSelectCategory(category: TipCategory): void {
+  public onSelectCategory(category: TipCategory): void {
     this.categoryChanged.emit(category);
   }
 
-  showMoreTips(): void {
+  public showMoreTips(): void {
     this.moreTipsRequested.emit();
   }
 
-  trackByTip(_index: number, tip: UsageTip): string {
+  public trackByTip(_index: number, tip: UsageTip): string {
     return `${tip.title}-${tip.description.slice(0, 20)}`;
   }
 }

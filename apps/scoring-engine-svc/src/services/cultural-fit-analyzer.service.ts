@@ -133,7 +133,9 @@ export class CulturalFitAnalyzerService {
    * Initializes a new instance of the Cultural Fit Analyzer Service.
    * @param geminiClient - The gemini client.
    */
-  constructor(private readonly geminiClient: GeminiClient) {}
+  constructor(private readonly geminiClient: GeminiClient) {
+  // Intentionally empty
+}
 
   /**
    * Comprehensive cultural fit and soft skills analysis

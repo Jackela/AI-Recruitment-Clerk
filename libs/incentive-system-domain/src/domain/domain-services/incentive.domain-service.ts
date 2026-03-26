@@ -43,7 +43,9 @@ export class IncentiveDomainService {
     private readonly eventBus: IDomainEventBus,
     private readonly auditLogger: IAuditLogger,
     private readonly paymentGateway: IPaymentGateway,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * 创建问卷完成激励
@@ -89,7 +91,7 @@ export class IncentiveDomainService {
 
       // 发布领域事件
       const events = incentive.getUncommittedEvents();
-      for (const event of events) {
+      for(const event of events) {
         await this.eventBus.publish(event);
       }
       incentive.markEventsAsCommitted();
@@ -170,7 +172,7 @@ export class IncentiveDomainService {
 
       // 发布领域事件
       const events = incentive.getUncommittedEvents();
-      for (const event of events) {
+      for(const event of events) {
         await this.eventBus.publish(event);
       }
       incentive.markEventsAsCommitted();
@@ -218,7 +220,7 @@ export class IncentiveDomainService {
 
       // 发布领域事件
       const events = incentive.getUncommittedEvents();
-      for (const event of events) {
+      for(const event of events) {
         await this.eventBus.publish(event);
       }
       incentive.markEventsAsCommitted();
@@ -268,7 +270,7 @@ export class IncentiveDomainService {
 
       // 发布领域事件
       const events = incentive.getUncommittedEvents();
-      for (const event of events) {
+      for(const event of events) {
         await this.eventBus.publish(event);
       }
       incentive.markEventsAsCommitted();
@@ -318,7 +320,7 @@ export class IncentiveDomainService {
 
       // 发布领域事件
       const events = incentive.getUncommittedEvents();
-      for (const event of events) {
+      for(const event of events) {
         await this.eventBus.publish(event);
       }
       incentive.markEventsAsCommitted();
@@ -403,7 +405,7 @@ export class IncentiveDomainService {
 
         // 发布领域事件
         const events = incentive.getUncommittedEvents();
-        for (const event of events) {
+        for(const event of events) {
           await this.eventBus.publish(event);
         }
         incentive.markEventsAsCommitted();
@@ -473,7 +475,7 @@ export class IncentiveDomainService {
       let successCount = 0;
       let totalPaidAmount = 0;
 
-      for (const incentive of incentives) {
+      for(const incentive of incentives) {
         const eligibility = IncentiveRules.canPayIncentive(incentive);
         if (!eligibility.isEligible) {
           results.push({
@@ -506,7 +508,7 @@ export class IncentiveDomainService {
 
             // 发布领域事件
             const events = incentive.getUncommittedEvents();
-            for (const event of events) {
+            for(const event of events) {
               await this.eventBus.publish(event);
             }
             incentive.markEventsAsCommitted();
@@ -693,7 +695,7 @@ export class IncentiveDomainService {
       rejected: 0,
     };
 
-    for (const incentive of incentives) {
+    for(const incentive of incentives) {
       const amount = incentive.getRewardAmount();
       totalAmount += amount;
 
@@ -749,7 +751,7 @@ export class IncentiveDomainService {
       rejected: 0,
     };
 
-    for (const incentive of allIncentives) {
+    for(const incentive of allIncentives) {
       totalAmount += incentive.getRewardAmount();
       uniqueIPs.add(incentive.getRecipientIP());
 

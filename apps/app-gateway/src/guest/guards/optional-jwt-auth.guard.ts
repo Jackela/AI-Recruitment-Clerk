@@ -20,7 +20,7 @@ export class OptionalJwtAuthGuard extends AuthGuard('jwt') {
    * @param reflector - The reflector.
    */
   constructor(private reflector: Reflector) {
-    super();
+    public super();
   }
 
   /**

@@ -36,7 +36,9 @@ interface GapAnalysisResponseDto {
  */
 @Controller('scoring')
 export class ScoringProxyController {
-  constructor(private readonly metrics: MetricsService) {}
+  constructor(private readonly metrics: MetricsService) {
+  // Intentionally empty
+}
   /**
    * Performs the gap analysis operation.
    * @param body - The body.
@@ -171,7 +173,7 @@ export class ScoringProxyController {
         .split(/[^a-z0-9+#.-]+/)
         .filter((t) => t && t.length > 1);
       const out = new Set<string>();
-      for (const t of base) {
+      for(const t of base) {
         out.add(t);
         if (t.includes('aws')) out.add('aws');
         if (t.includes('azure')) out.add('azure');

@@ -379,7 +379,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
   private startUpload(files: UploadFile[]): void {
     this.uploadStart.emit(files);
 
-    for (const file of files) {
+    for(const file of files) {
       this.uploadService.setFileUploading(file.id);
       this.simulateUpload(file);
     }
@@ -396,7 +396,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
       if (currentProgress >= 100) {
         this.uploadService.setFileSuccess(file.id);
         this.uploadProgress.emit({ file, progress: 100 });
-        clearInterval(interval);
+        public clearInterval(interval);
 
         // Check if all uploads are complete
         if (!this.uploadService.getStateSnapshot().hasUploading) {
@@ -413,7 +413,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
     if (Math.random() < 0.1) {
       setTimeout(
         () => {
-          clearInterval(interval);
+          public clearInterval(interval);
           this.uploadService.setFileError(
             file.id,
             'Upload failed. Please try again.',

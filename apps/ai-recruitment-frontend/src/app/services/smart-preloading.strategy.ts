@@ -104,7 +104,7 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
 
     let baseDelay = 1000;
 
-    switch (priority) {
+    switch(priority) {
       case 'high':
         baseDelay = 500;
         break;

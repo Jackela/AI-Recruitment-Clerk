@@ -238,12 +238,12 @@ export class StatisticsPanelComponent {
     );
   }
 
-  onCategoryChanged(category: TipCategory): void {
+  public onCategoryChanged(category: TipCategory): void {
     this.selectedCategory = category;
     this.tipCategoryChanged.emit(category);
   }
 
-  onMoreTipsRequested(): void {
+  public onMoreTipsRequested(): void {
     this.isLoadingTips = true;
     this.moreTipsRequested.emit();
     setTimeout(() => {
@@ -251,7 +251,7 @@ export class StatisticsPanelComponent {
     }, 1000);
   }
 
-  hasMoreTips(): boolean {
+  public hasMoreTips(): boolean {
     return false;
   }
 }

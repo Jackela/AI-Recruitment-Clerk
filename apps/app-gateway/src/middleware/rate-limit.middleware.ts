@@ -165,7 +165,7 @@ export class RateLimitMiddleware implements NestMiddleware {
       }
       const errorDetails = error instanceof Error ? (error.stack ?? error.message) : 'Unknown error';
       this.logger.error('Rate limit error', errorDetails);
-      next(); // 出错时不阻塞请求
+      public next(); // 出错时不阻塞请求
     }
   }
 
@@ -358,7 +358,7 @@ export class RateLimitMiddleware implements NestMiddleware {
       let totalQuestionnaires = 0;
       let totalPayments = 0;
 
-      for (const key of keys) {
+      for(const key of keys) {
         const recordStr = await this.redis?.get(key);
         if (recordStr) {
           const record: UsageRecord = JSON.parse(recordStr);

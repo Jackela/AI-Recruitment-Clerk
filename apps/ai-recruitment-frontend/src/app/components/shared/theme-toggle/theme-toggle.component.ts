@@ -457,7 +457,7 @@ export class ThemeToggleComponent implements OnDestroy {
    */
   public getThemeLabel(): string {
     const theme = this.currentTheme();
-    switch (theme) {
+    switch(theme) {
       case 'light':
         return '明亮';
       case 'dark':

@@ -188,7 +188,7 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly guestApi = inject(GuestApiService);
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       const sessionId = params.get('sessionId');
       if (sessionId) {
@@ -201,12 +201,12 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
-  loadDetailedResults(sessionId: string): void {
+  public loadDetailedResults(sessionId: string): void {
     if (this.lastLoadedSessionId === sessionId && this.analysisResult()) return;
     this.isLoading.set(true);
     this.hasError.set(false);
@@ -247,26 +247,26 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
     else this.errorMessage.set('加载失败，请稍后重试');
   }
 
-  goBack(): void {
+  public goBack(): void {
     this.router.navigate(['/analysis']);
   }
-  retryLoad(): void {
+  public retryLoad(): void {
     this.lastLoadedSessionId = '';
     this.loadDetailedResults(this.sessionId());
   }
-  toggleSkillsExpanded(): void {
+  public toggleSkillsExpanded(): void {
     this.isSkillsExpanded.set(!this.isSkillsExpanded());
   }
-  exportToPdf(): void {
+  public exportToPdf(): void {
     const url = this.analysisResult()?.reportUrl;
     if (url) window.open(`${url}/pdf`, '_blank');
   }
-  exportToExcel(): void {
+  public exportToExcel(): void {
     const url = this.analysisResult()?.reportUrl;
     if (url) window.open(`${url}/excel`, '_blank');
   }
 
-  async shareReport(): Promise<void> {
+  public async shareReport(): Promise<void> {
     const result = this.analysisResult();
     if (!result) return;
     const shareData = {

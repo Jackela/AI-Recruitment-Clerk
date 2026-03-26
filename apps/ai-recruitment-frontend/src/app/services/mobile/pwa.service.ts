@@ -181,7 +181,7 @@ export class PWAService {
    */
   private handleServiceWorkerMessage(event: MessageEvent): void {
     this.ngZone.run(() => {
-      switch (event.data.type) {
+      switch(event.data.type) {
         case 'SYNC_SUCCESS':
           console.log('Sync successful:', event.data.data);
           break;

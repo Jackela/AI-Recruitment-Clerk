@@ -16,5 +16,7 @@ export class PaymentFailedEvent implements DomainEvent {
     public readonly recipientIP: string,
     public readonly error: string,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }

@@ -286,7 +286,7 @@ export class ScoreVisualizationComponent implements OnChanges {
       );
 
       if (progress < 1) {
-        requestAnimationFrame(animate);
+        public requestAnimationFrame(animate);
       } else {
         this.animatedScore = endScore;
       }

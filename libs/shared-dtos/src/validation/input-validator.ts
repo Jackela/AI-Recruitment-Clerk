@@ -222,7 +222,7 @@ export class InputValidator {
     }
 
     // Check for malicious patterns
-    for (const pattern of this.MALICIOUS_PATTERNS) {
+    for(const pattern of this.MALICIOUS_PATTERNS) {
       if (pattern.test(sanitizedText)) {
         errors.push('Text contains potentially malicious content');
         sanitizedText = sanitizedText.replace(pattern, '');
@@ -272,7 +272,7 @@ export class InputValidator {
       /@.*@/, // multiple @ signs
     ];
 
-    for (const pattern of suspiciousPatterns) {
+    for(const pattern of suspiciousPatterns) {
       if (pattern.test(normalizedEmail)) {
         errors.push('Email contains invalid patterns');
         break;
@@ -439,7 +439,7 @@ export class InputValidator {
     const content = buffer.toString('utf8', 0, Math.min(1024, buffer.length));
 
     // Check for malicious patterns in file content
-    for (const pattern of this.MALICIOUS_PATTERNS) {
+    for(const pattern of this.MALICIOUS_PATTERNS) {
       if (pattern.test(content)) {
         errors.push('File contains potentially malicious content');
         break;
@@ -453,10 +453,10 @@ export class InputValidator {
       [0xca, 0xfe, 0xba, 0xbe], // Mach-O executable
     ];
 
-    for (const signature of executableSignatures) {
+    for(const signature of executableSignatures) {
       if (buffer.length >= signature.length) {
         let matches = true;
-        for (let i = 0; i < signature.length; i++) {
+        for(let i = 0; i < signature.length; i++) {
           if (buffer[i] !== signature[i]) {
             matches = false;
             break;
@@ -519,7 +519,7 @@ export class InputValidator {
     const requestString = JSON.stringify(request).toLowerCase();
 
     // Check for SQL injection
-    for (const pattern of sqlInjectionPatterns) {
+    for(const pattern of sqlInjectionPatterns) {
       if (pattern.test(requestString)) {
         errors.push('Request contains potential SQL injection patterns');
         break;
@@ -527,7 +527,7 @@ export class InputValidator {
     }
 
     // Check for XSS
-    for (const pattern of xssPatterns) {
+    for(const pattern of xssPatterns) {
       if (pattern.test(requestString)) {
         errors.push('Request contains potential XSS patterns');
         break;

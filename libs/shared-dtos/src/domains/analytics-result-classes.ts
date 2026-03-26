@@ -17,7 +17,9 @@ export class EventCreationResult {
     public readonly success: boolean,
     public readonly data?: AnalyticsEventSummary,
     public readonly errors?: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs success operation.
@@ -51,7 +53,9 @@ export class BatchProcessingResult {
       results: BatchProcessingItem[];
     },
     public readonly errors?: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs success operation.
@@ -90,7 +94,9 @@ export class PrivacyComplianceResult {
       complianceStatus: 'COMPLIANT' | 'REQUIRES_ACTION';
     },
     public readonly errors?: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs success operation.
@@ -135,7 +141,9 @@ export class DataRetentionReportResult {
       retentionPolicies: AnalyticsDataRetentionPolicy[];
     },
     public readonly errors?: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs success operation.
@@ -175,7 +183,9 @@ export class SessionAnalyticsResult {
     public readonly success: boolean,
     public readonly data?: SessionAnalytics,
     public readonly errors?: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs success operation.
@@ -204,7 +214,9 @@ export class EventProcessingMetricsResult {
     public readonly success: boolean,
     public readonly data?: EventProcessingMetrics,
     public readonly errors?: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs success operation.
@@ -233,7 +245,9 @@ export class DataPrivacyMetricsResult {
     public readonly success: boolean,
     public readonly data?: DataPrivacyMetrics,
     public readonly errors?: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs success operation.
@@ -262,7 +276,9 @@ export class ReportingAccessResult {
     public readonly success: boolean,
     public readonly data?: ReportingPermissionsResult,
     public readonly errors?: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs success operation.

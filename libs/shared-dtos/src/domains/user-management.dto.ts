@@ -16,7 +16,9 @@ export class UserSession {
      
     private _lastActiveAt: Date,
     private readonly dailyQuota: UsageQuota,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   // 工厂方法
   /**
@@ -237,7 +239,7 @@ export class IPAddress extends ValueObject<{ value: string }> {
     if (!props.value || !/^\d+\.\d+\.\d+\.\d+$/.test(props.value)) {
       throw new Error('IP address must be valid IPv4 format');
     }
-    super(props);
+    public super(props);
   }
 
   /**
@@ -395,7 +397,9 @@ export class UsageResult {
     public readonly success: boolean,
     public readonly data?: { used: number; remaining: number },
     public readonly error?: string,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the success operation.
@@ -483,7 +487,9 @@ export class UserManagementValidationResult {
   constructor(
     public readonly isValid: boolean,
     public readonly errors: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 // 领域事件
@@ -501,7 +507,9 @@ export class SessionCreatedEvent implements DomainEvent {
     public readonly sessionId: string,
     public readonly ip: string,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -520,7 +528,9 @@ export class UsageRecordedEvent implements DomainEvent {
     public readonly usageCount: number,
     public readonly remainingQuota: number,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**

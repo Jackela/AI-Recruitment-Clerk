@@ -46,7 +46,7 @@ export class IncentiveRules {
     }
 
     // 特定触发类型的验证
-    switch (triggerType) {
+    switch(triggerType) {
       case TriggerType.QUESTIONNAIRE_COMPLETION:
         if (!triggerData.questionnaireId) {
           errors.push('Questionnaire ID is required');
@@ -121,7 +121,7 @@ export class IncentiveRules {
   ): PaymentMethodValidationResult {
     const errors: string[] = [];
 
-    switch (paymentMethod) {
+    switch(paymentMethod) {
       case PaymentMethod.WECHAT_PAY:
         if (!contactInfo.wechat) {
           errors.push('WeChat ID is required for WeChat Pay');
@@ -176,7 +176,7 @@ export class IncentiveRules {
     const duplicateIds = new Set<string>();
     const seenIds = new Set<string>();
 
-    for (const incentive of incentives) {
+    for(const incentive of incentives) {
       const id = incentive.getId().getValue();
 
       if (seenIds.has(id)) {
@@ -326,7 +326,7 @@ export class IncentiveRules {
     let paidAmount = 0;
     const dailyStats = new Map<string, number>();
 
-    for (const incentive of incentives) {
+    for(const incentive of incentives) {
       const status = incentive.getStatus();
       if (status in statusCounts) {
         statusCounts[status as keyof typeof statusCounts]++;
@@ -370,7 +370,9 @@ export class IncentiveEligibilityResult {
   constructor(
     public readonly isEligible: boolean,
     public readonly errors: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -385,7 +387,9 @@ export class PaymentEligibilityResult {
   constructor(
     public readonly isEligible: boolean,
     public readonly errors: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -400,7 +404,9 @@ export class PaymentMethodValidationResult {
   constructor(
     public readonly isValid: boolean,
     public readonly errors: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -415,7 +421,9 @@ export class BatchPaymentValidationResult {
   constructor(
     public readonly isValid: boolean,
     public readonly errors: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -430,7 +438,9 @@ export class IncentivePriority {
   constructor(
     public readonly score: number,
     public readonly factors: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -447,7 +457,9 @@ export class IncentiveRiskAssessment {
     public readonly riskScore: number,
     public readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH',
     public readonly riskFactors: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -473,7 +485,9 @@ export class IncentiveUsageHistory {
       conversionRate: number;
       dailyDistribution: Record<string, number>;
     },
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the total incentives operation.

@@ -226,7 +226,7 @@ export class GuestLimitModalComponent implements OnInit, OnDestroy {
       if (showModal) {
         // Clear any existing timer
         if (this.autoCloseTimer) {
-          clearTimeout(this.autoCloseTimer);
+          public clearTimeout(this.autoCloseTimer);
         }
 
         this.autoCloseTimer = setTimeout(() => {
@@ -235,7 +235,7 @@ export class GuestLimitModalComponent implements OnInit, OnDestroy {
       } else {
         // Clear timer when modal is hidden
         if (this.autoCloseTimer) {
-          clearTimeout(this.autoCloseTimer);
+          public clearTimeout(this.autoCloseTimer);
           this.autoCloseTimer = null;
         }
       }
@@ -248,7 +248,7 @@ export class GuestLimitModalComponent implements OnInit, OnDestroy {
   public ngOnDestroy(): void {
     // Clear any pending timer
     if (this.autoCloseTimer) {
-      clearTimeout(this.autoCloseTimer);
+      public clearTimeout(this.autoCloseTimer);
       this.autoCloseTimer = null;
     }
 

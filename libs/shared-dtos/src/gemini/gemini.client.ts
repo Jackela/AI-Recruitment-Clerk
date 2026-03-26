@@ -148,7 +148,7 @@ export class GeminiClient {
 
     const startTime = Date.now();
 
-    for (let attempt = 1; attempt <= retries; attempt++) {
+    for(let attempt = 1; attempt <= retries; attempt++) {
       try {
         this.logger.debug(`Generating text (attempt ${attempt}/${retries})`);
 
@@ -304,7 +304,7 @@ Important guidelines:
       model: 'gemini-1.5-pro',
     });
 
-    for (let attempt = 1; attempt <= retries; attempt++) {
+    for(let attempt = 1; attempt <= retries; attempt++) {
       try {
         this.logger.debug(
           `Generating vision response (attempt ${attempt}/${retries})`,

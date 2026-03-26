@@ -51,10 +51,12 @@ export class AuthRepository {
   private readonly sessionStore = new Map<string, SessionRecord>();
   private readonly mfaDeviceStore = new Map<string, MfaDeviceRecord[]>();
 
-  constructor() {}
+  constructor() {
+  // Intentionally empty
+}
 
   // Token Storage Methods
-  async storeToken(
+  public async storeToken(
     record: Omit<TokenRecord, 'id' | 'createdAt'>,
   ): Promise<TokenRecord> {
     const tokenRecord: TokenRecord = {
@@ -69,7 +71,7 @@ export class AuthRepository {
     return tokenRecord;
   }
 
-  async getTokenByHash(tokenHash: string): Promise<TokenRecord | null> {
+  public async getTokenByHash(tokenHash: string): Promise<TokenRecord | null> {
     for (const record of this.tokenStore.values()) {
       if (record.tokenHash === tokenHash && !record.revokedAt) {
         return record;
@@ -78,7 +80,7 @@ export class AuthRepository {
     return null;
   }
 
-  async revokeToken(
+  public async revokeToken(
     tokenId: string,
     reason: string,
   ): Promise<TokenRecord | null> {
@@ -93,7 +95,7 @@ export class AuthRepository {
     return record;
   }
 
-  async revokeAllUserTokens(userId: string, reason: string): Promise<number> {
+  public async revokeAllUserTokens(userId: string, reason: string): Promise<number> {
     let count = 0;
     for (const [id, record] of this.tokenStore.entries()) {
       if (record.userId === userId && !record.revokedAt) {
@@ -107,7 +109,7 @@ export class AuthRepository {
     return count;
   }
 
-  async getActiveTokensByUser(userId: string): Promise<TokenRecord[]> {
+  public async getActiveTokensByUser(userId: string): Promise<TokenRecord[]> {
     const tokens: TokenRecord[] = [];
     for (const record of this.tokenStore.values()) {
       if (
@@ -121,7 +123,7 @@ export class AuthRepository {
     return tokens;
   }
 
-  async cleanupExpiredTokens(): Promise<number> {
+  public async cleanupExpiredTokens(): Promise<number> {
     const now = new Date();
     let count = 0;
     for (const [id, record] of this.tokenStore.entries()) {
@@ -134,7 +136,7 @@ export class AuthRepository {
   }
 
   // Refresh Token Rotation Methods
-  async rotateRefreshToken(
+  public async rotateRefreshToken(
     oldTokenId: string,
     newTokenRecord: Omit<TokenRecord, 'id' | 'createdAt'>,
   ): Promise<TokenRecord | null> {
@@ -162,7 +164,7 @@ export class AuthRepository {
     return newRecord;
   }
 
-  async isRefreshTokenValid(tokenHash: string): Promise<boolean> {
+  public async isRefreshTokenValid(tokenHash: string): Promise<boolean> {
     const record = await this.getTokenByHash(tokenHash);
     if (!record) return false;
     if (record.tokenType !== 'refresh') return false;
@@ -172,7 +174,7 @@ export class AuthRepository {
   }
 
   // Session Management Methods
-  async createSession(
+  public async createSession(
     sessionData: Omit<SessionRecord, 'id' | 'createdAt'>,
   ): Promise<SessionRecord> {
     const session: SessionRecord = {
@@ -187,11 +189,11 @@ export class AuthRepository {
     return session;
   }
 
-  async getSessionById(sessionId: string): Promise<SessionRecord | null> {
+  public async getSessionById(sessionId: string): Promise<SessionRecord | null> {
     return this.sessionStore.get(sessionId) || null;
   }
 
-  async getActiveSessionsByUser(userId: string): Promise<SessionRecord[]> {
+  public async getActiveSessionsByUser(userId: string): Promise<SessionRecord[]> {
     const sessions: SessionRecord[] = [];
     for (const session of this.sessionStore.values()) {
       if (
@@ -205,7 +207,7 @@ export class AuthRepository {
     return sessions;
   }
 
-  async updateSessionActivity(
+  public async updateSessionActivity(
     sessionId: string,
   ): Promise<SessionRecord | null> {
     const session = this.sessionStore.get(sessionId);
@@ -217,7 +219,7 @@ export class AuthRepository {
     return session;
   }
 
-  async terminateSession(sessionId: string): Promise<boolean> {
+  public async terminateSession(sessionId: string): Promise<boolean> {
     const session = this.sessionStore.get(sessionId);
     if (!session) {
       return false;
@@ -228,7 +230,7 @@ export class AuthRepository {
     return true;
   }
 
-  async terminateAllUserSessions(userId: string): Promise<number> {
+  public async terminateAllUserSessions(userId: string): Promise<number> {
     let count = 0;
     for (const [id, session] of this.sessionStore.entries()) {
       if (session.userId === userId && session.isActive) {
@@ -241,7 +243,7 @@ export class AuthRepository {
     return count;
   }
 
-  async cleanupExpiredSessions(): Promise<number> {
+  public async cleanupExpiredSessions(): Promise<number> {
     const now = new Date();
     let count = 0;
     for (const [id, session] of this.sessionStore.entries()) {
@@ -254,7 +256,7 @@ export class AuthRepository {
   }
 
   // MFA Device Storage Methods
-  async storeMfaDevice(
+  public async storeMfaDevice(
     deviceData: Omit<MfaDeviceRecord, 'id' | 'createdAt'>,
   ): Promise<MfaDeviceRecord> {
     const device: MfaDeviceRecord = {
@@ -273,16 +275,16 @@ export class AuthRepository {
     return device;
   }
 
-  async getMfaDevicesByUser(userId: string): Promise<MfaDeviceRecord[]> {
+  public async getMfaDevicesByUser(userId: string): Promise<MfaDeviceRecord[]> {
     return this.mfaDeviceStore.get(userId) || [];
   }
 
-  async getActiveMfaDevicesByUser(userId: string): Promise<MfaDeviceRecord[]> {
+  public async getActiveMfaDevicesByUser(userId: string): Promise<MfaDeviceRecord[]> {
     const devices = this.mfaDeviceStore.get(userId) || [];
     return devices.filter((d) => d.isActive);
   }
 
-  async updateMfaDeviceLastUsed(
+  public async updateMfaDeviceLastUsed(
     deviceId: string,
   ): Promise<MfaDeviceRecord | null> {
     for (const [userId, devices] of this.mfaDeviceStore.entries()) {
@@ -296,7 +298,7 @@ export class AuthRepository {
     return null;
   }
 
-  async deactivateMfaDevice(deviceId: string): Promise<MfaDeviceRecord | null> {
+  public async deactivateMfaDevice(deviceId: string): Promise<MfaDeviceRecord | null> {
     for (const [userId, devices] of this.mfaDeviceStore.entries()) {
       const device = devices.find((d) => d.id === deviceId);
       if (device) {
@@ -309,7 +311,7 @@ export class AuthRepository {
     return null;
   }
 
-  async removeMfaDevice(deviceId: string): Promise<boolean> {
+  public async removeMfaDevice(deviceId: string): Promise<boolean> {
     for (const [userId, devices] of this.mfaDeviceStore.entries()) {
       const index = devices.findIndex((d) => d.id === deviceId);
       if (index !== -1) {
@@ -323,7 +325,7 @@ export class AuthRepository {
   }
 
   // GDPR Compliance Methods
-  async deleteAllUserAuthData(userId: string): Promise<void> {
+  public async deleteAllUserAuthData(userId: string): Promise<void> {
     // Delete all tokens
     for (const [id, record] of this.tokenStore.entries()) {
       if (record.userId === userId) {
@@ -346,7 +348,7 @@ export class AuthRepository {
     );
   }
 
-  async getUserAuthAuditLog(userId: string): Promise<{
+  public async getUserAuthAuditLog(userId: string): Promise<{
     tokens: TokenRecord[];
     sessions: SessionRecord[];
     mfaDevices: MfaDeviceRecord[];

@@ -12,7 +12,7 @@ export class IPAddress extends ValueObject<{ value: string }> {
     if (!IPAddress.isValidIPv4(props.value)) {
       throw new Error(`Invalid IPv4 address: ${props.value}`);
     }
-    super(props);
+    public super(props);
   }
 
   private static isValidIPv4(ip: string): boolean {

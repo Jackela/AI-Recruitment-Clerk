@@ -135,7 +135,7 @@ export class AnalyticsRules {
       return new EventDataValidationResult(false, errors);
     }
 
-    switch (eventType) {
+    switch(eventType) {
       case EventType.USER_INTERACTION:
         if (!eventData.action) {
           errors.push('User interaction event requires action field');
@@ -222,7 +222,7 @@ export class AnalyticsRules {
     const factors: string[] = [];
 
     // 事件类型优先级
-    switch (eventType) {
+    switch(eventType) {
       case EventType.ERROR_EVENT:
         priority += 90;
         factors.push('Critical error event');
@@ -492,7 +492,7 @@ export class AnalyticsRules {
 
   // 私有辅助方法
   private static getRetentionPeriodDays(eventType: EventType): number {
-    switch (eventType) {
+    switch(eventType) {
       case EventType.USER_INTERACTION:
       case EventType.PAGE_VIEW:
       case EventType.FORM_SUBMISSION:
@@ -593,7 +593,9 @@ export class EventCreationEligibilityResult {
     public readonly isEligible: boolean,
     public readonly errors: string[],
     public readonly priority: EventPriority,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -608,7 +610,9 @@ export class EventDataValidationResult {
   constructor(
     public readonly isValid: boolean,
     public readonly errors: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -625,7 +629,9 @@ export class EventPriority {
     public readonly score: number,
     public readonly level: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
     public readonly factors: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -644,7 +650,9 @@ export class BatchProcessingEligibilityResult {
     public readonly errors: string[],
     public readonly warnings: string[],
     public readonly eligibleEventCount: number,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -667,7 +675,9 @@ export class AnalyticsDataRetentionPolicy {
     public readonly daysUntilExpiry: number,
     public readonly daysUntilAnonymization: number,
     public readonly recommendedActions: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -690,7 +700,9 @@ export class PrivacyComplianceRiskAssessment {
     public readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
     public readonly riskFactors: string[],
     public readonly recommendedActions: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -711,7 +723,9 @@ export class AnonymizationRequirementResult {
     public readonly urgency: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
     public readonly daysSinceCreation: number,
     public readonly anonymizationThresholdDays: number,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -728,7 +742,9 @@ export class ReportingPermissionsResult {
     public readonly hasAccess: boolean,
     public readonly permissions: string[],
     public readonly restrictions: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 // 枚举定义

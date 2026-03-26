@@ -97,7 +97,7 @@ export class SkeletonTextComponent {
    * @param index 行索引
    * @returns 宽度值
    */
-  getWidth(index: number): string {
+  public getWidth(index: number): string {
     if (Array.isArray(this.width)) {
       return this.width[index] || this.width[this.width.length - 1] || '100%';
     }

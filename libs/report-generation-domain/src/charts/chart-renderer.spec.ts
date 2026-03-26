@@ -30,14 +30,14 @@ class ChartRenderer {
     );
   }
 
-  renderBarChart(data: ChartData, options: ChartOptions): string {
+  public renderBarChart(data: ChartData, options: ChartOptions): string {
     if (!this.validateData(data)) {
       throw new Error('Invalid chart data');
     }
     return `bar-chart-${options.width}x${options.height}`;
   }
 
-  renderPieChart(data: ChartData, options: ChartOptions): string {
+  public renderPieChart(data: ChartData, options: ChartOptions): string {
     if (!this.validateData(data)) {
       throw new Error('Invalid chart data');
     }
@@ -47,14 +47,14 @@ class ChartRenderer {
     return `pie-chart-${options.width}x${options.height}`;
   }
 
-  renderLineChart(data: ChartData, options: ChartOptions): string {
+  public renderLineChart(data: ChartData, options: ChartOptions): string {
     if (!this.validateData(data)) {
       throw new Error('Invalid chart data');
     }
     return `line-chart-${options.width}x${options.height}`;
   }
 
-  exportToFormat(chartType: ChartType, format: 'png' | 'svg' | 'json'): string {
+  public exportToFormat(chartType: ChartType, format: 'png' | 'svg' | 'json'): string {
     const validFormats = ['png', 'svg', 'json'];
     if (!validFormats.includes(format)) {
       throw new Error(`Unsupported format: ${format}`);
@@ -62,7 +62,7 @@ class ChartRenderer {
     return `${chartType}.${format}`;
   }
 
-  calculateScale(data: ChartData): { min: number; max: number } {
+  public calculateScale(data: ChartData): { min: number; max: number } {
     const allValues = data.datasets.flatMap((ds) => ds.data);
     return {
       min: Math.min(...allValues),

@@ -12,7 +12,9 @@ export class WebSocketDemoController {
    * Initializes a new instance of the Web Socket Demo Controller.
    * @param webSocketGateway - The web socket gateway.
    */
-  constructor(private readonly webSocketGateway: WebSocketGateway) {}
+  constructor(private readonly webSocketGateway: WebSocketGateway) {
+  // Intentionally empty
+}
 
   /**
    * Performs the simulate progress operation.
@@ -56,7 +58,7 @@ export class WebSocketDemoController {
       '正在初始化分析流程...',
     );
 
-    for (const stepData of steps) {
+    for(const stepData of steps) {
       await this.delay(stepData.delay);
 
       // 发送步骤变更

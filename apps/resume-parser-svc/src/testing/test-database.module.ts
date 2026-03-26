@@ -79,7 +79,7 @@ export class TestDatabaseModule {
     if (!connection) return;
 
     const collections = connection.collections;
-    for (const key in collections) {
+    for(const key in collections) {
       const collection = collections[key];
       await collection.deleteMany({});
     }
