@@ -14,7 +14,7 @@ export class GeminiApiError extends Error {
     public readonly statusCode?: number,
     public readonly originalError?: Error,
   ) {
-    public super(message);
+    super(message);
     this.name = 'GeminiApiError';
   }
 }
@@ -32,7 +32,7 @@ export class GeminiRateLimitError extends GeminiApiError {
     message = 'Gemini API rate limit exceeded',
     public readonly retryAfter?: number,
   ) {
-    public super(message, 429);
+    super(message, 429);
     this.name = 'GeminiRateLimitError';
   }
 }
@@ -50,7 +50,7 @@ export class GeminiValidationError extends GeminiApiError {
     message: string,
     public readonly validationDetails?: unknown,
   ) {
-    public super(message, 400);
+    super(message, 400);
     this.name = 'GeminiValidationError';
   }
 }
@@ -64,7 +64,7 @@ export class GeminiTimeoutError extends GeminiApiError {
    * @param message - The message.
    */
   constructor(message = 'Gemini API request timed out') {
-    public super(message, 408);
+    super(message, 408);
     this.name = 'GeminiTimeoutError';
   }
 }
@@ -82,7 +82,7 @@ export class GeminiParsingError extends GeminiApiError {
     message: string,
     public readonly rawResponse?: string,
   ) {
-    public super(message, 422);
+    super(message, 422);
     this.name = 'GeminiParsingError';
   }
 }
@@ -97,7 +97,7 @@ export class GeminiConfigurationError extends GeminiApiError {
    * @param originalError - The original error.
    */
   constructor(message: string, originalError?: Error) {
-    public super(message, 500, originalError);
+    super(message, 500, originalError);
     this.name = 'GeminiConfigurationError';
   }
 }

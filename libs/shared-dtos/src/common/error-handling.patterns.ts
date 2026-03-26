@@ -146,7 +146,7 @@ export class BusinessLogicException extends AppException {
    * @param details - The details.
    */
   constructor(code: string, message: string, details?: unknown) {
-    public super(
+    super(
       ErrorType.BUSINESS_LOGIC,
       code,
       message,
@@ -166,7 +166,7 @@ export class ValidationException extends AppException {
    * @param validationErrors - The validation errors.
    */
   constructor(message: string, validationErrors?: unknown) {
-    public super(
+    super(
       ErrorType.VALIDATION,
       'VALIDATION_FAILED',
       message,
@@ -205,7 +205,7 @@ export class UnauthorizedException extends AppException {
    * @param message - The message.
    */
   constructor(message = 'Unauthorized access') {
-    public super(
+    super(
       ErrorType.AUTHORIZATION,
       'UNAUTHORIZED',
       message,
@@ -223,7 +223,7 @@ export class ForbiddenException extends AppException {
    * @param message - The message.
    */
   constructor(message = 'Access forbidden') {
-    public super(ErrorType.AUTHORIZATION, 'FORBIDDEN', message, HttpStatus.FORBIDDEN);
+    super(ErrorType.AUTHORIZATION, 'FORBIDDEN', message, HttpStatus.FORBIDDEN);
   }
 }
 
@@ -237,7 +237,7 @@ export class ConflictException extends AppException {
    * @param conflictDetails - The conflict details.
    */
   constructor(message: string, conflictDetails?: unknown) {
-    public super(
+    super(
       ErrorType.CONFLICT,
       'RESOURCE_CONFLICT',
       message,

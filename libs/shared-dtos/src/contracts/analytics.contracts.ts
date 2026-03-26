@@ -701,7 +701,7 @@ export class AnalyticsContractViolation extends Error {
    * @param message - The message.
    */
   constructor(message: string) {
-    public super(message);
+    super(message);
     this.name = 'AnalyticsContractViolation';
   }
 }

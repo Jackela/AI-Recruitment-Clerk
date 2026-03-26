@@ -41,7 +41,7 @@ export class ResumeParserNatsService extends BaseMicroserviceService {
     connectionManager: NatsConnectionManager,
     streamManager: NatsStreamManager,
   ) {
-    public super(configService, connectionManager, streamManager, 'resume-parser-svc');
+    super(configService, connectionManager, streamManager, 'resume-parser-svc');
   }
 
   /**

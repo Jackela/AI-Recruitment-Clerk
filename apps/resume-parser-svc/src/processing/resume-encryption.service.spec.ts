@@ -8,7 +8,7 @@ jest.mock('@ai-recruitment-clerk/infrastructure-shared', () => ({
     code: string;
     context: unknown;
     constructor(code: string, context: unknown) {
-      public super(code);
+      super(code);
       this.name = 'ResumeParserException';
       this.code = code;
       this.context = context;

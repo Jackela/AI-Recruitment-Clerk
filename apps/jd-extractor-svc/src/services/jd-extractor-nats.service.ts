@@ -25,7 +25,7 @@ export class JdExtractorNatsService extends BaseMicroserviceService {
     connectionManager: NatsConnectionManager,
     streamManager: NatsStreamManager,
   ) {
-    public super(configService, connectionManager, streamManager, 'jd-extractor-svc');
+    super(configService, connectionManager, streamManager, 'jd-extractor-svc');
   }
 
   /**

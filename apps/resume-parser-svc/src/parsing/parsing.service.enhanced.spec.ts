@@ -18,7 +18,7 @@ import type { ResumeDTO } from '@ai-recruitment-clerk/resume-dto';
 jest.mock('@ai-recruitment-clerk/infrastructure-shared', () => {
   class ContractViolationError extends Error {
     constructor(message: string) {
-      public super(message);
+      super(message);
       this.name = 'ContractViolationError';
     }
   }

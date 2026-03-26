@@ -298,6 +298,6 @@ export class ContractViolationError extends Error {
    * @param message - The message.
    */
   constructor(message: string) {
-    public super(message);
+    super(message);
   }
 }

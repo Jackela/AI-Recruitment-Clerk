@@ -239,7 +239,7 @@ export class IPAddress extends ValueObject<{ value: string }> {
     if (!props.value || !/^\d+\.\d+\.\d+\.\d+$/.test(props.value)) {
       throw new Error('IP address must be valid IPv4 format');
     }
-    public super(props);
+    super(props);
   }
 
   /**

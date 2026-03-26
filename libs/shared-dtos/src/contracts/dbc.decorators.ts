@@ -37,7 +37,7 @@ export class ContractViolationError extends Error {
     public readonly type: 'PRE' | 'POST' | 'INV',
     public readonly context: string,
   ) {
-    public super(`[${type}] ${context}: ${message}`);
+    super(`[${type}] ${context}: ${message}`);
     this.name = 'ContractViolationError';
   }
 }
@@ -173,7 +173,7 @@ export function Invariant<TInstance extends object>(
     return class extends constructor {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       constructor(...args: any[]) {
-        public super(...args);
+        super(...args);
         this.checkInvariant();
       }
 
