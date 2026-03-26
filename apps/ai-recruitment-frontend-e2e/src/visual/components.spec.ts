@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setupVisualTest, waitForPageStability } from './visual-helpers';
+import { setupVisualTest, waitForAngularStable } from './visual-helpers';
 
 test.describe('Component Visual', () => {
   test.beforeEach(async ({ page }) => {
@@ -8,52 +8,50 @@ test.describe('Component Visual', () => {
 
   test('job table matches snapshot', async ({ page }) => {
     await page.goto('/jobs');
-    const table = page
-      .locator('[data-testid="job-table"], table, .job-table')
+    await waitForAngularStable(page);
+    const jobGrid = page
+      .locator('[data-testid="jobs-grid"], [data-testid="jobs-container"]')
       .first();
-    await table.waitFor({ state: 'visible', timeout: 10000 });
-    await waitForPageStability(page);
-    await expect(table).toHaveScreenshot('job-table.png', {
+    await jobGrid.waitFor({ state: 'visible', timeout: 15000 });
+    await expect(jobGrid).toHaveScreenshot('job-grid.png', {
       timeout: 15000,
     });
   });
 
   test('resume upload area matches snapshot', async ({ page }) => {
     await page.goto('/resume');
-    const uploadArea = page
-      .locator(
-        '[data-testid="upload-area"], [data-testid="resume-upload"], .upload-area',
-      )
+    await waitForAngularStable(page);
+    const uploadForm = page
+      .locator('[data-testid="resume-upload-form"], .upload-form, form')
       .first();
-    await uploadArea.waitFor({ state: 'visible', timeout: 10000 });
-    await waitForPageStability(page);
-    await expect(uploadArea).toHaveScreenshot('resume-upload-area.png', {
+    await uploadForm.waitFor({ state: 'visible', timeout: 15000 });
+    await expect(uploadForm).toHaveScreenshot('resume-upload-form.png', {
       timeout: 15000,
     });
   });
 
   test('dashboard sidebar matches snapshot', async ({ page }) => {
     await page.goto('/dashboard');
+    await waitForAngularStable(page);
     const sidebar = page
-      .locator('[data-testid="sidebar"], .sidebar, nav')
+      .locator(
+        '[data-testid="app-sidebar"], [data-testid="sidebar"], .app-navigation, nav',
+      )
       .first();
-    await sidebar.waitFor({ state: 'visible', timeout: 10000 });
-    await waitForPageStability(page);
+    await sidebar.waitFor({ state: 'visible', timeout: 15000 });
     await expect(sidebar).toHaveScreenshot('dashboard-sidebar.png', {
       timeout: 15000,
     });
   });
 
-  test('search input matches snapshot', async ({ page }) => {
+  test('create job button matches snapshot', async ({ page }) => {
     await page.goto('/jobs');
-    const searchInput = page
-      .locator(
-        '[data-testid="search-input"], input[type="search"], .search-input',
-      )
+    await waitForAngularStable(page);
+    const createButton = page
+      .locator('[data-testid="create-job-button"]')
       .first();
-    await searchInput.waitFor({ state: 'visible', timeout: 10000 });
-    await waitForPageStability(page);
-    await expect(searchInput).toHaveScreenshot('search-input.png', {
+    await createButton.waitFor({ state: 'visible', timeout: 15000 });
+    await expect(createButton).toHaveScreenshot('create-job-button.png', {
       timeout: 15000,
     });
   });

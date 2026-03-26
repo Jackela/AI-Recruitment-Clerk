@@ -31,6 +31,7 @@ import { ProgressTrackerComponent } from '../../components/shared/progress-track
         (submit)="onSubmit($event)"
         *ngIf="!analysisId()"
         class="upload-form"
+        data-testid="resume-upload-form"
       >
         <div class="form-section">
           <h3>候选人信息 (可选)</h3>
@@ -66,13 +67,14 @@ import { ProgressTrackerComponent } from '../../components/shared/progress-track
 
         <div class="form-section">
           <h3>上传简历</h3>
-          <div class="file-upload">
+          <div class="file-upload" data-testid="file-upload-area">
             <input
               type="file"
               (change)="onFileChange($event)"
               accept=".pdf,.doc,.docx,.txt"
               id="resume-file"
               class="file-input"
+              data-testid="file-input"
             />
             <label for="resume-file" class="file-label">
               <svg

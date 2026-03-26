@@ -297,3 +297,65 @@ export async function scrollIntoView(
   // Small delay to ensure element is fully rendered
   await page.waitForTimeout(100);
 }
+
+/**
+ * Waits for Angular to be stable by waiting for network idle and checking loading states.
+ * This is specifically designed for Angular applications with async operations.
+ *
+ * @param page - The Playwright page object
+ * @param options - Optional configuration for the wait
+ * @returns Promise that resolves when Angular is stable
+ */
+export async function waitForAngularStable(
+  page: Page,
+  options: {
+    networkIdleTimeout?: number;
+    loadingTimeout?: number;
+    extraWait?: number;
+  } = {},
+): Promise<void> {
+  const {
+    networkIdleTimeout = 10000,
+    loadingTimeout = 10000,
+    extraWait = 500,
+  } = options;
+
+  // Wait for network idle
+  await page.waitForLoadState('networkidle', { timeout: networkIdleTimeout });
+
+  // Wait for loading state to disappear (if it exists)
+  await page
+    .waitForSelector('[data-testid="loading-state"]', {
+      state: 'hidden',
+      timeout: loadingTimeout,
+    })
+    .catch(() => {
+      // If loading-state doesn't exist, that's okay
+    });
+
+  // Wait for any spinners to disappear
+  await page
+    .waitForFunction(
+      () => {
+        const spinners = document.querySelectorAll(
+          '.spinner, .loading, [class*="loading"]',
+        );
+        return (
+          spinners.length === 0 ||
+          Array.from(spinners).every(
+            (s) =>
+              s.classList.contains('hidden') ||
+              (s as HTMLElement).style.display === 'none' ||
+              (s as HTMLElement).style.visibility === 'hidden',
+          )
+        );
+      },
+      { timeout: loadingTimeout },
+    )
+    .catch(() => {
+      // Ignore if check times out
+    });
+
+  // Extra wait to ensure rendering is complete
+  await page.waitForTimeout(extraWait);
+}
