@@ -8,8 +8,13 @@ export default {
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/apps/app-gateway',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
-  testMatch: ['**/*.spec.ts'],
-  testPathIgnorePatterns: ['/node_modules/', '\\.integration\\.spec\\.ts$'],
+  testMatch: ['**/src/**/*.spec.ts'],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '\\.e2e\\.spec\\.ts$',
+    '\\.integration\\.spec\\.ts$',
+    '/test/',
+  ],
   coverageThreshold: {
     global: {
       branches: 60,

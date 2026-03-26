@@ -77,6 +77,8 @@ jest.mock('@ai-recruitment-clerk/infrastructure-shared', () => {
         const max = maxSizeBytes || 10 * 1024 * 1024;
         return typeof size === 'number' && size >= 0 && size <= max;
       },
+      isValidFileBuffer: (buffer: unknown) =>
+        Buffer.isBuffer(buffer) && buffer.length > 0,
     },
   };
 });
@@ -261,11 +263,14 @@ describe('ParsingService Enhanced (parsing.service.enhanced.ts)', () => {
 
     it('should skip duplicate check when option is set', async () => {
       // Arrange
-      const { svc, vision, gridFs } = buildService();
+      const { svc, vision, gridFs, fieldMapper } = buildService();
       const pdfBuffer = Buffer.from('%PDF-1.4');
 
       gridFs.uploadFile.mockResolvedValue('gridfs://bucket/resume');
       vision.parseResumePdf.mockResolvedValue(createValidResumeDTO());
+      fieldMapper.normalizeToResumeDto.mockResolvedValue(
+        createValidResumeDTO(),
+      );
 
       // Act
       const result = await svc.parseResumeFile(
@@ -411,7 +416,7 @@ describe('ParsingService Enhanced (parsing.service.enhanced.ts)', () => {
 
     it('should accept DOC files with valid signature', async () => {
       // Arrange
-      const { svc, vision, gridFs } = buildService();
+      const { svc, vision, gridFs, fieldMapper } = buildService();
       const docBuffer = Buffer.concat([
         Buffer.from([0xd0, 0xcf, 0x11, 0xe0]), // DOC magic bytes
         Buffer.from('document content'),
@@ -419,6 +424,9 @@ describe('ParsingService Enhanced (parsing.service.enhanced.ts)', () => {
 
       gridFs.uploadFile.mockResolvedValue('gridfs://bucket/doc');
       vision.parseResumePdf.mockResolvedValue(createValidResumeDTO());
+      fieldMapper.normalizeToResumeDto.mockResolvedValue(
+        createValidResumeDTO(),
+      );
 
       // Act
       const result = await svc.parseResumeFile(
@@ -433,11 +441,14 @@ describe('ParsingService Enhanced (parsing.service.enhanced.ts)', () => {
 
     it('should be case-insensitive for file extensions', async () => {
       // Arrange
-      const { svc, vision, gridFs } = buildService();
+      const { svc, vision, gridFs, fieldMapper } = buildService();
       const pdfBuffer = Buffer.from('%PDF-1.4');
 
       gridFs.uploadFile.mockResolvedValue('gridfs://bucket/resume');
       vision.parseResumePdf.mockResolvedValue(createValidResumeDTO());
+      fieldMapper.normalizeToResumeDto.mockResolvedValue(
+        createValidResumeDTO(),
+      );
 
       // Act
       const result = await svc.parseResumeFile(
@@ -485,12 +496,15 @@ describe('ParsingService Enhanced (parsing.service.enhanced.ts)', () => {
 
     it('should track different files separately', async () => {
       // Arrange
-      const { svc, vision, gridFs } = buildService();
+      const { svc, vision, gridFs, fieldMapper } = buildService();
       const pdfBuffer1 = Buffer.from('%PDF-1.4 file 1');
       const pdfBuffer2 = Buffer.from('%PDF-1.4 file 2');
 
       gridFs.uploadFile.mockResolvedValue('gridfs://bucket/resume');
       vision.parseResumePdf.mockResolvedValue(createValidResumeDTO());
+      fieldMapper.normalizeToResumeDto.mockResolvedValue(
+        createValidResumeDTO(),
+      );
 
       // Act
       const result1 = await svc.parseResumeFile(
@@ -631,8 +645,14 @@ describe('ParsingService Enhanced (parsing.service.enhanced.ts)', () => {
   describe('Circuit Breaker - WithCircuitBreaker', () => {
     it('should wrap method with circuit breaker', async () => {
       // Arrange
-      const { svc } = buildService();
+      const { svc, fieldMapper, gridFs, vision } = buildService();
       const pdfBuffer = Buffer.from('%PDF-1.4');
+
+      gridFs.uploadFile.mockResolvedValue('gridfs://bucket/resume');
+      vision.parseResumePdf.mockResolvedValue(createValidResumeDTO());
+      fieldMapper.normalizeToResumeDto.mockResolvedValue(
+        createValidResumeDTO(),
+      );
 
       // Act - Circuit breaker is applied via decorator
       const result = await svc.parseResumeFile(
@@ -661,8 +681,13 @@ describe('ParsingService Enhanced (parsing.service.enhanced.ts)', () => {
   describe('Retry Logic - extractWithAI', () => {
     it('should retry on AI service failure', async () => {
       // Arrange
-      const { svc, vision } = buildService();
+      const { svc, vision, gridFs, fieldMapper } = buildService();
       const pdfBuffer = Buffer.from('%PDF-1.4');
+
+      gridFs.uploadFile.mockResolvedValue('gridfs://bucket/resume');
+      fieldMapper.normalizeToResumeDto.mockResolvedValue(
+        createValidResumeDTO(),
+      );
 
       // First 2 calls fail, 3rd succeeds
       vision.parseResumePdf
@@ -714,12 +739,15 @@ describe('ParsingService Enhanced (parsing.service.enhanced.ts)', () => {
   describe('GridFS Storage - storeFile', () => {
     it('should store file with correct metadata', async () => {
       // Arrange
-      const { svc, vision, gridFs } = buildService();
+      const { svc, vision, gridFs, fieldMapper } = buildService();
       const pdfBuffer = Buffer.from('%PDF-1.4 test content');
       const userId = 'user-123';
 
       gridFs.uploadFile.mockResolvedValue('gridfs://bucket/file-id-123');
       vision.parseResumePdf.mockResolvedValue(createValidResumeDTO());
+      fieldMapper.normalizeToResumeDto.mockResolvedValue(
+        createValidResumeDTO(),
+      );
 
       // Act
       const result = await svc.parseResumeFile(pdfBuffer, 'resume.pdf', userId);
