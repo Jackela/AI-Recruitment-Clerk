@@ -9,7 +9,6 @@ on:
         default: 'pre-release'
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   pre-release-deploy:

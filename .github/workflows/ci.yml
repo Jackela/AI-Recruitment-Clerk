@@ -16,7 +16,6 @@ env:
   CI: true
   NX_SKIP_NATIVE_FILE_CACHE: 'true'
   NX_DAEMON: 'false'
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   file_size_check:
