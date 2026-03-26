@@ -16,12 +16,13 @@ permissions:
 
 env:
   CI: true
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   coverage:
     name: 📊 Generate Coverage Report
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25 # 增加5分钟缓冲
 
     steps:
       - name: 📥 Checkout Code

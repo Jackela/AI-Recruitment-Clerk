@@ -3,6 +3,8 @@ import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app/app.module';
+import { AppGatewayNatsService } from '../../src/nats/app-gateway-nats.service';
+import { createMockAppGatewayNatsService } from '../utils/mock-nats';
 
 // Set extended timeout for performance tests
 jest.setTimeout(120000);
@@ -42,9 +44,14 @@ describe('🚀 API Performance and Load Testing', () => {
   };
 
   beforeAll(async () => {
+    const mockNatsService = createMockAppGatewayNatsService();
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(AppGatewayNatsService)
+      .useValue(mockNatsService)
+      .compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();

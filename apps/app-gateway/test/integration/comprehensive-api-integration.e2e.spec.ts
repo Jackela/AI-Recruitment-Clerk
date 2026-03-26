@@ -7,6 +7,8 @@ import { JwtService } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import mongoose from 'mongoose';
+import { AppGatewayNatsService } from '../../src/nats/app-gateway-nats.service';
+import { createMockAppGatewayNatsService } from '../utils/mock-nats';
 
 // Set extended timeout for integration tests - these tests make real HTTP requests
 // and need more time to complete, especially in CI environments
@@ -63,6 +65,8 @@ describe('🚀 Comprehensive API Integration Tests', () => {
   };
 
   beforeAll(async () => {
+    const mockNatsService = createMockAppGatewayNatsService();
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
@@ -75,7 +79,10 @@ describe('🚀 Comprehensive API Integration Tests', () => {
         ),
         AppModule,
       ],
-    }).compile();
+    })
+      .overrideProvider(AppGatewayNatsService)
+      .useValue(mockNatsService)
+      .compile();
 
     app = moduleFixture.createNestApplication();
     jwtService = moduleFixture.get<JwtService>(JwtService);

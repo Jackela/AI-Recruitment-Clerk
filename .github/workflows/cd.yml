@@ -8,6 +8,9 @@ on:
         required: true
         default: 'pre-release'
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   pre-release-deploy:
     if: ${{ github.event.inputs.channel == 'pre-release' }}
