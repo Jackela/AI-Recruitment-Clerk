@@ -8,6 +8,13 @@ import { WebSocketGateway } from '../../websocket/websocket.gateway';
 import { JobsSemanticCacheService } from './jobs-semantic-cache.service';
 import type { JobDocument } from '../../schemas/job.schema';
 
+// Injection tokens for testing
+const JOB_REPOSITORY_TOKEN = 'JobRepository';
+const NATS_CLIENT_TOKEN = 'AppGatewayNatsService';
+const CACHE_SERVICE_TOKEN = 'CacheService';
+const WEBSOCKET_GATEWAY_TOKEN = 'WebSocketGateway';
+const SEMANTIC_CACHE_SERVICE_TOKEN = 'JobsSemanticCacheService';
+
 const mockJobRepository = () => ({
   findById: jest.fn(),
   updateStatus: jest.fn(),
@@ -61,53 +68,51 @@ describe('JobsEventService', () => {
     jest.clearAllMocks();
 
     // Silence logger during tests
-    loggerSpy = jest
-      .spyOn(Logger.prototype, 'log')
-      .mockImplementation(() => {
-  // Intentionally empty
-});
+    loggerSpy = jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {
+      // Intentionally empty
+    });
     jest.spyOn(Logger.prototype, 'error').mockImplementation(() => {
-  // Intentionally empty
-});
+      // Intentionally empty
+    });
     jest.spyOn(Logger.prototype, 'warn').mockImplementation(() => {
-  // Intentionally empty
-});
+      // Intentionally empty
+    });
     jest.spyOn(Logger.prototype, 'debug').mockImplementation(() => {
-  // Intentionally empty
-});
+      // Intentionally empty
+    });
 
     const module = await Test.createTestingModule({
       providers: [
         JobsEventService,
         {
-          provide: JobRepository,
+          provide: JOB_REPOSITORY_TOKEN,
           useValue: mockJobRepository(),
         },
         {
-          provide: AppGatewayNatsService,
+          provide: NATS_CLIENT_TOKEN,
           useValue: mockNatsClient(),
         },
         {
-          provide: CacheService,
+          provide: CACHE_SERVICE_TOKEN,
           useValue: mockCacheService(),
         },
         {
-          provide: WebSocketGateway,
+          provide: WEBSOCKET_GATEWAY_TOKEN,
           useValue: mockWebSocketGateway(),
         },
         {
-          provide: JobsSemanticCacheService,
+          provide: SEMANTIC_CACHE_SERVICE_TOKEN,
           useValue: mockSemanticCacheService(),
         },
       ],
     }).compile();
 
     service = module.get<JobsEventService>(JobsEventService);
-    jobRepository = module.get(JobRepository);
-    natsClient = module.get(AppGatewayNatsService);
-    cacheService = module.get(CacheService);
-    webSocketGateway = module.get(WebSocketGateway);
-    semanticCacheService = module.get(JobsSemanticCacheService);
+    jobRepository = module.get(JOB_REPOSITORY_TOKEN);
+    natsClient = module.get(NATS_CLIENT_TOKEN);
+    cacheService = module.get(CACHE_SERVICE_TOKEN);
+    webSocketGateway = module.get(WEBSOCKET_GATEWAY_TOKEN);
+    semanticCacheService = module.get(SEMANTIC_CACHE_SERVICE_TOKEN);
   });
 
   afterEach(() => {
@@ -715,7 +720,7 @@ describe('JobsEventService', () => {
         extractedData: null,
         processingTimeMs: 1000,
         confidence: 0.9,
-        extractionMethod: 'ai',
+        extractionReference: 'ai',
         eventType: 'AnalysisJdExtractedEvent' as const,
         timestamp: new Date().toISOString(),
         version: '1.0',

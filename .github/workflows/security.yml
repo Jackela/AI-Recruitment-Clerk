@@ -31,6 +31,19 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: 🔍 Initialize CodeQL
+        uses: github/codeql-action/init@38697555549f1db7851b81482ff19f1fa5c4fedc # v4.34.1
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-extended,security-and-quality
+          config: |
+            paths-ignore:
+              - node_modules
+              - dist
+              - coverage
+              - test-results
+              - '**/*.spec.ts'
+              - '**/*.test.ts'
+
         uses: github/codeql-action/init@89a39a4e59826350b863aa6b6252a07ad50cf83e # v4.32.4
         with:
           languages: ${{ matrix.language }}
@@ -60,6 +73,10 @@ jobs:
           npm run build || echo "⚠️ Build failed, continuing with analysis"
 
       - name: 🔍 Perform CodeQL Analysis
+        if: ${{ env.ACT != 'true' }}
+        uses: github/codeql-action/analyze@38697555549f1db7851b81482ff19f1fa5c4fedc # v4.34.1
+        with:
+          category: '/language:${{ matrix.language }}'
         if: ${{ env.ACT != 'true' }}
         uses: github/codeql-action/analyze@89a39a4e59826350b863aa6b6252a07ad50cf83e # v4.32.4
         with:
