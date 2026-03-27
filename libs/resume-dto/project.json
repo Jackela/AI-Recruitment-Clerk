@@ -5,9 +5,6 @@
   "projectType": "library",
   "tags": ["domain:resume", "scope:shared", "type:dto"],
   "targets": {
-  "projectType": "library",
-  "implicitDependencies": ["shared-dtos"],
-  "targets": {
     "build": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
@@ -39,6 +36,5 @@
         }
       }
     }
-  },
-  "tags": ["domain:resume", "scope:shared", "type:dto"]
+  }
 }
