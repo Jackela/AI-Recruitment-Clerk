@@ -182,8 +182,7 @@ const createMockRepository = () => {
               }
 
               Object.entries(update).forEach(([key, value]) => {
-                if (!key.startsWith('
-})) {
+                if (!key.startsWith('$')) {
                   (updated as any)[key] = value;
                 }
               });
