@@ -413,7 +413,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
     if (Math.random() < 0.1) {
       setTimeout(
         () => {
-          public clearInterval(interval);
+          clearInterval(interval);
           this.uploadService.setFileError(
             file.id,
             'Upload failed. Please try again.',

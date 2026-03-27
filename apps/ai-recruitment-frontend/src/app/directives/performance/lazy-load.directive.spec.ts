@@ -136,7 +136,7 @@ describe('LazyLoadDirective - Image Element', () => {
     const loadPromise = new Promise<void>((resolve) => {
       imgElement.onload = () => {
         expect(imgElement.classList.contains('lazy-loaded')).toBe(true);
-        public resolve();
+        resolve();
       };
     });
 
@@ -155,7 +155,7 @@ describe('LazyLoadDirective - Image Element', () => {
         // The directive creates a temporary Image and loads it
         // We need to test the loaded output emission
         expect(component.loadedCount).toBeGreaterThanOrEqual(0);
-        public resolve();
+        resolve();
       }, 100);
     });
   });
