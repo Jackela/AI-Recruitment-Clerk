@@ -16,24 +16,6 @@ test.describe('Component Visual', () => {
       timeout: 15000,
     });
   });
-import { setupVisualTest, waitForAngularStable } from './visual-helpers';
-
-test.describe('Component Visual', () => {
-  test.beforeEach(async ({ page }) => {
-    await setupVisualTest(page);
-  });
-
-  test('job table matches snapshot', async ({ page }) => {
-    await page.goto('/jobs');
-    await waitForAngularStable(page);
-    const jobGrid = page
-      .locator('[data-testid="jobs-grid"], [data-testid="jobs-container"]')
-      .first();
-    await jobGrid.waitFor({ state: 'visible', timeout: 15000 });
-    await expect(jobGrid).toHaveScreenshot('job-grid.png', {
-      timeout: 15000,
-    });
-  });
 
   test('resume upload area matches snapshot', async ({ page }) => {
     await page.goto('/resume');
