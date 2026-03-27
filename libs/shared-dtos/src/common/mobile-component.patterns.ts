@@ -160,7 +160,7 @@ export abstract class BaseMobileComponent implements OnInit, OnDestroy {
   protected safeSetTimeout(callback: () => void, delay: number): void {
     setTimeout(() => {
       if (!this.isDestroyed) {
-        public callback();
+        callback();
       }
     }, delay);
   }
