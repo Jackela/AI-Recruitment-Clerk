@@ -535,22 +535,6 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
       'unknown'
     );
   }
-    // Handle various proxy headers
-    const forwarded = req.headers['x-forwarded-for'] as string;
-    if (forwarded) {
-      return forwarded.split(',')[0].trim();
-    }
-
-    return (
-      (req.headers['x-real-ip'] as string) ??
-      (req.headers['x-client-ip'] as string) ??
-      req.connection?.remoteAddress ??
-      req.socket?.remoteAddress ??
-      req.ip ??
-      'unknown'
-    );
-  }
-
   private generateFingerprint(ip: string, userAgent: string): string {
     // Simple fingerprinting - in production, you might want more sophisticated methods
     const combined = `${ip}:${userAgent}`;
