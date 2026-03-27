@@ -4,11 +4,11 @@ const path = require('path');
 
 const PORT = process.env.PORT || 4200;
 const API_TARGET = process.env.API_TARGET || 'http://localhost:3000';
-const STATIC_DIR = path.resolve(
-  __dirname,
-  '..',
-  'dist/apps/ai-recruitment-frontend/browser',
-);
+
+// Support both Angular 20+ (direct output) and legacy (browser subdirectory) structures
+const STATIC_DIR =
+  process.env.STATIC_DIR ||
+  path.resolve(__dirname, '..', 'dist/apps/ai-recruitment-frontend/browser');
 
 const MIME_TYPES = {
   '.html': 'text/html',
@@ -84,6 +84,28 @@ server.listen(PORT, () => {
   // Verify static directory exists
   if (!fs.existsSync(STATIC_DIR)) {
     console.error(`ERROR: Static directory ${STATIC_DIR} does not exist!`);
+    console.error('Checking alternative paths...');
+
+    // Try alternative paths for Angular 20+ builds
+    const alternativePaths = [
+      path.resolve(__dirname, '..', 'dist/apps/ai-recruitment-frontend'),
+      path.resolve(
+        __dirname,
+        '..',
+        'dist/apps/ai-recruitment-frontend/browser',
+      ),
+    ];
+
+    for (const altPath of alternativePaths) {
+      if (fs.existsSync(altPath)) {
+        console.log(`Found alternative path: ${altPath}`);
+        console.log('Contents:', fs.readdirSync(altPath).slice(0, 10));
+      }
+    }
+
     process.exit(1);
   }
+
+  console.log('✅ Static directory verified');
+  console.log('Contents:', fs.readdirSync(STATIC_DIR).slice(0, 10));
 });

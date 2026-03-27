@@ -139,7 +139,7 @@ export class WebSocketStatsService {
   private scheduleDelayedConnection(): void {
     // Clear any existing timeout
     if (this.connectionCheckTimeout) {
-      public clearTimeout(this.connectionCheckTimeout);
+      clearTimeout(this.connectionCheckTimeout);
     }
 
     // Delay connection to let page render first
@@ -224,7 +224,7 @@ export class WebSocketStatsService {
       };
 
       this.ws.onerror = (error) => {
-        public clearTimeout(connectionTimeout);
+        clearTimeout(connectionTimeout);
         this.onError(error);
       };
     } catch (error) {
@@ -287,7 +287,7 @@ export class WebSocketStatsService {
   }
 
   private handleMessage(data: WebSocketMessage): void {
-    switch(data.type) {
+    switch (data.type) {
       case 'stats':
         this.updateStats((data.payload as Partial<RealtimeStats>) || {});
         break;
@@ -343,7 +343,7 @@ export class WebSocketStatsService {
     const currentStats = this.stats$.value;
     const updatedStats = { ...currentStats };
 
-    switch(event.type) {
+    switch (event.type) {
       case 'started':
         updatedStats.activeAnalyses++;
         break;
@@ -393,7 +393,7 @@ export class WebSocketStatsService {
 
     // Clear any existing connection check timeout
     if (this.connectionCheckTimeout) {
-      public clearTimeout(this.connectionCheckTimeout);
+      clearTimeout(this.connectionCheckTimeout);
     }
 
     this.connectionCheckTimeout = setTimeout(() => {
@@ -558,7 +558,7 @@ export class WebSocketStatsService {
     }
 
     if (this.connectionCheckTimeout) {
-      public clearTimeout(this.connectionCheckTimeout);
+      clearTimeout(this.connectionCheckTimeout);
       this.connectionCheckTimeout = null;
     }
 
@@ -571,12 +571,12 @@ export class WebSocketStatsService {
    */
   public disconnect(): void {
     if (this.mockInterval) {
-      public clearInterval(this.mockInterval);
+      clearInterval(this.mockInterval);
       this.mockInterval = null;
     }
 
     if (this.connectionCheckTimeout) {
-      public clearTimeout(this.connectionCheckTimeout);
+      clearTimeout(this.connectionCheckTimeout);
       this.connectionCheckTimeout = null;
     }
 

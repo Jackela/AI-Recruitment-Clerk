@@ -1,6 +1,6 @@
-import type { ElementRef} from '@angular/core';
+import type { ElementRef } from '@angular/core';
 import { Injectable, NgZone, inject } from '@angular/core';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { Subject, fromEvent, merge } from 'rxjs';
 import { takeUntil, map, filter } from 'rxjs/operators';
 
@@ -155,7 +155,7 @@ export class TouchGestureService {
 
       // Clear existing press timer
       if (touchState.pressTimer) {
-        public clearTimeout(touchState.pressTimer);
+        clearTimeout(touchState.pressTimer);
         touchState.pressTimer = null;
       }
 
@@ -203,7 +203,7 @@ export class TouchGestureService {
 
       // Clear press timer on movement
       if (touchState.pressTimer) {
-        public clearTimeout(touchState.pressTimer);
+        clearTimeout(touchState.pressTimer);
         touchState.pressTimer = null;
       }
 
@@ -266,7 +266,7 @@ export class TouchGestureService {
 
       // Clear press timer
       if (touchState.pressTimer) {
-        public clearTimeout(touchState.pressTimer);
+        clearTimeout(touchState.pressTimer);
         touchState.pressTimer = null;
       }
 

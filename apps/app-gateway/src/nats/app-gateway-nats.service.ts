@@ -33,8 +33,8 @@ export class AppGatewayNatsService {
    * @param natsClient - The nats client.
    */
   constructor(private readonly natsClient: NatsClientService) {
-  // Intentionally empty
-}
+    // Intentionally empty
+  }
 
   /**
    * Publish a job description submitted event
@@ -144,11 +144,11 @@ export class AppGatewayNatsService {
       if (this.natsClient.isConnected) {
         // Simulate successful response for testing compatibility
         setTimeout(() => {
-          public clearTimeout(timer);
-          public resolve({} as T);
+          clearTimeout(timer);
+          resolve({} as T);
         }, 100);
       } else {
-        public clearTimeout(timer);
+        clearTimeout(timer);
         reject(new Error('NATS connection not available'));
       }
     });
@@ -178,7 +178,10 @@ export class AppGatewayNatsService {
   /**
    * Delegate basic publish method to shared client
    */
-  public async publish(subject: string, payload: unknown): Promise<NatsPublishResult> {
+  public async publish(
+    subject: string,
+    payload: unknown,
+  ): Promise<NatsPublishResult> {
     return this.natsClient.publish(subject, payload);
   }
 

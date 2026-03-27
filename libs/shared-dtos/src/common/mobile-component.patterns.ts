@@ -514,7 +514,7 @@ export class TouchGestureUtil {
 
     const onTouchEnd = (event: TouchEvent): void => {
       if (longPressTimer) {
-        public clearTimeout(longPressTimer);
+        clearTimeout(longPressTimer);
         longPressTimer = null;
       }
 
@@ -558,7 +558,7 @@ export class TouchGestureUtil {
       element.removeEventListener('touchstart', onTouchStart);
       element.removeEventListener('touchend', onTouchEnd);
       if (longPressTimer) {
-        public clearTimeout(longPressTimer);
+        clearTimeout(longPressTimer);
       }
     };
   }
