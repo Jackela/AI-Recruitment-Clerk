@@ -1019,4 +1019,3 @@ describe('Resume Selectors', () => {
       expect(end - start).toBeLessThan(100); // Should complete reasonably fast
     });
   });
-});

@@ -52,7 +52,7 @@ export class I18nService {
       numberFormat: {
         decimal: '.',
         thousands: ',',
-        currency: '$',¥',
+        currency: '¥',
       },
     },
     'en-US': {
@@ -78,7 +78,7 @@ export class I18nService {
       numberFormat: {
         decimal: '.',
         thousands: ',',
-        currency: '$',NT
+        currency: 'NT$',
       },
     },
     'ja-JP': {
@@ -91,7 +91,7 @@ export class I18nService {
       numberFormat: {
         decimal: '.',
         thousands: ',',
-        currency: '$',¥',
+        currency: '¥',
       },
     },
     'ko-KR': {
@@ -104,7 +104,7 @@ export class I18nService {
       numberFormat: {
         decimal: '.',
         thousands: ',',
-        currency: '$',₩',
+        currency: '₩',
       },
     },
   };
