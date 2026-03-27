@@ -9,7 +9,6 @@ import {
 import type { ProgressUpdate } from '../../../services/websocket.service';
 import { ToastService } from '../../../services/toast.service';
 import { ProgressTimelineComponent } from './progress-timeline.component';
-import { ProgressMilestoneComponent } from './progress-milestone.component';
 import { ProgressLogComponent } from './progress-log.component';
 import type {
   ProgressMessage,
@@ -28,7 +27,6 @@ import type {
   imports: [
     CommonModule,
     ProgressTimelineComponent,
-    ProgressMilestoneComponent,
     ProgressLogComponent,
   ],
   template: `

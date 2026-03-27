@@ -6,6 +6,7 @@ import type { Observable } from 'rxjs';
 import type { BentoGridItem } from '../../components/shared/bento-grid/bento-grid-item.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { BentoGridComponent } from '../../components/shared/bento-grid/bento-grid.component';
+import { BentoGridComponent } from '../../components/shared/bento-grid/bento-grid.component';
 import type {
   DashboardStats,
   SystemHealth,
@@ -23,6 +24,12 @@ import { ChartsComponent } from './charts.component';
   selector: 'arc-enhanced-dashboard',
   standalone: true,
   imports: [
+    CommonModule,
+    RouterModule,
+    BentoGridComponent,
+    StatsDisplayComponent,
+    TranslatePipe,
+  ],
     CommonModule,
     RouterModule,
     BentoGridComponent,

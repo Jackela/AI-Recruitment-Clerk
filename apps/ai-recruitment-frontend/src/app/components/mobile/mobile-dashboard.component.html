@@ -47,7 +47,7 @@
   <div class="dashboard-cards" *ngIf="dashboardCards.length > 0">
     <h2 class="section-title">{{ 'mobile.dashboard' | translate }}</h2>
     <div class="cards-container" #dashboardContainer>
-      <app-mobile-swipe
+      <arc-mobile-swipe
         *ngFor="let card of dashboardCards"
         [actions]="card.actions || []"
         [item]="card"
@@ -100,7 +100,7 @@
             </div>
           </div>
         </div>
-      </app-mobile-swipe>
+      </arc-mobile-swipe>
     </div>
   </div>
 
