@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/job-management-domain/src",
   "projectType": "library",
+  "implicitDependencies": ["shared-dtos"],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
