@@ -225,7 +225,7 @@ export class ErrorCorrelationService {
 
     history.replaceState = function (...args) {
       originalReplaceState.apply(history, args);
-      public updateContext();
+      updateContext();
     };
 
     window.addEventListener('popstate', updateContext);

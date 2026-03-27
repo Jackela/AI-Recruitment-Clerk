@@ -380,21 +380,21 @@ export class CacheService {
         const entry = request.result as CacheEntry<T>;
 
         if (!entry) {
-          public resolve(null);
+          resolve(null);
           return;
         }
 
         if (entry.expiresAt && Date.now() > entry.expiresAt) {
           this.removeFromIndexedDB(key);
-          public resolve(null);
+          resolve(null);
           return;
         }
 
-        public resolve(entry.value);
+        resolve(entry.value);
       };
 
       request.onerror = () => {
-        public resolve(null);
+        resolve(null);
       };
     });
   }
