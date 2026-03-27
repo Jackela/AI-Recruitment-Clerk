@@ -349,10 +349,8 @@ describe('FeedbackCodeModalComponent', () => {
 
   describe('Component Lifecycle', () => {
     it('should complete destroy subject on component destroy', () => {
-      const destroySpy = jest.spyOn(component['destroy
-}], 'next');
-      const completeSpy = jest.spyOn(component['destroy
-}], 'complete');
+      const destroySpy = jest.spyOn(component['destroy$'], 'next');
+      const completeSpy = jest.spyOn(component['destroy$'], 'complete');
 
       component.ngOnDestroy();
 

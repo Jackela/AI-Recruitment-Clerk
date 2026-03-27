@@ -396,7 +396,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
       if (currentProgress >= 100) {
         this.uploadService.setFileSuccess(file.id);
         this.uploadProgress.emit({ file, progress: 100 });
-        public clearInterval(interval);
+        clearInterval(interval);
 
         // Check if all uploads are complete
         if (!this.uploadService.getStateSnapshot().hasUploading) {
