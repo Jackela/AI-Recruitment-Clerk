@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Logger } from '@nestjs/common';
+import { Controller, Get, Post, Body, Logger } from '@nestjs/common';
 import type { WebSocketGateway } from '../../websocket/websocket.gateway';
 
 /**
@@ -13,8 +13,17 @@ export class WebSocketDemoController {
    * @param webSocketGateway - The web socket gateway.
    */
   constructor(private readonly webSocketGateway: WebSocketGateway) {
-  // Intentionally empty
-}
+    // Intentionally empty
+  }
+
+  /**
+   * Gets the demo status.
+   * @returns An object indicating if the demo is available.
+   */
+  @Get('demo-status')
+  public getDemoStatus(): { available: boolean } {
+    return { available: true };
+  }
 
   /**
    * Performs the simulate progress operation.
@@ -58,7 +67,7 @@ export class WebSocketDemoController {
       '正在初始化分析流程...',
     );
 
-    for(const stepData of steps) {
+    for (const stepData of steps) {
       await this.delay(stepData.delay);
 
       // 发送步骤变更

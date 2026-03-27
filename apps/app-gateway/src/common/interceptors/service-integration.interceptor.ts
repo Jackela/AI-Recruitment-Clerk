@@ -69,7 +69,10 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
     next: CallHandler,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<Observable<any>> {
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp()?.getRequest();
+    if (!request) {
+      throw new Error('Invalid context');
+    }
     const handler = context.getHandler();
     const className = context.getClass().name;
     const methodName = handler.name;

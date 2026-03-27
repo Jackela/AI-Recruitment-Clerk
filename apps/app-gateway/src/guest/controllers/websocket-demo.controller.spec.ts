@@ -4,7 +4,13 @@ describe('WebSocketDemoController', () => {
   let controller: WebSocketDemoController;
 
   beforeEach(() => {
-    controller = new WebSocketDemoController({} as any);
+    const mockWebSocketGateway = {
+      sendStepChange: jest.fn(),
+      sendProgressUpdate: jest.fn(),
+      sendCompletion: jest.fn(),
+      sendError: jest.fn(),
+    };
+    controller = new WebSocketDemoController(mockWebSocketGateway as any);
   });
 
   describe('getDemoStatus', () => {
@@ -12,6 +18,7 @@ describe('WebSocketDemoController', () => {
       const result = controller.getDemoStatus();
 
       expect(result).toHaveProperty('available');
+      expect(result.available).toBe(true);
     });
   });
 });
