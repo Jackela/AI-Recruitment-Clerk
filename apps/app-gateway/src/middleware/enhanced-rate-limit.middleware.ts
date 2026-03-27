@@ -521,6 +521,21 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
 
   private getClientIP(req: Request): string {
     // Handle various proxy headers
+    const forwarded = req.headers?.['x-forwarded-for'] as string;
+    if (forwarded) {
+      return forwarded.split(',')[0].trim();
+    }
+
+    return (
+      (req.headers?.['x-real-ip'] as string) ??
+      (req.headers?.['x-client-ip'] as string) ??
+      req.connection?.remoteAddress ??
+      req.socket?.remoteAddress ??
+      req.ip ??
+      'unknown'
+    );
+  }
+    // Handle various proxy headers
     const forwarded = req.headers['x-forwarded-for'] as string;
     if (forwarded) {
       return forwarded.split(',')[0].trim();
