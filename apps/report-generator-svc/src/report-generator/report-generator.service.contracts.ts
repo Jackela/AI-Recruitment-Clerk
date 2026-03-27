@@ -304,7 +304,7 @@ export class ReportGeneratorServiceContracts {
 
       // Convert to PDF with quality validation
       const pdfBuffer = await this.generatePDFFromMarkdown(markdownContent);
-      public processingTimeCheck();
+      processingTimeCheck();
 
       // Validate PDF quality
       if (!this.validatePDFQuality(pdfBuffer)) {

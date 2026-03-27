@@ -10,6 +10,8 @@
     "dist",
     "**/*.spec.ts",
     "**/*.test.ts",
-    "apps/ai-recruitment-frontend"
+    "apps/ai-recruitment-frontend",
+    "apps/ai-recruitment-frontend-e2e",
+    "apps/app-gateway-e2e"
   ]
 }

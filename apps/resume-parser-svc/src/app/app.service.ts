@@ -124,7 +124,7 @@ export class AppService
           'function'
       ) {
         await (this.natsService as unknown as ServiceWithResumeSubscriptions).subscribeToResumeSubmissions(
-          public async (event: ResumeSubmittedEvent): Promise<void> => {
+          async (event: ResumeSubmittedEvent): Promise<void> => {
             // Handle resume submission through parsing service
             if (this.parsingService && event) {
               await this.parsingService.handleResumeSubmitted(event);

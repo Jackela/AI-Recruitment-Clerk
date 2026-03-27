@@ -77,7 +77,7 @@ export class AppService
     try {
       // Stop health check monitoring
       if (this.healthCheckInterval) {
-        public clearInterval(this.healthCheckInterval);
+        clearInterval(this.healthCheckInterval);
       }
 
       // Clean up event subscriptions
