@@ -6,9 +6,36 @@ const PORT = process.env.PORT || 4200;
 const API_TARGET = process.env.API_TARGET || 'http://localhost:3000';
 
 // Support both Angular 20+ (direct output) and legacy (browser subdirectory) structures
-const STATIC_DIR =
-  process.env.STATIC_DIR ||
-  path.resolve(__dirname, '..', 'dist/apps/ai-recruitment-frontend/browser');
+const getStaticDir = () => {
+  if (process.env.STATIC_DIR) {
+    // If STATIC_DIR is provided, check if it's the parent directory
+    const providedPath = path.resolve(process.env.STATIC_DIR);
+    const browserPath = path.join(providedPath, 'browser');
+    
+    // Check if browser subdirectory exists
+    if (fs.existsSync(browserPath)) {
+      console.log(`Found browser subdirectory: ${browserPath}`);
+      return browserPath;
+    }
+    return providedPath;
+  }
+  
+  // Default paths to check
+  const defaultPaths = [
+    path.resolve(__dirname, '..', 'dist/apps/ai-recruitment-frontend/browser'),
+    path.resolve(__dirname, '..', 'dist/apps/ai-recruitment-frontend'),
+  ];
+  
+  for (const p of defaultPaths) {
+    if (fs.existsSync(p)) {
+      return p;
+    }
+  }
+  
+  return defaultPaths[0]; // Return first option even if it doesn't exist
+};
+
+const STATIC_DIR = getStaticDir();
 
 const MIME_TYPES = {
   '.html': 'text/html',

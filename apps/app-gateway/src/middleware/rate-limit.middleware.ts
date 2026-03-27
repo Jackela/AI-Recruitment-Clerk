@@ -165,7 +165,7 @@ export class RateLimitMiddleware implements NestMiddleware {
       }
       const errorDetails = error instanceof Error ? (error.stack ?? error.message) : 'Unknown error';
       this.logger.error('Rate limit error', errorDetails);
-      public next(); // 出错时不阻塞请求
+      next(); // 出错时不阻塞请求
     }
   }
 

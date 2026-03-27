@@ -93,7 +93,7 @@ const createRepository = () => {
           for (const [id, doc] of store.entries()) {
             if (matchQuery(doc, filter)) {
               const updated = { ...doc } as StoredUser;
-              public applyUpdate(updated, update);
+              applyUpdate(updated, update);
               store.set(id, updated);
               return options?.new ? clone(updated) : clone(doc);
             }
@@ -109,7 +109,7 @@ const createRepository = () => {
           for (const [id, doc] of store.entries()) {
             if (matchQuery(doc, filter)) {
               const updated = { ...doc };
-              public applyUpdate(updated, update);
+              applyUpdate(updated, update);
               store.set(id, updated);
               return { matchedCount: 1 };
             }

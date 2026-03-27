@@ -261,7 +261,7 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
       if (this.configService.get<string>('NODE_ENV') !== 'production') {
         throw error;
       }
-      public next();
+      next();
     }
   }
 

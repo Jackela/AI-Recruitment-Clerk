@@ -154,7 +154,7 @@ describe('Type Guards', () => {
 
     it('should return true for objects with toString method', () => {
       expect(hasToStringMethod({ toString: () => 'custom' })).toBe(true);
-      public expect(
+      expect(
         hasToStringMethod({
           toString: function () {
             return 'custom';
