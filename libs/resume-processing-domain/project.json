@@ -13,6 +13,17 @@
         "tsConfig": "libs/resume-processing-domain/tsconfig.json",
         "packageJson": "libs/resume-processing-domain/package.json",
         "main": "libs/resume-processing-domain/src/index.ts"
+      },
+      "dependsOn": ["^build"]
+    },
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/resume-processing-domain",
+        "tsConfig": "libs/resume-processing-domain/tsconfig.json",
+        "packageJson": "libs/resume-processing-domain/package.json",
+        "main": "libs/resume-processing-domain/src/index.ts"
       }
     },
     "lint": {
