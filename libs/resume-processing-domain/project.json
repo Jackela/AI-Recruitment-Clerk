@@ -1,10 +1,10 @@
 {
-"name": "resume-processing-domain",
-"$schema": "../../node_modules/nx/schemas/project-schema.json",
-"sourceRoot": "libs/resume-processing-domain/src",
+  "name": "resume-processing-domain",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/resume-processing-domain/src",
   "projectType": "library",
   "implicitDependencies": ["shared-dtos"],
-"targets": {
+  "targets": {
     "build": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
