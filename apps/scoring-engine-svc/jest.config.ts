@@ -22,7 +22,5 @@ export default {
     '!src/**/*.interface.ts',
     '!src/**/*.module.ts',
     '!src/main.ts',
-  ],
-  
-  },
+  ]
 };

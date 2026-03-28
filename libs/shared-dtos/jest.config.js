@@ -10,9 +10,8 @@ module.exports = {
           experimentalDecorators: true,
           emitDecoratorMetadata: true,
           target: 'es2020',
-          lib: ['es2020'],
-        },
-      },
+          lib: ['es2020']
+};
     ],
   },
   moduleFileExtensions: ['ts', 'js'],
@@ -29,7 +28,5 @@ module.exports = {
     '!<rootDir>/src/**/*.d.ts',
     '!<rootDir>/src/**/index.ts',
   ],
-  coverageDirectory: '../../coverage/libs/shared-dtos',
-  
-  },
+  coverageDirectory: '../../coverage/libs/shared-dtos'
 };

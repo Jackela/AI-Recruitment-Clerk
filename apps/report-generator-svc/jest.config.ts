@@ -27,7 +27,5 @@ export default {
     '!src/report-generator/report-analytics.repository.ts', // Analytics repository
     '!src/report-generator/report.repository.ts', // Data repository
     '!src/app/reports.controller.ts', // Admin REST controller (requires full HTTP mocking)
-  ],
-  
-  },
+  ]
 };

@@ -28,7 +28,5 @@ export default {
     '!src/**/test-fixtures.ts',
     '!src/**/extraction.service.contracts.ts',
     '!src/services/jd-extractor-nats.service.stub.ts',
-  ],
-  
-  },
+  ]
 };

@@ -14,7 +14,5 @@ export default {
     '\\.e2e\\.spec\\.ts$',
     '\\.integration\\.spec\\.ts$',
     '/test/',
-  ],
-  
-  },
+  ]
 };
