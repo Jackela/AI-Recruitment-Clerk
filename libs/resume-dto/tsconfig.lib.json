@@ -1,7 +1,6 @@
 {
 "extends": "./tsconfig.json",
   "compilerOptions": {
-    "rootDir": "../../",
     "outDir": "../../dist/libs/resume-dto",
     "declaration": true,
     "types": ["node"],
