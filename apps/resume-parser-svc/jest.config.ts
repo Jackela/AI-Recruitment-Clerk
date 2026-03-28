@@ -22,7 +22,11 @@ export default {
     '!src/vision-llm/vision-llm-error-handler.ts', // Error handler (covered by integration)
     '!src/vision-llm/vision-llm.service.ts', // Complex mocking, covered by integration tests
   ],
-  
+  moduleNameMapper: {
+    '\\.(?:worker\\.min\\.mjs\\?url)$': '<rootDir>/test/pdf-worker.stub.js',
+    '^pdf-parse$': '<rootDir>/../../__mocks__/pdf-parse.js',
+    '^@app/(.*)$': '<rootDir>/../../libs/$1/src',
+    '^@ai-recruitment-clerk/(.*)$': '<rootDir>/../../libs/$1/src',
   },
   moduleNameMapper: {
     '\\.(?:worker\\.min\\.mjs\\?url)$': '<rootDir>/test/pdf-worker.stub.js',
