@@ -33,10 +33,10 @@ export default {
   restoreMocks: true,
   // Coverage aggregation configuration
   coverageDirectory: '<rootDir>/coverage',
-  collectCoverage: false, // Set to false by default, enable via --coverage flag
+  collectCoverage: false,
   coverageReporters: ['json-summary', 'json', 'lcov', 'text'],
   reporters: ['default'],
-  // Global coverage patterns to ensure all source files are considered
+  // Global coverage patterns
   collectCoverageFrom: [
     'apps/*/src/**/*.{ts,js}',
     'libs/*/src/**/*.{ts,js}',
@@ -49,26 +49,15 @@ export default {
     '!**/dist/**',
     '!**/index.ts',
   ],
-  // Worker configuration to prevent resource exhaustion and timeouts
-  // 根据测试类型动态调整
-  maxWorkers: process.env.CI
-    ? 1
-    : '50%',
-    ? process.env.TEST_TYPE === 'unit'
-      ? 3
-      : 1
-    : '50%',
-  workerIdleMemoryLimit: '512MB', // 增加内存限制
-  // 分层超时
-  testTimeout: process.env.CI
-    ? process.env.TEST_TYPE === 'integration'
-      ? 120000
-      : 30000
-    : 30000,
-  // Prevent hanging by limiting test suite time
-  forceExit: true, // Force exit to prevent CI hanging
+  // Worker configuration to prevent resource exhaustion
+  maxWorkers: process.env.CI ? 1 : '50%',
+  workerIdleMemoryLimit: '512MB',
+  // Test timeout configuration
+  testTimeout: process.env.CI ? 30000 : 30000,
+  // Prevent hanging
+  forceExit: true,
   detectOpenHandles: false,
-  // Skip e2e/integration tests in default coverage run
+  // Skip e2e/integration tests
   testPathIgnorePatterns: [
     '/node_modules/',
     '\\.e2e\\.spec\\.(ts|js)$',
@@ -83,6 +72,6 @@ export default {
     '/test/performance/',
     '/test/production/',
     '/src/.*/.*\\.integration\\.spec\\.(ts|js)$',
-    '\\.slow\\.spec\\.ts$', // 排除标记为slow的测试
+    '\\.slow\\.spec\\.ts$',
   ],
 };
