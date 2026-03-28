@@ -52,6 +52,8 @@ export default {
   // Worker configuration to prevent resource exhaustion and timeouts
   // 根据测试类型动态调整
   maxWorkers: process.env.CI
+    ? 1
+    : '50%',
     ? process.env.TEST_TYPE === 'unit'
       ? 3
       : 1

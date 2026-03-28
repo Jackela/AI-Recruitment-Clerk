@@ -197,10 +197,21 @@ describe('InputValidator', () => {
       const result = InputValidator.validateText('Hi', { minLength: 10 });
 
       expect(result.isValid).toBe(false);
+      expect(result.errors).toContain('Text must be at least 10 characters long');
+    });
+      const result = InputValidator.validateText('Hi', { minLength: 10 });
+
+      expect(result.isValid).toBe(false);
       expect(result.errors).toContain('at least 10 characters');
     });
 
     it('should enforce maximum length', () => {
+      const longText = 'a'.repeat(100);
+      const result = InputValidator.validateText(longText, { maxLength: 50 });
+
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toContain('Text must not exceed 50 characters');
+    });
       const longText = 'a'.repeat(100);
       const result = InputValidator.validateText(longText, { maxLength: 50 });
 
