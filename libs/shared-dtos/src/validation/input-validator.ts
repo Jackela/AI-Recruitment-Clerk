@@ -481,8 +481,6 @@ export class InputValidator {
     }
     return createHash('sha256').update(Uint8Array.from(buffer)).digest('hex');
   }
-    return createHash('sha256').update(Uint8Array.from(buffer)).digest('hex');
-  }
 
   private static formatBytes(bytes: number): string {
     const sizes = ['B', 'KB', 'MB', 'GB'];
