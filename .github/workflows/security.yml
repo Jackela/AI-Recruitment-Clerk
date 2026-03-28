@@ -83,10 +83,10 @@ jobs:
       - name: 📦 Install Dependencies
         run: npm ci --legacy-peer-deps --prefer-offline || npm install --legacy-peer-deps
 
-      - name: 🔐 Run npm audit
-        run: |
-          echo "🔐 Running npm security audit..."
-          npm audit --omit=dev --registry https://registry.npmjs.org/ --audit-level=moderate --json > audit-report.json || true
+      VH|      - name: 🔐 Run npm audit
+        TQ|        run: |
+          YN|          echo "🔐 Running npm security audit..."
+          QX|          npm audit --production --registry https://registry.npmjs.org/ --audit-level=moderate --json > audit-report.json || true
 
           if [ -f audit-report.json ]; then
             CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' < audit-report.json)
