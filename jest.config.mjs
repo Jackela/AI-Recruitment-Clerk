@@ -64,7 +64,7 @@ export default {
       : 30000
     : 30000,
   // Prevent hanging by limiting test suite time
-  forceExit: false, // Keep false to detect open handles
+  forceExit: true, // Force exit to prevent CI hanging
   detectOpenHandles: false,
   // Skip e2e/integration tests in default coverage run
   testPathIgnorePatterns: [

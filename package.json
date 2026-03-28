@@ -31,7 +31,7 @@
     "test": "jest --config jest.config.mjs --passWithNoTests",
     "test:smoke": "jest --config jest.smoke.config.mjs --passWithNoTests",
     "test:app-gateway": "jest --config jest.config.mjs --passWithNoTests apps/app-gateway",
-    "test:ci": "jest --config jest.config.mjs --ci --coverage --passWithNoTests --runInBand",
+    "test:ci": "jest --config jest.config.mjs --ci --coverage --passWithNoTests --runInBand --forceExit",
     "test:coverage": "NODE_OPTIONS='--max-old-space-size=8192' jest --config jest.config.mjs --coverage --passWithNoTests --runInBand",
     "lint": "npx nx run-many -t lint --all --parallel=3 --exclude ai-recruitment-clerk",
     "typecheck": "tsc --noEmit --project tsconfig.ci.json",
