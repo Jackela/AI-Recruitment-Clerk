@@ -13,7 +13,8 @@
         "outputPath": "dist/libs/service-base",
         "tsConfig": "libs/service-base/tsconfig.json",
         "packageJson": "libs/service-base/package.json",
-        "main": "libs/service-base/src/index.ts"
+        "main": "libs/service-base/src/index.ts",
+        "buildableProjectDepsInPackageJson": true
       }
     },
     "lint": {

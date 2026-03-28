@@ -12,7 +12,8 @@
         "outputPath": "dist/libs/resume-processing-domain",
         "tsConfig": "libs/resume-processing-domain/tsconfig.json",
         "packageJson": "libs/resume-processing-domain/package.json",
-        "main": "libs/resume-processing-domain/src/index.ts"
+        "main": "libs/resume-processing-domain/src/index.ts",
+        "buildableProjectDepsInPackageJson": true
       },
       "dependsOn": ["^build"]
     },
