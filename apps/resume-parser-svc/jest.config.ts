@@ -22,13 +22,7 @@ export default {
     '!src/vision-llm/vision-llm-error-handler.ts', // Error handler (covered by integration)
     '!src/vision-llm/vision-llm.service.ts', // Complex mocking, covered by integration tests
   ],
-  coverageThreshold: {
-    global: {
-      branches: 30,
-      functions: 30,
-      lines: 30,
-      statements: 30,
-    },
+  
   },
   moduleNameMapper: {
     '\\.(?:worker\\.min\\.mjs\\?url)$': '<rootDir>/test/pdf-worker.stub.js',

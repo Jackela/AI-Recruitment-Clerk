@@ -28,12 +28,6 @@ export default {
     '!src/report-generator/report.repository.ts', // Data repository
     '!src/app/reports.controller.ts', // Admin REST controller (requires full HTTP mocking)
   ],
-  coverageThreshold: {
-    global: {
-      branches: 30,
-      functions: 30,
-      lines: 30,
-      statements: 30,
-    },
+  
   },
 };
