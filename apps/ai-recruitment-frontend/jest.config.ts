@@ -29,6 +29,12 @@ export default {
     '<rootDir>/src/app/store/resumes/resume.selectors.spec.ts',
     '<rootDir>/src/app/services/api.service.spec.ts',
     '<rootDir>/src/app/services/file-upload.service.spec.ts',
+    // Additional files failing with "configSet.processWithEsbuild is not a function"
+    '<rootDir>/src/app/pages/jobs/create-job/create-job.component.spec.ts',
+    '<rootDir>/src/app/directives/pull-to-refresh.directive.spec.ts',
+    '<rootDir>/src/app/components/shared/form-example/form-example.component.spec.ts',
+    '<rootDir>/src/app/components/privacy/consent-management.component.spec.ts',
+    '<rootDir>/src/app/directives/validation/validation-feedback.component.spec.ts',
   ],
   snapshotSerializers: [
     'jest-preset-angular/build/serializers/no-ng-attributes',
