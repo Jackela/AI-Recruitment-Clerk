@@ -12,6 +12,8 @@ export default {
         tsconfig: '<rootDir>/tsconfig.spec.json',
         stringifyContentPathRegex: '\\.(html|svg)$',
         useESM: true,
+        // Disable esbuild to avoid "processWithEsbuild is not a function" error
+        processWithEsbuild: false,
       },
     ],
   },
