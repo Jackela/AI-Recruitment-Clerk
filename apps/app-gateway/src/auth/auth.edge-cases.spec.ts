@@ -104,7 +104,10 @@ describe('AuthService - Edge Cases', () => {
     (service as any).failedLoginAttempts.clear();
   });
 
-  afterEach(() => {
+    afterEach(() => {
+      jest.clearAllMocks();
+      jest.useRealTimers();
+    });
     jest.clearAllMocks();
   });
 
