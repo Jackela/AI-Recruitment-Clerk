@@ -1,10 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "baseUrl": "../../",
     "module": "ES2022",
     "target": "ES2022",
-    "outDir": "./dist",
-
+    "outDir": "../../dist/libs/resume-processing-domain",
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
