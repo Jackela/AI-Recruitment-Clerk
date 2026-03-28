@@ -29,13 +29,17 @@ const mockAuditLogger: jest.Mocked<IAuditLogger> = {
 describe('AnalyticsAggregationService', () => {
   let service: AnalyticsAggregationService;
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    service = new AnalyticsAggregationService(
-      mockRepository,
-      mockEventBus,
-      mockAuditLogger,
-    );
+beforeEach(() => {
+jest.clearAllMocks();
+service = new AnalyticsAggregationService(
+mockRepository,
+mockEventBus,
+mockAuditLogger,
+);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   describe('processBatchEvents', () => {
