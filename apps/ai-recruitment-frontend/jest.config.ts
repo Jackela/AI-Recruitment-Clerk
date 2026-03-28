@@ -8,12 +8,10 @@ export default {
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [
       'jest-preset-angular',
-      {
+{
         tsconfig: '<rootDir>/tsconfig.spec.json',
         stringifyContentPathRegex: '\\.(html|svg)$',
         useESM: true,
-        // Disable esbuild to avoid "processWithEsbuild is not a function" error
-        processWithEsbuild: false,
       },
     ],
   },
