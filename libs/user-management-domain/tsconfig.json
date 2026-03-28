@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "composite": true,
+    "rootDir": "../../",
     "target": "ES2022",
     "module": "CommonJS",
     "moduleResolution": "node",

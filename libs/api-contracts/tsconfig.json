@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
+    "rootDir": "../../",
     "module": "ES2022",
     "target": "ES2022",
     "lib": ["ES2022"],
