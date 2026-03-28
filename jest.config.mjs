@@ -74,4 +74,16 @@ export default {
     '/src/.*/.*\\.integration\\.spec\\.(ts|js)$',
     '\\.slow\\.spec\\.ts$',
   ],
+  // Disable coverage threshold in CI for sharded test runs
+  // Coverage is collected and merged separately
+  coverageThreshold: process.env.CI
+    ? undefined
+    : {
+        global: {
+          branches: 30,
+          functions: 30,
+          lines: 30,
+          statements: 30,
+        },
+      },
 };
