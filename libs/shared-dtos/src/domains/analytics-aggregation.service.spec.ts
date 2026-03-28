@@ -14,6 +14,8 @@ const mockRepository: jest.Mocked<IAnalyticsRepository> = {
   findByDateRange: jest.fn(),
   findByIds: jest.fn(),
   countSessionEvents: jest.fn(),
+  deleteExpired: jest.fn(),
+  anonymizeOldEvents: jest.fn(),
 };
 
 const mockEventBus: jest.Mocked<IDomainEventBus> = {
