@@ -476,6 +476,11 @@ export class InputValidator {
   }
 
   private static generateFileHash(buffer: Buffer): string {
+    if (!buffer) {
+      return '';
+    }
+    return createHash('sha256').update(Uint8Array.from(buffer)).digest('hex');
+  }
     return createHash('sha256').update(Uint8Array.from(buffer)).digest('hex');
   }
 
