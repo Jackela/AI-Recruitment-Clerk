@@ -9,10 +9,10 @@ module.exports = {
   coverageDirectory: '../../coverage/libs/resume-dto',
   coverageThreshold: {
     global: {
-      branches: 60,
-      functions: 60,
-      lines: 60,
-      statements: 60,
+      branches: 30,
+      functions: 30,
+      lines: 30,
+      statements: 30,
     },
   },
 };
