@@ -65,10 +65,11 @@ describe('GuestLimitModalComponent', () => {
     component.error$ = mockState.pipe(map((state) => state.error));
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
+afterEach(() => {
+jest.clearAllMocks();
     mockState.complete();
-  });
+    jest.useRealTimers();
+});
 
   it('should create', () => {
     expect(component).toBeTruthy();

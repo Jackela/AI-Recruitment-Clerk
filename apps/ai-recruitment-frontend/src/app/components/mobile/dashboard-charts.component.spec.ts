@@ -55,6 +55,10 @@ describe('DashboardChartsComponent', () => {
     fixture.detectChanges();
   });
 
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
