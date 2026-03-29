@@ -9,6 +9,7 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
+        "rootDir": ".",
         "outputPath": "dist/libs/api-contracts",
         "tsConfig": "libs/api-contracts/tsconfig.json",
         "packageJson": "libs/api-contracts/package.json",

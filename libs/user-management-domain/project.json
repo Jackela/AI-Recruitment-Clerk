@@ -9,6 +9,7 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
+        "rootDir": ".",
         "outputPath": "dist/libs/user-management-domain",
         "tsConfig": "libs/user-management-domain/tsconfig.json",
         "packageJson": "libs/user-management-domain/package.json",

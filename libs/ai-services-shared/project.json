@@ -9,6 +9,7 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
+        "rootDir": ".",
         "outputPath": "dist/libs/ai-services-shared",
         "tsConfig": "libs/ai-services-shared/tsconfig.json",
         "packageJson": "libs/ai-services-shared/package.json",

@@ -9,6 +9,7 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
+        "rootDir": ".",
         "outputPath": "dist/libs/resume-processing-domain",
         "tsConfig": "libs/resume-processing-domain/tsconfig.json",
         "packageJson": "libs/resume-processing-domain/package.json",

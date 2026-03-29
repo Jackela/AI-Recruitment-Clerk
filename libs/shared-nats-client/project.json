@@ -9,6 +9,7 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
+        "rootDir": ".",
         "outputPath": "dist/libs/shared-nats-client",
         "tsConfig": "libs/shared-nats-client/tsconfig.lib.json",
         "packageJson": "libs/shared-nats-client/package.json",

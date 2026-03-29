@@ -9,6 +9,7 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
+        "rootDir": ".",
         "outputPath": "dist/libs/incentive-system-domain",
         "tsConfig": "libs/incentive-system-domain/tsconfig.json",
         "packageJson": "libs/incentive-system-domain/package.json",
