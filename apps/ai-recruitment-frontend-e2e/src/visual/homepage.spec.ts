@@ -17,9 +17,8 @@ test.describe('Homepage Visual', () => {
 
   test('homepage header matches snapshot', async ({ page }) => {
     await page.goto('/');
-    const header = page.locator('header, [data-testid="header"]').first();
-    await header.waitFor({ state: 'visible', timeout: 10000 });
     await waitForPageStability(page);
+    const header = page.locator('header, [data-testid="header"]').first();
     await expect(header).toHaveScreenshot('homepage-header.png', {
       timeout: 15000,
     });
@@ -27,9 +26,8 @@ test.describe('Homepage Visual', () => {
 
   test('homepage hero section matches snapshot', async ({ page }) => {
     await page.goto('/');
-    const hero = page.locator('main, .hero, [data-testid="hero"]').first();
-    await hero.waitFor({ state: 'visible', timeout: 10000 });
     await waitForPageStability(page);
+    const hero = page.locator('main, .hero, [data-testid="hero"]').first();
     await expect(hero).toHaveScreenshot('homepage-hero.png', {
       timeout: 15000,
     });
@@ -37,9 +35,8 @@ test.describe('Homepage Visual', () => {
 
   test('homepage footer matches snapshot', async ({ page }) => {
     await page.goto('/');
-    const footer = page.locator('footer, [data-testid="footer"]').first();
-    await footer.waitFor({ state: 'visible', timeout: 10000 });
     await waitForPageStability(page);
+    const footer = page.locator('footer, [data-testid="footer"]').first();
     await expect(footer).toHaveScreenshot('homepage-footer.png', {
       timeout: 15000,
     });

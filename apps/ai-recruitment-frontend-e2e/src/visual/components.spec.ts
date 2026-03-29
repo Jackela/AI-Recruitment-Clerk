@@ -22,7 +22,6 @@ test.describe('Component Visual', () => {
     const uploadForm = page
       .locator('[data-testid="resume-upload-form"], .upload-form, form')
       .first();
-    await uploadForm.waitFor({ state: 'visible', timeout: 15000 });
     await expect(uploadForm).toHaveScreenshot('resume-upload-form.png', {
       timeout: 15000,
     });
@@ -36,7 +35,6 @@ test.describe('Component Visual', () => {
         '[data-testid="app-sidebar"], [data-testid="sidebar"], .app-navigation, nav',
       )
       .first();
-    await sidebar.waitFor({ state: 'visible', timeout: 15000 });
     await expect(sidebar).toHaveScreenshot('dashboard-sidebar.png', {
       timeout: 15000,
     });
@@ -48,7 +46,6 @@ test.describe('Component Visual', () => {
     const createButton = page
       .locator('[data-testid="create-job-button"]')
       .first();
-    await createButton.waitFor({ state: 'visible', timeout: 15000 });
     await expect(createButton).toHaveScreenshot('create-job-button.png', {
       timeout: 15000,
     });
