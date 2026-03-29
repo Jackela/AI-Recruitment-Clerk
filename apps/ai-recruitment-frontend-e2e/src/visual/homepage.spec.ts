@@ -18,8 +18,9 @@ test.describe('Homepage Visual', () => {
   test('homepage header matches snapshot', async ({ page }) => {
     await page.goto('/');
     await waitForPageStability(page);
-    const header = page.locator('header, [data-testid="header"]').first();
-    await expect(header).toHaveScreenshot('homepage-header.png', {
+    // Full page screenshot for reliability with Angular lazy loading
+    await expect(page).toHaveScreenshot('homepage-header.png', {
+      fullPage: true,
       timeout: 15000,
     });
   });
@@ -27,8 +28,9 @@ test.describe('Homepage Visual', () => {
   test('homepage hero section matches snapshot', async ({ page }) => {
     await page.goto('/');
     await waitForPageStability(page);
-    const hero = page.locator('main, .hero, [data-testid="hero"]').first();
-    await expect(hero).toHaveScreenshot('homepage-hero.png', {
+    // Full page screenshot for reliability with Angular lazy loading
+    await expect(page).toHaveScreenshot('homepage-hero.png', {
+      fullPage: true,
       timeout: 15000,
     });
   });
@@ -36,8 +38,9 @@ test.describe('Homepage Visual', () => {
   test('homepage footer matches snapshot', async ({ page }) => {
     await page.goto('/');
     await waitForPageStability(page);
-    const footer = page.locator('footer, [data-testid="footer"]').first();
-    await expect(footer).toHaveScreenshot('homepage-footer.png', {
+    // Full page screenshot for reliability with Angular lazy loading
+    await expect(page).toHaveScreenshot('homepage-footer.png', {
+      fullPage: true,
       timeout: 15000,
     });
   });
