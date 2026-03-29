@@ -162,20 +162,20 @@
       "options": {
         "buildTarget": "ai-recruitment-frontend:build:production",
         "port": 4200,
-        "staticFilePath": "dist/apps/ai-recruitment-frontend/browser",
+        "staticFilePath": "dist/apps/ai-recruitment-frontend",
         "spa": true
       },
       "configurations": {
         "production": {
           "buildTarget": "ai-recruitment-frontend:build:production",
           "port": 4200,
-          "staticFilePath": "dist/apps/ai-recruitment-frontend/browser",
+          "staticFilePath": "dist/apps/ai-recruitment-frontend",
           "spa": true
         },
         "webkit-test": {
           "buildTarget": "ai-recruitment-frontend:build:webkit-test",
           "port": 4204,
-          "staticFilePath": "dist/apps/ai-recruitment-frontend/browser",
+          "staticFilePath": "dist/apps/ai-recruitment-frontend",
           "spa": true
         }
       },
