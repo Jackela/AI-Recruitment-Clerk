@@ -82,10 +82,10 @@ jobs:
         with:
           port: 4200
           build-command: 'NODE_OPTIONS="--max-old-space-size=4096" npx nx build ai-recruitment-frontend --configuration=webkit-test'
-          serve-command: 'STATIC_DIR=dist/apps/ai-recruitment-frontend node scripts/proxy-server.cjs'
+          serve-command: 'STATIC_DIR=dist/apps/ai-recruitment-frontend/browser node scripts/proxy-server.cjs'
           health-check-url: 'http://localhost:4200'
           health-check-timeout: '60000'
-          verify-build-output: 'dist/apps/ai-recruitment-frontend'
+          verify-build-output: 'dist/apps/ai-recruitment-frontend/browser'
           server-log-path: '/tmp/server.log'
 
       # Determine execution mode based on event type and inputs
