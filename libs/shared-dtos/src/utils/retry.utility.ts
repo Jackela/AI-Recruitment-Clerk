@@ -201,10 +201,8 @@ export class CircuitBreaker {
     try {
       const result = await operation();
 
-      if (this.state === 'HALF_OPEN') {
-        this.reset();
-        // Circuit breaker moving to CLOSED state
-      }
+      // Reset failures on success
+      this.reset();
 
       return result;
     } catch (error) {

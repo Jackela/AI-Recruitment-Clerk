@@ -347,7 +347,7 @@ describe('Error Interceptors', () => {
     beforeEach(() => {
       interceptor = new ErrorRecoveryInterceptor(mockServiceName, {
         enableCircuitBreaker: true,
-        failureThreshold: 1,
+        failureThreshold: 3,
         recoveryTimeout: 1000,
       });
 
@@ -420,6 +420,20 @@ describe('Error Interceptors', () => {
     });
 
     it('should enhance errors with recovery strategies', async () => {
+      // First, fail 3 times to open the circuit breaker
+      mockCallHandler.handle.mockReturnValue(
+        throwError(() => new Error('Test error')),
+      );
+
+      for (let i = 0; i < 3; i++) {
+        try {
+          await interceptor.intercept(mockContext, mockCallHandler).toPromise();
+        } catch (_e) {
+          // Expected - circuit breaker is recording failures
+        }
+      }
+
+      // Now the circuit is open, error should have recovery strategies
       const error = new EnhancedAppException(
         ErrorType.SYSTEM,
         'TEST',

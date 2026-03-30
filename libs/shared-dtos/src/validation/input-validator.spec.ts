@@ -222,7 +222,7 @@ describe('InputValidator', () => {
       });
 
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain('does not match required pattern');
+      expect(result.errors).toContain('Text does not match required pattern');
     });
 
     it('should trim text by default', () => {
@@ -259,7 +259,7 @@ describe('InputValidator', () => {
       const result = InputValidator.validateText('javascript:alert(1)');
 
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain('malicious content');
+      expect(result.errors).toContain('Text contains potentially malicious content');
     });
   });
 
@@ -315,7 +315,7 @@ describe('InputValidator', () => {
       const result = InputValidator.validateEmail('test..test@example.com');
 
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain('invalid patterns');
+      expect(result.errors).toContain('Email contains invalid patterns');
     });
   });
 
@@ -563,14 +563,14 @@ describe('InputValidator', () => {
       const result = (InputValidator as any).validateFilename('file<test>.pdf');
 
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain('invalid characters');
+      expect(result.errors).toContain('Filename contains invalid characters');
     });
 
     it('should reject Windows reserved names', () => {
       const result = (InputValidator as any).validateFilename('CON.pdf');
 
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain('reserved name');
+      expect(result.errors).toContain('Filename uses a reserved name');
     });
 
     it('should sanitize filename correctly', () => {
