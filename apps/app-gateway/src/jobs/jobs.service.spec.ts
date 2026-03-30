@@ -12,12 +12,6 @@ import type { JobDocument } from '../schemas/job.schema';
 import { UserRole } from '@ai-recruitment-clerk/user-management-domain';
 import type { UserDto } from '@ai-recruitment-clerk/user-management-domain';
 
-// Token constants for injection
-const JOB_REPOSITORY_TOKEN = 'JobRepository';
-const NATS_CLIENT_TOKEN = 'AppGatewayNatsService';
-const CACHE_SERVICE_TOKEN = 'CacheService';
-const WEBSOCKET_GATEWAY_TOKEN = 'WebSocketGateway';
-const CONFIG_SERVICE_TOKEN = 'ConfigService';
 
 // Mock JobsSemanticCacheService
 jest.mock('./services/jobs-semantic-cache.service', () => ({
@@ -127,32 +121,32 @@ describe('JobsService', () => {
       providers: [
         JobsService,
         {
-          provide: JOB_REPOSITORY_TOKEN,
+          provide: JobRepository,
           useValue: mockJobRepository(),
         },
         {
-          provide: NATS_CLIENT_TOKEN,
+          provide: AppGatewayNatsService,
           useValue: mockNatsClient(),
         },
         {
-          provide: CACHE_SERVICE_TOKEN,
+          provide: CacheService,
           useValue: mockCacheService(),
         },
         {
-          provide: WEBSOCKET_GATEWAY_TOKEN,
+          provide: WebSocketGateway,
           useValue: mockWebSocketGateway(),
         },
         {
-          provide: CONFIG_SERVICE_TOKEN,
+          provide: ConfigService,
           useValue: mockConfigService(),
         },
       ],
     }).compile();
 
     service = module.get<JobsService>(JobsService);
-    jobRepository = module.get(JOB_REPOSITORY_TOKEN);
-    natsClient = module.get(NATS_CLIENT_TOKEN);
-    cacheService = module.get(CACHE_SERVICE_TOKEN);
+    jobRepository = module.get(JobRepository);
+    natsClient = module.get(AppGatewayNatsService);
+    cacheService = module.get(CacheService);
   });
 
   describe('createJob', () => {

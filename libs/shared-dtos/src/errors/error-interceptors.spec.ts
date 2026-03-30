@@ -347,7 +347,7 @@ describe('Error Interceptors', () => {
     beforeEach(() => {
       interceptor = new ErrorRecoveryInterceptor(mockServiceName, {
         enableCircuitBreaker: true,
-        failureThreshold: 3,
+        failureThreshold: 1,
         recoveryTimeout: 1000,
       });
 
