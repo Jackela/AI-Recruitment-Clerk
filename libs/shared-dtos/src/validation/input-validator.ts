@@ -81,7 +81,7 @@ export class InputValidator {
   ): ValidationResult {
     const errors: string[] = [];
 
-    if (!file) {
+    if (!file || !file.buffer) {
       return {
         isValid: false,
         errors: ['File is required'],
@@ -195,14 +195,13 @@ export class InputValidator {
       errors.push('Text does not match required pattern');
     }
 
-    // HTML validation
+    // HTML validation - BEFORE special chars to ensure proper encoding
     if (!options.allowHtml) {
       const htmlPattern = /<[^>]*>/g;
       if (htmlPattern.test(sanitizedText)) {
         errors.push('HTML tags are not allowed');
       }
       // Encode dangerous characters to prevent HTML injection
-      // This is the safest approach - escape first, then the content is harmless
       sanitizedText = sanitizedText
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
@@ -211,12 +210,12 @@ export class InputValidator {
         .replace(/'/g, '&#x27;');
     }
 
-    // Special characters validation
-    if (!options.allowSpecialChars) {
-      const specialCharsPattern = /[<>"';(){}[\]]/g;
+    // Special characters validation - AFTER encoding to preserve HTML entities
+    // Exclude semicolon to preserve HTML entities
+    if (!options.allowHtml && !options.allowSpecialChars) {
+      const specialCharsPattern = /[<>"'(){}[\]]/g;
       if (specialCharsPattern.test(sanitizedText)) {
         errors.push('Special characters are not allowed');
-        // Remove special characters
         sanitizedText = sanitizedText.replace(specialCharsPattern, '');
       }
     }
@@ -497,12 +496,11 @@ export class InputValidator {
 
     // Enhanced SQL injection patterns
     const sqlInjectionPatterns = [
-      /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION)\b)/gi,
+      /(?<![a-zA-Z0-9'])(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION)(?![a-zA-Z0-9'"|}])/gi,
       /('\s*OR\s*')/gi,
       /('; )/g,
       /(--)/g,
-      /(\bunion\b)/gi,
-      /(\bdrop\b)/gi,
+
       /(\/\*|\*\/)/g,
     ];
 
