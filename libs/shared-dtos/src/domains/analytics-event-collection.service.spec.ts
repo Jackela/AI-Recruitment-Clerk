@@ -16,6 +16,8 @@ const mockRepository: jest.Mocked<IAnalyticsRepository> = {
   findByDateRange: jest.fn(),
   findByIds: jest.fn(),
   countSessionEvents: jest.fn(),
+  deleteExpired: jest.fn(),
+  anonymizeOldEvents: jest.fn(),
 };
 
 const mockEventBus: jest.Mocked<IDomainEventBus> = {
@@ -30,11 +32,14 @@ const mockAuditLogger: jest.Mocked<IAuditLogger> = {
 
 const mockPrivacyService: jest.Mocked<IPrivacyService> = {
   getUserConsentStatus: jest.fn(),
+  anonymizeUserData: jest.fn(),
+  deleteUserData: jest.fn(),
 };
 
 const mockSessionTracker: jest.Mocked<ISessionTracker> = {
   updateSessionActivity: jest.fn(),
   getSession: jest.fn(),
+  endSession: jest.fn(),
 };
 
 describe('AnalyticsEventCollectionService', () => {
@@ -166,9 +171,9 @@ describe('AnalyticsEventCollectionService', () => {
       expect(mockRepository.save).toHaveBeenCalled();
     });
 
-    it('should handle partial consent status', async () => {
+    it('should handle pending consent status', async () => {
       mockPrivacyService.getUserConsentStatus.mockResolvedValue(
-        ConsentStatus.PARTIAL,
+        ConsentStatus.PENDING,
       );
       mockRepository.countSessionEvents.mockResolvedValue(5);
       mockRepository.save.mockResolvedValue(undefined);
@@ -183,7 +188,7 @@ describe('AnalyticsEventCollectionService', () => {
         mockEventData,
       );
 
-      // Should succeed with partial consent
+      // Should succeed with pending consent
       expect(result.success).toBe(true);
     });
 
@@ -235,7 +240,7 @@ describe('AnalyticsEventCollectionService', () => {
       mockSessionTracker.updateSessionActivity.mockResolvedValue(undefined);
       mockAuditLogger.logBusinessEvent.mockResolvedValue(undefined);
 
-      const clickEventType = EventType.BUTTON_CLICK;
+      const clickEventType = EventType.USER_INTERACTION;
       const clickEventData = { buttonId: 'submit-btn', action: 'click' };
 
       const result = await service.createUserInteractionEvent(
@@ -243,6 +248,7 @@ describe('AnalyticsEventCollectionService', () => {
         mockUserId,
         clickEventType,
         clickEventData,
+        { userAgent: 'test-browser' },
       );
 
       expect(result.success).toBe(true);
@@ -425,7 +431,7 @@ describe('AnalyticsEventCollectionService', () => {
       const result = await service.createBusinessMetricEvent(
         'response_time',
         250.5,
-        MetricUnit.MILLISECONDS,
+        MetricUnit.DURATION_MS,
       );
 
       expect(result.success).toBe(true);

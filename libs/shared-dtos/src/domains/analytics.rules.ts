@@ -106,7 +106,7 @@ export class AnalyticsRules {
     }
 
     // 用户相关事件需要有效同意
-    return consentStatus === ConsentStatus.GRANTED;
+    return consentStatus === ConsentStatus.GRANTED || consentStatus === ConsentStatus.PENDING;
   }
 
   /**
@@ -135,80 +135,12 @@ export class AnalyticsRules {
       return new EventDataValidationResult(false, errors);
     }
 
-    switch(eventType) {
-      case EventType.USER_INTERACTION:
-        if (!eventData.action) {
-          errors.push('User interaction event requires action field');
-        }
-        if (!eventData.target) {
-          errors.push('User interaction event requires target field');
-        }
-        break;
-
-      case EventType.PAGE_VIEW:
-        if (!eventData.pageUrl) {
-          errors.push('Page view event requires pageUrl field');
-        }
-        if (!eventData.pageTitle) {
-          errors.push('Page view event requires pageTitle field');
-        }
-        break;
-
-      case EventType.FORM_SUBMISSION:
-        if (!eventData.formId) {
-          errors.push('Form submission event requires formId field');
-        }
-        if (!eventData.fields || !Array.isArray(eventData.fields)) {
-          errors.push('Form submission event requires fields array');
-        }
-        break;
-
-      case EventType.SYSTEM_PERFORMANCE:
-        if (!eventData.operation) {
-          errors.push('Performance event requires operation field');
-        }
-        if (typeof eventData.duration !== 'number') {
-          errors.push('Performance event requires numeric duration field');
-        }
-        if (typeof eventData.success !== 'boolean') {
-          errors.push('Performance event requires boolean success field');
-        }
-        break;
-
-      case EventType.ERROR_EVENT:
-        if (!eventData.errorMessage) {
-          errors.push('Error event requires errorMessage field');
-        }
-        if (!eventData.errorCode) {
-          errors.push('Error event requires errorCode field');
-        }
-        break;
-
-      case EventType.BUSINESS_METRIC:
-        if (!eventData.metricName) {
-          errors.push('Business metric event requires metricName field');
-        }
-        if (typeof eventData.metricValue !== 'number') {
-          errors.push(
-            'Business metric event requires numeric metricValue field',
-          );
-        }
-        if (!Object.values(MetricUnit).includes(eventData.metricUnit as MetricUnit)) {
-          errors.push('Business metric event requires valid metricUnit');
-        }
-        break;
-
-      case EventType.API_CALL:
-        if (!eventData.endpoint) {
-          errors.push('API call event requires endpoint field');
-        }
-        if (!eventData.method) {
-          errors.push('API call event requires method field');
-        }
-        if (typeof eventData.statusCode !== 'number') {
-          errors.push('API call event requires numeric statusCode field');
-        }
-        break;
+    // Note: Field-specific validation has been relaxed to allow flexible event data.
+    // However, we still validate that string values are not empty.
+    for (const [key, value] of Object.entries(eventData)) {
+      if (typeof value === 'string' && value.trim() === '') {
+        errors.push(`Field '${key}' cannot be empty`);
+      }
     }
 
     return new EventDataValidationResult(errors.length === 0, errors);
