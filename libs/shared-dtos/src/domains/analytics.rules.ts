@@ -5,7 +5,6 @@ import {
   EventType,
   EventStatus,
   ConsentStatus,
-  MetricUnit
 } from './analytics.dto';
 
 /**
@@ -125,7 +124,7 @@ export class AnalyticsRules {
    * 验证事件数据结构
    */
   public static validateEventDataStructure(
-    eventType: EventType,
+    _eventType: EventType,
     eventData: Record<string, unknown>,
   ): EventDataValidationResult {
     const errors: string[] = [];
@@ -302,7 +301,7 @@ export class AnalyticsRules {
     }
 
     // 检查数据保留期限
-    const retentionExpiry = event.getRetentionExpiry();
+    const retentionExpiry = event.getRetentionExpiry?.();
     if (retentionExpiry && Date.now() > retentionExpiry.getTime()) {
       riskScore += 50;
       riskFactors.push('Data retention period exceeded');

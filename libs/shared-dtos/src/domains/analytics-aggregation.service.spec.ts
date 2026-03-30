@@ -426,6 +426,7 @@ mockAuditLogger,
 
 // Helper function to create mock analytics events
 function createMockAnalyticsEvent(id: string, status: EventStatus) {
+  let uncommittedEvents: unknown[] = [];
   return {
     getId: () => ({ getValue: () => id }),
     getStatus: () => status,
@@ -434,10 +435,19 @@ function createMockAnalyticsEvent(id: string, status: EventStatus) {
     getTimestamp: () => new Date().toISOString(),
     getCreatedAt: () => new Date(),
     getEventType: () => 'PAGE_VIEW',
-    processEvent: jest.fn(),
+    getRetentionExpiry: () => undefined,
+    processEvent: jest.fn().mockImplementation(() => {
+      // Simulate real processEvent which adds AnalyticsEventProcessedEvent to uncommittedEvents
+      uncommittedEvents = [{
+        eventId: id,
+        sessionId: `session-${id}`,
+        eventType: 'PAGE_VIEW',
+        occurredAt: new Date(),
+      }];
+    }),
     anonymizeData: jest.fn(),
     markAsExpired: jest.fn(),
-    getUncommittedEvents: jest.fn().mockReturnValue([]),
+    getUncommittedEvents: jest.fn().mockImplementation(() => uncommittedEvents),
     markEventsAsCommitted: jest.fn(),
   } as unknown as import('./analytics.dto').AnalyticsEvent;
 }
