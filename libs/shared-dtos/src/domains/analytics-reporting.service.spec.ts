@@ -1,5 +1,5 @@
 import { AnalyticsReportingService } from './analytics-reporting.service';
-import { EventStatus } from './analytics.dto';
+import { EventStatus, UserSession } from './analytics.dto';
 import { ReportType, DataScope } from './analytics.rules';
 import type {
   IAnalyticsRepository,
@@ -15,6 +15,8 @@ const mockRepository: jest.Mocked<IAnalyticsRepository> = {
   findByDateRange: jest.fn(),
   findByIds: jest.fn(),
   countSessionEvents: jest.fn(),
+  deleteExpired: jest.fn(),
+  anonymizeOldEvents: jest.fn(),
 };
 
 const mockAuditLogger: jest.Mocked<IAuditLogger> = {
@@ -25,6 +27,7 @@ const mockAuditLogger: jest.Mocked<IAuditLogger> = {
 
 const mockSessionTracker: jest.Mocked<ISessionTracker> = {
   updateSessionActivity: jest.fn(),
+  endSession: jest.fn(),
   getSession: jest.fn(),
 };
 
@@ -492,8 +495,8 @@ describe('AnalyticsReportingService', () => {
 
   describe('validateReportingAccess', () => {
     const mockUserRole = 'admin';
-    const mockReportType = ReportType.SUMMARY;
-    const mockDataScope = DataScope.ALL;
+    const mockReportType = ReportType.USER_BEHAVIOR;
+    const mockDataScope = DataScope.FULL_ACCESS;
 
     it('should validate reporting access successfully', async () => {
       mockAuditLogger.logSecurityEvent.mockResolvedValue(undefined);
@@ -521,8 +524,8 @@ describe('AnalyticsReportingService', () => {
 
       const result = await service.validateReportingAccess(
         'viewer',
-        ReportType.DETAILED,
-        DataScope.ALL,
+        ReportType.SYSTEM_PERFORMANCE,
+        DataScope.FULL_ACCESS,
       );
 
       expect(result.success).toBe(true);
@@ -535,8 +538,8 @@ describe('AnalyticsReportingService', () => {
 
       const result = await service.validateReportingAccess(
         'admin',
-        ReportType.DETAILED,
-        DataScope.ALL,
+        ReportType.SYSTEM_PERFORMANCE,
+        DataScope.FULL_ACCESS,
       );
 
       expect(result.success).toBe(true);
@@ -573,9 +576,9 @@ describe('AnalyticsReportingService', () => {
       mockAuditLogger.logSecurityEvent.mockResolvedValue(undefined);
 
       const reportTypes = [
-        ReportType.SUMMARY,
-        ReportType.DETAILED,
-        ReportType.AUDIT,
+        ReportType.USER_BEHAVIOR,
+        ReportType.SYSTEM_PERFORMANCE,
+        ReportType.ERROR_ANALYSIS,
       ];
 
       for (const reportType of reportTypes) {
@@ -591,7 +594,7 @@ describe('AnalyticsReportingService', () => {
     it('should handle different data scopes', async () => {
       mockAuditLogger.logSecurityEvent.mockResolvedValue(undefined);
 
-      const dataScopes = [DataScope.OWN, DataScope.DEPARTMENT, DataScope.ALL];
+      const dataScopes = [DataScope.ANONYMIZED_ONLY, DataScope.AGGREGATED_ONLY, DataScope.FULL_ACCESS];
 
       for (const dataScope of dataScopes) {
         const result = await service.validateReportingAccess(
@@ -633,6 +636,7 @@ function createMockAnalyticsEvent(id: string, status: EventStatus) {
     getTimestamp: () => new Date().toISOString(),
     getCreatedAt: () => new Date(),
     getEventType: () => 'PAGE_VIEW',
+    getRetentionExpiry: () => undefined,
     anonymizeData: jest.fn(),
     markAsExpired: jest.fn(),
   } as unknown as import('./analytics.dto').AnalyticsEvent;
@@ -642,29 +646,22 @@ function createMockAnalyticsEventWithDate(
   id: string,
   status: EventStatus,
   date: Date,
-) {
-  return {
-    ...createMockAnalyticsEvent(id, status),
-    getCreatedAt: () => date,
-  };
+): import('./analytics.dto').AnalyticsEvent {
+  const mock = createMockAnalyticsEvent(id, status);
+  mock.getCreatedAt = () => date;
+  return mock as import('./analytics.dto').AnalyticsEvent;
 }
 
 function createMockAnalyticsEventWithTimestamp(
   id: string,
   status: EventStatus,
   timestamp: Date,
-) {
-  return {
-    ...createMockAnalyticsEvent(id, status),
-    getTimestamp: () => timestamp.toISOString(),
-  };
+): import('./analytics.dto').AnalyticsEvent {
+  const mock = createMockAnalyticsEvent(id, status);
+  mock.getTimestamp = () => timestamp.toISOString();
+  return mock as import('./analytics.dto').AnalyticsEvent;
 }
 
-function createMockUserSession() {
-  return {
-    sessionId: 'session-123',
-    userId: 'user-456',
-    consentStatus: 'GRANTED',
-    isSystemSession: false,
-  };
+function createMockUserSession(): UserSession {
+  return UserSession.create('session-123', 'user-456');
 }

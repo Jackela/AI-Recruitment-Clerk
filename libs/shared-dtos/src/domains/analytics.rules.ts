@@ -483,8 +483,17 @@ export class AnalyticsRules {
       restrictions.push('user_behavior_requires_elevated_permissions');
     }
 
+    // Validate data scope requirements
+    let hasAccess = permissions.length > 0 && !permissions.includes('no_access_permissions');
+
+    // FULL_ACCESS scope requires full_access permission
+    if (hasAccess && dataScope === DataScope.FULL_ACCESS && !permissions.includes('full_access')) {
+      hasAccess = false;
+      restrictions.push('full_access_required_for_full_access_scope');
+    }
+
     return new ReportingPermissionsResult(
-      permissions.length > 0 && !permissions.includes('no_access_permissions'),
+      hasAccess,
       permissions,
       restrictions,
     );
