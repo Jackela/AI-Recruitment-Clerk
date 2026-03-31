@@ -54,6 +54,14 @@
           "codeCoverage": true
         }
       }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/app-gateway/**/*.ts"],
+        "maxWarnings": -1
+      }
     }
   }
 }
