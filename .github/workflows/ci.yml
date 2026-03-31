@@ -174,7 +174,7 @@ jobs:
         run: echo "TEST_START_TIME=$(date +%s)" >> $GITHUB_ENV
 
       - name: Download all coverage artifacts
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392443fae83e421467 # v4.1.9
+        uses: actions/download-artifact@v4
         with:
           pattern: coverage-shard-*
           path: coverage/
