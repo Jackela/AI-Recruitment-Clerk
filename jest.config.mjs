@@ -57,6 +57,9 @@ export default {
   // Prevent hanging
   forceExit: true,
   detectOpenHandles: false,
+  // Global setup/teardown for resource management
+  globalSetup: '<rootDir>/test/jest-global-setup.cjs',
+  globalTeardown: '<rootDir>/test/jest-global-teardown.cjs',
   // Skip e2e/integration tests
   testPathIgnorePatterns: [
     '/node_modules/',

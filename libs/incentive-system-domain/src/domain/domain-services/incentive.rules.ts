@@ -148,7 +148,7 @@ export class IncentiveRules {
         errors.push(`Unsupported payment method: ${paymentMethod}`);
     }
 
-    if (!contactInfo.isValid()) {
+    if (paymentMethod !== PaymentMethod.MANUAL && !contactInfo.isValid()) {
       errors.push(...contactInfo.getValidationErrors());
     }
 
@@ -295,7 +295,7 @@ export class IncentiveRules {
     }
 
     const riskLevel =
-      riskScore >= 60 ? 'HIGH' : riskScore >= 30 ? 'MEDIUM' : 'LOW';
+      riskScore >= 40 ? 'HIGH' : riskScore >= 30 ? 'MEDIUM' : 'LOW';
 
     return new IncentiveRiskAssessment(riskScore, riskLevel, riskFactors);
   }

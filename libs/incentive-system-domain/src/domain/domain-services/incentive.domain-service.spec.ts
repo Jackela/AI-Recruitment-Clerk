@@ -3,7 +3,6 @@ import {
   Incentive,
   IncentiveStatus,
   PaymentMethod,
-  Currency,
 } from '../aggregates/incentive.aggregate';
 import { ContactInfo } from '../value-objects/contact-info.value-object';
 import type {
@@ -29,17 +28,15 @@ describe('IncentiveDomainService', () => {
   const createMockIncentive = (overrides?: {
     status?: IncentiveStatus;
     rewardAmount?: number;
+    qualityScore?: number;
   }): Incentive => {
     const incentive = Incentive.createQuestionnaireIncentive(
       '192.168.1.1',
       'questionnaire-123',
-      overrides?.rewardAmount ?? 85,
+      // Use qualityScore < 70 to avoid auto-approval, unless specified otherwise
+      overrides?.qualityScore ?? 60,
       mockContactInfo,
     );
-
-    if (overrides?.status) {
-      jest.spyOn(incentive, 'getStatus').mockReturnValue(overrides.status);
-    }
 
     return incentive;
   };
@@ -77,6 +74,10 @@ describe('IncentiveDomainService', () => {
       mockAuditLogger,
       mockPaymentGateway,
     );
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   describe('constructor', () => {
@@ -320,13 +321,12 @@ describe('IncentiveDomainService', () => {
 
       expect(result.success).toBe(false);
     });
-  });
+});
 
   describe('processPayment', () => {
     it('should process payment successfully', async () => {
-      const incentive = createMockIncentive({
-        status: IncentiveStatus.APPROVED,
-      });
+      const incentive = createMockIncentive({ qualityScore: 85 });
+      // Incentive is auto-approved due to qualityScore >= 70
       mockRepository.findById.mockResolvedValue(incentive);
       mockPaymentGateway.processPayment.mockResolvedValue({
         success: true,
@@ -345,9 +345,8 @@ describe('IncentiveDomainService', () => {
     });
 
     it('should fail for non-approved incentive', async () => {
-      const incentive = createMockIncentive({
-        status: IncentiveStatus.PENDING_VALIDATION,
-      });
+      const incentive = createMockIncentive();
+      // Default qualityScore of 60 results in PENDING_VALIDATION status
       mockRepository.findById.mockResolvedValue(incentive);
 
       const result = await service.processPayment(
@@ -402,13 +401,14 @@ describe('IncentiveDomainService', () => {
   });
 
   describe('processBatchPayment', () => {
-    it('should process batch payment successfully', async () => {
-      const incentives = [
-        createMockIncentive({ status: IncentiveStatus.APPROVED }),
-        createMockIncentive({ status: IncentiveStatus.APPROVED }),
-      ];
+it('should process batch payment successfully', async () => {
+const incentives = [
+createMockIncentive({ qualityScore: 85 }),
+createMockIncentive({ qualityScore: 85 }),
+];
+      // Incentives are auto-approved due to qualityScore >= 70
       mockRepository.findByIds.mockResolvedValue(incentives);
-      mockPaymentGateway.processPayment.mockResolvedValue({
+mockPaymentGateway.processPayment.mockResolvedValue({
         success: true,
         transactionId: 'txn-123',
       });
@@ -439,7 +439,8 @@ describe('IncentiveDomainService', () => {
     it('should fail for batch exceeding limit', async () => {
       const incentives = Array(101)
         .fill(null)
-        .map(() => createMockIncentive({ status: IncentiveStatus.APPROVED }));
+        .map(() => createMockIncentive({ qualityScore: 85 }));
+      // Incentives are auto-approved due to qualityScore >= 70
       mockRepository.findByIds.mockResolvedValue(incentives);
 
       const result = await service.processBatchPayment(

@@ -2,8 +2,8 @@
  * Global Jest setup to ensure cache-manager is available
  */
 
-// Pre-load cache-manager to ensure it's available for @nestjs/cache-manager
-require('cache-manager');
-require('cache-manager-redis-yet');
-
-console.log('✅ Cache modules pre-loaded successfully');
+module.exports = async () => {
+  // Note: cache-manager modules are loaded on-demand by tests
+  // to avoid hanging issues with Redis connections
+  console.log('✅ Global setup complete');
+};

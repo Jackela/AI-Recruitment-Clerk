@@ -394,6 +394,13 @@ export class IncentiveDomainService {
       const gatewayResult =
         await this.paymentGateway.processPayment(paymentRequest);
 
+      // Check if payment gateway succeeded
+      if (!gatewayResult.success) {
+        return PaymentProcessingResult.failed([
+          gatewayResult.error ?? 'Payment gateway error',
+        ]);
+      }
+
       // 执行激励支付
       const paymentResult = incentive.executePayment(
         paymentMethod,
