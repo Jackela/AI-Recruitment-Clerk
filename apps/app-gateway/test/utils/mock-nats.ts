@@ -44,12 +44,12 @@ export const createMockAppGatewayNatsService = () => ({
 
   // Health and status
   getHealthStatus: jest.fn().mockResolvedValue({
+    healthy: true,
     connected: true,
+    jetstreamAvailable: true,
+    subscriptionCount: 0,
     lastOperationTime: new Date(),
-    messagesSent: 0,
-    messagesReceived: 0,
   } as NatsHealthResult),
-
   isConnected: true,
 });
 
@@ -70,10 +70,11 @@ export const createMockNatsClientService = () => ({
   isConnected: true,
 
   getHealthStatus: jest.fn().mockResolvedValue({
+    healthy: true,
     connected: true,
+    jetstreamAvailable: true,
+    subscriptionCount: 0,
     lastOperationTime: new Date(),
-    messagesSent: 0,
-    messagesReceived: 0,
   } as NatsHealthResult),
 
   close: jest.fn().mockResolvedValue(undefined),
