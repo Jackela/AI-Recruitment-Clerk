@@ -37,7 +37,7 @@ describe('IncentiveRecipient', () => {
     it('should restore with pending status', () => {
       const data = {
         ip: '172.16.0.1',
-        contactInfo: { phone: '+1234567890' },
+        contactInfo: { phone: '13812345678' },
         verificationStatus: VerificationStatus.PENDING,
       };
 

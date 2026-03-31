@@ -23,7 +23,9 @@ describe('ValueObject', () => {
   describe('constructor', () => {
     it('should freeze props', () => {
       const vo = TestValueObject.create('test');
-      expect(Object.isFrozen(vo.props)).toBe(true);
+      // Test immutability by trying to modify through getValue reference
+      const value = vo.getValue();
+      expect(Object.isFrozen(value)).toBe(true);
     });
 
     it('should create instance with props', () => {

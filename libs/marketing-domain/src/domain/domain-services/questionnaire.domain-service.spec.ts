@@ -62,7 +62,7 @@ describe('QuestionnaireDomainService', () => {
         improvementSuggestion: 'Better UI',
       },
       businessValue: {
-        currentScreeningMethod: 'manual',
+        currentScreeningMethod: 'ats',
         timeSpentPerResume: 5,
         resumesPerWeek: 50,
         timeSavingPercentage: 60,

@@ -346,7 +346,7 @@ export interface IPIncentiveStatistics {
   paidAmount: number;
   pendingAmount: number;
   statusBreakdown: {
-    pending: number;
+    pending_validation: number;
     approved: number;
     paid: number;
     rejected: number;
@@ -365,7 +365,7 @@ export interface SystemIncentiveStatistics {
   paidAmount: number;
   pendingAmount: number;
   statusBreakdown: {
-    pending: number;
+    pending_validation: number;
     approved: number;
     paid: number;
     rejected: number;

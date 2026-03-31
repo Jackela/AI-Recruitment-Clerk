@@ -1,5 +1,12 @@
 import type { DomainEvent } from '../domain-events/base/domain-event.js';
 import {
+  IncentiveCreatedEvent,
+  IncentiveValidatedEvent,
+  IncentiveApprovedEvent,
+  IncentiveRejectedEvent,
+  IncentivePaidEvent,
+} from '../domain-events/index.js';
+import {
   Incentive,
   IncentiveStatus,
   PaymentMethod,
@@ -37,7 +44,7 @@ describe('Incentive Aggregate', () => {
 
       const events = incentive.getUncommittedEvents();
       expect(events.length).toBeGreaterThanOrEqual(1);
-      expect(events[0].eventName).toBe('incentive.created');
+      expect(events[0] instanceof IncentiveCreatedEvent).toBe(true);
     });
 
     it('should auto-approve high quality submissions', () => {
@@ -85,7 +92,7 @@ describe('Incentive Aggregate', () => {
 
       const events = incentive.getUncommittedEvents();
       const createdEvent = events.find(
-        (e: DomainEvent) => e.eventName === 'incentive.created',
+        (e) => e instanceof IncentiveCreatedEvent,
       );
       expect(createdEvent).toBeDefined();
     });
@@ -101,7 +108,7 @@ describe('Incentive Aggregate', () => {
       );
 
       const result = incentive.validateEligibility();
-      expect(result.isValid()).toBe(true);
+      expect(result.isValid).toBe(true);
     });
 
     it('should emit IncentiveValidatedEvent for valid incentive', () => {
@@ -116,7 +123,7 @@ describe('Incentive Aggregate', () => {
       incentive.validateEligibility();
       const events = incentive.getUncommittedEvents();
       const validatedEvent = events.find(
-        (e: DomainEvent) => e.eventName === 'incentive.validated',
+        (e) => e instanceof IncentiveValidatedEvent,
       );
       expect(validatedEvent).toBeDefined();
     });
@@ -144,7 +151,7 @@ describe('Incentive Aggregate', () => {
       incentive.approveForProcessing('Manual approval');
       const events = incentive.getUncommittedEvents();
       const approvedEvent = events.find(
-        (e: DomainEvent) => e.eventName === 'incentive.approved',
+        (e) => e instanceof IncentiveApprovedEvent,
       );
       expect(approvedEvent).toBeDefined();
     });
@@ -185,7 +192,7 @@ describe('Incentive Aggregate', () => {
       incentive.reject('Fraud detected');
       const events = incentive.getUncommittedEvents();
       const rejectedEvent = events.find(
-        (e: DomainEvent) => e.eventName === 'incentive.rejected',
+        (e) => e instanceof IncentiveRejectedEvent,
       );
       expect(rejectedEvent).toBeDefined();
     });
@@ -220,7 +227,7 @@ describe('Incentive Aggregate', () => {
         'txn-123456',
       );
 
-      expect(result.isSuccess()).toBe(true);
+      expect(result.success).toBe(true);
       expect(incentive.getStatus()).toBe(IncentiveStatus.PAID);
     });
 
@@ -234,9 +241,7 @@ describe('Incentive Aggregate', () => {
 
       incentive.executePayment(PaymentMethod.WECHAT_PAY, 'txn-123456');
       const events = incentive.getUncommittedEvents();
-      const paidEvent = events.find(
-        (e: DomainEvent) => e.eventName === 'incentive.paid',
-      );
+      const paidEvent = events.find((e) => e instanceof IncentivePaidEvent);
       expect(paidEvent).toBeDefined();
     });
 
@@ -252,8 +257,8 @@ describe('Incentive Aggregate', () => {
         'txn-123456',
       );
 
-      expect(result.isSuccess()).toBe(false);
-      expect(result.getError()).toContain('Cannot pay incentive');
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Cannot pay incentive');
     });
   });
 
@@ -268,8 +273,8 @@ describe('Incentive Aggregate', () => {
 
       const summary = incentive.getIncentiveSummary();
       expect(summary).toBeDefined();
-      expect(summary.getRecipientIP()).toBe('192.168.1.1');
-      expect(summary.getRewardAmount()).toBeGreaterThan(0);
+      expect(summary.recipientIP).toBe('192.168.1.1');
+      expect(summary.rewardAmount).toBeGreaterThan(0);
     });
   });
 

@@ -6,17 +6,17 @@ describe('IncentiveReward', () => {
     it('should calculate high quality reward for score >= 90', () => {
       const reward = IncentiveReward.calculateForQuestionnaire(95);
 
-      expect(reward.props.amount).toBe(8);
-      expect(reward.props.currency).toBe(Currency.CNY);
-      expect(reward.props.rewardType).toBe(RewardType.QUESTIONNAIRE_COMPLETION);
-      expect(reward.props.calculationMethod).toContain('High quality bonus');
+      expect(reward.getAmount()).toBe(8);
+      expect(reward.getCurrency()).toBe(Currency.CNY);
+      expect(reward.getRewardType()).toBe(RewardType.QUESTIONNAIRE_COMPLETION);
+      expect(reward.getCalculationMethod()).toContain('High quality bonus');
     });
 
     it('should calculate standard reward for score >= 70', () => {
       const reward = IncentiveReward.calculateForQuestionnaire(75);
 
-      expect(reward.props.amount).toBe(5);
-      expect(reward.props.calculationMethod).toContain(
+      expect(reward.getAmount()).toBe(5);
+      expect(reward.getCalculationMethod()).toContain(
         'Standard quality bonus',
       );
     });
@@ -24,8 +24,8 @@ describe('IncentiveReward', () => {
     it('should calculate basic reward for score >= 50', () => {
       const reward = IncentiveReward.calculateForQuestionnaire(55);
 
-      expect(reward.props.amount).toBe(3);
-      expect(reward.props.calculationMethod).toContain(
+      expect(reward.getAmount()).toBe(3);
+      expect(reward.getCalculationMethod()).toContain(
         'Basic completion bonus',
       );
     });
@@ -33,23 +33,23 @@ describe('IncentiveReward', () => {
     it('should return zero reward for score < 50', () => {
       const reward = IncentiveReward.calculateForQuestionnaire(30);
 
-      expect(reward.props.amount).toBe(0);
-      expect(reward.props.calculationMethod).toContain('No reward');
+      expect(reward.getAmount()).toBe(0);
+      expect(reward.getCalculationMethod()).toContain('No reward');
     });
 
     it('should handle boundary at 90', () => {
       const reward = IncentiveReward.calculateForQuestionnaire(90);
-      expect(reward.props.amount).toBe(8);
+      expect(reward.getAmount()).toBe(8);
     });
 
     it('should handle boundary at 70', () => {
       const reward = IncentiveReward.calculateForQuestionnaire(70);
-      expect(reward.props.amount).toBe(5);
+      expect(reward.getAmount()).toBe(5);
     });
 
     it('should handle boundary at 50', () => {
       const reward = IncentiveReward.calculateForQuestionnaire(50);
-      expect(reward.props.amount).toBe(3);
+      expect(reward.getAmount()).toBe(3);
     });
   });
 
@@ -57,10 +57,10 @@ describe('IncentiveReward', () => {
     it('should create fixed referral reward', () => {
       const reward = IncentiveReward.createReferralReward();
 
-      expect(reward.props.amount).toBe(3);
-      expect(reward.props.currency).toBe(Currency.CNY);
-      expect(reward.props.rewardType).toBe(RewardType.REFERRAL);
-      expect(reward.props.calculationMethod).toContain('Fixed referral reward');
+      expect(reward.getAmount()).toBe(3);
+      expect(reward.getCurrency()).toBe(Currency.CNY);
+      expect(reward.getRewardType()).toBe(RewardType.REFERRAL);
+      expect(reward.getCalculationMethod()).toContain('Fixed referral reward');
     });
   });
 
@@ -74,8 +74,8 @@ describe('IncentiveReward', () => {
       };
 
       const reward = IncentiveReward.restore(data);
-      expect(reward.props.amount).toBe(5);
-      expect(reward.props.calculationMethod).toBe('Test method');
+      expect(reward.getAmount()).toBe(5);
+      expect(reward.getCalculationMethod()).toBe('Test method');
     });
   });
 

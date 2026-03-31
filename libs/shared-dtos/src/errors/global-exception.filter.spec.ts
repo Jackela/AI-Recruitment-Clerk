@@ -16,7 +16,7 @@ import {
 import { ErrorCorrelationManager } from './error-correlation';
 import { StructuredLoggerFactory } from './structured-logging';
 import type { ArgumentsHost } from '@nestjs/common';
-import { HttpStatus } from '@nestjs/common';
+import { HttpStatus, HttpException } from '@nestjs/common';
 import { ThrottlerException } from '@nestjs/throttler';
 import { ValidationError } from 'class-validator';
 import type { Request, Response } from 'express';
@@ -109,7 +109,6 @@ describe('StandardizedGlobalExceptionFilter', () => {
         500,
         {},
         {},
-        ErrorSeverity.HIGH,
       );
 
       filter.catch(error, mockArgumentsHost);
@@ -147,11 +146,10 @@ describe('StandardizedGlobalExceptionFilter', () => {
     });
 
     it('should handle HttpException', () => {
-      const error = {
-        getStatus: () => HttpStatus.NOT_FOUND,
-        getResponse: () => ({ message: 'Not found', error: 'NOT_FOUND' }),
-        message: 'Not found',
-      };
+      const error = new HttpException(
+        { message: 'Not found', error: 'NOT_FOUND' },
+        HttpStatus.NOT_FOUND,
+      );
 
       filter.catch(error, mockArgumentsHost);
 
@@ -165,7 +163,7 @@ describe('StandardizedGlobalExceptionFilter', () => {
 
       expect(mockResponse.status).toHaveBeenCalledWith(500);
       const responseBody = (mockResponse.json as jest.Mock).mock.calls[0][0];
-      expect(responseBody.error.message).toContain('Something went wrong');
+      expect(responseBody.error.message).toContain('An unexpected error occurred');
     });
 
     it('should set correlation headers', () => {
@@ -270,7 +268,7 @@ describe('StandardizedGlobalExceptionFilter', () => {
 
     it('should use remoteAddress as fallback', () => {
       mockRequest.headers = {};
-      mockRequest.ip = undefined;
+      (mockRequest as Record<string, unknown>).ip = undefined;
 
       const error = new Error('Test');
       filter.catch(error, mockArgumentsHost);
@@ -280,8 +278,8 @@ describe('StandardizedGlobalExceptionFilter', () => {
 
     it('should use unknown when no IP available', () => {
       mockRequest.headers = {};
-      mockRequest.ip = undefined;
-      mockRequest.socket = undefined;
+      (mockRequest as Record<string, unknown>).ip = undefined;
+      (mockRequest as Record<string, unknown>).socket = undefined;
 
       const error = new Error('Test');
       filter.catch(error, mockArgumentsHost);

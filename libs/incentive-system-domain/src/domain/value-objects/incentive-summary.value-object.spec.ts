@@ -33,7 +33,7 @@ describe('IncentiveSummary', () => {
         rewardAmount: 10,
         rewardCurrency: Currency.CNY,
         triggerType: TriggerType.REFERRAL,
-        status: IncentiveStatus.PENDING,
+        status: IncentiveStatus.PENDING_VALIDATION,
         createdAt,
         processedAt,
         paidAt: undefined,
@@ -41,10 +41,13 @@ describe('IncentiveSummary', () => {
         daysSinceCreation: 3,
       });
 
-      expect(summary.props.id).toBe('inc-1');
-      expect(summary.props.recipientIP).toBe('10.0.0.1');
-      expect(summary.props.rewardAmount).toBe(10);
-      expect(summary.props.status).toBe(IncentiveStatus.PENDING);
+      expect(summary.id).toBe('inc-1');
+      expect(summary.recipientIP).toBe('10.0.0.1');
+      expect(summary.rewardAmount).toBe(10);
+      expect(summary.status).toBe(IncentiveStatus.PENDING_VALIDATION);
+      expect(summary.recipientIP).toBe('10.0.0.1');
+      expect(summary.rewardAmount).toBe(10);
+      expect(summary.status).toBe(IncentiveStatus.PENDING_VALIDATION);
     });
   });
 

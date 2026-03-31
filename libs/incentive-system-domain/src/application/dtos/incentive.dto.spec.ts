@@ -29,7 +29,7 @@ describe('IncentiveCreationResult', () => {
         createdAt: new Date(),
         canBePaid: true,
         daysSinceCreation: 1,
-      } as IncentiveSummary;
+      } as unknown as IncentiveSummary;
 
       const result = IncentiveCreationResult.success(mockSummary);
 
@@ -210,7 +210,12 @@ describe('IncentiveStatsResult', () => {
           totalAmount: 25,
           paidAmount: 15,
           pendingAmount: 10,
-          statusBreakdown: { pending: 1, approved: 1, paid: 2, rejected: 1 },
+          statusBreakdown: {
+            pending_validation: 1,
+            approved: 1,
+            paid: 2,
+            rejected: 1,
+          },
           averageReward: 5,
         },
       };
@@ -230,7 +235,7 @@ describe('IncentiveStatsResult', () => {
           paidAmount: 300,
           pendingAmount: 200,
           statusBreakdown: {
-            pending: 20,
+            pending_validation: 20,
             approved: 30,
             paid: 40,
             rejected: 10,
@@ -272,7 +277,7 @@ describe('PendingIncentivesResult', () => {
         createdAt: new Date(),
         canBePaid: true,
         daysSinceCreation: 1,
-      } as IncentiveSummary;
+      } as unknown as IncentiveSummary;
 
       const priority = {
         score: 50,

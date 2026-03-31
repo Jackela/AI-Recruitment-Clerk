@@ -315,7 +315,7 @@ export class IncentiveRules {
    */
   public static analyzeUsageHistory(incentives: Incentive[]): IncentiveUsageHistory {
     const statusCounts = {
-      pending: 0,
+      pending_validation: 0,
       approved: 0,
       paid: 0,
       rejected: 0,
@@ -474,7 +474,7 @@ export class IncentiveUsageHistory {
     public readonly data: {
       totalIncentives: number;
       statusBreakdown: {
-        pending: number;
+        pending_validation: number;
         approved: number;
         paid: number;
         rejected: number;

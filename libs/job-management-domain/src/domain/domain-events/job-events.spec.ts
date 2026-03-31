@@ -95,31 +95,19 @@ describe('Job Events', () => {
 
   describe('AnalysisJdExtractedEvent', () => {
     const mockJdDTO: JdDTO = {
-      title: 'Software Engineer',
-      description: 'Build scalable applications',
-      requirements: ['JavaScript', 'TypeScript'],
-      responsibilities: ['Develop features', 'Write tests'],
-      qualifications: ['3+ years experience', 'Bachelor degree'],
-      location: 'Remote',
-      employmentType: 'Full-time',
-      salary: {
-        min: 80000,
-        max: 120000,
-        currency: 'USD',
+      requirements: {
+        technical: ['JavaScript', 'TypeScript', 'React', 'Node.js', 'MongoDB'],
+        soft: ['Communication', 'Teamwork'],
+        experience: '3+ years',
+        education: 'Bachelor degree',
       },
-      benefits: ['Health insurance', '401k'],
-      department: 'Engineering',
-      reportingTo: 'Engineering Manager',
-      experienceLevel: 'Mid-level',
-      educationRequirements: ['Bachelor in CS'],
-      skills: ['React', 'Node.js', 'MongoDB'],
-      languages: ['English'],
-      certifications: ['AWS Certified'],
-      tools: ['VS Code', 'Git', 'Docker'],
-      workSchedule: 'Monday-Friday',
-      travelRequirements: 'None',
-      physicalRequirements: 'None',
-      additionalNotes: 'Fast-paced environment',
+      responsibilities: ['Develop features', 'Write tests', 'Code review'],
+      benefits: ['Health insurance', '401k', 'Remote work'],
+      company: {
+        name: 'Tech Corp',
+        industry: 'Software',
+        size: '100-500',
+      },
     };
 
     it('should create valid AnalysisJdExtractedEvent', () => {
@@ -138,8 +126,15 @@ describe('Job Events', () => {
 
     it('should handle minimal extracted data', () => {
       const minimalData: JdDTO = {
-        title: 'Developer',
-        description: 'Code stuff',
+        requirements: {
+          technical: [],
+          soft: [],
+          experience: '',
+          education: '',
+        },
+        responsibilities: [],
+        benefits: [],
+        company: {},
       };
 
       const event: AnalysisJdExtractedEvent = {
@@ -149,8 +144,8 @@ describe('Job Events', () => {
         processingTimeMs: 500,
       };
 
-      expect(event.extractedData.title).toBe('Developer');
-      expect(event.extractedData.requirements).toBeUndefined();
+      expect(event.extractedData.requirements.technical).toEqual([]);
+      expect(event.extractedData.company).toEqual({});
     });
 
     it('should handle zero processing time', () => {
@@ -177,32 +172,19 @@ describe('Job Events', () => {
 
     it('should handle complex nested data structures', () => {
       const complexData: JdDTO = {
-        title: 'Senior Architect',
-        description: 'Design systems',
-        requirements: ['10+ years', 'System Design', 'Cloud Architecture'],
-        responsibilities: ['Architecture', 'Mentoring', 'Code Review'],
-        salary: {
-          min: 150000,
-          max: 200000,
-          currency: 'USD',
-          negotiable: true,
+        requirements: {
+          technical: ['AWS', 'Azure', 'GCP', 'Kubernetes', 'Terraform', 'Microservices'],
+          soft: ['Leadership', 'Communication', 'Problem solving'],
+          experience: '10+ years system design and cloud architecture',
+          education: 'Masters degree in CS or related field',
         },
-        skills: [
-          'AWS',
-          'Azure',
-          'GCP',
-          'Kubernetes',
-          'Terraform',
-          'Microservices',
-        ],
-        benefits: [
-          'Health',
-          'Dental',
-          'Vision',
-          '401k Match',
-          'Unlimited PTO',
-          'Remote Work',
-        ],
+        responsibilities: ['Architecture design', 'Team mentoring', 'Code review', 'Technical leadership'],
+        benefits: ['Health', 'Dental', 'Vision', '401k Match', 'Unlimited PTO', 'Remote Work'],
+        company: {
+          name: 'Big Tech Corp',
+          industry: 'Cloud Computing',
+          size: '1000+',
+        },
       };
 
       const event: AnalysisJdExtractedEvent = {
@@ -212,8 +194,8 @@ describe('Job Events', () => {
         processingTimeMs: 2500,
       };
 
-      expect(event.extractedData.skills).toHaveLength(6);
-      expect(event.extractedData.salary?.max).toBe(200000);
+      expect(event.extractedData.requirements.technical).toHaveLength(6);
+      expect(event.extractedData.company.name).toBe('Big Tech Corp');
     });
 
     it('should verify event structure completeness', () => {
@@ -234,32 +216,19 @@ describe('Job Events', () => {
 
     it('should handle events with all JdDTO fields populated', () => {
       const fullData: JdDTO = {
-        title: 'Full Stack Developer',
-        description: 'Complete development role',
-        requirements: ['5+ years', 'Full stack experience'],
-        responsibilities: ['Frontend', 'Backend', 'Database'],
-        qualifications: ['Degree', 'Portfolio'],
-        location: 'Hybrid',
-        employmentType: 'Full-time',
-        salary: {
-          min: 100000,
-          max: 150000,
-          currency: 'USD',
-          negotiable: true,
+        requirements: {
+          technical: ['React', 'Node', 'PostgreSQL', 'AWS', 'TypeScript', 'Full stack development'],
+          soft: ['Communication', 'Problem solving', 'Leadership'],
+          experience: '5+ years full stack development',
+          education: 'BS in CS or equivalent experience',
         },
-        benefits: ['Health', 'Dental', 'Vision'],
-        department: 'Engineering',
-        reportingTo: 'CTO',
-        experienceLevel: 'Senior',
-        educationRequirements: ['BS in CS', 'MS preferred'],
-        skills: ['React', 'Node', 'PostgreSQL', 'AWS'],
-        languages: ['English', 'Spanish'],
-        certifications: ['AWS', 'Google Cloud'],
-        tools: ['Git', 'Docker', 'Kubernetes'],
-        workSchedule: 'Flexible',
-        travelRequirements: 'Occasional',
-        physicalRequirements: 'None',
-        additionalNotes: 'Great opportunity',
+        responsibilities: ['Frontend development', 'Backend development', 'Database design', 'API development'],
+        benefits: ['Health', 'Dental', 'Vision', '401k', 'Flexible schedule'],
+        company: {
+          name: 'Tech Startup',
+          industry: 'SaaS',
+          size: '50-200',
+        },
       };
 
       const event: AnalysisJdExtractedEvent = {
@@ -284,7 +253,17 @@ describe('Job Events', () => {
 
       const extractEvent: AnalysisJdExtractedEvent = {
         jobId: 'job-123',
-        extractedData: { title: 'Developer', description: 'Desc' },
+        extractedData: {
+          requirements: {
+            technical: [],
+            soft: [],
+            experience: '',
+            education: '',
+          },
+          responsibilities: [],
+          benefits: [],
+          company: {},
+        },
         timestamp: new Date().toISOString(),
         processingTimeMs: 1000,
       };
@@ -309,7 +288,17 @@ describe('Job Events', () => {
 
       const extractEvent: AnalysisJdExtractedEvent = {
         jobId,
-        extractedData: { title: 'Developer', description: 'Desc' },
+        extractedData: {
+          requirements: {
+            technical: [],
+            soft: [],
+            experience: '',
+            education: '',
+          },
+          responsibilities: [],
+          benefits: [],
+          company: {},
+        },
         timestamp,
         processingTimeMs: 1000,
       };

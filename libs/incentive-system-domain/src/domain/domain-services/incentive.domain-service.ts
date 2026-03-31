@@ -689,7 +689,7 @@ export class IncentiveDomainService {
     let pendingAmount = 0;
 
     const statusCount = {
-      pending: 0,
+      pending_validation: 0,
       approved: 0,
       paid: 0,
       rejected: 0,
@@ -701,7 +701,7 @@ export class IncentiveDomainService {
 
       switch (incentive.getStatus()) {
         case IncentiveStatus.PENDING_VALIDATION:
-          statusCount.pending++;
+          statusCount.pending_validation++;
           pendingAmount += amount;
           break;
         case IncentiveStatus.APPROVED:
@@ -745,7 +745,7 @@ export class IncentiveDomainService {
     const uniqueIPs = new Set<string>();
 
     const statusCount = {
-      pending: 0,
+      pending_validation: 0,
       approved: 0,
       paid: 0,
       rejected: 0,
@@ -757,7 +757,7 @@ export class IncentiveDomainService {
 
       switch (incentive.getStatus()) {
         case IncentiveStatus.PENDING_VALIDATION:
-          statusCount.pending++;
+          statusCount.pending_validation++;
           break;
         case IncentiveStatus.APPROVED:
           statusCount.approved++;

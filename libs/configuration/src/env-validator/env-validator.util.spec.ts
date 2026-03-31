@@ -8,6 +8,12 @@ import {
   ServiceSchemas,
 } from './env-validator.util';
 
+// Polyfill for Jasmine's fail() function in Jest
+function fail(message: string): never {
+  throw new Error(message);
+}
+
+
 describe('EnvAccess', () => {
   const originalEnv = process.env;
 

@@ -9,12 +9,12 @@ describe('IncentiveTrigger', () => {
     it('should create trigger for questionnaire', () => {
       const trigger = IncentiveTrigger.fromQuestionnaire('q-123', 85);
 
-      expect(trigger.props.triggerType).toBe(
+      expect(trigger.getTriggerType()).toBe(
         TriggerType.QUESTIONNAIRE_COMPLETION,
       );
-      expect(trigger.props.triggerData.questionnaireId).toBe('q-123');
-      expect(trigger.props.triggerData.qualityScore).toBe(85);
-      expect(trigger.props.qualifiedAt).toBeInstanceOf(Date);
+      expect(trigger.getTriggerData().questionnaireId).toBe('q-123');
+      expect(trigger.getTriggerData().qualityScore).toBe(85);
+      expect(trigger.getQualifiedAt()).toBeInstanceOf(Date);
     });
   });
 
@@ -22,8 +22,8 @@ describe('IncentiveTrigger', () => {
     it('should create trigger for referral', () => {
       const trigger = IncentiveTrigger.fromReferral('192.168.1.1');
 
-      expect(trigger.props.triggerType).toBe(TriggerType.REFERRAL);
-      expect(trigger.props.triggerData.referredIP).toBe('192.168.1.1');
+      expect(trigger.getTriggerType()).toBe(TriggerType.REFERRAL);
+      expect(trigger.getTriggerData().referredIP).toBe('192.168.1.1');
     });
   });
 
@@ -36,10 +36,10 @@ describe('IncentiveTrigger', () => {
       };
 
       const trigger = IncentiveTrigger.restore(data);
-      expect(trigger.props.triggerType).toBe(
+      expect(trigger.getTriggerType()).toBe(
         TriggerType.QUESTIONNAIRE_COMPLETION,
       );
-      expect(trigger.props.qualifiedAt).toBeInstanceOf(Date);
+      expect(trigger.getQualifiedAt()).toBeInstanceOf(Date);
     });
 
     it('should handle Date object in qualifiedAt', () => {
@@ -50,7 +50,7 @@ describe('IncentiveTrigger', () => {
       };
 
       const trigger = IncentiveTrigger.restore(data);
-      expect(trigger.props.qualifiedAt).toBeInstanceOf(Date);
+      expect(trigger.getQualifiedAt()).toBeInstanceOf(Date);
     });
   });
 

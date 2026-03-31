@@ -17,8 +17,8 @@ describe('RequestDto', () => {
       };
 
       const request: AuthenticatedRequest = {
-        user: mockUser as any,
-      };
+        user: mockUser,
+      } as unknown as AuthenticatedRequest;
 
       expect(request.user).toBeDefined();
       expect(request.user.id).toBe('user-123');
@@ -40,8 +40,8 @@ describe('RequestDto', () => {
       };
 
       const request: AuthenticatedRequest = {
-        user: mockUser as any,
-      };
+        user: mockUser,
+      } as unknown as AuthenticatedRequest;
 
       expect(request.user.organizationId).toBe('org-123');
     });
