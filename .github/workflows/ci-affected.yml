@@ -67,6 +67,12 @@ jobs:
       - name: Test affected
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
+            npx nx affected -t test --base=origin/main --head=HEAD --parallel=1 --runInBand --exclude infrastructure-shared shared-dtos
+          else
+            npx nx run-many -t test --all --parallel=1 --runInBand --exclude infrastructure-shared shared-dtos
+          fi
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
             npx nx affected -t test --base=origin/main --head=HEAD --parallel=1 --runInBand
           else
             npx nx run-many -t test --all --parallel=1 --runInBand
