@@ -1,6 +1,7 @@
 import { QuestionnaireDomainService } from './questionnaire.service';
 import type { Questionnaire } from './questionnaire.dto';
 import { QuestionnaireValidationFailedEvent } from './questionnaire-events.dto';
+import { SubmissionMetadata } from './questionnaire-value-objects.dto';
 import type {
   IQuestionnaireRepository,
   IQuestionnaireTemplateService,
@@ -71,12 +72,11 @@ describe('QuestionnaireDomainService', () => {
       },
     };
 
-    const mockMetadata = {
+    const mockMetadata = new SubmissionMetadata({
       ip: '192.168.1.1',
       userAgent: 'Mozilla/5.0',
       timestamp: new Date(),
-      source: 'web',
-    };
+    });
 
     it('should submit questionnaire successfully', async () => {
       mockTemplateService.getCurrentTemplate.mockResolvedValue({
