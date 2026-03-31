@@ -813,7 +813,9 @@ describe('AuthService - Edge Cases', () => {
     it('should handle health check with various states', async () => {
       redisBlacklist.healthCheck.mockResolvedValue({
         status: 'healthy',
-        connected: true,
+        tokenStore: 'redis',
+        blacklistedTokens: 0,
+        blacklistedUsers: 0,
       });
 
       const health = await service.authHealthCheck();
