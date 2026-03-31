@@ -489,14 +489,26 @@ describe('ParsingService Enhanced (parsing.service.enhanced.ts)', () => {
       const pdfBuffer = Buffer.from('%PDF-1.4 duplicate test');
 
       gridFs.uploadFile.mockResolvedValue('gridfs://bucket/resume');
-      vision.parseResumePdf.mockResolvedValue(createValidResumeDTO());
+      // Make first call hang to simulate concurrent processing
+      let resolveFirstCall: () => void;
+      const firstCallPromise = new Promise<void>((resolve) => {
+        resolveFirstCall = resolve;
+      });
+      vision.parseResumePdf.mockImplementationOnce(async () => {
+        await firstCallPromise;
+        return createValidResumeDTO();
+      });
       fieldMapper.normalizeToResumeDto.mockResolvedValue(createValidResumeDTO());
-      // Act - First call starts processing
+
+      // Act - First call starts processing (will hang until we resolve it)
       const firstCall = svc.parseResumeFile(
         pdfBuffer,
         'resume.pdf',
         'user-123',
       );
+
+      // Small delay to ensure first call has registered itself
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
       // Second call should detect duplicate
       const result = await svc.parseResumeFile(
@@ -505,7 +517,8 @@ describe('ParsingService Enhanced (parsing.service.enhanced.ts)', () => {
         'user-123',
       );
 
-      // Wait for first call to complete
+      // Resolve first call
+      resolveFirstCall!();
       await firstCall;
 
       // Assert - Second call should fail with duplicate error
