@@ -16,6 +16,8 @@ const baseProjects = [
   '<rootDir>/libs/usage-management-domain/jest.config.ts',
   '<rootDir>/libs/job-management-domain/jest.config.ts',
   '<rootDir>/libs/resume-processing-domain/jest.config.ts',
+  '<rootDir>/libs/job-management-domain/jest.config.ts',
+  '<rootDir>/libs/resume-processing-domain/jest.config.ts',
   '<rootDir>/libs/report-generation-domain/jest.config.ts',
   '<rootDir>/libs/shared-nats-client/jest.config.ts',
   '<rootDir>/libs/configuration/jest.config.ts',
