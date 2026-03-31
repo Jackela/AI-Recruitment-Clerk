@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/shared-dtos/src",
   "projectType": "library",
+  "implicitDependencies": ["resume-dto"],
   "tags": ["scope:shared", "type:utils"],
   "targets": {
     "build": {
