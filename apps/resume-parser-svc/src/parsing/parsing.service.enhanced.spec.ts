@@ -25,7 +25,24 @@ jest.mock('@ai-recruitment-clerk/infrastructure-shared', () => {
 
   return {
     RetryUtility: {
-      withExponentialBackoff: jest.fn((fn) => fn()),
+      withExponentialBackoff: jest.fn(async (fn, options) => {
+        const maxAttempts = options?.maxAttempts || 3;
+        let lastError: unknown;
+        
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+          try {
+            return await fn();
+          } catch (error) {
+            lastError = error;
+            if (attempt === maxAttempts) {
+              throw error;
+            }
+            // Simple delay for tests (no actual timing needed)
+            await Promise.resolve();
+          }
+        }
+        throw lastError;
+      }),
     },
     WithCircuitBreaker:
       () =>
@@ -43,11 +60,11 @@ jest.mock('@ai-recruitment-clerk/infrastructure-shared', () => {
         descriptor: PropertyDescriptor,
       ) => {
         const originalMethod = descriptor.value;
-        descriptor.value = function (...args: unknown[]) {
+        descriptor.value = async function (...args: unknown[]) {
           if (!predicate(...args)) {
             throw new ContractViolationError(message);
           }
-          return originalMethod.apply(this, args);
+          return await originalMethod.apply(this, args);
         };
         return descriptor;
       },
@@ -468,12 +485,12 @@ describe('ParsingService Enhanced (parsing.service.enhanced.ts)', () => {
   describe('Duplicate Processing Check - checkDuplicateProcessing', () => {
     it('should throw error when same file is being processed', async () => {
       // Arrange
-      const { svc, vision, gridFs } = buildService();
+      const { svc, vision, gridFs, fieldMapper } = buildService();
       const pdfBuffer = Buffer.from('%PDF-1.4 duplicate test');
 
       gridFs.uploadFile.mockResolvedValue('gridfs://bucket/resume');
       vision.parseResumePdf.mockResolvedValue(createValidResumeDTO());
-
+      fieldMapper.normalizeToResumeDto.mockResolvedValue(createValidResumeDTO());
       // Act - First call starts processing
       const firstCall = svc.parseResumeFile(
         pdfBuffer,
@@ -1043,15 +1060,25 @@ describe('ParsingService Enhanced (parsing.service.enhanced.ts)', () => {
 
     it('should handle file at exactly 10MB limit', async () => {
       // Arrange
-      const { svc } = buildService();
+      const { svc, vision, gridFs, fieldMapper } = buildService();
       const maxSizeBuffer = Buffer.alloc(10 * 1024 * 1024);
       maxSizeBuffer.write('%PDF-1.4', 0);
 
-      // Act & Assert - Should not throw for exactly 10MB
-      // Note: This might fail due to DBC check, but file size check allows 10MB
-      await expect(
-        svc.parseResumeFile(maxSizeBuffer, 'maxsize.pdf', 'user-123'),
-      ).rejects.toThrow();
+      gridFs.uploadFile.mockResolvedValue('gridfs://bucket/file');
+      vision.parseResumePdf.mockResolvedValue(createValidResumeDTO());
+      fieldMapper.normalizeToResumeDto.mockResolvedValue(
+        createValidResumeDTO(),
+      );
+
+      // Act & Assert - Should not throw for exactly 10MB (at limit is valid)
+      const result = await svc.parseResumeFile(
+        maxSizeBuffer,
+        'maxsize.pdf',
+        'user-123',
+      );
+      
+      // Should complete successfully
+      expect(result.status).not.toBe('failed');
     });
   });
 

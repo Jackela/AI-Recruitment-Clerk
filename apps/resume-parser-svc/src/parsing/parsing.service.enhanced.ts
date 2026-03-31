@@ -245,16 +245,17 @@ export class ParsingService {
       // Validate file type from name and buffer content
       await this.validateFileType(fileName, fileBuffer);
 
+      // Track processing attempt BEFORE duplicate check
+      // This ensures concurrent calls can detect each other
+      this.trackProcessingAttempt(jobId, fileBuffer);
+
       // Check for duplicate processing (unless skipped)
       if (!options.skipDuplicateCheck) {
-        await this.checkDuplicateProcessing(fileBuffer, userId);
+        await this.checkDuplicateProcessing(jobId, fileBuffer, userId);
       }
 
       // Store file in GridFS
       const fileUrl = await this.storeFile(fileBuffer, fileName, userId);
-
-      // Track processing attempt
-      this.trackProcessingAttempt(jobId, fileBuffer);
 
       // Extract text and analyze with AI
       const extractedData = await this.extractWithAI(
@@ -269,7 +270,7 @@ export class ParsingService {
 
       // Validate parsing quality
       const confidence = this.calculateConfidence(parsedData, extractedData);
-      if (confidence < 0.7) {
+      if (confidence <= 0.7) {
         warnings.push(
           `Low confidence parsing (${Math.round(confidence * 100)}%)`,
         );
@@ -384,19 +385,23 @@ export class ParsingService {
    * @since 1.1.0
    */
   private async checkDuplicateProcessing(
+    jobId: string,
     fileBuffer: Buffer,
     _userId: string,
   ): Promise<void> {
     const fileHash = createHash('sha256')
       .update(Uint8Array.from(fileBuffer))
       .digest('hex');
-    const existingProcessing = Array.from(this.processingFiles.values()).find(
-      (p) => p.hash === fileHash,
+    const existingProcessing = Array.from(this.processingFiles.entries()).find(
+      ([existingJobId, p]) => existingJobId !== jobId && p.hash === fileHash,
     );
 
     if (existingProcessing) {
-      const timeSinceStart = Date.now() - existingProcessing.timestamp;
+      const [, processing] = existingProcessing;
+      const timeSinceStart = Date.now() - processing.timestamp;
       if (timeSinceStart < this.FILE_TIMEOUT_MS) {
+        // Clean up self registration before throwing
+        this.processingFiles.delete(jobId);
         throw new BadRequestException('File is already being processed');
       }
     }
