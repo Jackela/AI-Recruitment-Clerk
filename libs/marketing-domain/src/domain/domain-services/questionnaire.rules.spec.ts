@@ -99,7 +99,7 @@ describe('QuestionnaireRules', () => {
       );
     });
 
-    // eslint-disable-next-line jest/no-disabled-tests
+
     it.skip('should return false for insufficient detailed answers', () => {
       const submission = createMockSubmission({
         summary: { completionRate: 0.9, textLength: 200, detailedAnswers: 1 },
