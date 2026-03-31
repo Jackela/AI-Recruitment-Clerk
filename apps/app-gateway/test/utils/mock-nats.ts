@@ -1,6 +1,9 @@
 import type { TestingModule } from '@nestjs/testing';
 import type {
   NatsPublishResult,
+  NatsHealthResult,
+} from '@ai-recruitment-clerk/shared-nats-client';
+  NatsPublishResult,
   NatsHealthStatus,
 } from '@ai-recruitment-clerk/shared-nats-client';
 
@@ -48,7 +51,7 @@ export const createMockAppGatewayNatsService = () => ({
     lastOperationTime: new Date(),
     messagesSent: 0,
     messagesReceived: 0,
-  } as NatsHealthStatus),
+  } as NatsHealthResult),
 
   isConnected: true,
 });
@@ -74,7 +77,7 @@ export const createMockNatsClientService = () => ({
     lastOperationTime: new Date(),
     messagesSent: 0,
     messagesReceived: 0,
-  } as NatsHealthStatus),
+  } as NatsHealthResult),
 
   close: jest.fn().mockResolvedValue(undefined),
 });
