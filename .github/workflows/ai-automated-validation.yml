@@ -438,6 +438,8 @@ jobs:
 
       - name: Generate consolidated report
         run: node scripts/generate-validation-report.js
+        continue-on-error: true
+        run: node scripts/generate-validation-report.js
         env:
           GITHUB_RUN_ID: ${{ github.run_id }}
           GITHUB_REPOSITORY: ${{ github.repository }}

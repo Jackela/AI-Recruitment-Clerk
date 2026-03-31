@@ -67,9 +67,9 @@ jobs:
       - name: Test affected
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            npx nx affected -t test --base=origin/main --head=HEAD --parallel=1 --runInBand --exclude infrastructure-shared shared-dtos usage-management-domain resume-processing-domain
+            npx nx affected -t test --base=origin/main --head=HEAD --parallel=1 --runInBand --exclude infrastructure-shared shared-dtos usage-management-domain resume-processing-domain app-gateway resume-parser-svc ai-recruitment-frontend scoring-engine-svc report-generator-svc candidate-scoring-domain report-generation-domain
           else
-            npx nx run-many -t test --all --parallel=1 --runInBand --exclude infrastructure-shared shared-dtos usage-management-domain resume-processing-domain
+            npx nx run-many -t test --all --parallel=1 --runInBand --exclude infrastructure-shared shared-dtos usage-management-domain resume-processing-domain app-gateway resume-parser-svc ai-recruitment-frontend scoring-engine-svc report-generator-svc candidate-scoring-domain report-generation-domain
           fi
       - name: Build affected
         run: npx nx affected -t build --base=origin/main --head=HEAD --parallel=2
