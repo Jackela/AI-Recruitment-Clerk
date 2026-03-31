@@ -64,7 +64,11 @@ jobs:
         run: npm ci
 
       - name: Run Unit Tests (Shard ${{ matrix.shard }}/4)
-        run: npx nx run-many -t test --all --parallel=1 --shard=${{ matrix.shard }}/4 --coverage --exclude infrastructure-shared shared-dtos usage-management-domain resume-processing-domain
+        run: |
+          # Use Jest directly for sharding since nx run-many doesn't support --shard
+          NODE_OPTIONS='--max-old-space-size=4096' npx jest --config jest.config.mjs --coverage --passWithNoTests --runInBand --shard=${{ matrix.shard }}/4 --forceExit
+        env:
+          CI: true
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
