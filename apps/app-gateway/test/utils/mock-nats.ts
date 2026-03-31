@@ -3,9 +3,6 @@ import type {
   NatsPublishResult,
   NatsHealthResult,
 } from '@ai-recruitment-clerk/shared-nats-client';
-  NatsPublishResult,
-  NatsHealthStatus,
-} from '@ai-recruitment-clerk/shared-nats-client';
 
 /**
  * 创建标准的 NATS Mock 服务
