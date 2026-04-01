@@ -52,26 +52,10 @@ jobs:
       - name: 🧪 Run Tests with Coverage
         run: |
           echo "🧪 Running tests with coverage reporting..."
-          NODE_OPTIONS='--max-old-space-size=8192' npx nx run-many -t test --all --parallel=1 --coverage --skip-nx-cache --exclude infrastructure-shared shared-dtos usage-management-domain resume-processing-domain
-        env:
-          CI: true
-          NODE_OPTIONS: '--max-old-space-size=8192'
-        run: |
-          echo "🧪 Running tests with coverage reporting..."
           npm run test:coverage
         env:
           CI: true
-        run: |
-          echo "🧪 Running tests with coverage reporting..."
-          NODE_OPTIONS='--max-old-space-size=8192' npx nx run-many -t test --all --parallel=1 --coverage --skip-nx-cache --exclude infrastructure-shared shared-dtos usage-management-domain resume-processing-domain
-        env:
-          CI: true
           NODE_OPTIONS: '--max-old-space-size=8192'
-        run: |
-          echo "🧪 Running tests with coverage reporting..."
-          npm run test:coverage
-        env:
-          CI: true
 
       - name: 📊 Generate Coverage Summary
         id: coverage

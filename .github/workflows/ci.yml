@@ -203,9 +203,6 @@ jobs:
           echo ""
           echo "📁 Final coverage files:"
           ls -la coverage/
-        run: |
-          npx nyc merge coverage/ coverage/merged-coverage.json
-          npx nyc report -t coverage --reporter=lcov --reporter=json-summary
 
       - name: ⏱️ Calculate Test Duration
         id: duration
