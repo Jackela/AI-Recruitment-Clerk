@@ -80,12 +80,6 @@ jobs:
           else
             npx jest --config jest.config.mjs --passWithNoTests
           fi
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            npx nx affected -t test --base=origin/main --head=HEAD --parallel=1 --runInBand --exclude infrastructure-shared shared-dtos usage-management-domain resume-processing-domain app-gateway resume-parser-svc ai-recruitment-frontend scoring-engine-svc report-generator-svc candidate-scoring-domain report-generation-domain
-          else
-            npx nx run-many -t test --all --parallel=1 --runInBand --exclude infrastructure-shared shared-dtos usage-management-domain resume-processing-domain app-gateway resume-parser-svc ai-recruitment-frontend scoring-engine-svc report-generator-svc candidate-scoring-domain report-generation-domain
-          fi
       - name: Build affected
         run: npx nx affected -t build --base=origin/main --head=HEAD --parallel=2
       - name: Manage server lifecycle
@@ -98,17 +92,10 @@ jobs:
           health-check-timeout: '90000'
           verify-build-output: 'dist/apps/ai-recruitment-frontend/browser'
           server-log-path: '/tmp/server.log'
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
       - name: E2E affected
         # Skip app-gateway-e2e due to complex service dependencies
         # Skip @accessibility tests (pre-existing UI issues)
         run: npx nx affected -t e2e --base=origin/main --head=HEAD --exclude=app-gateway-e2e --configuration=ci --parallel=1 -- --grep-invert '@accessibility'
-        env:
-          CI: true
-          E2E_SKIP_WEBSERVER: true
-        # Skip app-gateway-e2e due to complex service dependencies
-        run: npx nx affected -t e2e --base=origin/main --head=HEAD --exclude=app-gateway-e2e --configuration=ci --parallel=1
         env:
           CI: true
           E2E_SKIP_WEBSERVER: true
