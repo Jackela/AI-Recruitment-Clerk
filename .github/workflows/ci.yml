@@ -183,6 +183,27 @@ jobs:
 
       - name: Merge Coverage Reports
         run: |
+          echo "📂 Listing downloaded coverage artifacts..."
+          find coverage/ -type f -name "*.json" | head -20
+          echo ""
+          echo "🔧 Flattening coverage structure..."
+          # Find all coverage-final.json files from shards and copy to flat structure
+          find coverage/ -name "coverage-final.json" -type f | while read f; do
+            shard=$(basename $(dirname "$f"))
+            cp "$f" "coverage/coverage-${shard}.json"
+            echo "  ✓ Copied $f -> coverage/coverage-${shard}.json"
+          done
+          echo ""
+          echo "📊 Merging coverage reports..."
+          npx nyc merge coverage/ coverage/merged-coverage.json
+          echo "✅ Coverage merged successfully"
+          echo ""
+          echo "📝 Generating reports..."
+          npx nyc report -t coverage --reporter=lcov --reporter=json-summary
+          echo ""
+          echo "📁 Final coverage files:"
+          ls -la coverage/
+        run: |
           npx nyc merge coverage/ coverage/merged-coverage.json
           npx nyc report -t coverage --reporter=lcov --reporter=json-summary
 
