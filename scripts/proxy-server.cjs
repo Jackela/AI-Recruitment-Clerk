@@ -563,8 +563,17 @@ const server = http.createServer((req, res) => {
     });
     req.pipe(proxy, { end: true });
   } else {
-    let filePath = req.url === '/' ? '/index.html' : req.url;
-    filePath = path.join(STATIC_DIR, filePath);
+    // SPA routing support: serve index.html for non-API routes
+    const isFileRequest = req.url.match(/\.[^/]+$/);
+    let filePath;
+    
+    if (req.url === '/' || !isFileRequest) {
+      // For root or routes without file extensions, serve index.html (SPA)
+      filePath = path.join(STATIC_DIR, 'index.html');
+    } else {
+      // For file requests (JS, CSS, images, etc.), serve the actual file
+      filePath = path.join(STATIC_DIR, req.url);
+    }
 
     const ext = path.extname(filePath).toLowerCase();
     const contentType = MIME_TYPES[ext] || 'application/octet-stream';
