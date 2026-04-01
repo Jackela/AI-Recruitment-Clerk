@@ -178,6 +178,36 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: coverage-shard-*
+          path: coverage-download/
+          merge-multiple: false
+
+      - name: Prepare coverage directory
+        run: |
+          mkdir -p coverage
+          # Copy coverage files from downloaded shards
+          for shard_dir in coverage-download/coverage-shard-*/; do
+            if [ -d "$shard_dir" ]; then
+              shard_name=$(basename "$shard_dir")
+              echo "Processing $shard_name..."
+              # Find and copy coverage-final.json
+              if [ -f "$shard_dir/coverage-final.json" ]; then
+                cp "$shard_dir/coverage-final.json" "coverage/coverage-${shard_name}.json"
+                echo "  ✓ Copied coverage-final.json"
+              elif [ -f "$shard_dir/coverage/coverage-final.json" ]; then
+                cp "$shard_dir/coverage/coverage-final.json" "coverage/coverage-${shard_name}.json"
+                echo "  ✓ Copied coverage/coverage-final.json"
+              else
+                echo "  ⚠️ No coverage-final.json found in $shard_name"
+                find "$shard_dir" -name "*.json" -type f | head -5
+              fi
+            fi
+          done
+          echo ""
+          echo "📁 Coverage files prepared:"
+          ls -la coverage/
+        uses: actions/download-artifact@v4
+        with:
+          pattern: coverage-shard-*
           path: coverage/
           merge-multiple: true
 
