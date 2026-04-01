@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('键盘导航可访问性测试', () => {
+test.describe('键盘导航可访问性测试 @accessibility', () => {
   test.describe('Tab 键导航顺序', () => {
     test('所有交互元素可通过 Tab 键访问', async ({ page }) => {
       await page.goto('/');

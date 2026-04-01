@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('屏幕阅读器可访问性测试', () => {
+test.describe('屏幕阅读器可访问性测试 @accessibility', () => {
   test.describe('ARIA 标签', () => {
     test('所有交互元素有 aria-label 或可见标签', async ({ page }) => {
       await page.goto('/');

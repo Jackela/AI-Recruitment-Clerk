@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-test.describe('颜色对比度可访问性测试', () => {
+test.describe('颜色对比度可访问性测试 @accessibility', () => {
   test.describe('WCAG 2.1 AA 对比度标准', () => {
     test('正常文本对比度 ≥ 4.5:1', async ({ page }) => {
       await page.goto('/');

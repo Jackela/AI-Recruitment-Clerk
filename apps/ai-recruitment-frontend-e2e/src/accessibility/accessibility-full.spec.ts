@@ -9,7 +9,7 @@ import { waitForAppHydration } from '../test-utils/hydration';
 
 const DEFAULT_TIMEOUT = 30000;
 
-test.describe('完整可访问性测试', () => {
+test.describe('完整可访问性测试 @accessibility', () => {
   const pages = [
     { url: '/', name: '首页' },
     { url: '/login', name: '登录页' },
