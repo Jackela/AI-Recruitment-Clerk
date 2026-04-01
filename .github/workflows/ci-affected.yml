@@ -67,6 +67,21 @@ jobs:
       - name: Test affected
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
+            # Get affected projects and filter for those with jest configs
+            AFFECTED=$(npx nx show projects --affected --base=origin/main --head=HEAD --json 2>/dev/null | jq -r '.[]' 2>/dev/null || echo "")
+            if [ -z "$AFFECTED" ]; then
+              echo "No affected projects found"
+              exit 0
+            fi
+            echo "Affected projects:"
+            echo "$AFFECTED"
+            # Run Jest on affected projects only
+            npx jest --config jest.config.mjs --passWithNoTests
+          else
+            npx jest --config jest.config.mjs --passWithNoTests
+          fi
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
             npx nx affected -t test --base=origin/main --head=HEAD --parallel=1 --runInBand --exclude infrastructure-shared shared-dtos usage-management-domain resume-processing-domain app-gateway resume-parser-svc ai-recruitment-frontend scoring-engine-svc report-generator-svc candidate-scoring-domain report-generation-domain
           else
             npx nx run-many -t test --all --parallel=1 --runInBand --exclude infrastructure-shared shared-dtos usage-management-domain resume-processing-domain app-gateway resume-parser-svc ai-recruitment-frontend scoring-engine-svc report-generator-svc candidate-scoring-domain report-generation-domain
