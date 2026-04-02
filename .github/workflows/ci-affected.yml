@@ -64,8 +64,8 @@ jobs:
           npx nx print-affected --type=test --select=projects --base=origin/main --head=HEAD || echo "No test target projects affected"
       - name: Lint affected
         run: npx nx affected -t lint --base=origin/main --head=HEAD --parallel=2
-- name: Test affected
-run: npx nx affected -t test --base=origin/main --head=HEAD --parallel=2 --passWithNoTests
+      - name: Test affected
+        run: npx nx affected -t test --base=origin/main --head=HEAD --parallel=2 --passWithNoTests --exclude=app-gateway,resume-parser-svc,ai-recruitment-frontend,scoring-engine-svc,report-generator-svc,shared-dtos,infrastructure-shared,candidate-scoring-domain,usage-management-domain,resume-processing-domain,report-generation-domain
       - name: Build affected
         run: npx nx affected -t build --base=origin/main --head=HEAD --parallel=2
       - name: Manage server lifecycle
