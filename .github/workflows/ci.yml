@@ -250,7 +250,7 @@ jobs:
           fi
 
       - name: 📊 Upload Coverage to Codecov
-        uses: codecov/codecov-action@0565863fc370e9ce6b6a387784c6a4529d9b0e01 # v5.4.0
+        uses: codecov/codecov-action@v4
         with:
           files: ./coverage/lcov.info
           flags: unittests
