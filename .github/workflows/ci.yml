@@ -16,6 +16,7 @@ env:
   CI: true
   NX_SKIP_NATIVE_FILE_CACHE: 'true'
   NX_DAEMON: 'false'
+  HUSKY: '0'
 
 jobs:
   file_size_check:

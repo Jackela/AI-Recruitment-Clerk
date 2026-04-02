@@ -105,9 +105,6 @@ export class PortManager {
       }
     }
 
-    if (process.env['E2E_USE_REAL_API'] !== 'true') {
-      ports.add(3000);
-    }
 
     if (process.env['E2E_SKIP_WEBSERVER'] === 'true') {
       ports.add(4200);

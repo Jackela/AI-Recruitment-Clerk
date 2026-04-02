@@ -65,21 +65,7 @@ jobs:
       - name: Lint affected
         run: npx nx affected -t lint --base=origin/main --head=HEAD --parallel=2
       - name: Test affected
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            # Get affected projects and filter for those with jest configs
-            AFFECTED=$(npx nx show projects --affected --base=origin/main --head=HEAD --json 2>/dev/null | jq -r '.[]' 2>/dev/null || echo "")
-            if [ -z "$AFFECTED" ]; then
-              echo "No affected projects found"
-              exit 0
-            fi
-            echo "Affected projects:"
-            echo "$AFFECTED"
-            # Run Jest on affected projects only
-            npx jest --config jest.config.mjs --passWithNoTests
-          else
-            npx jest --config jest.config.mjs --passWithNoTests
-          fi
+        run: npx nx affected -t test --base=origin/main --head=HEAD --parallel=2 --passWithNoTests
       - name: Build affected
         run: npx nx affected -t build --base=origin/main --head=HEAD --parallel=2
       - name: Manage server lifecycle
