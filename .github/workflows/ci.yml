@@ -319,21 +319,7 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Run E2E Tests (Shard ${{ matrix.shard }}/4)
         working-directory: apps/ai-recruitment-frontend-e2e
-        run: |
-          # Exclude tests with pre-existing failures:
-          # - @pdf-variety, @real-data, @accessibility: Known issues
-          # - browser-compatibility, essential-compatibility: Element visibility timeouts
-          # - core-user-flow: UI rendering issues in CI
-          npx playwright test \
-            --grep-invert '@pdf-variety|@real-data|@accessibility' \
-            --ignore src/browser-compatibility-test.spec.ts \
-            --ignore src/essential-compatibility.spec.ts \
-            --ignore src/core-user-flow.spec.ts \
-            --ignore src/comprehensive-validation.spec.ts \
-            --ignore src/detailed-job-creation.spec.ts \
-            --ignore src/ai-validation \
-            --ignore src/accessibility \
-            --shard=${{ matrix.shard }}/4
+        run: npx playwright test --grep-invert '@pdf-variety|@real-data|@accessibility' --shard=${{ matrix.shard }}/4
         env:
           CI: true
           E2E_SKIP_WEBSERVER: true
