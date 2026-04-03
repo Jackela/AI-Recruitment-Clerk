@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { setupVisualTest, waitForPageStability } from './visual-helpers';
 
-test.describe('Component Visual', () => {
+test.describe('Component Visual @visual', () => {
   test.beforeEach(async ({ page }) => {
     await setupVisualTest(page);
   });

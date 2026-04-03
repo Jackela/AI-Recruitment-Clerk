@@ -155,7 +155,7 @@ if (process.env['E2E_ENABLE_WEBKIT'] === 'true') {
 export default defineConfig({
   testDir: './src',
   // Exclude debug/diagnostic tests from regular runs
-  testIgnore: ['**/debug/**', '**/*.debug.spec.ts', '**/browser-compatibility-test.spec.ts', '**/essential-compatibility.spec.ts', '**/core-user-flow.spec.ts', '**/comprehensive-validation.spec.ts', '**/detailed-job-creation.spec.ts', '**/ai-validation/**', '**/accessibility/**', '**/scenarios/**', '**/performance/**', '**/backend-unavailable.spec.ts', '**/error-scenarios.spec.ts', '**/example.spec.ts', '**/mock-server-test.spec.ts', '**/real-data-expansion.spec.ts', '**/pdf-variety-uat.spec.ts', '**/pdf-real-file-uat.spec.ts', '**/firefox-stability-test.spec.ts', '**/simple-firefox-test.spec.ts', '**/unified-analysis-regression.spec.ts', '**/tests/**', '**/simple-test.spec.ts', '**/webkit-*.spec.ts', '**/visual/**'],
+  testIgnore: ['**/debug/**', '**/*.debug.spec.ts', '**/browser-compatibility-test.spec.ts', '**/essential-compatibility.spec.ts', '**/core-user-flow.spec.ts', '**/comprehensive-validation.spec.ts', '**/detailed-job-creation.spec.ts', '**/ai-validation/**', '**/accessibility/**', '**/scenarios/**', '**/performance/**', '**/backend-unavailable.spec.ts', '**/error-scenarios.spec.ts', '**/example.spec.ts', '**/mock-server-test.spec.ts', '**/real-data-expansion.spec.ts', '**/pdf-variety-uat.spec.ts', '**/pdf-real-file-uat.spec.ts', '**/firefox-stability-test.spec.ts', '**/simple-firefox-test.spec.ts', '**/unified-analysis-regression.spec.ts', '**/tests/**', '**/simple-test.spec.ts', '**/webkit-*.spec.ts'],
   timeout: 60000,
   expect: {
     timeout: 30000,

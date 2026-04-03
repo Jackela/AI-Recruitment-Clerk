@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { setupVisualTest, setTheme } from './visual-helpers';
 
-test.describe('Theme Visual', () => {
+test.describe('Theme Visual @visual', () => {
   test.beforeEach(async ({ page }) => {
     await setupVisualTest(page, { theme: 'light' });
   });

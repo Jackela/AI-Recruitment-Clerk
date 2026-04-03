@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { setupVisualTest, setViewportWithDeviceScale } from './visual-helpers';
 
-test.describe('Responsive Visual', () => {
+test.describe('Responsive Visual @visual', () => {
   test.beforeEach(async ({ page }) => {
     await setupVisualTest(page);
   });
