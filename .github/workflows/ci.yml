@@ -317,7 +317,9 @@ jobs:
           server-log-path: '/tmp/server.log'
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
-      - name: Run E2E Tests (Shard ${{ matrix.shard }}/4)
+      - name: Run E2E Tests (Shard ${{ matrix.shard }}/2)
+        working-directory: apps/ai-recruitment-frontend-e2e
+        run: npx playwright test --grep-invert '@pdf-variety|@real-data|@accessibility|@visual' --shard=${{ matrix.shard }}/2
         working-directory: apps/ai-recruitment-frontend-e2e
         run: npx playwright test --grep-invert '@pdf-variety|@real-data|@accessibility' --shard=${{ matrix.shard }}/4
         env:
