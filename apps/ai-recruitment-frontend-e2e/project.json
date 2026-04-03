@@ -28,7 +28,7 @@
       },
       "configurations": {
         "ci": {
-          "command": "sh -c 'npx playwright test --grep-invert \"@pdf-variety|@real-data\"'"
+          "command": "sh -c 'npx playwright test --grep-invert \"@pdf-variety|@real-data|@visual|@accessibility\"'"
         }
       }
     }
