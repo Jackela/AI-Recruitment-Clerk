@@ -120,7 +120,9 @@ jobs:
       # Initialize baseline if no snapshots exist (first run)
       - name: Initialize Baseline Snapshots
         if: steps.check-snapshots.outputs.snapshots_exist != 'true'
+        timeout-minutes: 10
         run: |
+          set -e
           echo "No baseline snapshots found. Creating initial snapshots..."
           npm run test:e2e:visual:update
           echo "baseline_created=true" >> $GITHUB_OUTPUT

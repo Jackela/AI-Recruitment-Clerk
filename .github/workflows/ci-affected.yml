@@ -19,7 +19,7 @@ env:
 jobs:
   affected:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -63,13 +63,17 @@ jobs:
           echo "Affected projects with test target:"
           npx nx print-affected --type=test --select=projects --base=origin/main --head=HEAD || echo "No test target projects affected"
       - name: Lint affected
+        timeout-minutes: 10
         run: npx nx affected -t lint --base=origin/main --head=HEAD --parallel=2
       - name: Test affected
+        timeout-minutes: 15
         run: npx nx affected -t test --base=origin/main --head=HEAD --parallel=2 --passWithNoTests --exclude=app-gateway,resume-parser-svc,ai-recruitment-frontend,scoring-engine-svc,report-generator-svc,shared-dtos,infrastructure-shared,candidate-scoring-domain,usage-management-domain,resume-processing-domain,report-generation-domain
       - name: Build affected
+        timeout-minutes: 15
         run: npx nx affected -t build --base=origin/main --head=HEAD --parallel=2
       - name: Manage server lifecycle
         uses: ./.github/actions/server-lifecycle
+        timeout-minutes: 5
         with:
           port: 4200
           build-command: 'echo "Build already done via Build affected"'
@@ -79,6 +83,7 @@ jobs:
           verify-build-output: 'dist/apps/ai-recruitment-frontend/browser'
           server-log-path: '/tmp/server.log'
       - name: E2E affected
+        timeout-minutes: 18
         # Skip app-gateway-e2e due to complex service dependencies
         # Skip @accessibility tests (pre-existing UI issues)
         run: npx nx affected -t e2e --base=origin/main --head=HEAD --exclude=app-gateway-e2e --configuration=ci --parallel=1 -- --grep-invert '@accessibility'
