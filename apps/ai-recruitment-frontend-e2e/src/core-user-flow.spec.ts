@@ -52,7 +52,23 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
     });
     await expect(page).toHaveURL(/\/reports/);
 
-    // Navigate back to jobs page (直接导航)
+    // 确保应用完全加载
+    await waitForAppHydration(page);
+    await jobsPage.waitForPageLoad();
+op
+replace
+pos
+31#VN
+lines
+    // 确保应用完全加载（使用basic级别，适合列表页面）
+    await waitForAppHydration(page, { level: 'basic' });
+    await jobsPage.waitForPageLoad();
+edits
+[{"op":"replace","pos":"55#VP","lines":["    // 直接导航到目标页面，而非依赖客户端重定向",
+"    await gotoAndWait(page, LANDING_PATH, { waitForNetworkIdle: true });",
+"    // 使用basic级别 hydration",
+"    await waitForAppHydration(page, { level: 'basic' });",
+"    await jobsPage.waitForPageLoad();",]}
     await gotoAndWait(page, LANDING_PATH, { waitForNetworkIdle: true });
     await waitForAppHydration(page);
     await jobsPage.waitForPageLoad();
@@ -65,7 +81,30 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
     const jobsPage = new JobsPage(page);
     const dashboardPage = new DashboardPage(page);
 
-    // Test landing page (直接导航)
+    // 直接导航到创建页面
+    await gotoAndWait(page, '/jobs/create', {
+      waitForNetworkIdle: true,
+    });
+    await waitForAppHydration(page);
+    await jobsPage.waitForPageLoad();
+op
+replace
+pos
+91#VJ
+lines
+    // 直接导航到创建页面
+    await gotoAndWait(page, '/jobs/create', {
+      waitForNetworkIdle: true,
+    });
+    // 使用basic级别 hydration
+    await waitForAppHydration(page, { level: 'basic' });
+    await jobsPage.waitForPageLoad();
+edits
+[{"op":"replace","pos":"68#TS","lines":["    // Test landing page (直接导航)",
+"    await gotoAndWait(page, LANDING_PATH, { waitForNetworkIdle: true });",
+"    // 使用basic级别 hydration",
+"    await waitForAppHydration(page, { level: 'basic' });",
+"    await jobsPage.waitForPageLoad();",]}
     await gotoAndWait(page, LANDING_PATH, { waitForNetworkIdle: true });
     await waitForAppHydration(page);
     await jobsPage.waitForPageLoad();
