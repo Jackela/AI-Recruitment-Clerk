@@ -275,8 +275,35 @@ export class HydrationLogger {
     if (this.config.observability?.verbose) {
       this.log(`⏭️ Skipped: ${name}`);
     }
+  /**
+   * Generic step logger - handles various call signatures
+   * Used by hydration.ts for flexible step logging
+   */
+  logStep(name: string, meta?: { duration?: number; skipped?: boolean; warning?: string; error?: string; level?: string; ciMode?: boolean; success?: boolean }): void {
+    if (meta?.skipped) {
+      this.logStepSkipped(name);
+      return;
+    }
+    if (meta?.error || meta?.warning) {
+      const err = new Error(meta.error || meta.warning || 'Unknown error');
+      this.logStepFailure(name, err, meta.duration || 0, false);
+      return;
+    }
+    if (meta?.duration !== undefined) {
+      this.logStepSuccess(name, meta.duration);
+      return;
+    }
+    if (meta?.level !== undefined) {
+      this.log(`[start] level=${meta.level}, ciMode=${meta.ciMode}`);
+      return;
+    }
+    if (meta?.success !== undefined) {
+      this.log(`[complete] success=${meta.success}`);
+      return;
+    }
+    // Default: log as success with 0 duration
+    this.logStepSuccess(name, 0);
   }
-
   getReport(success: boolean, errors: Error[] = []): HydrationReport {
     return {
       totalDuration: Date.now() - this.startTime,

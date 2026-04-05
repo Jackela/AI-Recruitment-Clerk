@@ -199,10 +199,9 @@ async function waitForFonts(
   config: HydrationConfig,
   logger: HydrationLogger,
 ): Promise<void> {
-  if (!config.features.fontLoading) {
+  if (!config.features?.waitForFonts) {
     logger.logStep('fontLoading', { skipped: true });
     return;
-  }
 
   const startTime = Date.now();
   try {
@@ -229,10 +228,9 @@ async function waitForKeyElements(
   config: HydrationConfig,
   logger: HydrationLogger,
 ): Promise<void> {
-  if (!config.features.keyElementCheck) {
+  if (!config.features?.waitForKeyElements) {
     logger.logStep('keyElements', { skipped: true });
     return;
-  }
 
   const startTime = Date.now();
   try {
@@ -264,10 +262,9 @@ async function waitForNetwork(
   config: HydrationConfig,
   logger: HydrationLogger,
 ): Promise<void> {
-  if (!config.features.networkIdle) {
+  if (!config.features?.waitForNetworkIdle) {
     logger.logStep('networkIdle', { skipped: true });
     return;
-  }
 
   const startTime = Date.now();
   await waitForNetworkIdle(page, config.timeouts.networkIdle);
@@ -282,10 +279,9 @@ async function waitForIdleCycles(
   config: HydrationConfig,
   logger: HydrationLogger,
 ): Promise<void> {
-  if (!config.features.idleCallback) {
-    logger.logStep('idleCycles', { skipped: true });
+  if (!config.features?.waitForIdle) {
+    logger.logStep('idleCallback', { skipped: true });
     return;
-  }
 
   const startTime = Date.now();
   await waitForIdle(page);
@@ -301,10 +297,9 @@ async function waitForAnimationCompletion(
   config: HydrationConfig,
   logger: HydrationLogger,
 ): Promise<void> {
-  if (!config.features.animationWait) {
+  if (!config.features?.waitForAnimationCompletion) {
     logger.logStep('animationWait', { skipped: true });
     return;
-  }
 
   const startTime = Date.now();
   await page.waitForTimeout(500);

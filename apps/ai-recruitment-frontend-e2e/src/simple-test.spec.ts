@@ -5,7 +5,6 @@ import { waitForAppHydration } from './test-utils/hydration';
  * Simple Debug Test - Direct Angular App Verification
  * Enhanced with better hydration waiting and resilient navigation
  */
-
 const LANDING_PATH = '/jobs';
 const DEFAULT_TIMEOUT = 60000; // 增加到60秒应对CI环境
 
@@ -45,106 +44,5 @@ test.describe('Simple Angular App Test', () => {
 
     expect(hasContent).toBe(true);
     console.log('✅ Angular app is working correctly!');
-  });
-
-  import { test, expect } from './fixtures';
-import { waitForAppHydration } from './test-utils/hydration';
-
-/**
- * Simple Debug Test - Direct Angular App Verification
- * Enhanced with better hydration waiting and resilient navigation
- */
-
-const LANDING_PATH = '/jobs';
-const DEFAULT_TIMEOUT = 60000; // 增加到60秒应对CI环境
-
-test.describe('Simple Angular App Test', () => {
-  test('check if arc-root exists and app loads with resilient navigation', async ({
-    page,
-  }) => {
-    console.log('🚀 Starting simple Angular app test...');
-
-    // 最佳实践：直接导航到目标路由，避免依赖客户端重定向
-    console.log('🔄 Navigating directly to /jobs...');
-    await page.goto(LANDING_PATH);
-
-    // 等待 hydration 完成（而非等待URL变化）
-    console.log('⏳ Waiting for app hydration...');
-    await waitForAppHydration(page);
-    console.log('✅ App hydration complete');
-op
-replace
-pos
-1#WH
-lines
-import { test, expect } from './fixtures';
-import { waitForAppHydration } from './test-utils/hydration';
-
-/**
- * Simple Debug Test - Direct Angular App Verification
- * Enhanced with better hydration waiting and resilient navigation
- * Uses minimal hydration level for faster CI execution
- */
-
-const LANDING_PATH = '/jobs';
-const DEFAULT_TIMEOUT = 60000; // 增加到60秒应对CI环境
-
-test.describe('Simple Angular App Test', () => {
-  test('check if arc-root exists and app loads with resilient navigation', async ({
-    page,
-  }) => {
-    console.log('🚀 Starting simple Angular app test...');
-
-    // 最佳实践：直接导航到目标路由，避免依赖客户端重定向
-    console.log('🔄 Navigating directly to /jobs...');
-    await page.goto(LANDING_PATH);
-
-    // 等待 hydration 完成（使用minimal级别， fastest for CI）
-    console.log('⏳ Waiting for app hydration (minimal level)...');
-    await waitForAppHydration(page, { level: 'minimal' });
-    console.log('✅ App hydration complete');
-edits
-[{"op":"replace","pos":"50#XW","lines":["  test('direct navigation to specific routes', async ({ page }) => {",
-"    // Test jobs list page",
-"    console.log('🔄 Testing /jobs route...');",
-"    await page.goto('/jobs');",
-"    await page.waitForLoadState('domcontentloaded');",
-"    // 使用minimal级别 hydration",
-"    await waitForAppHydration(page, { level: 'minimal' });",
-"",
-"    const jobsContent = await page.locator('arc-root').innerHTML();",
-"    expect(jobsContent.length).toBeGreaterThan(100);",
-"    console.log('✅ Jobs page loaded successfully');",
-"",
-"    // Test create job page",
-"    console.log('🔄 Testing /jobs/create route...');",
-"    await page.goto('/jobs/create');",
-"    await page.waitForLoadState('domcontentloaded');",
-"    // 使用minimal级别 hydration",
-"    await waitForAppHydration(page, { level: 'minimal' });",
-"",
-"    const createContent = await page.locator('arc-root').innerHTML();",
-"    expect(createContent.length).toBeGreaterThan(100);",
-"    console.log('✅ Create job page loaded successfully');",
-"  });",]}
-    // Test jobs list page
-    console.log('🔄 Testing /jobs route...');
-    await page.goto('/jobs');
-    await page.waitForLoadState('domcontentloaded');
-    await waitForAppHydration(page);
-
-    const jobsContent = await page.locator('arc-root').innerHTML();
-    expect(jobsContent.length).toBeGreaterThan(100);
-    console.log('✅ Jobs page loaded successfully');
-
-    // Test create job page
-    console.log('🔄 Testing /jobs/create route...');
-    await page.goto('/jobs/create');
-    await page.waitForLoadState('domcontentloaded');
-    await waitForAppHydration(page);
-
-    const createContent = await page.locator('arc-root').innerHTML();
-    expect(createContent.length).toBeGreaterThan(100);
-    console.log('✅ Create job page loaded successfully');
   });
 });

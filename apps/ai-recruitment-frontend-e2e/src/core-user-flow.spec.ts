@@ -55,27 +55,6 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
     // 确保应用完全加载
     await waitForAppHydration(page);
     await jobsPage.waitForPageLoad();
-op
-replace
-pos
-31#VN
-lines
-    // 确保应用完全加载（使用basic级别，适合列表页面）
-    await waitForAppHydration(page, { level: 'basic' });
-    await jobsPage.waitForPageLoad();
-edits
-[{"op":"replace","pos":"55#VP","lines":["    // 直接导航到目标页面，而非依赖客户端重定向",
-"    await gotoAndWait(page, LANDING_PATH, { waitForNetworkIdle: true });",
-"    // 使用basic级别 hydration",
-"    await waitForAppHydration(page, { level: 'basic' });",
-"    await jobsPage.waitForPageLoad();",]}
-    await gotoAndWait(page, LANDING_PATH, { waitForNetworkIdle: true });
-    await waitForAppHydration(page);
-    await jobsPage.waitForPageLoad();
-
-    // Log any errors
-    logErrors(errors);
-  });
 
   test('Quick smoke test - navigation essentials', async ({ page }) => {
     const jobsPage = new JobsPage(page);
