@@ -1,5 +1,6 @@
 import { BasePage } from './BasePage';
 import type { Page } from '@playwright/test';
+import { waitForAppHydration } from '../test-utils/hydration';
 
 /**
  * Dashboard Page - 仪表板页面
@@ -26,6 +27,8 @@ export class DashboardPage extends BasePage {
 
   async navigateTo(): Promise<void> {
     await this.page.goto('/dashboard');
+    // 使用最小级别的 hydration（最快，适合简单仪表板页面）
+    await waitForAppHydration(this.page, { level: 'minimal' });
     await this.waitForPageLoad();
   }
 

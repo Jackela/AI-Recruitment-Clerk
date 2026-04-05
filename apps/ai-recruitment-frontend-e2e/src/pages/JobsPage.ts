@@ -57,8 +57,8 @@ export class JobsPage extends BasePage {
   async waitForPageLoad(): Promise<void> {
     console.log('⏳ Waiting for jobs page to load...');
 
-    // 首先确保应用已完全加载
-    await waitForAppHydration(this.page);
+    // 使用基本级别的 hydration（比完整级别更快，适合列表页面）
+    await waitForAppHydration(this.page, { level: 'basic' });
 
     // 等待页面内容加载
     await this.page.waitForLoadState('domcontentloaded');
@@ -96,8 +96,8 @@ export class JobsPage extends BasePage {
     console.log('🔄 Navigating to /jobs/create...');
     await this.page.goto('/jobs/create');
 
-    // 等待应用hydration
-    await waitForAppHydration(this.page);
+    // 使用基本级别的 hydration
+    await waitForAppHydration(this.page, { level: 'basic' });
 
     // 等待表单可见
     await this.page.waitForLoadState('domcontentloaded');
