@@ -43,6 +43,10 @@ export interface HydrationConfig {
     waitForNetworkIdle?: boolean;
     /** Wait for idle callbacks */
     waitForIdle?: boolean;
+    /** Wait for key elements */
+    waitForKeyElements?: boolean;
+    /** Wait for animation completion */
+    waitForAnimationCompletion?: boolean;
   };
 
   /** Observability options */
