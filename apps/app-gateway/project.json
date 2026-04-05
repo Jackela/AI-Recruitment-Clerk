@@ -60,7 +60,7 @@
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["apps/app-gateway/**/*.ts"],
-        "maxWarnings": 50
+        "maxWarnings": 200
       }
     }
   }

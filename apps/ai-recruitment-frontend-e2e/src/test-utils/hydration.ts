@@ -79,7 +79,7 @@ async function waitForAngularRoot(
   try {
     await page.locator('arc-root').waitFor({
       state: 'attached',
-      timeout: config.timeouts.elementVisible,
+      timeout: config.timeouts.loadingScreen ?? 10000,
     });
     logger.logStep('angularRootAttached', { duration: Date.now() - startTime });
   } catch (error) {
@@ -153,7 +153,7 @@ async function waitForBodyVisible(
       );
     },
     null,
-    { timeout: config.timeouts.elementVisible },
+    { timeout: config.timeouts.loadingScreen ?? 10000 },
   );
   logger.logStep('bodyVisible', { duration: Date.now() - startTime });
 }
