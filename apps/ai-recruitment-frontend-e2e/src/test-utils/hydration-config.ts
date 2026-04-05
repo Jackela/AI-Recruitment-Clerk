@@ -275,6 +275,7 @@ export class HydrationLogger {
     if (this.config.observability?.verbose) {
       this.log(`⏭️ Skipped: ${name}`);
     }
+  }
   /**
    * Generic step logger - handles various call signatures
    * Used by hydration.ts for flexible step logging
