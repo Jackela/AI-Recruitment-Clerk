@@ -206,7 +206,7 @@ export interface HydrationReport {
  */
 export class HydrationLogger {
   private steps: HydrationStepResult[] = [];
-  private startTime: number = 0;
+  private startTime = 0;
 
   constructor(private config: HydrationConfig) {
     this.startTime = Date.now();

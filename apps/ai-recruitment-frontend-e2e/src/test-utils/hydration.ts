@@ -202,7 +202,7 @@ async function waitForFonts(
   if (!config.features?.waitForFonts) {
     logger.logStep('fontLoading', { skipped: true });
     return;
-
+  }
   const startTime = Date.now();
   try {
     await Promise.race([
@@ -231,7 +231,7 @@ async function waitForKeyElements(
   if (!config.features?.waitForKeyElements) {
     logger.logStep('keyElements', { skipped: true });
     return;
-
+  }
   const startTime = Date.now();
   try {
     await page.waitForFunction(
@@ -265,7 +265,7 @@ async function waitForNetwork(
   if (!config.features?.waitForNetworkIdle) {
     logger.logStep('networkIdle', { skipped: true });
     return;
-
+  }
   const startTime = Date.now();
   await waitForNetworkIdle(page, config.timeouts.networkIdle);
   logger.logStep('networkIdle', { duration: Date.now() - startTime });
@@ -282,7 +282,7 @@ async function waitForIdleCycles(
   if (!config.features?.waitForIdle) {
     logger.logStep('idleCallback', { skipped: true });
     return;
-
+  }
   const startTime = Date.now();
   await waitForIdle(page);
   await waitForIdle(page);
@@ -300,7 +300,7 @@ async function waitForAnimationCompletion(
   if (!config.features?.waitForAnimationCompletion) {
     logger.logStep('animationWait', { skipped: true });
     return;
-
+  }
   const startTime = Date.now();
   await page.waitForTimeout(500);
   logger.logStep('animationWait', { duration: Date.now() - startTime });
