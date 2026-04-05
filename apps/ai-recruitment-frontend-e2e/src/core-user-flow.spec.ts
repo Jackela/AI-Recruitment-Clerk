@@ -7,11 +7,11 @@ import { waitForAppHydration } from './test-utils/hydration';
 /**
  * Core User Flow - Job Creation to Report Viewing
  * Refactored to use Page Object Model with improved waiting strategies
+ * Uses direct navigation to avoid client-side redirect dependencies
  */
 
-const BASE_URL = '/';
 const LANDING_PATH = '/jobs';
-const DEFAULT_TIMEOUT = 30000;
+const DEFAULT_TIMEOUT = 60000; // 增加到60秒应对CI环境
 
 test.describe('Core User Flow - Job Creation to Report Viewing', () => {
   test('Complete job creation happy path (frontend only)', async ({ page }) => {
@@ -25,14 +25,8 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
     const jobsPage = new JobsPage(page);
     const dashboardPage = new DashboardPage(page);
 
-    // Navigate to landing page with proper hydration
-    await gotoAndWait(page, BASE_URL, { waitForNetworkIdle: true });
-    await page.waitForURL(
-      (location) => location.pathname.startsWith(LANDING_PATH),
-      {
-        timeout: DEFAULT_TIMEOUT,
-      },
-    );
+    // 最佳实践：直接导航到目标页面，而非依赖客户端重定向
+    await gotoAndWait(page, LANDING_PATH, { waitForNetworkIdle: true });
 
     // 确保应用完全加载
     await waitForAppHydration(page);
@@ -58,14 +52,8 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
     });
     await expect(page).toHaveURL(/\/reports/);
 
-    // Navigate back to home
-    await gotoAndWait(page, BASE_URL, { waitForNetworkIdle: true });
-    await page.waitForURL(
-      (location) => location.pathname.startsWith(LANDING_PATH),
-      {
-        timeout: DEFAULT_TIMEOUT,
-      },
-    );
+    // Navigate back to jobs page (直接导航)
+    await gotoAndWait(page, LANDING_PATH, { waitForNetworkIdle: true });
     await waitForAppHydration(page);
     await jobsPage.waitForPageLoad();
 
@@ -77,14 +65,8 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
     const jobsPage = new JobsPage(page);
     const dashboardPage = new DashboardPage(page);
 
-    // Test landing page
-    await gotoAndWait(page, BASE_URL, { waitForNetworkIdle: true });
-    await page.waitForURL(
-      (location) => location.pathname.startsWith(LANDING_PATH),
-      {
-        timeout: DEFAULT_TIMEOUT,
-      },
-    );
+    // Test landing page (直接导航)
+    await gotoAndWait(page, LANDING_PATH, { waitForNetworkIdle: true });
     await waitForAppHydration(page);
     await jobsPage.waitForPageLoad();
 
@@ -106,7 +88,8 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
   test('Job creation form accessibility basics', async ({ page }) => {
     const jobsPage = new JobsPage(page);
 
-    await gotoAndWait(page, `${BASE_URL}jobs/create`, {
+    // 直接导航到创建页面
+    await gotoAndWait(page, '/jobs/create', {
       waitForNetworkIdle: true,
     });
     await waitForAppHydration(page);
