@@ -6,6 +6,12 @@ import {
   logTestEnvironment,
 } from './test-environment.js';
 
+// Handle EPIPE errors gracefully when stdout is piped through Nx
+// This prevents global-setup from crashing on 'write EPIPE' errors
+process.stdout.on('error', (err: NodeJS.ErrnoException) => {
+  if (err.code === 'EPIPE' || err.code === 'ECONNRESET') return;
+  console.error('stdout error:', err);
+});
 async function globalSetup(): Promise<void> {
   console.log('🚀 Starting E2E test environment setup...');
 
