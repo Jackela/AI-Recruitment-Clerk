@@ -77,7 +77,7 @@ jobs:
         with:
           port: 4200
           build-command: 'echo "Build already done via Build affected"'
-          serve-command: 'npx nx run ai-recruitment-frontend:serve-static --port 4200'
+          serve-command: 'STATIC_DIR=dist/apps/ai-recruitment-frontend/browser node scripts/proxy-server.cjs'
           health-check-url: 'http://localhost:4200'
           health-check-timeout: '90000'
           verify-build-output: 'dist/apps/ai-recruitment-frontend/browser'
