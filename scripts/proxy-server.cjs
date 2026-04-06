@@ -588,7 +588,13 @@ const server = http.createServer((req, res) => {
           res.end('Server Error');
         }
       } else {
-        res.writeHead(200, { 'Content-Type': contentType });
+        // Add CORS headers for module scripts (needed for ES modules with crossorigin="anonymous")
+        const headers = { 'Content-Type': contentType };
+        if (ext === '.js' || ext === '.mjs') {
+          headers['Access-Control-Allow-Origin'] = '*';
+          headers['Cross-Origin-Resource-Policy'] = 'cross-origin';
+        }
+        res.writeHead(200, headers);
         res.end(content);
       }
     });
