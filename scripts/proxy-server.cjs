@@ -593,6 +593,8 @@ const server = http.createServer((req, res) => {
         if (ext === '.js' || ext === '.mjs') {
           headers['Access-Control-Allow-Origin'] = '*';
           headers['Cross-Origin-Resource-Policy'] = 'cross-origin';
+          headers['Cross-Origin-Embedder-Policy'] = 'require-corp';
+          headers['Cross-Origin-Opener-Policy'] = 'same-origin';
         }
         res.writeHead(200, headers);
         res.end(content);

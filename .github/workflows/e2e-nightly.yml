@@ -40,7 +40,7 @@ jobs:
         with:
           port: 4200
           build-command: 'npx nx build ai-recruitment-frontend --configuration=webkit-test'
-          serve-command: 'npx nx run ai-recruitment-frontend:serve-static --port 4200'
+          serve-command: 'node scripts/proxy-server.cjs'
           health-check-url: 'http://localhost:4200'
           health-check-timeout: '60000'
           server-log-path: '/tmp/server.log'
