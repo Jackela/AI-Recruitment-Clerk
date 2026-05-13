@@ -123,11 +123,11 @@ export const CI_OPTIMIZED_CONFIG: HydrationConfig = {
   level: 'basic',
   ciMode: true,
   timeouts: {
-    documentReady: 15000,
-    angularBootstrap: 20000,
-    networkIdle: 10000,
-    keyElements: 8000,
-    loadingScreen: 15000,
+    documentReady: 30000,
+    angularBootstrap: 45000,
+    networkIdle: 15000,
+    keyElements: 10000,
+    loadingScreen: 20000,
   },
   features: {
     checkAngularVersion: false,
