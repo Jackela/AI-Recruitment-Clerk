@@ -68,7 +68,7 @@
           "sourceMap": false,
           "namedChunks": false,
           "extractLicenses": true,
-          "subresourceIntegrity": true
+          "subresourceIntegrity": false
         },
         "production": {
           "budgets": [
