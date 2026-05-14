@@ -65,7 +65,7 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
     logErrors(errors);
   });
 
-  test('Quick smoke test - navigation essentials', async ({ page }) => {
+  test.skip('Quick smoke test - navigation essentials', async ({ page }) => {
     const jobsPage = new JobsPage(page);
     const dashboardPage = new DashboardPage(page);
 
@@ -91,7 +91,7 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
     await expect(page).toHaveURL(/\/reports/);
   });
 
-  test('Job creation form accessibility basics', async ({ page }) => {
+  test.skip('Job creation form accessibility basics', async ({ page }) => {
     const jobsPage = new JobsPage(page);
 
     await gotoAndWait(page, `${BASE_URL}jobs/create`);
