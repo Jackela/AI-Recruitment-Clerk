@@ -55,7 +55,7 @@ jobs:
         if: ${{ env.ACT != 'true' }}
         uses: github/codeql-action/analyze@c10b8064de6f491fea524254123dbe5e09572f13 # v4.35.1
         with:
-          category: "language:${{ matrix.language }}-security"
+          category: "/language:${{ matrix.language }}"
 
   dependency-scan:
     name: 🔐 Dependency Security Scan
