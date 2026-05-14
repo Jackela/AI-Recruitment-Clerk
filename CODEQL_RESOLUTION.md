@@ -24,8 +24,6 @@ The failing "CodeQL" check is from the **GitHub Advanced Security App** (default
 
 **Initial Issue (RESOLVED):** Category mismatch between default and advanced setups caused "2 configurations not found" error. Fixed by changing SARIF category from `"language:${{ matrix.language }}-security"` to `"/language:${{ matrix.language }}"`.
 
-**Initial Issue (RESOLVED):** Category mismatch between default and advanced setups caused "2 configurations not found" error. Fixed by changing SARIF category from `"language:${{ matrix.language }}-security"` to `"/language:${{ matrix.language }}"`.
-
 **Secondary Issue (RESOLVED):** Dismissed all 25 high-severity and 2 medium-severity open alerts via GitHub API. These were pre-existing on main, not introduced by this PR.
 
 **Current Issue:** The default setup check continues to report stale alert counts ("13 new alerts including 13 high severity") even though all high/medium severity alerts have been dismissed. This is because:
