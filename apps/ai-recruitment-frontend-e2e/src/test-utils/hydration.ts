@@ -161,6 +161,11 @@ async function waitForAngularBootstrap(
           src: s.src || '[inline]',
           type: s.type || 'text/javascript',
         }));
+      const scriptSources = scripts.map(s => ({
+        src: s.src || '[inline]',
+        type: s.type || 'text/javascript',
+        loaded: s.readyState || 'complete',
+      }));
       return {
         rootExists: !!root,
         rootHTML: root ? root.outerHTML.substring(0, 500) : 'null',
@@ -168,9 +173,12 @@ async function waitForAngularBootstrap(
         rootNgVersion: root?.getAttribute('ng-version') || null,
         documentReadyState: document.readyState,
         scriptsCount: scripts.length,
+        scriptSources: scriptSources.slice(0, 10),
         scriptsWithError: scriptsWithError.slice(0, 5),
         bodyHTML: document.body ? document.body.innerHTML.substring(0, 500) : 'no body',
         windowAngular: !!(window as Record<string, unknown>)['ng'],
+        windowBootstrap: typeof (window as Record<string, unknown>)['bootstrap'] === 'function',
+        headScripts: Array.from(document.querySelectorAll('head script')).map(s => s.src || '[inline]').slice(0, 5),
       };
     });
 
