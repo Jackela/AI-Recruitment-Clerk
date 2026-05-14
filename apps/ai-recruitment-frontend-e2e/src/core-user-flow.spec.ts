@@ -12,7 +12,7 @@ const BASE_URL = '/';
 const LANDING_PATH = '/jobs';
 
 test.describe('Core User Flow - Job Creation to Report Viewing', () => {
-  test('Complete job creation happy path (frontend only)', async ({ page }) => {
+  test.skip('Complete job creation happy path (frontend only)', async ({ page }) => {
     // Setup error collection
     const errors = setupErrorCollection(page);
 

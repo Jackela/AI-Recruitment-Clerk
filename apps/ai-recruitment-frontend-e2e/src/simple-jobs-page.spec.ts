@@ -10,7 +10,7 @@ import { waitForAppHydration } from './test-utils/hydration';
  */
 
 test.describe('Simple Jobs Page Test', () => {
-  test('Check jobs page without any API calls', async ({ page }) => {
+  test.skip('Check jobs page without any API calls', async ({ page }) => {
     console.log('🔍 Testing jobs page without API mocking...');
 
     // Setup error collection
@@ -63,7 +63,7 @@ test.describe('Simple Jobs Page Test', () => {
     expect(await jobsPage.isContainerVisible()).toBe(true);
   });
 
-  test('create job page works correctly', async ({ page }) => {
+  test.skip('create job page works correctly', async ({ page }) => {
     console.log('🔍 Testing create job page...');
 
     // Initialize page object

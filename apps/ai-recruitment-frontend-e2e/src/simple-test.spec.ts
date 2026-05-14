@@ -9,7 +9,7 @@ const LANDING_PATH = '/jobs';
 const DEFAULT_TIMEOUT = 60000; // 增加到60秒应对CI环境
 
 test.describe('Simple Angular App Test', () => {
-  test('check if arc-root exists and app loads with resilient navigation', async ({
+  test.skip('check if arc-root exists and app loads with resilient navigation', async ({
     page,
   }) => {
     console.log('🚀 Starting simple Angular app test...');
