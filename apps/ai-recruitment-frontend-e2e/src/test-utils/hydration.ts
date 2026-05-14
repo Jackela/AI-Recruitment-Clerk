@@ -114,7 +114,7 @@ async function waitForAngularBootstrap(
   const consoleErrors: string[] = [];
   const pageErrors: string[] = [];
 
-  // Collect console errors during bootstrap wait
+  // Collect console errors and failed requests during bootstrap wait
   const consoleHandler = (msg: import('@playwright/test').ConsoleMessage) => {
     if (msg.type() === 'error') {
       consoleErrors.push(`[console.${msg.type()}] ${msg.text()}`);
@@ -123,8 +123,12 @@ async function waitForAngularBootstrap(
   const pageErrorHandler = (error: Error) => {
     pageErrors.push(`[pageerror] ${error.message}`);
   };
+  const requestFailedHandler = (request: import('@playwright/test').Request) => {
+    consoleErrors.push(`[requestfailed] ${request.method()} ${request.url()} - ${request.failure()?.errorText || 'unknown'}`);
+  };
   page.on('console', consoleHandler);
   page.on('pageerror', pageErrorHandler);
+  page.on('requestfailed', requestFailedHandler);
 
   try {
     await page.waitForFunction(
@@ -185,6 +189,7 @@ async function waitForAngularBootstrap(
   } finally {
     page.off('console', consoleHandler);
     page.off('pageerror', pageErrorHandler);
+    page.off('requestfailed', requestFailedHandler);
   }
 }
 
