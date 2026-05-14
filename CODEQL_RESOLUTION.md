@@ -209,4 +209,4 @@ The default-setup check's message "13 new alerts including 13 high severity" is 
 
 *Document generated: 2026-05-14*
 *PR: #61 (feature/agent-browser-testing)*
-*Latest commit: `039b93ce`*
+*Latest commit: `5aabe31c`*
