@@ -111,25 +111,81 @@ async function waitForAngularBootstrap(
   logger: HydrationLogger,
 ): Promise<void> {
   const startTime = Date.now();
-  await page.waitForFunction(
-    () => {
+  const consoleErrors: string[] = [];
+  const pageErrors: string[] = [];
+
+  // Collect console errors during bootstrap wait
+  const consoleHandler = (msg: import('@playwright/test').ConsoleMessage) => {
+    if (msg.type() === 'error') {
+      consoleErrors.push(`[console.${msg.type()}] ${msg.text()}`);
+    }
+  };
+  const pageErrorHandler = (error: Error) => {
+    pageErrors.push(`[pageerror] ${error.message}`);
+  };
+  page.on('console', consoleHandler);
+  page.on('pageerror', pageErrorHandler);
+
+  try {
+    await page.waitForFunction(
+      () => {
+        const root = document.querySelector('arc-root');
+        if (!root) return false;
+        const hasContent = Array.from(root.childNodes).some(
+          (node) =>
+            node.nodeType === Node.ELEMENT_NODE ||
+            (node.nodeType === Node.TEXT_NODE && node.textContent?.trim()),
+        );
+        return (
+          hasContent ||
+          root.hasAttribute('ng-version') ||
+          root.children.length > 0
+        );
+      },
+      null,
+      { timeout: config.timeouts.angularBootstrap },
+    );
+    logger.logStep('angularBootstrap', { duration: Date.now() - startTime });
+  } catch (error) {
+    // On timeout, capture diagnostic info about the DOM state
+    const domState = await page.evaluate(() => {
       const root = document.querySelector('arc-root');
-      if (!root) return false;
-      const hasContent = Array.from(root.childNodes).some(
-        (node) =>
-          node.nodeType === Node.ELEMENT_NODE ||
-          (node.nodeType === Node.TEXT_NODE && node.textContent?.trim()),
-      );
-      return (
-        hasContent ||
-        root.hasAttribute('ng-version') ||
-        root.children.length > 0
-      );
-    },
-    null,
-    { timeout: config.timeouts.angularBootstrap },
-  );
-  logger.logStep('angularBootstrap', { duration: Date.now() - startTime });
+      const scripts = Array.from(document.querySelectorAll('script'));
+      const scriptsWithError = scripts
+        .filter((s) => s.getAttribute('onerror') || s.textContent?.includes('error'))
+        .map((s) => ({
+          src: s.src || '[inline]',
+          type: s.type || 'text/javascript',
+        }));
+      return {
+        rootExists: !!root,
+        rootHTML: root ? root.outerHTML.substring(0, 500) : 'null',
+        rootChildren: root ? root.children.length : 0,
+        rootNgVersion: root?.getAttribute('ng-version') || null,
+        documentReadyState: document.readyState,
+        scriptsCount: scripts.length,
+        scriptsWithError: scriptsWithError.slice(0, 5),
+        bodyHTML: document.body ? document.body.innerHTML.substring(0, 500) : 'no body',
+        windowAngular: !!(window as Record<string, unknown>)['ng'],
+      };
+    });
+
+    logger.log('🔍 Angular bootstrap diagnostic:');
+    logger.log(`  DOM state: ${JSON.stringify(domState, null, 2)}`);
+    if (consoleErrors.length > 0) {
+      logger.log(`  Console errors (${consoleErrors.length}):`);
+      consoleErrors.slice(0, 10).forEach((e) => logger.log(`    ${e}`));
+    }
+    if (pageErrors.length > 0) {
+      logger.log(`  Page errors (${pageErrors.length}):`);
+      pageErrors.slice(0, 10).forEach((e) => logger.log(`    ${e}`));
+    }
+
+    throw error;
+  } finally {
+    page.off('console', consoleHandler);
+    page.off('pageerror', pageErrorHandler);
+  }
 }
 
 /**
