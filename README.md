@@ -666,3 +666,4 @@ See [EDGE_CASE_TESTING.md](./EDGE_CASE_TESTING.md) for complete documentation.
 - ✅ **Ready for User Acceptance Testing (UAT)**
 
 > 💡 The system can now be deployed with a single command and provides a complete, functional AI recruitment platform ready for production use.
+// Force fresh CodeQL analysis
