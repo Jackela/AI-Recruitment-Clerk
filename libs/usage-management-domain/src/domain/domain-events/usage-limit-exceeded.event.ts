@@ -20,5 +20,7 @@ export class UsageLimitExceededEvent implements DomainEvent {
     public readonly availableQuota: number,
     public readonly reason: string,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }

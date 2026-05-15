@@ -209,7 +209,9 @@ describe('TimesheetExportUtil', () => {
 
   describe('exportData()', () => {
     it('should generate filename with current date', () => {
-      const downloadSpy = jest.spyOn(TimesheetExportUtil, 'downloadCSV').mockImplementation(() => {});
+      const downloadSpy = jest.spyOn(TimesheetExportUtil, 'downloadCSV').mockImplementation(() => {
+  // Intentionally empty
+});
 
       TimesheetExportUtil.exportData(mockEntries, mockColumns);
 
@@ -224,7 +226,9 @@ describe('TimesheetExportUtil', () => {
 
     it('should convert data to CSV before download', () => {
       const convertSpy = jest.spyOn(TimesheetExportUtil, 'convertToCSV');
-      const downloadSpy = jest.spyOn(TimesheetExportUtil, 'downloadCSV').mockImplementation(() => {});
+      const downloadSpy = jest.spyOn(TimesheetExportUtil, 'downloadCSV').mockImplementation(() => {
+  // Intentionally empty
+});
 
       TimesheetExportUtil.exportData(mockEntries, mockColumns);
 

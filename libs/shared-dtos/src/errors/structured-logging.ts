@@ -403,7 +403,7 @@ export class StructuredErrorLogger {
     const logMessage = this.formatLogMessage(entry);
     const logContext = this.formatLogContext(entry);
 
-    switch (entry.level) {
+    switch(entry.level) {
       case LogLevel.FATAL:
       case LogLevel.ERROR:
         this.logger.error(logMessage, entry.error?.stack, logContext);

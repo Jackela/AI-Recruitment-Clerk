@@ -29,7 +29,9 @@ export class ParsingFileService {
     private readonly gridFsService: GridFsService,
     private readonly fileProcessingService: FileProcessingService,
     private readonly resumeEncryptionService: ResumeEncryptionService,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Downloads and validates a file from GridFS.

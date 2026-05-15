@@ -11,6 +11,7 @@ concurrency:
   group: pr-template-check-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+
 jobs:
   validate-pr-template:
     name: Validate PR Template

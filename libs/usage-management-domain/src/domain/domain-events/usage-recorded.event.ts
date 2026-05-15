@@ -18,5 +18,7 @@ export class UsageRecordedEvent implements DomainEvent {
     public readonly newUsageCount: number,
     public readonly remainingQuota: number,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }

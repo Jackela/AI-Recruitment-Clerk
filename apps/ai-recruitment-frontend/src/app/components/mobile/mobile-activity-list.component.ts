@@ -3,6 +3,7 @@ import {
   Input,
   Output,
   EventEmitter,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { ActivityItem } from '../../services/mobile/mobile-dashboard.service';
@@ -32,12 +33,7 @@ import type { ActivityItem } from '../../services/mobile/mobile-dashboard.servic
             class="activity-icon"
             [class]="'activity-icon--' + activity.type"
           >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
               <path [attr.d]="activity.icon" />
             </svg>
           </div>
@@ -47,12 +43,7 @@ import type { ActivityItem } from '../../services/mobile/mobile-dashboard.servic
             <div class="activity-time">{{ activity.timeAgo }}</div>
           </div>
           <div class="activity-action">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
               <path
                 d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"
               />
@@ -159,6 +150,8 @@ import type { ActivityItem } from '../../services/mobile/mobile-dashboard.servic
       }
     `,
   ],
+
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MobileActivityListComponent {
   @Input({ required: true })

@@ -412,7 +412,7 @@ export class LlmService {
     ];
     const text = jdText.toLowerCase();
 
-    for (const industry of industries) {
+    for(const industry of industries) {
       if (text.includes(industry.toLowerCase())) {
         return industry;
       }

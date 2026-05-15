@@ -199,7 +199,7 @@ export class ReportDataService {
     // Group by skill name and average match scores
     const skillMap = new Map<string, MatchingSkill[]>();
 
-    for (const skill of allSkills) {
+    for(const skill of allSkills) {
       const existing = skillMap.get(skill.skill) || [];
       existing.push(skill);
       skillMap.set(skill.skill, existing);
@@ -350,7 +350,7 @@ export class ReportDataService {
   public mapRecommendationDecision(
     decision?: string,
   ): 'hire' | 'strong_hire' | 'consider' | 'pass' {
-    switch (decision) {
+    switch(decision) {
       case 'hire':
         return 'hire';
       case 'strong_hire':

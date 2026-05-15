@@ -1,4 +1,4 @@
-import { Component, signal, inject, ViewChild } from '@angular/core';
+import {Component, signal, inject, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ErrorReportingService } from '../../../services/error/error-reporting.service';
 import {
@@ -166,7 +166,8 @@ import {
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class ErrorReportingComponent {
   private readonly errorReporting = inject(ErrorReportingService);
   private readonly errorCorrelation = inject(ErrorCorrelationService);

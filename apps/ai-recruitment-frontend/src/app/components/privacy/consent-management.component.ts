@@ -1,13 +1,11 @@
 import type {
   OnInit,
   OnDestroy} from '@angular/core';
-import {
-  Component,
+import {Component,
   Input,
   Output,
   EventEmitter,
-  inject,
-} from '@angular/core';
+  inject, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
@@ -97,7 +95,8 @@ import { ToastService } from '../../services/toast.service';
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './consent-management.component.html',
   styleUrls: ['./consent-management.component.scss'],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class ConsentManagementComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly privacyApi = inject(PrivacyApiService);

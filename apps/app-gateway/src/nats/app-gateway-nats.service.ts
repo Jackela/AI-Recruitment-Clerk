@@ -32,7 +32,9 @@ export class AppGatewayNatsService {
    * Initializes a new instance of the App Gateway NATS Service.
    * @param natsClient - The nats client.
    */
-  constructor(private readonly natsClient: NatsClientService) {}
+  constructor(private readonly natsClient: NatsClientService) {
+    // Intentionally empty
+  }
 
   /**
    * Publish a job description submitted event
@@ -176,7 +178,10 @@ export class AppGatewayNatsService {
   /**
    * Delegate basic publish method to shared client
    */
-  public async publish(subject: string, payload: unknown): Promise<NatsPublishResult> {
+  public async publish(
+    subject: string,
+    payload: unknown,
+  ): Promise<NatsPublishResult> {
     return this.natsClient.publish(subject, payload);
   }
 

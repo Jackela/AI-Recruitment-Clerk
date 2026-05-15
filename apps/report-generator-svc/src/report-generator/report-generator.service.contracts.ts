@@ -215,7 +215,9 @@ export class ReportGeneratorServiceContracts {
     public readonly llmService: LlmService,
     public readonly gridfsService: GridFsService,
     public readonly reportRepository: ReportRepository,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Generates comprehensive analysis report with quality guarantees
@@ -450,7 +452,7 @@ export class ReportGeneratorServiceContracts {
       const maxConcurrency = Math.min(requests.length, 3); // Limit to 3 concurrent
       const results: ReportResult[] = [];
 
-      for (let i = 0; i < requests.length; i += maxConcurrency) {
+      for(let i = 0; i < requests.length; i += maxConcurrency) {
         const batch = requests.slice(i, i + maxConcurrency);
         const batchPromises = batch.map((request) =>
           this.generateAnalysisReport(

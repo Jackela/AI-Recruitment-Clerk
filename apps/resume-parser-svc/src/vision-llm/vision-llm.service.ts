@@ -534,14 +534,22 @@ export class VisionLlmService {
       }),
       healthCheck: async () => true,
       // Add stub implementations for required GeminiClient properties
-      logger: { log: () => {}, warn: () => {}, error: () => {} },
+      logger: { log: () => {
+  // Intentionally empty
+}, warn: () => {
+  // Intentionally empty
+}, error: () => {
+  // Intentionally empty
+} },
       genAI: null,
       model: '',
       rateLimit: { maxRequests: 0, windowMs: 0 },
       retryConfig: { maxAttempts: 0, baseDelayMs: 0 },
       healthCheckStatus: { status: 'healthy' },
       metrics: { requestCount: 0, errorCount: 0 },
-      updateConfig: () => {},
+      updateConfig: () => {
+  // Intentionally empty
+},
     } as unknown as GeminiClient;
   }
 }

@@ -1,13 +1,11 @@
-import type {
-  OnDestroy,
-  OnChanges,
-  SimpleChanges} from '@angular/core';
+import type { OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
 import {
   Component,
   Input,
   Output,
   EventEmitter,
   inject,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
@@ -48,7 +46,14 @@ export interface ProgressUpdate {
         <div class="card-header">
           <div class="header-content">
             <div class="header-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
                 <polyline points="23 4 23 10 17 10"></polyline>
                 <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
               </svg>
@@ -65,7 +70,14 @@ export interface ProgressUpdate {
             (click)="onCancelClick()"
             aria-label="取消分析"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
@@ -163,7 +175,10 @@ export interface ProgressUpdate {
                 </div>
 
                 <!-- Progress Bar (shown for active and completed steps) -->
-                <div class="progress-bar-wrapper" *ngIf="step.status !== 'pending'">
+                <div
+                  class="progress-bar-wrapper"
+                  *ngIf="step.status !== 'pending'"
+                >
                   <div class="progress-bar-track">
                     <div
                       class="progress-bar-fill"
@@ -173,7 +188,10 @@ export interface ProgressUpdate {
                       [attr.aria-valuemax]="100"
                       role="progressbar"
                     >
-                      <div *ngIf="step.status === 'active'" class="progress-shimmer"></div>
+                      <div
+                        *ngIf="step.status === 'active'"
+                        class="progress-shimmer"
+                      ></div>
                     </div>
                   </div>
                 </div>
@@ -211,7 +229,11 @@ export interface ProgressUpdate {
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
-            <span *ngIf="isCancelling" class="spinner" aria-hidden="true"></span>
+            <span
+              *ngIf="isCancelling"
+              class="spinner"
+              aria-hidden="true"
+            ></span>
             <span>{{ isCancelling ? '取消中...' : '取消分析' }}</span>
           </button>
         </div>
@@ -219,6 +241,8 @@ export interface ProgressUpdate {
     </div>
   `,
   styleUrls: ['./analysis-progress.component.scss'],
+
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AnalysisProgressComponent implements OnChanges, OnDestroy {
   @Input() public sessionId = '';
@@ -227,10 +251,12 @@ export class AnalysisProgressComponent implements OnChanges, OnDestroy {
 
   @Output() public progressUpdate = new EventEmitter<ProgressUpdate>();
   @Output() public stepChange = new EventEmitter<string>();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @Output() public analysisCompleted = new EventEmitter<any>();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @Output() public analysisError = new EventEmitter<any>();
+  @Output() public analysisCompleted = new EventEmitter<
+    import('../../../services/websocket.service').CompletionData
+  >();
+  @Output() public analysisError = new EventEmitter<
+    import('../../../services/websocket.service').ErrorData
+  >();
   @Output() public cancelRequested = new EventEmitter<void>();
 
   public isCancelling = false;
@@ -249,8 +275,7 @@ export class AnalysisProgressComponent implements OnChanges, OnDestroy {
     }
 
     const newSessionId: string = sessionIdChange.currentValue;
-    const previousSessionId: string | undefined =
-      sessionIdChange.previousValue;
+    const previousSessionId: string | undefined = sessionIdChange.previousValue;
 
     if (newSessionId && newSessionId !== previousSessionId) {
       this.destroy$.next();
@@ -289,11 +314,11 @@ export class AnalysisProgressComponent implements OnChanges, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((message) => {
         if (message.type === 'step_change') {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const data = message.data as any;
+          const data =
+            message.data as import('../../../services/websocket.service').WebSocketMessageData;
           const stepVal =
-            data?.['step'] ??
-            data?.['currentStep'] ??
+            (data?.step as string | undefined) ??
+            (data?.currentStep as string | undefined) ??
             '';
           this.stepChange.emit(String(stepVal));
         }
@@ -337,5 +362,4 @@ export class AnalysisProgressComponent implements OnChanges, OnDestroy {
   public trackByStepId(_index: number, step: AnalysisStep): string {
     return step.id;
   }
-
 }

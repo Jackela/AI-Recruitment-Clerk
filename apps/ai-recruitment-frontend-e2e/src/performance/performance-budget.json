@@ -1,0 +1,55 @@
+{
+  "homepage": {
+    "lcp": 2500,
+    "fcp": 1800,
+    "cls": 0.1,
+    "ttfb": 600,
+    "size": 500000,
+    "loadTime": 3000
+  },
+  "dashboard": {
+    "lcp": 3000,
+    "fcp": 2000,
+    "cls": 0.1,
+    "ttfb": 800,
+    "size": 1000000,
+    "loadTime": 5000
+  },
+  "jobs-list": {
+    "lcp": 2500,
+    "fcp": 1500,
+    "cls": 0.1,
+    "ttfb": 600,
+    "size": 800000,
+    "loadTime": 3000
+  },
+  "analysis": {
+    "lcp": 5000,
+    "fcp": 3000,
+    "cls": 0.15,
+    "ttfb": 1000,
+    "duration": 70000,
+    "loadTime": 8000
+  },
+  "upload": {
+    "duration": 30000,
+    "speed": 1048576
+  },
+  "memory": {
+    "maxHeapSize": 200000000,
+    "leakThreshold": 1048576,
+    "usageRatio": 0.8
+  },
+  "interactions": {
+    "clickResponse": 100,
+    "inputDelay": 50,
+    "hoverResponse": 50,
+    "animationFps": 30
+  },
+  "network": {
+    "maxRequests": 100,
+    "failureRate": 0.05,
+    "apiTimeout": 2000,
+    "cacheRate": 0.5
+  }
+}

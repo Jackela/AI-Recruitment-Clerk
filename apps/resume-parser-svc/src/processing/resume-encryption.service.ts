@@ -36,7 +36,9 @@ export interface ResumeSecurityOptions {
 export class ResumeEncryptionService {
   private readonly logger = new Logger(ResumeEncryptionService.name);
 
-  constructor(private readonly config: ResumeParserConfigService) {}
+  constructor(private readonly config: ResumeParserConfigService) {
+  // Intentionally empty
+}
 
   /**
    * Encrypts sensitive PII data in a resume DTO

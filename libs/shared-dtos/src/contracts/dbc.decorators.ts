@@ -154,7 +154,9 @@ export function Ensures<TResult>(
  * ```typescript
  * @Invariant(instance => instance.email && instance.id, 'User must always have email and id')
  * class User {
- *   constructor(public email: string, public id: string) {}
+ *   constructor(public email: string, public id: string) {
+  // Intentionally empty
+}
  * }
  * ```
  *

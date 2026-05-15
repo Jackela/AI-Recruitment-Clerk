@@ -43,7 +43,9 @@ export class IncentiveDomainService {
     private readonly eventBus: IDomainEventBus,
     private readonly auditLogger: IAuditLogger,
     private readonly paymentGateway: IPaymentGateway,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * 创建问卷完成激励
@@ -89,7 +91,7 @@ export class IncentiveDomainService {
 
       // 发布领域事件
       const events = incentive.getUncommittedEvents();
-      for (const event of events) {
+      for(const event of events) {
         await this.eventBus.publish(event);
       }
       incentive.markEventsAsCommitted();
@@ -170,7 +172,7 @@ export class IncentiveDomainService {
 
       // 发布领域事件
       const events = incentive.getUncommittedEvents();
-      for (const event of events) {
+      for(const event of events) {
         await this.eventBus.publish(event);
       }
       incentive.markEventsAsCommitted();
@@ -218,7 +220,7 @@ export class IncentiveDomainService {
 
       // 发布领域事件
       const events = incentive.getUncommittedEvents();
-      for (const event of events) {
+      for(const event of events) {
         await this.eventBus.publish(event);
       }
       incentive.markEventsAsCommitted();
@@ -268,7 +270,7 @@ export class IncentiveDomainService {
 
       // 发布领域事件
       const events = incentive.getUncommittedEvents();
-      for (const event of events) {
+      for(const event of events) {
         await this.eventBus.publish(event);
       }
       incentive.markEventsAsCommitted();
@@ -318,7 +320,7 @@ export class IncentiveDomainService {
 
       // 发布领域事件
       const events = incentive.getUncommittedEvents();
-      for (const event of events) {
+      for(const event of events) {
         await this.eventBus.publish(event);
       }
       incentive.markEventsAsCommitted();
@@ -392,6 +394,13 @@ export class IncentiveDomainService {
       const gatewayResult =
         await this.paymentGateway.processPayment(paymentRequest);
 
+      // Check if payment gateway succeeded
+      if (!gatewayResult.success) {
+        return PaymentProcessingResult.failed([
+          gatewayResult.error ?? 'Payment gateway error',
+        ]);
+      }
+
       // 执行激励支付
       const paymentResult = incentive.executePayment(
         paymentMethod,
@@ -403,7 +412,7 @@ export class IncentiveDomainService {
 
         // 发布领域事件
         const events = incentive.getUncommittedEvents();
-        for (const event of events) {
+        for(const event of events) {
           await this.eventBus.publish(event);
         }
         incentive.markEventsAsCommitted();
@@ -473,7 +482,7 @@ export class IncentiveDomainService {
       let successCount = 0;
       let totalPaidAmount = 0;
 
-      for (const incentive of incentives) {
+      for(const incentive of incentives) {
         const eligibility = IncentiveRules.canPayIncentive(incentive);
         if (!eligibility.isEligible) {
           results.push({
@@ -506,7 +515,7 @@ export class IncentiveDomainService {
 
             // 发布领域事件
             const events = incentive.getUncommittedEvents();
-            for (const event of events) {
+            for(const event of events) {
               await this.eventBus.publish(event);
             }
             incentive.markEventsAsCommitted();
@@ -687,19 +696,19 @@ export class IncentiveDomainService {
     let pendingAmount = 0;
 
     const statusCount = {
-      pending: 0,
+      pending_validation: 0,
       approved: 0,
       paid: 0,
       rejected: 0,
     };
 
-    for (const incentive of incentives) {
+    for(const incentive of incentives) {
       const amount = incentive.getRewardAmount();
       totalAmount += amount;
 
       switch (incentive.getStatus()) {
         case IncentiveStatus.PENDING_VALIDATION:
-          statusCount.pending++;
+          statusCount.pending_validation++;
           pendingAmount += amount;
           break;
         case IncentiveStatus.APPROVED:
@@ -743,19 +752,19 @@ export class IncentiveDomainService {
     const uniqueIPs = new Set<string>();
 
     const statusCount = {
-      pending: 0,
+      pending_validation: 0,
       approved: 0,
       paid: 0,
       rejected: 0,
     };
 
-    for (const incentive of allIncentives) {
+    for(const incentive of allIncentives) {
       totalAmount += incentive.getRewardAmount();
       uniqueIPs.add(incentive.getRecipientIP());
 
       switch (incentive.getStatus()) {
         case IncentiveStatus.PENDING_VALIDATION:
-          statusCount.pending++;
+          statusCount.pending_validation++;
           break;
         case IncentiveStatus.APPROVED:
           statusCount.approved++;

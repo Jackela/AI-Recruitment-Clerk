@@ -455,7 +455,7 @@ export class DBCMonitor {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private extractMetricValue(stats: any, metricName: string): number {
-    switch (metricName) {
+    switch(metricName) {
       case 'violationRate':
         return stats.violationRate;
       case 'averageExecutionTime':
@@ -468,7 +468,7 @@ export class DBCMonitor {
   }
 
   private evaluateThreshold(value: number, threshold: AlertThreshold): boolean {
-    switch (threshold.operator) {
+    switch(threshold.operator) {
       case 'gt':
         return value > threshold.value;
       case 'lt':

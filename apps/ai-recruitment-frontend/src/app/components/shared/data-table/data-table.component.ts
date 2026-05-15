@@ -1,12 +1,34 @@
-import type { OnInit, AfterViewInit, OnDestroy, ElementRef } from '@angular/core';
-import { Component, Input, Output, EventEmitter, ViewChild, signal, computed } from '@angular/core';
+import type {
+  OnInit,
+  AfterViewInit,
+  OnDestroy,
+  ElementRef,
+} from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  ViewChild,
+  HostListener,
+  signal,
+  computed,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 import type { PageEvent } from './data-table-pagination.component';
 import { DataTablePaginationComponent } from './data-table-pagination.component';
-import { DataTableExportUtil, DataTableDisplayUtil } from './data-table-export.util';
-import { DataTableSortingUtil, type SortState } from './data-table-sorting.util';
+import {
+  DataTableExportUtil,
+  DataTableDisplayUtil,
+} from './data-table-export.util';
+import {
+  DataTableSortingUtil,
+  type SortState,
+} from './data-table-sorting.util';
 import { DataTableSelectionUtil } from './data-table-selection.util';
 import { DataTableScrollUtil } from './data-table-scroll.util';
 
@@ -62,12 +84,22 @@ export interface SortEvent {
 @Component({
   selector: 'arc-data-table',
   standalone: true,
-  imports: [CommonModule, FormsModule, DataTablePaginationComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    DataTablePaginationComponent,
+    TranslatePipe,
+  ],
   templateUrl: './data-table.component.html',
   styleUrls: ['./data-table.component.scss'],
+
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DataTableComponent<T = Record<string, unknown>> implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('tableWrapper', { static: false }) public tableWrapper!: ElementRef<HTMLDivElement>;
+export class DataTableComponent<T = Record<string, unknown>>
+  implements OnInit, AfterViewInit, OnDestroy
+{
+  @ViewChild('tableWrapper', { static: false })
+  public tableWrapper!: ElementRef<HTMLDivElement>;
 
   private destroy$ = new Subject<void>();
   private resizeObserver?: ResizeObserver;
@@ -76,6 +108,10 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
   @Input() public data: T[] = [];
   @Input() public options: TableOptions = {};
   @Input() public showActions = false;
+  @Input() public tableTitle?: string;
+
+  // Unique IDs for accessibility
+  public readonly searchId = `search-${Math.random().toString(36).substr(2, 9)}`;
 
   @Output() public sortChange = new EventEmitter<SortEvent>();
   @Output() public pageChange = new EventEmitter<PageEvent>();
@@ -86,13 +122,20 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
   @Output() public exportData = new EventEmitter<void>();
 
   // Deprecated outputs for backwards compatibility
-  /** @deprecated Use sortChange instead */ @Output() public onSort = this.sortChange;
-  /** @deprecated Use pageChange instead */ @Output() public onPageChange = this.pageChange;
-  /** @deprecated Use selectionChange instead */ @Output() public onSelectionChange = this.selectionChange;
-  /** @deprecated Use viewItem instead */ @Output() public onView = this.viewItem;
-  /** @deprecated Use editItem instead */ @Output() public onEdit = this.editItem;
-  /** @deprecated Use deleteItem instead */ @Output() public onDelete = this.deleteItem;
-  /** @deprecated Use exportData instead */ @Output() public onExport = this.exportData;
+  /** @deprecated Use sortChange instead */ @Output() public onSort =
+    this.sortChange;
+  /** @deprecated Use pageChange instead */ @Output() public onPageChange =
+    this.pageChange;
+  /** @deprecated Use selectionChange instead */ @Output()
+  public onSelectionChange = this.selectionChange;
+  /** @deprecated Use viewItem instead */ @Output() public onView =
+    this.viewItem;
+  /** @deprecated Use editItem instead */ @Output() public onEdit =
+    this.editItem;
+  /** @deprecated Use deleteItem instead */ @Output() public onDelete =
+    this.deleteItem;
+  /** @deprecated Use exportData instead */ @Output() public onExport =
+    this.exportData;
 
   // State
   public searchTerm = '';
@@ -102,6 +145,11 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
   public sortDirection = signal<'asc' | 'desc' | null>(null);
   public selectedRows = signal<T[]>([]);
   public hasHorizontalScroll = false;
+
+  // Keyboard Navigation State
+  public focusedRowIndex = signal<number>(-1);
+  public focusedColumnIndex = signal<number>(-1);
+  public isKeyboardActive = signal<boolean>(false);
 
   // Computed values
   public filteredData = computed(() => {
@@ -154,7 +202,10 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
     };
 
     this.pageSize = this.options.pageSize || 10;
-    this.columns = this.columns.map((col) => ({ ...col, priority: col.priority || 'medium' }));
+    this.columns = this.columns.map((col) => ({
+      ...col,
+      priority: col.priority || 'medium',
+    }));
   }
 
   public ngAfterViewInit(): void {
@@ -180,7 +231,7 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
   public getCellValue(row: T, key: string): unknown {
     const keys = key.split('.');
     let value: unknown = row;
-    for (const k of keys) {
+    for(const k of keys) {
       value = (value as Record<string, unknown>)?.[k];
     }
     return value;
@@ -206,8 +257,16 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
 
     const sortEvent = DataTableSortingUtil.createSortEvent(newState);
     if (sortEvent) {
-      this.onSort.emit(sortEvent);
+      this.sortChange.emit(sortEvent);
     }
+  }
+
+  public getAriaSort(
+    column: TableColumn,
+  ): 'ascending' | 'descending' | 'none' | null {
+    if (!column.sortable) return null;
+    if (this.sortColumn() !== column.key) return 'none';
+    return this.sortDirection() === 'asc' ? 'ascending' : 'descending';
   }
 
   public handlePageChange(event: PageEvent): void {
@@ -221,32 +280,53 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
   }
 
   public isAllSelected(): boolean {
-    return DataTableSelectionUtil.isAllSelected(this.paginatedData(), this.selectedRows());
+    return DataTableSelectionUtil.isAllSelected(
+      this.paginatedData(),
+      this.selectedRows(),
+    );
   }
 
   public isSomeSelected(): boolean {
-    return DataTableSelectionUtil.isSomeSelected(this.paginatedData(), this.selectedRows());
+    return DataTableSelectionUtil.isSomeSelected(
+      this.paginatedData(),
+      this.selectedRows(),
+    );
   }
 
   public toggleSelect(row: T): void {
-    const selected = DataTableSelectionUtil.toggleSelect(row, this.selectedRows(), this.options.multiSelect ?? false);
+    const selected = DataTableSelectionUtil.toggleSelect(
+      row,
+      this.selectedRows(),
+      this.options.multiSelect ?? false,
+    );
     this.selectedRows.set(selected);
     this.onSelectionChange.emit(selected);
   }
 
   public toggleSelectAll(): void {
-    const selected = DataTableSelectionUtil.toggleSelectAll(this.paginatedData(), this.selectedRows());
+    const selected = DataTableSelectionUtil.toggleSelectAll(
+      this.paginatedData(),
+      this.selectedRows(),
+    );
     this.selectedRows.set(selected);
     this.onSelectionChange.emit(selected);
   }
 
   public exportTableData(): void {
     this.exportData.emit();
-    DataTableExportUtil.exportTableData(this.filteredData(), this.columns, (row, key) => this.getCellValue(row, key));
+    DataTableExportUtil.exportTableData(
+      this.filteredData(),
+      this.columns,
+      (row, key) => this.getCellValue(row, key),
+    );
   }
 
   public getNextSortDirection(column: string): 'asc' | 'desc' | null {
-    return DataTableSortingUtil.getNextSortDirection(this.sortColumn(), this.sortDirection(), column);
+    return DataTableSortingUtil.getNextSortDirection(
+      this.sortColumn(),
+      this.sortDirection(),
+      column,
+    );
   }
 
   // Mobile responsiveness methods - delegated to utility classes
@@ -254,10 +334,228 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
   public getColumnLabel = DataTableDisplayUtil.getColumnLabel;
 
   public getTruncatedValue(row: T, column: TableColumn): string {
-    return DataTableDisplayUtil.getTruncatedValue(this.getCellValue(row, column.key), column.truncateLength);
+    return DataTableDisplayUtil.getTruncatedValue(
+      this.getCellValue(row, column.key),
+      column.truncateLength,
+    );
   }
 
   public shouldShowTooltip(row: T, column: TableColumn): boolean {
-    return DataTableDisplayUtil.shouldShowTooltip(this.getCellValue(row, column.key), column.truncateLength);
+    return DataTableDisplayUtil.shouldShowTooltip(
+      this.getCellValue(row, column.key),
+      column.truncateLength,
+    );
+  }
+
+  // Keyboard Navigation Methods
+  public onTableFocus(): void {
+    this.isKeyboardActive.set(true);
+    if (this.focusedRowIndex() === -1 && this.paginatedData().length > 0) {
+      this.focusedRowIndex.set(0);
+      this.focusedColumnIndex.set(this.options.selectable ? -1 : 0);
+    }
+  }
+
+  public onTableBlur(): void {
+    this.isKeyboardActive.set(false);
+    this.focusedRowIndex.set(-1);
+    this.focusedColumnIndex.set(-1);
+  }
+
+  public isCellFocused(rowIndex: number, colIndex: number): boolean {
+    return (
+      this.isKeyboardActive() &&
+      this.focusedRowIndex() === rowIndex &&
+      this.focusedColumnIndex() === colIndex
+    );
+  }
+
+  public isRowFocused(rowIndex: number): boolean {
+    return this.isKeyboardActive() && this.focusedRowIndex() === rowIndex;
+  }
+
+  @HostListener('keydown', ['$event'])
+  public handleTableKeyboardEvent(event: KeyboardEvent): void {
+    const paginatedData = this.paginatedData();
+    const totalCols =
+      this.columns.length +
+      (this.options.selectable ? 1 : 0) +
+      (this.showActions ? 1 : 0);
+    const currentRow = this.focusedRowIndex();
+    const currentCol = this.focusedColumnIndex();
+
+    switch(event.key) {
+      case 'ArrowDown':
+        if (currentRow < paginatedData.length - 1) {
+          this.focusedRowIndex.set(currentRow + 1);
+          event.preventDefault();
+        }
+        break;
+
+      case 'ArrowUp':
+        if (currentRow > 0) {
+          this.focusedRowIndex.set(currentRow - 1);
+          event.preventDefault();
+        }
+        break;
+
+      case 'ArrowRight':
+        if (currentCol < totalCols - 1) {
+          this.focusedColumnIndex.set(currentCol + 1);
+          event.preventDefault();
+        }
+        break;
+
+      case 'ArrowLeft':
+        if (currentCol > (this.options.selectable ? -1 : 0)) {
+          this.focusedColumnIndex.set(currentCol - 1);
+          event.preventDefault();
+        }
+        break;
+
+      case 'Tab':
+        // Tab navigation - move to next/previous cell
+        if (event.shiftKey) {
+          // Shift+Tab - move backward
+          if (currentCol > (this.options.selectable ? -1 : 0)) {
+            this.focusedColumnIndex.set(currentCol - 1);
+          } else if (currentRow > 0) {
+            this.focusedRowIndex.set(currentRow - 1);
+            this.focusedColumnIndex.set(totalCols - 1);
+          }
+        } else {
+          // Tab - move forward
+          if (currentCol < totalCols - 1) {
+            this.focusedColumnIndex.set(currentCol + 1);
+          } else if (currentRow < paginatedData.length - 1) {
+            this.focusedRowIndex.set(currentRow + 1);
+            this.focusedColumnIndex.set(this.options.selectable ? -1 : 0);
+          }
+        }
+        event.preventDefault();
+        break;
+
+      case 'Enter':
+        this.handleEnterKey(currentRow, currentCol);
+        event.preventDefault();
+        break;
+
+      case ' ':
+      case 'Spacebar':
+        this.handleSpaceKey(currentRow, currentCol, paginatedData);
+        event.preventDefault();
+        break;
+
+      case 'Home':
+        this.focusedColumnIndex.set(this.options.selectable ? -1 : 0);
+        event.preventDefault();
+        break;
+
+      case 'End':
+        this.focusedColumnIndex.set(totalCols - 1);
+        event.preventDefault();
+        break;
+
+      case 'PageDown':
+        if (
+          this.options.showPagination &&
+          currentRow < paginatedData.length - 1
+        ) {
+          const nextPage = Math.min(
+            this.currentPage() + 1,
+            Math.ceil(this.totalItems() / this.pageSize) - 1,
+          );
+          if (nextPage !== this.currentPage()) {
+            this.currentPage.set(nextPage);
+            this.focusedRowIndex.set(0);
+            this.handlePageChange({
+              pageIndex: nextPage,
+              pageSize: this.pageSize,
+              length: this.totalItems(),
+            });
+          }
+        }
+        event.preventDefault();
+        break;
+
+      case 'PageUp':
+        if (this.options.showPagination && this.currentPage() > 0) {
+          const prevPage = this.currentPage() - 1;
+          this.currentPage.set(prevPage);
+          this.focusedRowIndex.set(this.pageSize - 1);
+          this.handlePageChange({
+            pageIndex: prevPage,
+            pageSize: this.pageSize,
+            length: this.totalItems(),
+          });
+        }
+        event.preventDefault();
+        break;
+
+      case 'Delete':
+      case 'Backspace':
+        if (currentRow >= 0 && currentRow < paginatedData.length) {
+          this.deleteItem.emit(paginatedData[currentRow]);
+          event.preventDefault();
+        }
+        break;
+
+      case 'Escape':
+        this.onTableBlur();
+        event.preventDefault();
+        break;
+    }
+  }
+
+  private handleEnterKey(rowIndex: number, colIndex: number): void {
+    const paginatedData = this.paginatedData();
+    if (rowIndex < 0 || rowIndex >= paginatedData.length) return;
+
+    const row = paginatedData[rowIndex];
+    const checkboxOffset = this.options.selectable ? 1 : 0;
+
+    // Check if it's the checkbox column
+    if (this.options.selectable && colIndex === -1) {
+      this.toggleSelect(row);
+      return;
+    }
+
+    // Check if it's the actions column
+    const actionColIndex = this.columns.length + checkboxOffset;
+    if (
+      this.showActions &&
+      colIndex === actionColIndex - (this.options.selectable ? 0 : 0)
+    ) {
+      // View action is triggered by Enter on actions column
+      this.viewItem.emit(row);
+      return;
+    }
+
+    // Regular cell - trigger view action
+    if (colIndex >= 0 && colIndex < this.columns.length) {
+      this.viewItem.emit(row);
+    }
+  }
+
+  private handleSpaceKey(
+    rowIndex: number,
+    colIndex: number,
+    paginatedData: T[],
+  ): void {
+    if (rowIndex < 0 || rowIndex >= paginatedData.length) return;
+
+    const row = paginatedData[rowIndex];
+
+    // Space selects the row if selectable is enabled
+    if (
+      this.options.selectable &&
+      (colIndex === -1 || this.options.multiSelect)
+    ) {
+      this.toggleSelect(row);
+    }
+  }
+
+  public getCellTabindex(rowIndex: number, colIndex: number): number {
+    return this.isCellFocused(rowIndex, colIndex) ? 0 : -1;
   }
 }

@@ -24,7 +24,9 @@ import type { SubmitQuestionnaireDto } from './dto/submit-questionnaire.dto';
  */
 @Controller()
 export class QuestionnairesController {
-  constructor(private readonly questionnairesService: QuestionnairesService) {}
+  constructor(private readonly questionnairesService: QuestionnairesService) {
+  // Intentionally empty
+}
   /**
    * Creates the entity.
    * @param _body - The body.

@@ -44,7 +44,9 @@ import {
 export class UsageLimitQuotaController {
   constructor(
     private readonly usageLimitService: UsageLimitIntegrationService,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the check usage limit operation.

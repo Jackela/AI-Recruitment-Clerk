@@ -8,6 +8,7 @@ on:
         required: true
         default: 'pre-release'
 
+
 jobs:
   pre-release-deploy:
     if: ${{ github.event.inputs.channel == 'pre-release' }}
@@ -27,9 +28,9 @@ jobs:
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: ~/.cache/ms-playwright
-          key: pw-${{ runner.os }}-${{ hashFiles('package.json') }}
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
           restore-keys: |
-            pw-${{ runner.os }}-
+            ${{ runner.os }}-playwright-
       - name: Install deps
         run: npm ci
       - name: Pre-release Deploy
@@ -53,9 +54,9 @@ jobs:
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: ~/.cache/ms-playwright
-          key: pw-${{ runner.os }}-${{ hashFiles('package.json') }}
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
           restore-keys: |
-            pw-${{ runner.os }}-
+            ${{ runner.os }}-playwright-
       - name: Install deps
         run: npm ci
       - name: Install Playwright browsers
@@ -71,3 +72,4 @@ jobs:
             playwright-report
             e2e/results
           if-no-files-found: ignore
+          retention-days: 7

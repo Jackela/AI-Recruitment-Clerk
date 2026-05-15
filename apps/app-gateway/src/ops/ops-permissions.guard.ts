@@ -7,7 +7,9 @@ import { hasAllPermissions } from '@ai-recruitment-clerk/user-management-domain'
 
 @Injectable()
 export class OpsPermissionsGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
+  constructor(private readonly reflector: Reflector) {
+  // Intentionally empty
+}
 
   public canActivate(context: ExecutionContext): boolean {
     if (process.env.NODE_ENV === 'test') return true;

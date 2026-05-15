@@ -1,4 +1,11 @@
-import { Component, Input, Output, EventEmitter, model } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  model,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import type { TimesheetViewType } from './timesheet-table.component';
@@ -91,7 +98,10 @@ import type { TimesheetViewType } from './timesheet-table.component';
         </button>
 
         <!-- Bulk action buttons for bulk edit view -->
-        <div class="bulk-actions" *ngIf="viewType === 'bulkEdit' && selectedCount > 0">
+        <div
+          class="bulk-actions"
+          *ngIf="viewType === 'bulkEdit' && selectedCount > 0"
+        >
           <button
             (click)="bulkEdit.emit()"
             class="bulk-btn edit-bulk-btn"
@@ -111,6 +121,7 @@ import type { TimesheetViewType } from './timesheet-table.component';
     </div>
   `,
   styleUrls: ['./timesheet-toolbar.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TimesheetToolbarComponent {
   @Input() public showFilter = false;

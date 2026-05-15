@@ -151,7 +151,9 @@ export interface DashboardState {
  *
  * @example
  * ```typescript
- * constructor(private dashboardService: MobileDashboardService) {}
+ * constructor(private dashboardService: MobileDashboardService) {
+  // Intentionally empty
+}
  *
  * ngOnInit() {
  *   this.state$ = this.dashboardService.state$;

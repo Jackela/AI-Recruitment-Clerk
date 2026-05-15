@@ -113,7 +113,9 @@ export class ExperienceAnalyzerService {
    * Initializes a new instance of the Experience Analyzer Service.
    * @param geminiClient - The gemini client.
    */
-  constructor(private readonly geminiClient: GeminiClient) {}
+  constructor(private readonly geminiClient: GeminiClient) {
+  // Intentionally empty
+}
 
   private getNow(): Date {
     if (process.env.NODE_ENV === 'test') {
@@ -386,7 +388,7 @@ export class ExperienceAnalyzerService {
     let totalGapMonths = 0;
     const gapExplanations: string[] = [];
 
-    for (let i = 1; i < sortedExperience.length; i++) {
+    for(let i = 1; i < sortedExperience.length; i++) {
       const prevEnd =
         sortedExperience[i - 1].endDate === 'present'
           ? this.getNow()
@@ -423,7 +425,7 @@ export class ExperienceAnalyzerService {
   ): Promise<{ [industry: string]: number }> {
     const industryExperience: { [industry: string]: number } = {};
 
-    for (const exp of workExperience) {
+    for(const exp of workExperience) {
       // Use AI to classify company industry if needed
       const industry = await this.classifyCompanyIndustry(
         exp.company,

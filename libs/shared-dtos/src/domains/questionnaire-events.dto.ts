@@ -21,7 +21,9 @@ export class QuestionnaireSubmittedEvent implements DomainEvent {
     public readonly bonusEligible: boolean,
     public readonly submissionData: SubmissionSummary,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -42,7 +44,9 @@ export class HighQualitySubmissionEvent implements DomainEvent {
     public readonly qualityScore: number,
     public readonly qualityReasons: string[],
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -61,5 +65,7 @@ export class QuestionnaireValidationFailedEvent implements DomainEvent {
     public readonly validationErrors: string[],
     public readonly submissionData: Partial<RawSubmissionData>,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }

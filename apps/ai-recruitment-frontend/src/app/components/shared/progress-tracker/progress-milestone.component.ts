@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import {Component, Input, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { ProgressStep } from './progress-tracker.types';
 
@@ -193,7 +193,8 @@ import type { ProgressStep } from './progress-tracker.types';
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class ProgressMilestoneComponent {
   @Input() public step!: ProgressStep;
   @Input() public stepNumber = 0;

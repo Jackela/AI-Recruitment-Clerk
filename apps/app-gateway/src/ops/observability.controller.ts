@@ -21,7 +21,9 @@ interface HealthResponse {
 @Controller('ops/observability')
 @UseGuards(OpsGuard, OpsPermissionsGuard)
 export class ObservabilityController {
-  constructor(private readonly metrics: MetricsService) {}
+  constructor(private readonly metrics: MetricsService) {
+  // Intentionally empty
+}
 
   @Get('funnels')
   @Permissions(Permission.VIEW_ANALYTICS)

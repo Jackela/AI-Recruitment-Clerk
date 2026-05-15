@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   displayName: 'resume-dto',
   preset: '../../jest.preset.cjs',
   testEnvironment: 'node',
@@ -6,5 +6,5 @@ export default {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/libs/resume-dto',
+  coverageDirectory: '../../coverage/libs/resume-dto'
 };

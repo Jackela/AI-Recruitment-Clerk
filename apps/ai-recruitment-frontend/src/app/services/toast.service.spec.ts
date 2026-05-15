@@ -1,4 +1,5 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { take } from 'rxjs/operators';
 import { ToastService, ToastMessage } from './toast.service';
 import { ProgressFeedbackService } from './feedback/progress-feedback.service';
 
@@ -57,7 +58,7 @@ describe('ToastService', () => {
         'success',
         3000,
         undefined,
-        false
+        false,
       );
     });
 
@@ -70,7 +71,7 @@ describe('ToastService', () => {
         'success',
         5000,
         undefined,
-        false
+        false,
       );
     });
   });
@@ -94,7 +95,7 @@ describe('ToastService', () => {
         'error',
         5000,
         undefined,
-        false
+        false,
       );
     });
 
@@ -107,7 +108,7 @@ describe('ToastService', () => {
         'error',
         10000,
         undefined,
-        false
+        false,
       );
     });
   });
@@ -131,7 +132,7 @@ describe('ToastService', () => {
         'warning',
         4000,
         undefined,
-        false
+        false,
       );
     });
   });
@@ -155,7 +156,7 @@ describe('ToastService', () => {
         'info',
         3000,
         undefined,
-        false
+        false,
       );
     });
   });
@@ -171,13 +172,11 @@ describe('ToastService', () => {
   });
 
   describe('getToasts$()', () => {
-    it('should return observable of toasts', (done) => {
+    it('should return observable of toasts', async () => {
       service.success('Test message');
 
-      service.getToasts$().subscribe((toasts) => {
-        expect(toasts.length).toBe(1);
-        done();
-      });
+      const toasts = await service.getToasts$().pipe(take(1)).toPromise();
+      expect(toasts.length).toBe(1);
     });
   });
 
@@ -253,7 +252,7 @@ describe('ToastService', () => {
         'success',
         3000,
         undefined,
-        false
+        false,
       );
     });
 
@@ -266,7 +265,7 @@ describe('ToastService', () => {
         'error',
         5000,
         undefined,
-        false
+        false,
       );
     });
 
@@ -279,7 +278,7 @@ describe('ToastService', () => {
         'warning',
         4000,
         undefined,
-        false
+        false,
       );
     });
 
@@ -292,7 +291,7 @@ describe('ToastService', () => {
         'info',
         3000,
         undefined,
-        false
+        false,
       );
     });
   });

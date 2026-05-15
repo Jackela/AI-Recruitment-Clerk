@@ -10,7 +10,9 @@ export class PaymentResult {
     public readonly amount?: number,
     public readonly currency?: Currency,
     public readonly error?: string,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the success operation.

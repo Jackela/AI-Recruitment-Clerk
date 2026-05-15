@@ -93,7 +93,7 @@ export class IdValidator {
 
     // Validate format based on options
     if (format) {
-      switch (format) {
+      switch(format) {
         case 'UUID':
           if (!this.UUID_V4_REGEX.test(id)) {
             errors.push(`${errorPrefix} must be a valid UUID v4`);

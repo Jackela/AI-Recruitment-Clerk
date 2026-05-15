@@ -16,9 +16,13 @@ describe('UploadResumeComponent', () => {
           provide: GuestApiService,
           useValue: {
             // eslint-disable-next-line @typescript-eslint/no-empty-function
-            analyzeResume: () => ({ subscribe: () => {} }),
+            analyzeResume: () => ({ subscribe: () => {
+  // Intentionally empty
+} }),
             // eslint-disable-next-line @typescript-eslint/no-empty-function
-            getDemoAnalysis: () => ({ subscribe: () => {} }),
+            getDemoAnalysis: () => ({ subscribe: () => {
+  // Intentionally empty
+} }),
           },
         },
         {
@@ -27,7 +31,9 @@ describe('UploadResumeComponent', () => {
             onCompletion: () => ({ pipe: () => ({ subscribe: () => ({}) }) }),
             onError: () => ({ pipe: () => ({ subscribe: () => ({}) }) }),
             // eslint-disable-next-line @typescript-eslint/no-empty-function
-            disconnect: () => {},
+            disconnect: () => {
+  // Intentionally empty
+},
           },
         },
       ],

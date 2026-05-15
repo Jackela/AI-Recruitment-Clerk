@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -13,11 +13,16 @@ import { CommonModule } from '@angular/common';
       class="loading-container"
       [class.inline]="inline"
       [class.overlay]="overlay"
+      role="status"
+      aria-live="polite"
+      [attr.aria-busy]="true"
+      [attr.aria-label]="ariaLabel"
     >
       <div
         class="loading-spinner"
         [class.sm]="size === 'sm'"
         [class.lg]="size === 'lg'"
+        aria-hidden="true"
       >
         <div class="spinner-ring"></div>
         <div class="spinner-ring"></div>
@@ -130,10 +135,16 @@ import { CommonModule } from '@angular/common';
       }
     `,
   ],
+
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoadingComponent {
   @Input() public message = '';
   @Input() public size: 'sm' | 'md' | 'lg' = 'md';
   @Input() public inline = false;
   @Input() public overlay = false;
+
+  public get ariaLabel(): string {
+    return this.message || '正在加载';
+  }
 }

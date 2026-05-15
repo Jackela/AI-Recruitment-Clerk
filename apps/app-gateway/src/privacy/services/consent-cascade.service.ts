@@ -15,7 +15,9 @@ import { ConsentPurpose } from '@ai-recruitment-clerk/shared-dtos';
 export class ConsentCascadeService {
   private readonly logger = new Logger(ConsentCascadeService.name);
 
-  constructor() {}
+  constructor() {
+  // Intentionally empty
+}
 
   /**
    * Cascade consent withdrawal to all affected services
@@ -32,7 +34,7 @@ export class ConsentCascadeService {
       );
 
       // Stop all related processing activities based on purpose
-      switch (purpose) {
+      switch(purpose) {
         case ConsentPurpose.RESUME_PROCESSING:
           await this.stopResumeProcessing(userId, natsClient);
           await this.stopJobMatchingActivities(userId, natsClient);

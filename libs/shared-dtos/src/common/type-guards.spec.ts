@@ -50,8 +50,14 @@ describe('Type Guards', () => {
 
     it('should return true for functions (typeof function is object in some contexts)', () => {
       // Note: typeof function === 'function', not 'object', so this should return false
-      expect(isNonNullObject(() => {})).toBe(false);
-      expect(isNonNullObject(function () {})).toBe(false);
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      expect(isNonNullObject(() => {
+  // Intentionally empty
+})).toBe(false);
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      expect(isNonNullObject(function () {
+  // Intentionally empty
+})).toBe(false);
     });
   });
 

@@ -253,7 +253,7 @@ export class SecurityMonitorService {
 
       const events: SecurityEvent[] = [];
 
-      for (const eventId of eventIds) {
+      for(const eventId of eventIds) {
         const eventKey = `security_events:${eventId}`;
         const eventData = await this.redis.get(eventKey);
 
@@ -337,7 +337,7 @@ export class SecurityMonitorService {
       const ipCounts = new Map<string, number>();
       const hourlyBuckets = new Map<number, number>();
 
-      for (const eventId of eventIds) {
+      for(const eventId of eventIds) {
         const eventKey = `security_events:${eventId}`;
         const eventData = await this.redis.get(eventKey);
 
@@ -346,7 +346,7 @@ export class SecurityMonitorService {
 
           metrics.totalEvents++;
 
-          switch (event.severity) {
+          switch(event.severity) {
             case 'CRITICAL':
               metrics.criticalEvents++;
               break;

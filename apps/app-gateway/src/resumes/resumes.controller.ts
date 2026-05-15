@@ -15,11 +15,14 @@ import {
 import { NotFoundException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import type { MulterFile } from '../jobs/types/multer.types';
+
+type ResumeStatus = 'processing' | 'completed' | 'pending' | 'approved';
 
 type ResumeRecord = {
   id: string;
   ownerId?: string;
-  status: 'processing' | 'completed' | 'pending' | 'approved';
+  status: ResumeStatus;
   createdAt: string;
   updatedAt: string;
 };
@@ -45,8 +48,10 @@ export class ResumesController {
   @Post('resumes/upload')
   @UseInterceptors(FileInterceptor('resume'))
   @HttpCode(HttpStatus.CREATED)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public upload(@UploadedFile() file: Express.Multer.File, @Body() _body: any): { resumeId: string } {
+  public upload(
+    @UploadedFile() file: MulterFile,
+    @Body() _body: unknown,
+  ): { resumeId: string } {
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
@@ -76,7 +81,10 @@ export class ResumesController {
   @UseGuards(JwtAuthGuard)
   @Get('resumes/:id')
   @HttpCode(HttpStatus.OK)
-  public getResume(@Param('id') id: string): { resumeId: string; status: string } {
+  public getResume(@Param('id') id: string): {
+    resumeId: string;
+    status: string;
+  } {
     const rec = resumeStore.get(id);
     if (!rec) {
       throw new NotFoundException('Resume not found');
@@ -101,7 +109,11 @@ export class ResumesController {
   @UseGuards(JwtAuthGuard)
   @Get('resumes/:id/analysis')
   @HttpCode(HttpStatus.OK)
-  public getAnalysis(@Param('id') id: string): { skills: string[]; experience: { company: string; years: number }[]; education: { degree: string } } {
+  public getAnalysis(@Param('id') id: string): {
+    skills: string[];
+    experience: { company: string; years: number }[];
+    education: { degree: string };
+  } {
     if (!resumeStore.has(id)) {
       throw new NotFoundException('Resume not found');
     }
@@ -121,15 +133,16 @@ export class ResumesController {
   @UseGuards(JwtAuthGuard)
   @Put('resumes/:id/status')
   @HttpCode(HttpStatus.OK)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public updateStatus(@Param('id') id: string, @Body() body: any): { resumeId: string; newStatus: string } {
+  public updateStatus(
+    @Param('id') id: string,
+    @Body() body: Record<string, unknown>,
+  ): { resumeId: string; newStatus: string } {
     const rec = resumeStore.get(id);
     if (!rec) {
       throw new NotFoundException('Resume not found');
     }
     const newStatus = String(body?.status ?? 'approved');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    rec.status = newStatus as any;
+    rec.status = newStatus as ResumeStatus;
     rec.updatedAt = new Date().toISOString();
     resumeStore.set(id, rec);
     return { resumeId: id, newStatus };

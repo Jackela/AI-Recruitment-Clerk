@@ -20,6 +20,10 @@ module.exports = {
     '<rootDir>/src/**/*.(test|spec).(ts|js)',
     '<rootDir>/src/**/__tests__/**/*.(ts|js)',
   ],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '\\.integration\\.spec\\.(ts|js)$',
+  ],
   collectCoverageFrom: [
     '<rootDir>/src/**/*.(ts|js)',
     '!<rootDir>/src/**/*.d.ts',

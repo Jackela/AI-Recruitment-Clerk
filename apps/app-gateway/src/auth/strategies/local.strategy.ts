@@ -12,7 +12,9 @@ export class LocalStrategy {
    * Initializes a new instance of the Local Strategy.
    * @param authService - The auth service.
    */
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {
+  // Intentionally empty
+}
 
   /**
    * Validates the data.

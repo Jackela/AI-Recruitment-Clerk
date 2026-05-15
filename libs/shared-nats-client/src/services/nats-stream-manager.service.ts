@@ -24,7 +24,9 @@ export class NatsStreamManager {
    * Initializes a new instance of the NATS Stream Manager.
    * @param connectionManager - The connection manager.
    */
-  constructor(private readonly connectionManager: NatsConnectionManager) {}
+  constructor(private readonly connectionManager: NatsConnectionManager) {
+  // Intentionally empty
+}
 
   /**
    * Ensure specified streams exist, creating them if necessary
@@ -38,7 +40,7 @@ export class NatsStreamManager {
     try {
       const jsm = await connection.jetstreamManager();
 
-      for (const streamConfig of streams) {
+      for(const streamConfig of streams) {
         await this.ensureStreamExists(jsm, streamConfig);
       }
 

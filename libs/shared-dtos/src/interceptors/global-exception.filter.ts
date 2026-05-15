@@ -59,7 +59,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
    * @param exception - The exception.
    * @param host - The host.
    */
-  public catch(exception: unknown, host: ArgumentsHost): void {
+  catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
@@ -304,7 +304,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     );
 
     // Use appropriate log level based on severity
-    switch (error.enhancedDetails.severity) {
+    switch(error.enhancedDetails.severity) {
       case 'critical':
         this.logger.fatal(logData.message, logData);
         break;
