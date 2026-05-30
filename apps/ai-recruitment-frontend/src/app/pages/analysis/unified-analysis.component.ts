@@ -243,19 +243,19 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
     this.webSocketService.disconnect();
   }
 
-  private normalizeScore(value: unknown): number {
+  public normalizeScore(value: unknown): number {
     return normalizeScore(value, 0);
   }
 
-  private normalizeString(value: unknown): string {
+  public normalizeString(value: unknown): string {
     return normalizeString(value, '');
   }
 
-  private normalizeStringArray(value: unknown): string[] {
+  public normalizeStringArray(value: unknown): string[] {
     return normalizeStringArray(value);
   }
 
-  private normalizeUrl(value: unknown): string | undefined {
+  public normalizeUrl(value: unknown): string | undefined {
     return normalizeUrl(value);
   }
 }

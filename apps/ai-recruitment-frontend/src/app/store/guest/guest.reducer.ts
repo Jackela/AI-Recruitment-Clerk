@@ -194,7 +194,8 @@ export const guestReducer = createReducer(
       status: 'processing' as const,
       filename: analysisData.data.filename,
       uploadedAt: analysisData.data.uploadedAt,
-      estimatedCompletionTime: analysisData.data.estimatedCompletionTime,
+      estimatedCompletionTime:
+        analysisData.data.estimatedCompletionTime ?? null,
       progress: 10, // Start with some progress
     },
     remainingCount: analysisData.data.remainingUsage ?? state.remainingCount,
@@ -228,10 +229,7 @@ export const guestReducer = createReducer(
     },
     currentAnalysis: {
       ...state.currentAnalysis,
-      status:
-        analysisResults.data.status === 'completed'
-          ? 'completed'
-          : state.currentAnalysis.status,
+      status: analysisResults.data.status,
       progress: analysisResults.data.progress,
     },
     showAnalysisResults: analysisResults.data.status === 'completed',
@@ -305,7 +303,7 @@ export const guestReducer = createReducer(
           ? {
               ...state.currentAnalysis,
               progress,
-              status: (status as typeof state.currentAnalysis.status) || state.currentAnalysis.status,
+              status: status || state.currentAnalysis.status,
             }
           : state.currentAnalysis,
       analysisResults: {
@@ -314,8 +312,7 @@ export const guestReducer = createReducer(
           ? {
               ...state.analysisResults[analysisId],
               progress,
-              status:
-                (status as typeof state.analysisResults[typeof analysisId]['status']) || state.analysisResults[analysisId].status,
+              status: status || state.analysisResults[analysisId].status,
             }
           : state.analysisResults[analysisId],
       },
