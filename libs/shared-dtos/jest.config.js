@@ -3,17 +3,7 @@ module.exports = {
   preset: '../../jest.preset.cjs',
   testEnvironment: 'node',
   transform: {
-    '^.+\\.[tj]s$': [
-      'ts-jest',
-      {
-        tsconfig: {
-          experimentalDecorators: true,
-          emitDecoratorMetadata: true,
-          target: 'es2020',
-          lib: ['es2020'],
-        },
-      },
-    ],
+    '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
   },
   moduleFileExtensions: ['ts', 'js'],
   testMatch: [
