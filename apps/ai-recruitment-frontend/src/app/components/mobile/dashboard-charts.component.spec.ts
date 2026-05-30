@@ -92,12 +92,12 @@ describe('DashboardChartsComponent', () => {
     it('should refresh chart correctly', () => {
       const chart = { ...mockCharts[0], loading: false, error: null };
       component.charts = [chart];
-      jest.useFakeTimers();
+      const emitSpy = jest.spyOn(component.chartRefreshRequested, 'emit');
+
       component.refreshChart('chart-1');
-      expect(chart.loading).toBe(true);
-      jest.advanceTimersByTime(1000);
+
+      expect(emitSpy).toHaveBeenCalledWith('chart-1');
       expect(chart.loading).toBe(false);
-      jest.useRealTimers();
     });
 
     it('should not refresh non-existent chart', () => {

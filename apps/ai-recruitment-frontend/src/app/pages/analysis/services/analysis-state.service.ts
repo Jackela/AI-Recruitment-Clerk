@@ -3,18 +3,22 @@
  * Manages shared state for the analysis process using Signals
  */
 
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import type {
   AnalysisState,
   AnalysisResult,
   ErrorInfo,
   AnalysisStatistics,
 } from '../types/analysis.types';
+import { ApiService } from '../../../services/api.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AnalysisStateService {
+  private readonly apiService = inject(ApiService);
+
   // Core state signals
   public currentState = signal<AnalysisState>('upload');
   public sessionId = signal('');
@@ -27,17 +31,19 @@ export class AnalysisStateService {
   public analysisResult = signal<AnalysisResult | null>(null);
 
   // Statistics signals
-  public todayAnalyses = signal(42);
-  public totalAnalyses = signal(1247);
-  public averageScore = computed(() => 76);
+  public todayAnalyses = signal(0);
+  public totalAnalyses = signal(0);
+  public averageScore = signal(0);
+  public successRate = signal(0);
+  public monthlyAnalyses = signal(0);
 
   // Computed statistics object
   public statistics = computed<AnalysisStatistics>(() => ({
     todayAnalyses: this.todayAnalyses(),
     totalAnalyses: this.totalAnalyses(),
     averageScore: this.averageScore(),
-    successRate: 95.2,
-    monthlyAnalyses: 156,
+    successRate: this.successRate(),
+    monthlyAnalyses: this.monthlyAnalyses(),
   }));
 
   // Error info computed from error message
@@ -150,10 +156,14 @@ export class AnalysisStateService {
    */
   public async loadStatistics(): Promise<void> {
     try {
-      // TODO: Replace with real API call when available
-      // For now, using mock data
-      this.todayAnalyses.set(42);
-      this.totalAnalyses.set(1247);
+      const statistics = await firstValueFrom(
+        this.apiService.getAnalysisStatistics(),
+      );
+      this.todayAnalyses.set(statistics.todayAnalyses);
+      this.totalAnalyses.set(statistics.totalAnalyses);
+      this.averageScore.set(statistics.averageScore);
+      this.successRate.set(statistics.successRate);
+      this.monthlyAnalyses.set(statistics.monthlyAnalyses);
     } catch {
       // Silent fail - statistics are not critical
     }

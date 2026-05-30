@@ -29,7 +29,7 @@ import type { MulterFile } from './types/multer.types';
 import type { JobListDto} from './dto/job-response.dto';
 import { JobDetailDto } from './dto/job-response.dto';
 import type { ResumeListItemDto, ResumeDetailDto } from './dto/resume-response.dto';
-import type { AnalysisReportDto, ReportsListDto } from './dto/report-response.dto';
+import type { ReportsListDto } from './dto/report-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Permissions } from '../auth/decorators/permissions.decorator';
@@ -175,18 +175,4 @@ export class JobsController {
     return this.jobsService.getResumeById(resumeId);
   }
 
-  /**
-   * Retrieves report by id.
-   * @param req - The req.
-   * @param reportId - The report id.
-   * @returns A promise that resolves to AnalysisReportDto.
-   */
-  @Permissions(Permission.READ_ANALYSIS)
-  @Get('reports/:reportId')
-  public getReportById(
-    @Request() _req: AuthenticatedRequest,
-    @Param('reportId') reportId: string,
-  ): Promise<AnalysisReportDto> {
-    return this.jobsService.getReportById(reportId);
-  }
 }

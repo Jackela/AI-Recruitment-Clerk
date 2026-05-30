@@ -204,6 +204,7 @@
     "@ai-recruitment-clerk/resume-dto": "file:libs/resume-dto",
     "@ai-recruitment-clerk/shared-dtos": "file:libs/shared-dtos",
     "@ai-recruitment-clerk/user-management-domain": "file:libs/user-management-domain",
+    "@angular/animations": "^20.3.21",
     "@angular/common": "~20.3.9",
     "@angular/compiler": "~20.3.9",
     "@angular/core": "~20.3.9",

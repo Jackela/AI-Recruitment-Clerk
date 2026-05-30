@@ -2,11 +2,12 @@ import { Test } from '@nestjs/testing';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import type { CreateJobDto } from './dto/create-job.dto';
-import type { JobRepository } from '../repositories/job.repository';
-import type { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
-import type { CacheService } from '../cache/cache.service';
-import type { WebSocketGateway } from '../websocket/websocket.gateway';
-import type { ConfigService } from '@nestjs/config';
+import { JobRepository } from '../repositories/job.repository';
+import { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
+import { CacheService } from '../cache/cache.service';
+import { WebSocketGateway } from '../websocket/websocket.gateway';
+import { ConfigService } from '@nestjs/config';
+import { ReportsService } from '../reports/reports.service';
 import { MulterFile } from './types/multer.types';
 import type { JobDocument } from '../schemas/job.schema';
 import { UserRole } from '@ai-recruitment-clerk/user-management-domain';
@@ -54,6 +55,14 @@ const mockCacheService = () => ({
   wrap: jest.fn((key, fn) => fn()),
   del: jest.fn().mockResolvedValue(undefined),
   getJobQueryKey: jest.fn((opts) => JSON.stringify(opts)),
+});
+
+const mockReportsService = () => ({
+  getReportsByJobId: jest.fn().mockResolvedValue({
+    jobId: 'job-123',
+    reports: [],
+  }),
+  getReportById: jest.fn(),
 });
 
 const mockWebSocketGateway = () => ({
@@ -113,6 +122,7 @@ describe('JobsService', () => {
   let jobRepository: jest.Mocked<ReturnType<typeof mockJobRepository>>;
   let natsClient: jest.Mocked<ReturnType<typeof mockNatsClient>>;
   let cacheService: jest.Mocked<ReturnType<typeof mockCacheService>>;
+  let reportsService: jest.Mocked<ReturnType<typeof mockReportsService>>;
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -133,6 +143,10 @@ describe('JobsService', () => {
           useValue: mockCacheService(),
         },
         {
+          provide: ReportsService,
+          useValue: mockReportsService(),
+        },
+        {
           provide: WebSocketGateway,
           useValue: mockWebSocketGateway(),
         },
@@ -147,6 +161,7 @@ describe('JobsService', () => {
     jobRepository = module.get(JobRepository);
     natsClient = module.get(AppGatewayNatsService);
     cacheService = module.get(CacheService);
+    reportsService = module.get(ReportsService);
   });
 
   describe('createJob', () => {
@@ -513,12 +528,29 @@ describe('JobsService', () => {
   });
 
   describe('getReportById', () => {
-    it('should throw NotFoundException for any reportId', async () => {
-      await expect(service.getReportById('report-123')).rejects.toThrow(
-        new NotFoundException(
-          'Report operations should be handled by ReportService',
-        ),
-      );
+    it('should return report details from ReportService', async () => {
+      const generatedAt = new Date('2026-05-30T00:00:00.000Z');
+      reportsService.getReportById.mockResolvedValue({
+        id: 'report-123',
+        jobId: 'job-123',
+        candidateName: 'Ada Lovelace',
+        matchScore: 92,
+        oneSentenceSummary: 'Strong technical match.',
+        status: 'completed',
+        generatedAt,
+      });
+
+      const result = await service.getReportById('report-123');
+
+      expect(reportsService.getReportById).toHaveBeenCalledWith('report-123');
+      expect(result).toMatchObject({
+        id: 'report-123',
+        jobId: 'job-123',
+        candidateName: 'Ada Lovelace',
+        matchScore: 92,
+        oneSentenceSummary: 'Strong technical match.',
+        generatedAt,
+      });
     });
   });
 

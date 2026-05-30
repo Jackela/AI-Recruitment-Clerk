@@ -196,7 +196,31 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
       return gridFsUrl;
     }
 
-    throw new Error('GridFsService.uploadFile not implemented');
+    return new Promise((resolve, reject) => {
+      const uploadStream = this.gridFSBucket.openUploadStream(_filename, {
+        metadata: _metadata ?? {},
+        contentType:
+          (_metadata && (_metadata.contentType as string)) ||
+          'application/octet-stream',
+      });
+
+      uploadStream.once('error', (error) => {
+        this.logger.error('GridFS upload stream error', {
+          error: error.message,
+          filename: _filename,
+        });
+        reject(new Error(`Failed to upload file to GridFS: ${error.message}`));
+      });
+
+      uploadStream.once('finish', () => {
+        const fileId = uploadStream.id.toString();
+        const gridFsUrl = `gridfs://${this.bucketName}/${fileId}`;
+        this.logger.debug(`Uploaded file to GridFS: ${gridFsUrl}`);
+        resolve(gridFsUrl);
+      });
+
+      uploadStream.end(_buffer);
+    });
   }
 
   /**

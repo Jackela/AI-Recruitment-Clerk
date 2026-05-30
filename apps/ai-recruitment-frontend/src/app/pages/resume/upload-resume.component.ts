@@ -8,6 +8,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import type { HttpErrorResponse } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { GuestApiService } from '../../services/guest/guest-api.service';
@@ -425,6 +426,7 @@ export class UploadResumeComponent implements OnDestroy {
 
   private readonly guestApi = inject(GuestApiService);
   private readonly webSocketService = inject(WebSocketService);
+  private readonly router = inject(Router);
 
   /**
    * Performs the on file change operation.
@@ -545,11 +547,9 @@ export class UploadResumeComponent implements OnDestroy {
    * Performs the view detailed results operation.
    */
   public viewDetailedResults(): void {
-    // 导航到详细结果页面
     const sessionId = this.analysisId();
     if (sessionId) {
-      // Navigation to results page with sessionId
-      // TODO: 实现导航逻辑
+      this.router.navigate(['/results', sessionId]);
     }
   }
 

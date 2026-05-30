@@ -1,11 +1,13 @@
 import type { ComponentFixture } from '@angular/core/testing';
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { NEVER, of, throwError } from 'rxjs';
 import { UnifiedAnalysisComponent } from './unified-analysis.component';
 import { GuestApiService } from '../../services/guest/guest-api.service';
 import { WebSocketService } from '../../services/websocket.service';
 import { ToastService } from '../../services/toast.service';
+import { ApiService } from '../../services/api.service';
 
 describe('UnifiedAnalysisComponent', () => {
   let component: UnifiedAnalysisComponent;
@@ -36,8 +38,8 @@ describe('UnifiedAnalysisComponent', () => {
     } as jest.Mocked<Router>;
 
     const guestApiSpy = {
-      analyzeResume: jest.fn(),
-      getDemoAnalysis: jest.fn(),
+      analyzeResume: jest.fn().mockReturnValue(NEVER),
+      getDemoAnalysis: jest.fn().mockReturnValue(NEVER),
     } as unknown as jest.Mocked<GuestApiService>;
 
     const webSocketSpy = {
@@ -51,6 +53,18 @@ describe('UnifiedAnalysisComponent', () => {
       info: jest.fn(),
     } as jest.Mocked<ToastService>;
 
+    const apiSpy = {
+      getAnalysisStatistics: jest.fn().mockReturnValue(
+        of({
+          todayAnalyses: 3,
+          totalAnalyses: 18,
+          averageScore: 82,
+          successRate: 94,
+          monthlyAnalyses: 11,
+        }),
+      ),
+    } as unknown as jest.Mocked<ApiService>;
+
     await TestBed.configureTestingModule({
       imports: [UnifiedAnalysisComponent],
       providers: [
@@ -58,6 +72,8 @@ describe('UnifiedAnalysisComponent', () => {
         { provide: GuestApiService, useValue: guestApiSpy },
         { provide: WebSocketService, useValue: webSocketSpy },
         { provide: ToastService, useValue: toastSpy },
+        { provide: ApiService, useValue: apiSpy },
+        provideNoopAnimations(),
       ],
     }).compileComponents();
 
@@ -118,7 +134,7 @@ describe('UnifiedAnalysisComponent', () => {
     });
 
     it('should handle demo request', () => {
-      mockGuestApiService.getDemoAnalysis.mockReturnValue(of({}));
+      mockGuestApiService.getDemoAnalysis.mockReturnValue(NEVER);
       component.onDemoRequested();
       expect(component.isSubmitting()).toBe(true);
       expect(component.currentState()).toBe('analyzing');
@@ -165,8 +181,8 @@ describe('UnifiedAnalysisComponent', () => {
     it('should load statistics asynchronously', fakeAsync(() => {
       component.ngAfterViewInit();
       tick();
-      expect(component.todayAnalyses()).toBe(42);
-      expect(component.totalAnalyses()).toBe(1247);
+      expect(component.todayAnalyses()).toBe(3);
+      expect(component.totalAnalyses()).toBe(18);
     }));
 
     it('should complete analysis flow', fakeAsync(() => {

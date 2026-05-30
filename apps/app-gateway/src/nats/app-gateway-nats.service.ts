@@ -1,7 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import type {
+  MessageHandler,
   NatsClientService,
   NatsPublishResult,
+  SubscriptionOptions,
 } from '@ai-recruitment-clerk/shared-nats-client';
 
 // Local event interfaces to maintain compatibility
@@ -183,6 +185,17 @@ export class AppGatewayNatsService {
     payload: unknown,
   ): Promise<NatsPublishResult> {
     return this.natsClient.publish(subject, payload);
+  }
+
+  /**
+   * Delegate subscription setup to shared client.
+   */
+  public async subscribe<T = unknown>(
+    subject: string,
+    handler: MessageHandler<T>,
+    options?: SubscriptionOptions,
+  ): Promise<void> {
+    return this.natsClient.subscribe(subject, handler, options);
   }
 
   /**
