@@ -116,29 +116,32 @@ describe('VisionLlmService (isolated)', () => {
   });
 
   describe('parseResumeText', () => {
-    it('throws in test mode', async () => {
-      await expect(service.parseResumeText('sample resume')).rejects.toThrow(
-        'VisionLlmService.parseResumeText not implemented',
+    it('returns deterministic parsed data in test mode', async () => {
+      const result = await service.parseResumeText(
+        'Jane Candidate jane@example.com TypeScript Node.js',
       );
+
+      expect(result.contactInfo.email).toBe('jane@example.com');
+      expect(result.skills).toContain('TypeScript');
     });
   });
 
   describe('parseResumePdfAdvanced', () => {
-    it('throws in test mode', async () => {
-      await expect(
-        service.parseResumePdfAdvanced({
-          pdfBuffer: Buffer.from('%PDF-1.4 test'),
-          filename: 'test.pdf',
-        }),
-      ).rejects.toThrow('VisionLlmService.parseResumePdfAdvanced not implemented');
+    it('returns deterministic advanced result in test mode', async () => {
+      const result = await service.parseResumePdfAdvanced({
+        pdfBuffer: Buffer.from('%PDF-1.4 test'),
+        filename: 'test.pdf',
+      });
+
+      expect(result.extractedData).toBeDefined();
+      expect(result.confidence).toBeGreaterThanOrEqual(0);
+      expect(result.processingTimeMs).toBeGreaterThanOrEqual(0);
     });
   });
 
   describe('estimateProcessingTime', () => {
-    it('throws in test mode', async () => {
-      await expect(service.estimateProcessingTime(1024)).rejects.toThrow(
-        'VisionLlmService.estimateProcessingTime not implemented',
-      );
+    it('estimates processing time in test mode', async () => {
+      await expect(service.estimateProcessingTime(1024)).resolves.toBeGreaterThan(0);
     });
   });
 

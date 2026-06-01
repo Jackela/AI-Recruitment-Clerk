@@ -24,6 +24,18 @@ export class ContactInfo extends ValueObject<{
   }
 
   /**
+   * Creates a new ContactInfo instance.
+   * @param data - The contact data (string email or object with contact fields).
+   * @returns The ContactInfo.
+   */
+  public static create(data: string | { email?: string; phone?: string; wechat?: string; alipay?: string }): ContactInfo {
+    if (typeof data === 'string') {
+      return new ContactInfo({ email: data });
+    }
+    return new ContactInfo(data);
+  }
+
+  /**
    * Performs the is valid operation.
    * @returns The boolean value.
    */

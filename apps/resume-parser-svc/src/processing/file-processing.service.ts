@@ -1,5 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InputValidator, ResumeParserException } from '@ai-recruitment-clerk/infrastructure-shared';
+import { createHash } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
 
 /**
  * Result of file validation and processing
@@ -19,6 +21,8 @@ export interface FileProcessingConfig {
   allowedMimeTypes: string[];
 }
 
+export type FileDownloadFunction = (url: string) => Promise<Buffer>;
+
 /**
  * Handles file validation, download, and processing operations for resume parsing.
  * Extracted from ParsingService to separate file handling concerns from business logic.
@@ -34,6 +38,7 @@ export class FileProcessingService {
   ];
 
   private readonly config: FileProcessingConfig;
+  private downloadFn?: FileDownloadFunction;
 
   constructor(config?: Partial<FileProcessingConfig>) {
     this.config = {
@@ -41,6 +46,10 @@ export class FileProcessingService {
       allowedMimeTypes:
         config?.allowedMimeTypes ?? this.DEFAULT_ALLOWED_MIME_TYPES,
     };
+  }
+
+  public setDownloadFunction(downloadFn: FileDownloadFunction): void {
+    this.downloadFn = downloadFn;
   }
 
   /**
@@ -52,14 +61,17 @@ export class FileProcessingService {
    * @throws ResumeParserException if download or validation fails
    */
   public async downloadAndValidateFile(
-    _gridFsUrl: string,
-    _filename: string,
-    _metadata?: { mimetype?: string; size?: number },
+    gridFsUrl: string,
+    filename: string,
+    metadata?: { mimetype?: string; size?: number },
   ): Promise<FileProcessingResult> {
-    // This would integrate with GridFsService - keeping as placeholder for now
-    // since GridFsService has its own downloadFile method
-    throw new Error(
-      'Method requires GridFsService integration. Use downloadAndValidateFileWithService instead.',
+    const downloadFn = this.downloadFn ?? this.defaultDownloadFile.bind(this);
+
+    return this.downloadAndValidateFileWithService(
+      downloadFn,
+      gridFsUrl,
+      filename,
+      metadata,
     );
   }
 
@@ -192,9 +204,7 @@ export class FileProcessingService {
    * @returns Hexadecimal hash string
    */
   public generateFileHash(buffer: Buffer): string {
-    const crypto = require('crypto');
-    return crypto
-      .createHash('sha256')
+    return createHash('sha256')
       .update(Uint8Array.from(buffer))
       .digest('hex');
   }
@@ -214,5 +224,44 @@ export class FileProcessingService {
    */
   public getConfig(): Readonly<FileProcessingConfig> {
     return { ...this.config };
+  }
+
+  private async defaultDownloadFile(url: string): Promise<Buffer> {
+    if (!url || typeof url !== 'string') {
+      throw new ResumeParserException('FILE_DOWNLOAD_FAILED', {
+        url,
+        reason: 'empty_url',
+      });
+    }
+
+    if (url.startsWith('gridfs://')) {
+      throw new ResumeParserException('FILE_DOWNLOAD_SERVICE_UNAVAILABLE', {
+        url,
+        reason: 'GridFS downloads require a registered download function',
+      });
+    }
+
+    if (url.startsWith('file://')) {
+      return readFile(new URL(url));
+    }
+
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new ResumeParserException('FILE_DOWNLOAD_FAILED', {
+          url,
+          status: response.status,
+          statusText: response.statusText,
+        });
+      }
+
+      return Buffer.from(await response.arrayBuffer());
+    }
+
+    throw new ResumeParserException('FILE_DOWNLOAD_FAILED', {
+      url,
+      reason: 'unsupported_url_scheme',
+    });
   }
 }

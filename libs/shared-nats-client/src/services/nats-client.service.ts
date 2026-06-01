@@ -47,7 +47,9 @@ export class NatsClientService implements OnModuleInit, OnModuleDestroy {
     private readonly configService: ConfigService,
     private readonly connectionManager: NatsConnectionManager,
     private readonly streamManager: NatsStreamManager,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the on module init operation.
@@ -123,7 +125,7 @@ export class NatsClientService implements OnModuleInit, OnModuleDestroy {
   public async shutdown(): Promise<void> {
     try {
       // Close all active subscriptions
-      for (const [subject, subscription] of this.activeSubscriptions) {
+      for(const [subject, subscription] of this.activeSubscriptions) {
         try {
           if (subscription && typeof subscription.stop === 'function') {
             await subscription.stop();

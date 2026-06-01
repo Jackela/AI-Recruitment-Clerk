@@ -6,6 +6,7 @@ import type {
   AnalysisResultsResponse,
   ResumeAnalysisResponse,
 } from '../../services/guest/guest-api.service';
+import type { GuestAnalysisResultStatus } from './guest.state';
 
 /**
  * Defines the shape of the analysis data.
@@ -222,7 +223,11 @@ export const hideAnalysisResults = createAction(
 
 export const updateAnalysisProgress = createAction(
   '[Guest] Update Analysis Progress',
-  props<{ analysisId: string; progress: number; status?: string }>(),
+  props<{
+    analysisId: string;
+    progress: number;
+    status?: GuestAnalysisResultStatus;
+  }>(),
 );
 
 // Data management actions

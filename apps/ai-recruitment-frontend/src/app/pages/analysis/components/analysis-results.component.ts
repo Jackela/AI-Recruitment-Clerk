@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import {Component, Input, Output, EventEmitter, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ScoreVisualizationComponent } from './score-visualization.component';
 
@@ -249,7 +249,8 @@ export interface ResultAction {
     </div>
   `,
   styleUrls: ['./analysis-results.component.scss'],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class AnalysisResultsComponent {
   @Input() public result: AnalysisResult | null = null;
   @Input() public showDetailedSummary = false;

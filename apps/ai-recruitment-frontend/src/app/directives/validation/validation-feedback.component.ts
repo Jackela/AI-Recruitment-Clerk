@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import {Component, Input, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { AbstractControl, ValidationErrors } from '@angular/forms';
 
@@ -159,7 +159,8 @@ import type { AbstractControl, ValidationErrors } from '@angular/forms';
     `,
   ],
   animations: [],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class ValidationFeedbackComponent {
   @Input() public control: AbstractControl | null = null;
   @Input() public showHint = true;

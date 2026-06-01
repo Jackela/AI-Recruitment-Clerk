@@ -1,18 +1,28 @@
+/**
+ * @slow
+ * Execution time: 45-60s
+ * Large test file with comprehensive extraction service scenarios
+ */
+
 // Mock dependencies completely for comprehensive testing - MUST be before imports
 jest.mock('./llm.service');
 jest.mock('../services/jd-extractor-nats.service');
 
 // Create a proper mock constructor function that Jest can track
-const JDExtractorExceptionMock = jest.fn(function JDExtractorException(this: any, message: string, details?: any) {
+const JDExtractorExceptionMock = jest.fn(function JDExtractorException(
+  this: any,
+  message: string,
+  details?: any,
+) {
   if (!(this instanceof JDExtractorExceptionMock)) {
     return new (JDExtractorExceptionMock as any)(message, details);
   }
-  
+
   Error.captureStackTrace(this, JDExtractorExceptionMock);
   this.name = 'JDExtractorException';
   this.message = message;
   this.details = details;
-  
+
   return this;
 }) as any;
 
@@ -44,8 +54,14 @@ import type {
   JobJdSubmittedEvent,
   AnalysisJdExtractedEvent,
 } from '../dto/events.dto';
-import type { JdDTO, LlmExtractionResponse } from '@ai-recruitment-clerk/job-management-domain';
-import { RetryUtility, ErrorCorrelationManager } from '@ai-recruitment-clerk/infrastructure-shared';
+import type {
+  JdDTO,
+  LlmExtractionResponse,
+} from '@ai-recruitment-clerk/job-management-domain';
+import {
+  RetryUtility,
+  ErrorCorrelationManager,
+} from '@ai-recruitment-clerk/infrastructure-shared';
 
 // Get references to the mocked functions
 const MockRetryUtility = RetryUtility as jest.Mocked<typeof RetryUtility>;
@@ -240,7 +256,7 @@ describe('ExtractionService', () => {
   beforeEach(() => {
     // Use real timers to avoid issues with retry setTimeout
     jest.useRealTimers();
-    
+
     // Create comprehensive mocks
     mockLlmService = {
       extractStructuredData: jest.fn(),
@@ -283,7 +299,7 @@ describe('ExtractionService', () => {
       traceId: 'test-trace-id',
     });
   });
-  
+
   afterEach(() => {
     // Clean up any pending timers from retry logic
     service.clearPendingTimers();
@@ -436,15 +452,18 @@ describe('ExtractionService', () => {
       const jobTypes = [
         {
           jobTitle: 'Frontend Developer',
-          jdText: 'React, Vue.js, CSS experience required. Must have 5+ years of frontend development experience with modern frameworks and responsive design.',
+          jdText:
+            'React, Vue.js, CSS experience required. Must have 5+ years of frontend development experience with modern frameworks and responsive design.',
         },
         {
           jobTitle: 'DevOps Engineer',
-          jdText: 'Docker, Kubernetes, AWS experience needed. Strong background in cloud infrastructure and CI/CD pipelines required.',
+          jdText:
+            'Docker, Kubernetes, AWS experience needed. Strong background in cloud infrastructure and CI/CD pipelines required.',
         },
         {
           jobTitle: 'Data Scientist',
-          jdText: 'Python, Machine Learning, Statistics background. Experience with data analysis, model training, and statistical inference required.',
+          jdText:
+            'Python, Machine Learning, Statistics background. Experience with data analysis, model training, and statistical inference required.',
         },
       ];
 
@@ -462,7 +481,10 @@ describe('ExtractionService', () => {
         await service.handleJobJdSubmitted(event);
 
         // Check that the jobTitle matches and text contains key parts (sanitized removes special chars like +)
-        const actualCall = mockLlmService.extractStructuredData.mock.calls[mockLlmService.extractStructuredData.mock.calls.length - 1][0];
+        const actualCall =
+          mockLlmService.extractStructuredData.mock.calls[
+            mockLlmService.extractStructuredData.mock.calls.length - 1
+          ][0];
         expect(actualCall.jobTitle).toBe(jobType.jobTitle);
         // Special chars like + are removed by sanitization, so check for partial match
         if (jobType.jobTitle === 'Frontend Developer') {
@@ -779,9 +801,7 @@ describe('ExtractionService', () => {
         processingTimeMs: 15000,
       });
 
-      mockLlmService.extractStructuredData.mockResolvedValueOnce(
-        slowResponse,
-      );
+      mockLlmService.extractStructuredData.mockResolvedValueOnce(slowResponse);
       mockNatsService.publishAnalysisJdExtracted.mockResolvedValueOnce({
         success: true,
         messageId: 'msg-slow',
@@ -791,9 +811,7 @@ describe('ExtractionService', () => {
       await service.handleJobJdSubmitted(event);
 
       // Assert
-      expect(
-        mockNatsService.publishAnalysisJdExtracted,
-      ).toHaveBeenCalledWith(
+      expect(mockNatsService.publishAnalysisJdExtracted).toHaveBeenCalledWith(
         expect.objectContaining({
           processingTimeMs: expect.any(Number),
         }),
@@ -1111,7 +1129,8 @@ describe('ExtractionService', () => {
       void jobId;
       void jobId;
       void jobId;
-      const jdText = 'Valid job description with technical requirements. Must have 5+ years of experience in software development with strong technical skills and problem-solving abilities.';
+      const jdText =
+        'Valid job description with technical requirements. Must have 5+ years of experience in software development with strong technical skills and problem-solving abilities.';
       const jobTitle = 'Software Engineer';
       const mockLlmResponse = createMockLlmExtractionResponse();
 
@@ -1141,11 +1160,7 @@ describe('ExtractionService', () => {
       // Act
       let result: AnalysisJdExtractedEvent | undefined;
       try {
-        result = await service.processJobDescription(
-          jobId,
-          jdText,
-          jobTitle,
-        );
+        result = await service.processJobDescription(jobId, jdText, jobTitle);
       } finally {
         nowSpy.mockRestore();
       }
@@ -1154,9 +1169,7 @@ describe('ExtractionService', () => {
       expect(result).toBeDefined();
       const finalResult = result as AnalysisJdExtractedEvent;
       expect(finalResult.jobId).toBe(jobId);
-      expect(finalResult.extractedData).toEqual(
-        mockLlmResponse.extractedData,
-      );
+      expect(finalResult.extractedData).toEqual(mockLlmResponse.extractedData);
       expect(finalResult.timestamp).toBeDefined();
       expect(finalResult.processingTimeMs).toBeGreaterThan(0);
       expect(MockRetryUtility.withExponentialBackoff).toHaveBeenCalledTimes(1);
@@ -1213,7 +1226,8 @@ describe('ExtractionService', () => {
       // Arrange
       const jobId = 'test-job-123';
       void jobId;
-      const jdText = 'Valid job description for timing test. Must have 5+ years of software engineering experience with strong technical and leadership skills.';
+      const jdText =
+        'Valid job description for timing test. Must have 5+ years of software engineering experience with strong technical and leadership skills.';
       const jobTitle = 'Software Engineer';
       const mockLlmResponse = createMockLlmExtractionResponse();
 
@@ -1229,11 +1243,7 @@ describe('ExtractionService', () => {
       // Act
       let result: AnalysisJdExtractedEvent | undefined;
       try {
-        result = await service.processJobDescription(
-          jobId,
-          jdText,
-          jobTitle,
-        );
+        result = await service.processJobDescription(jobId, jdText, jobTitle);
       } finally {
         nowSpy.mockRestore();
       }
@@ -1647,9 +1657,13 @@ describe('ExtractionService', () => {
     it('should not retry validation and permanent errors', async () => {
       // Arrange
       const event = createValidJobJdSubmittedEvent();
-      const validationError = new Error('Invalid input format - validation failed');
+      const validationError = new Error(
+        'Invalid input format - validation failed',
+      );
 
-      mockLlmService.extractStructuredData.mockRejectedValueOnce(validationError);
+      mockLlmService.extractStructuredData.mockRejectedValueOnce(
+        validationError,
+      );
       mockNatsService.publishProcessingError.mockResolvedValue({
         success: true,
         messageId: 'no-retry-test',
@@ -1684,7 +1698,7 @@ describe('ExtractionService', () => {
       // Manually check the processing map to see if job was marked for retry
       const processingJobsMap = (service as any).processingJobs;
       void processingJobsMap;
-      
+
       // Assert - should have logged that error is retryable and attempted to schedule retry
       expect(mockLogger.log).toHaveBeenCalledWith(
         expect.stringContaining('is retryable'),

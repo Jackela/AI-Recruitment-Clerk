@@ -1,8 +1,15 @@
-<div class="data-table-container" [class.loading]="options.loading">
+<div
+  class="data-table-container"
+  [class.loading]="options.loading"
+  role="region"
+  [attr.aria-label]="tableTitle || ('table.dataTable' | translate)"
+>
   <!-- Toolbar -->
   <div
     class="table-toolbar"
     *ngIf="options.showFilter || options.showExport"
+    role="toolbar"
+    [attr.aria-label]="'table.toolbar' | translate"
   >
     <div class="toolbar-left">
       <div class="search-box" *ngIf="options.showFilter">
@@ -14,22 +21,30 @@
           fill="none"
           stroke="currentColor"
           stroke-width="2"
+          aria-hidden="true"
+          focusable="false"
         >
           <circle cx="11" cy="11" r="8"></circle>
           <path d="m21 21-4.35-4.35"></path>
         </svg>
+        <label [for]="searchId" class="sr-only">{{
+          'table.search_label'
+        }}</label>
         <input
+          [id]="searchId"
           type="text"
           class="search-input"
           [(ngModel)]="searchTerm"
           (ngModelChange)="onSearch()"
-          placeholder="搜索..."
+          [placeholder]="'table.search_placeholder' | translate"
+          [attr.aria-label]="'table.search_placeholder' | translate"
         />
         <button
           *ngIf="searchTerm"
           (click)="clearSearch()"
           class="clear-btn"
           type="button"
+          [attr.aria-label]="'table.clear_search' | translate"
         >
           <svg
             width="16"
@@ -38,6 +53,8 @@
             fill="none"
             stroke="currentColor"
             stroke-width="2"
+            aria-hidden="true"
+            focusable="false"
           >
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -52,6 +69,7 @@
         (click)="exportData()"
         class="export-btn"
         type="button"
+        [attr.aria-label]="'table.export' | translate"
       >
         <svg
           width="20"
@@ -60,12 +78,14 @@
           fill="none"
           stroke="currentColor"
           stroke-width="2"
+          aria-hidden="true"
+          focusable="false"
         >
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
           <polyline points="7,10 12,15 17,10"></polyline>
           <line x1="12" y1="15" x2="12" y2="3"></line>
         </svg>
-        导出
+        {{ 'common.export' | translate }}
       </button>
     </div>
   </div>
@@ -75,22 +95,34 @@
     class="table-wrapper"
     #tableWrapper
     [class.has-horizontal-scroll]="hasHorizontalScroll"
+    tabindex="0"
+    (focus)="onTableFocus()"
+    (blur)="onTableBlur()"
+    [attr.aria-description]="'table.keyboard_navigation_hint' | translate"
   >
     <table
       class="data-table"
       [class.striped]="options.striped"
       [class.bordered]="options.bordered"
       [class.hoverable]="options.hoverable"
+      [class.keyboard-active]="isKeyboardActive()"
+      role="table"
+      [attr.aria-label]="tableTitle || ('table.dataTable' | translate)"
     >
-      <thead>
-        <tr>
-          <th *ngIf="options.selectable" class="checkbox-column">
+      <thead role="rowgroup">
+        <tr role="row">
+          <th
+            *ngIf="options.selectable"
+            class="checkbox-column"
+            role="columnheader"
+          >
             <input
               *ngIf="options.multiSelect"
               type="checkbox"
               [checked]="isAllSelected()"
               [indeterminate]="isSomeSelected()"
               (change)="toggleSelectAll()"
+              [attr.aria-label]="'table.select_all' | translate"
             />
           </th>
           <th
@@ -99,14 +131,13 @@
             [style.text-align]="column.align || 'left'"
             [class.sortable]="column.sortable"
             [class]="getColumnClasses(column)"
-            (click)="
-              column.sortable
-                ? onSort.emit({
-                    column: column.key,
-                    direction: getNextSortDirection(column.key),
-                  })
-                : null
-            "
+            role="columnheader"
+            scope="col"
+            [attr.aria-sort]="getAriaSort(column)"
+            (click)="column.sortable ? handleSort(column.key) : null"
+            [attr.tabindex]="column.sortable ? 0 : -1"
+            (keydown.enter)="column.sortable ? handleSort(column.key) : null"
+            (keydown.space)="column.sortable ? handleSort(column.key) : null"
           >
             <div class="th-content">
               <span>{{ getColumnLabel(column) }}</span>
@@ -117,8 +148,7 @@
                     sortColumn() === column.key && sortDirection() === 'asc'
                   "
                   [class.active-desc]="
-                    sortColumn() === column.key &&
-                    sortDirection() === 'desc'
+                    sortColumn() === column.key && sortDirection() === 'desc'
                   "
                   width="16"
                   height="16"
@@ -126,49 +156,69 @@
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
+                  aria-hidden="true"
+                  focusable="false"
                 >
                   <path
                     d="m7 15 5 5 5-5"
                     *ngIf="
-                      sortColumn() !== column.key ||
-                      sortDirection() === 'desc'
+                      sortColumn() !== column.key || sortDirection() === 'desc'
                     "
                   ></path>
                   <path
                     d="m7 9 5-5 5 5"
                     *ngIf="
-                      sortColumn() === column.key &&
-                      sortDirection() === 'asc'
+                      sortColumn() === column.key && sortDirection() === 'asc'
                     "
                   ></path>
                 </svg>
               </div>
             </div>
           </th>
-          <th *ngIf="showActions" class="actions-column">操作</th>
+          <th
+            *ngIf="showActions"
+            class="actions-column"
+            role="columnheader"
+            scope="col"
+          >
+            {{ 'table.actions' | translate }}
+          </th>
         </tr>
       </thead>
-      <tbody>
+      <tbody role="rowgroup">
         <tr
           *ngFor="let row of paginatedData(); let i = index"
           [class.selected]="isSelected(row)"
+          [class.focused]="isRowFocused(i)"
+          role="row"
+          [attr.aria-selected]="isSelected(row)"
         >
-          <td *ngIf="options.selectable" class="checkbox-column">
+          <td
+            *ngIf="options.selectable"
+            class="checkbox-column"
+            role="cell"
+            [class.focused]="isCellFocused(i, -1)"
+          >
             <input
               type="checkbox"
               [checked]="isSelected(row)"
               (change)="toggleSelect(row)"
+              [attr.aria-label]="'table.select_row' | translate"
+              [attr.tabindex]="getCellTabindex(i, -1)"
             />
           </td>
           <td
-            *ngFor="let column of columns"
+            *ngFor="let column of columns; let colIndex = index"
             [style.text-align]="column.align || 'left'"
             [class]="getColumnClasses(column)"
+            [class.focused]="isCellFocused(i, colIndex)"
+            role="cell"
             [title]="
               shouldShowTooltip(row, column)
                 ? getCellValue(row, column.key)
                 : null
             "
+            [attr.tabindex]="getCellTabindex(i, colIndex)"
           >
             <span [ngSwitch]="column.type">
               <span *ngSwitchCase="'boolean'">
@@ -176,14 +226,21 @@
                   class="badge"
                   [class.badge-success]="getCellValue(row, column.key)"
                   [class.badge-danger]="!getCellValue(row, column.key)"
+                  [attr.aria-label]="
+                    getCellValue(row, column.key)
+                      ? ('common.yes' | translate)
+                      : ('common.no' | translate)
+                  "
                 >
-                  {{ getCellValue(row, column.key) ? '是' : '否' }}
+                  {{
+                    getCellValue(row, column.key)
+                      ? ('common.yes' | translate)
+                      : ('common.no' | translate)
+                  }}
                 </span>
               </span>
               <span *ngSwitchCase="'date'">
-                {{
-                  getCellValue(row, column.key) | date: 'yyyy-MM-dd HH:mm'
-                }}
+                {{ getCellValue(row, column.key) | date: 'yyyy-MM-dd HH:mm' }}
               </span>
               <span *ngSwitchCase="'number'">
                 {{ getCellValue(row, column.key) | number: '1.0-2' }}
@@ -193,12 +250,27 @@
               </span>
             </span>
           </td>
-          <td *ngIf="showActions" class="actions-column">
-            <div class="action-buttons">
+          <td
+            *ngIf="showActions"
+            class="actions-column"
+            role="cell"
+            [class.focused]="
+              isCellFocused(i, columns.length + (options.selectable ? 1 : 0))
+            "
+            [attr.aria-label]="'table.actions'"
+            [attr.tabindex]="
+              getCellTabindex(i, columns.length + (options.selectable ? 1 : 0))
+            "
+          >
+            <div
+              class="action-buttons"
+              role="group"
+              [attr.aria-label]="'table.row_actions' | translate"
+            >
               <button
                 (click)="onView.emit(row)"
                 class="action-btn view-btn"
-                title="查看"
+                [attr.aria-label]="'table.view' | translate"
                 type="button"
               >
                 <svg
@@ -208,17 +280,17 @@
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
+                  aria-hidden="true"
+                  focusable="false"
                 >
-                  <path
-                    d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
-                  ></path>
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                   <circle cx="12" cy="12" r="3"></circle>
                 </svg>
               </button>
               <button
                 (click)="onEdit.emit(row)"
                 class="action-btn edit-btn"
-                title="编辑"
+                [attr.aria-label]="'table.edit' | translate"
                 type="button"
               >
                 <svg
@@ -228,6 +300,8 @@
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
+                  aria-hidden="true"
+                  focusable="false"
                 >
                   <path
                     d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
@@ -240,7 +314,7 @@
               <button
                 (click)="onDelete.emit(row)"
                 class="action-btn delete-btn"
-                title="删除"
+                [attr.aria-label]="'table.delete' | translate"
                 type="button"
               >
                 <svg
@@ -250,6 +324,8 @@
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
+                  aria-hidden="true"
+                  focusable="false"
                 >
                   <polyline points="3,6 5,6 21,6"></polyline>
                   <path
@@ -267,6 +343,8 @@
     <div
       class="empty-state"
       *ngIf="paginatedData().length === 0 && !options.loading"
+      role="status"
+      aria-live="polite"
     >
       <svg
         width="64"
@@ -275,18 +353,26 @@
         fill="none"
         stroke="currentColor"
         stroke-width="2"
+        aria-hidden="true"
+        focusable="false"
       >
         <path d="M3 3h18v18H3z"></path>
         <path d="M3 9h18"></path>
         <path d="M9 3v18"></path>
       </svg>
-      <p>{{ options.emptyMessage || '暂无数据' }}</p>
+      <p>{{ options.emptyMessage || ('table.noData' | translate) }}</p>
     </div>
 
     <!-- Loading Overlay -->
-    <div class="loading-overlay" *ngIf="options.loading">
-      <div class="spinner"></div>
-      <p>加载中...</p>
+    <div
+      class="loading-overlay"
+      *ngIf="options.loading"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+    >
+      <div class="spinner" aria-hidden="true"></div>
+      <p>{{ 'common.loading' | translate }}</p>
     </div>
   </div>
 

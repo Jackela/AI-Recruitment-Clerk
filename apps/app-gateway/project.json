@@ -9,11 +9,17 @@
       "executor": "nx:run-commands",
       "options": {
         "command": "webpack-cli build --config apps/app-gateway/webpack.config.cjs",
-        "args": ["--node-env=production"]
+        "args": ["--node-env=production"],
+        "env": {
+          "NODE_ENV": "production"
+        }
       },
       "configurations": {
         "development": {
-          "args": ["--node-env=development"]
+          "args": ["--node-env=development"],
+          "env": {
+            "NODE_ENV": "development"
+          }
         }
       }
     },
@@ -47,6 +53,14 @@
           "ci": true,
           "codeCoverage": true
         }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/app-gateway/**/*.ts"],
+        "maxWarnings": 200
       }
     }
   }

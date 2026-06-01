@@ -134,6 +134,31 @@
   --color-moonlight-800: #424242;
   --color-moonlight-900: #90a4ae; // Fantasy moonlight - Refined Elegance
 
+  // Bootstrap 兼容颜色映射
+  // 这些颜色对应 Bootstrap 5 的默认调色板
+  --color-bs-primary: #007bff;
+  --color-bs-secondary: #6c757d;
+  --color-bs-success: #28a745;
+  --color-bs-info: #0dcaf0;
+  --color-bs-warning: #ffc107;
+  --color-bs-danger: #dc3545;
+  --color-bs-light: #f8f9fa;
+  --color-bs-dark: #212529;
+
+  // Bootstrap 状态背景色
+  --color-bs-success-bg: #d1e7dd;
+  --color-bs-success-border: #a3cfbb;
+  --color-bs-success-text: #0f5132;
+  --color-bs-info-bg: #cff4fc;
+  --color-bs-info-border: #9eeaf9;
+  --color-bs-info-text: #055160;
+  --color-bs-warning-bg: #fff3cd;
+  --color-bs-warning-border: #ffecb5;
+  --color-bs-warning-text: #664d03;
+  --color-bs-danger-bg: #f8d7da;
+  --color-bs-danger-border: #f1aeb5;
+  --color-bs-danger-text: #58151c;
+
   // 扩展的功能色彩 (保持与新的fantasy主题一致)
   --color-danger-50: var(--color-error-50);
   --color-danger-100: var(--color-error-100);
@@ -167,6 +192,38 @@
   --color-border-primary: var(--color-neutral-300);
   --color-border-secondary: var(--color-neutral-200);
   --color-border-fantasy: var(--color-primary-700);
+
+  // 半透明颜色（用于阴影、遮罩等）
+  --shadow-soft: rgba(0, 0, 0, 0.1);
+  --shadow-medium: rgba(0, 0, 0, 0.15);
+  --shadow-strong: rgba(0, 0, 0, 0.25);
+  --shadow-subtle: rgba(0, 0, 0, 0.05);
+  --surface-light: rgba(255, 255, 255, 0.1);
+  --surface-overlay: rgba(255, 255, 255, 0.95);
+  --surface-glass: rgba(255, 255, 255, 0.8);
+
+  // Bootstrap 半透明色（用于悬停、聚焦状态）
+  --color-bs-primary-focus: rgba(0, 123, 255, 0.25);
+  --color-bs-primary-subtle: rgba(0, 123, 255, 0.05);
+  --color-bs-secondary-subtle: rgba(108, 117, 125, 0.05);
+  --color-bs-success-shadow: rgba(40, 167, 69, 0.3);
+  --color-bs-warning-dark: rgba(255, 193, 7, 0.1);
+  --color-bs-info-dark: rgba(13, 202, 240, 0.1);
+  --color-bs-success-dark: rgba(25, 135, 84, 0.1);
+  --color-bs-danger-dark: rgba(220, 53, 69, 0.1);
+  --color-bs-primary-dark: rgba(13, 110, 253, 0.25);
+
+  // 自定义渐变阴影
+  --shadow-primary-glow: rgba(102, 126, 234, 0.3);
+  --shadow-warning-glow: rgba(255, 215, 0, 0.4);
+  --shadow-info-glow: rgba(52, 152, 219, 0.4);
+  --shadow-info-strong: rgba(52, 152, 219, 0.6);
+
+  // 卡片半透明背景
+  --color-success-subtle: rgba(40, 167, 69, 0.1);
+  --color-error-subtle: rgba(231, 76, 60, 0.1);
+  --color-info-subtle: rgba(52, 152, 219, 0.1);
+  --color-warning-subtle: rgba(255, 193, 7, 0.1);
 }
 
 // 高对比度主题 - Fantasy Enhanced

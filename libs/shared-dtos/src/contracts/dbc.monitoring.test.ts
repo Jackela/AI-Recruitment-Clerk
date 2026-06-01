@@ -439,7 +439,7 @@ describe('DBC Production Monitoring', () => {
       }
 
       @withMonitoring('TestService')
-      async failingOperation(): Promise<never> {
+      public async failingOperation(): Promise<never> {
         throw new ContractViolationError(
           'Test violation',
           'PRE',
@@ -448,7 +448,7 @@ describe('DBC Production Monitoring', () => {
       }
 
       @withMonitoring('TestService')
-      async slowOperation(): Promise<string> {
+      public async slowOperation(): Promise<string> {
         // Simulate slow operation
         await new Promise((resolve) => setTimeout(resolve, 50));
         return 'completed';
@@ -500,7 +500,7 @@ describe('DBC Production Monitoring', () => {
       const startTime = Date.now();
 
       // Simulate high-volume metric recording
-      for (let i = 0; i < 1000; i++) {
+      for(let i = 0; i < 1000; i++) {
         monitor.recordContractExecution({
           operationName: `operation_${i % 10}`,
           contractType: i % 3 === 0 ? 'PRE' : 'POST',
@@ -525,7 +525,7 @@ describe('DBC Production Monitoring', () => {
       const initialMemory = process.memoryUsage().heapUsed;
 
       // Record many metrics to test memory management
-      for (let i = 0; i < 2000; i++) {
+      for(let i = 0; i < 2000; i++) {
         monitor.recordContractExecution({
           operationName: 'memoryTest',
           contractType: 'POST',
@@ -549,7 +549,7 @@ describe('DBC Production Monitoring', () => {
 
     it('should generate health reports quickly under load', () => {
       // Add some metrics
-      for (let i = 0; i < 100; i++) {
+      for(let i = 0; i < 100; i++) {
         monitor.recordContractExecution({
           operationName: 'reportTest',
           contractType: 'POST',

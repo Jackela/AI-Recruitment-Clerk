@@ -1,8 +1,7 @@
 {
-  "extends": "../../tsconfig.base.json",
+"extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-
     "declaration": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
@@ -17,7 +16,15 @@
     "forceConsistentCasingInFileNames": true,
     "incremental": true,
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "baseUrl": "."
   },
-  "include": ["src/**/*"],
-  "exclude": ["dist", "node_modules", "**/*.spec.ts", "**/*.test.ts"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "**/*.spec.ts",
+    "**/*.test.ts"
+  ]
 }

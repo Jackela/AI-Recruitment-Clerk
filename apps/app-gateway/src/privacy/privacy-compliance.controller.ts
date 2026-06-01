@@ -58,7 +58,9 @@ export class PrivacyComplianceController {
    * Initializes a new instance of the Privacy Compliance Controller.
    * @param privacyService - The privacy service.
    */
-  constructor(private readonly privacyService: PrivacyComplianceService) {}
+  constructor(private readonly privacyService: PrivacyComplianceService) {
+  // Intentionally empty
+}
 
   /**
    * CONSENT MANAGEMENT ENDPOINTS

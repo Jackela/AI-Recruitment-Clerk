@@ -1,3 +1,4 @@
+
 import {
   Body,
   Controller,
@@ -12,19 +13,41 @@ import pdf from 'pdf-parse-fork';
 import type { MetricsService } from '../ops/metrics.service';
 
 /**
+ * DTO for gap analysis request body.
+ */
+interface GapAnalysisBodyDto {
+  jdText?: string;
+  resumeText?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * DTO for gap analysis response.
+ */
+interface GapAnalysisResponseDto {
+  matchedSkills?: string[];
+  missingSkills?: string[];
+  suggestedSkills?: string[];
+  [key: string]: unknown;
+}
+
+/**
  * Exposes endpoints for scoring proxy.
  */
 @Controller('scoring')
 export class ScoringProxyController {
-  constructor(private readonly metrics: MetricsService) {}
+  constructor(private readonly metrics: MetricsService) {
+  // Intentionally empty
+}
   /**
    * Performs the gap analysis operation.
    * @param body - The body.
    * @returns The result of the operation.
    */
   @Post('gap-analysis')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-function-return-type
-  public async gapAnalysis(@Body() body: any) {
+  public async gapAnalysis(
+    @Body() body: GapAnalysisBodyDto,
+  ): Promise<GapAnalysisResponseDto> {
     this.metrics.incExposure();
     const base =
       process.env.SCORING_ENGINE_URL || 'http://scoring-engine-svc:3000';
@@ -66,7 +89,8 @@ export class ScoringProxyController {
   @UseInterceptors(FileInterceptor('resume'))
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   public async gapAnalysisFile(
-    @UploadedFile() file: Express.Multer.File,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    @UploadedFile() file: any,
     @Body() body: { jdText?: string },
   ) {
     if (!file) {
@@ -149,7 +173,7 @@ export class ScoringProxyController {
         .split(/[^a-z0-9+#.-]+/)
         .filter((t) => t && t.length > 1);
       const out = new Set<string>();
-      for (const t of base) {
+      for(const t of base) {
         out.add(t);
         if (t.includes('aws')) out.add('aws');
         if (t.includes('azure')) out.add('azure');

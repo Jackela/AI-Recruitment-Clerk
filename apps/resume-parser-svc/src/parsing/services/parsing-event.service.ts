@@ -31,7 +31,9 @@ export interface PublishResult {
 export class ParsingEventService {
   private readonly logger = new Logger(ParsingEventService.name);
 
-  constructor(private readonly natsService: ResumeParserNatsService) {}
+  constructor(private readonly natsService: ResumeParserNatsService) {
+  // Intentionally empty
+}
 
   /**
    * Publishes a success event for a completed resume parse.

@@ -1,10 +1,10 @@
 import type { OnInit } from '@angular/core';
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
-import { SharedModule } from '../../components/shared/shared.module';
+import { DashboardCardComponent } from '../../components/shared/dashboard-card/dashboard-card.component';
 
 interface DashboardStats {
   totalJobs: number;
@@ -29,7 +29,8 @@ interface ActivityItem {
 @Component({
   selector: 'arc-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, SharedModule],
+  imports: [CommonModule, RouterModule, DashboardCardComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
       class="dashboard-container"
@@ -357,7 +358,7 @@ export class DashboardComponent implements OnInit {
    * @returns The string value.
    */
   public getStatusText(status: string): string {
-    switch (status) {
+    switch(status) {
       case 'processing':
         return '处理中';
       case 'completed':

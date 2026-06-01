@@ -3,19 +3,19 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/service-base/src",
   "projectType": "library",
+  "implicitDependencies": ["shared-dtos", "shared-nats-client"],
   "tags": ["scope:shared", "type:utils"],
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
       "options": {
-        "command": "tsc",
-        "cwd": "libs/service-base"
-      },
-      "outputs": ["{projectRoot}/dist"],
-      "configurations": {
-        "production": {
-          "command": "tsc --project tsconfig.json"
-        }
+        "rootDir": ".",
+        "outputPath": "dist/libs/service-base",
+        "tsConfig": "libs/service-base/tsconfig.json",
+        "packageJson": "libs/service-base/package.json",
+        "main": "libs/service-base/src/index.ts",
+        "buildableProjectDepsInPackageJson": true
       }
     },
     "lint": {

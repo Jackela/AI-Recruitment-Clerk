@@ -21,15 +21,12 @@
     "incremental": true,
     "resolveJsonModule": true
   },
-  "include": [
-    "apps/**/*",
-    "libs/**/*",
-    "tests/**/*"
-  ],
+  "include": ["apps/**/*", "libs/**/*", "tests/**/*"],
   "exclude": [
     "node_modules",
     "dist",
     "**/*.spec.ts",
-    "**/*.test.ts"
+    "**/*.test.ts",
+    "**/debug/**"
   ]
 }

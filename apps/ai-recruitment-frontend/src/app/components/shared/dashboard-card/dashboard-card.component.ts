@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import {Component, Input, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -286,7 +286,8 @@ import { CommonModule } from '@angular/common';
     }
     \n    /* Responsive design */\n    @media (max-width: 768px) {\n      .dashboard-card {\n        padding: var(--space-4);\n        \n        &:hover {\n          transform: translateY(-2px);\n        }\n      }\n      \n      .card-icon {\n        width: 40px;\n        height: 40px;\n        margin-bottom: var(--space-3);\n      }\n      \n      .card-value {\n        font-size: var(--font-size-2xl);\n      }\n      \n      .card-title {\n        font-size: var(--font-size-sm);\n      }\n      \n      .card-subtitle {\n        font-size: var(--font-size-xs);\n      }\n      \n      .trend-indicator {\n        font-size: var(--font-size-xs);\n        padding: var(--space-0-5) var(--space-1-5);\n      }\n    }\n    \n    @media (max-width: 480px) {\n      .dashboard-card {\n        padding: var(--space-3);\n      }\n      \n      .card-icon {\n        width: 36px;\n        height: 36px;\n      }\n      \n      .card-value {\n        font-size: var(--font-size-xl);\n      }\n    }\n  `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class DashboardCardComponent {
   @Input() public title = '';
   @Input() public subtitle = '';

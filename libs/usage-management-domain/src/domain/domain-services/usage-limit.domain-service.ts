@@ -22,7 +22,9 @@ export class UsageLimitDomainService {
     private readonly repository: IUsageLimitRepository,
     private readonly eventBus: IDomainEventBus,
     private readonly auditLogger: IAuditLogger,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * 检查IP的使用限制状态
@@ -54,7 +56,7 @@ export class UsageLimitDomainService {
 
       // 发布领域事件
       const events = usageLimit.getUncommittedEvents();
-      for (const event of events) {
+      for(const event of events) {
         await this.eventBus.publish(event);
       }
       usageLimit.markEventsAsCommitted();
@@ -130,7 +132,7 @@ export class UsageLimitDomainService {
 
       // 发布领域事件
       const events = usageLimit.getUncommittedEvents();
-      for (const event of events) {
+      for(const event of events) {
         await this.eventBus.publish(event);
       }
       usageLimit.markEventsAsCommitted();
@@ -214,7 +216,7 @@ export class UsageLimitDomainService {
 
       // 发布领域事件
       const events = usageLimit.getUncommittedEvents();
-      for (const event of events) {
+      for(const event of events) {
         await this.eventBus.publish(event);
       }
       usageLimit.markEventsAsCommitted();
@@ -311,7 +313,7 @@ export class UsageLimitDomainService {
     let totalBonusQuota = 0;
     let activeIPs = 0;
 
-    for (const usageLimit of allUsageLimits) {
+    for(const usageLimit of allUsageLimits) {
       const stats = usageLimit.getUsageStatistics();
       totalUsage += stats.currentUsage;
       totalQuota += stats.availableQuota;
@@ -354,7 +356,9 @@ export class UsageLimitResult {
       bonusQuota: number;
     },
     public readonly errors?: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the success operation.
@@ -394,7 +398,9 @@ export class UsageTrackingResult {
       timestamp: Date;
     },
     public readonly error?: string,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the success operation.
@@ -431,7 +437,9 @@ export class BonusQuotaResult {
       bonusType: BonusType;
     },
     public readonly errors?: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the success operation.
@@ -477,7 +485,9 @@ export class UsageStatsResult {
       system?: SystemUsageStatistics;
     },
     public readonly errors?: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the success operation.

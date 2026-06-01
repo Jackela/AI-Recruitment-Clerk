@@ -225,7 +225,7 @@ export class GlobalErrorInterceptor implements NestInterceptor {
     );
 
     // Use appropriate log level based on severity
-    switch (error.enhancedDetails.severity) {
+    switch(error.enhancedDetails.severity) {
       case 'critical':
         this.logger.fatal(logData.message, logData);
         break;

@@ -1,16 +1,13 @@
-import type {
-  OnInit,
-  OnDestroy,
-} from '@angular/core';
+import type { OnInit, OnDestroy } from '@angular/core';
 import {
   Component,
   Input,
+  Output,
+  EventEmitter,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
-import type {
-  Observable,
-} from 'rxjs';
+import type { Observable } from 'rxjs';
 import {
   SparklineChartComponent,
   BarChartComponent,
@@ -74,7 +71,12 @@ export interface SparklineMeta {
 @Component({
   selector: 'arc-dashboard-charts',
   standalone: true,
-  imports: [CommonModule, SparklineChartComponent, BarChartComponent, PieChartComponent],
+  imports: [
+    CommonModule,
+    SparklineChartComponent,
+    BarChartComponent,
+    PieChartComponent,
+  ],
   template: `
     <div class="dashboard-charts" *ngIf="charts.length > 0">
       <h2 class="section-title">Analytics</h2>
@@ -95,7 +97,12 @@ export interface SparklineMeta {
                 [disabled]="chart.loading"
                 [attr.aria-label]="'Refresh ' + chart.title"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
                   <path
                     d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"
                   />
@@ -182,7 +189,12 @@ export interface SparklineMeta {
 
               <!-- Placeholder for unimplemented chart types -->
               <div *ngSwitchDefault class="chart-placeholder">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  width="48"
+                  height="48"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
                   <path
                     d="M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.11,3 19,3M19,19H5V5H19V19M7,10H9V17H7V10M11,7H13V17H11V7M15,13H17V17H15V13Z"
                   />
@@ -352,6 +364,7 @@ export interface SparklineMeta {
       }
     `,
   ],
+
 })
 export class DashboardChartsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
@@ -367,6 +380,9 @@ export class DashboardChartsComponent implements OnInit, OnDestroy {
    */
   @Input()
   public chartRefresh?: Observable<{ chartId: string }>;
+
+  @Output()
+  public chartRefreshRequested = new EventEmitter<string>();
 
   /**
    * Performs the ng on init operation.
@@ -397,10 +413,11 @@ export class DashboardChartsComponent implements OnInit, OnDestroy {
     if (chart) {
       chart.loading = true;
       chart.error = null;
-      // TODO: Implement actual chart refresh logic
-      setTimeout(() => {
+      this.chartRefreshRequested.emit(chartId);
+
+      if (!this.chartRefreshRequested.observed) {
         chart.loading = false;
-      }, 1000);
+      }
     }
   }
 
@@ -434,12 +451,13 @@ export class DashboardChartsComponent implements OnInit, OnDestroy {
 
     const current = data[data.length - 1].value;
     const previous = data.length > 1 ? data[data.length - 2].value : current;
-    const change = previous !== 0 ? ((current - previous) / Math.abs(previous)) * 100 : 0;
+    const change =
+      previous !== 0 ? ((current - previous) / Math.abs(previous)) * 100 : 0;
 
     let changeType: SparklineMeta['changeType'];
-    if (change > 0.1) {
+    if (change > 1) {
       changeType = 'increase';
-    } else if (change < -0.1) {
+    } else if (change < -1) {
       changeType = 'decrease';
     } else {
       changeType = 'neutral';

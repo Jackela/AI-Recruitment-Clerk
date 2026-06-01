@@ -16,7 +16,9 @@ export class AppController {
    * Initializes a new instance of the App Controller.
    * @param appService - The app service.
    */
-  constructor(private readonly _appService: AppService) {}
+  constructor(private readonly _appService: AppService) {
+  // Intentionally empty
+}
 
   /**
    * Performs the gap analysis operation.
@@ -56,7 +58,7 @@ export class AppController {
         .filter((t) => t && t.length > 1);
 
       const out = new Set<string>();
-      for (const t of base) {
+      for(const t of base) {
         out.add(t);
         // Heuristic expansions for common tech acronyms embedded in tokens
         if (t.includes('aws')) out.add('aws');

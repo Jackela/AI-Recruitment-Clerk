@@ -56,7 +56,7 @@ export class OpenAIEmbeddingProvider implements IEmbeddingProvider {
 
     let lastError: unknown;
 
-    for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
+    for(let attempt = 1; attempt <= this.maxRetries; attempt++) {
       try {
         const response = await firstValueFrom(
           this.httpService.post(this.apiUrl, payload, { headers }),

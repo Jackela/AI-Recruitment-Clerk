@@ -1,0 +1,418 @@
+/**
+ * 设计系统 Mixins
+ * 可重用的样式模式，用于消除代码重复
+ */
+
+// =====================
+// 卡片基础 mixin
+// =====================
+@mixin card-base {
+  background: var(--color-bg-card, var(--color-bg-primary));
+  border-radius: var(--radius-lg, 12px);
+  box-shadow: var(--shadow-card, var(--shadow-sm));
+  backdrop-filter: var(--backdrop-blur, blur(8px));
+}
+
+// =====================
+// 渐变按钮 mixin
+// =====================
+@mixin gradient-button($start-color, $end-color) {
+  background: linear-gradient(135deg, $start-color, $end-color);
+  color: white;
+  border: none;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba($start-color, 0.4);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// =====================
+// 进度条 mixin
+// =====================
+@mixin progress-bar($height: 8px, $radius: 4px) {
+  width: 100%;
+  height: $height;
+  background: var(--color-neutral-200);
+  border-radius: $radius;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      var(--color-primary-500),
+      var(--color-primary-600)
+    );
+    border-radius: $radius;
+    transition: width 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+}
+
+// =====================
+// 渐变卡片 mixin
+// =====================
+@mixin gradient-card($start-color, $end-color, $opacity: 1) {
+  background: linear-gradient(
+    135deg,
+    rgba($start-color, $opacity),
+    rgba($end-color, $opacity)
+  );
+  color: white;
+  box-shadow: 0 8px 32px rgba($start-color, 0.3);
+  border-color: rgba($start-color, 0.5);
+
+  &:hover {
+    box-shadow: 0 16px 48px rgba($start-color, 0.4);
+    transform: translateY(-4px);
+  }
+}
+
+// =====================
+// 文本截断 mixin
+// =====================
+@mixin text-truncate($lines: 1) {
+  @if $lines == 1 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  } @else {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+// =====================
+// 响应式字体 mixin
+// =====================
+@mixin responsive-font(
+  $min-size,
+  $max-size,
+  $min-width: 320px,
+  $max-width: 1200px
+) {
+  font-size: clamp(
+    #{$min-size},
+    #{$min-size} + (#{$max-size} - #{$min-size}) *
+      ((100vw - #{$min-width}) / (#{$max-width} - #{$min-width})),
+    #{$max-size}
+  );
+}
+
+// =====================
+// 玻璃效果 mixin
+// =====================
+@mixin glass-effect($opacity: 0.1, $blur: 10px) {
+  background: rgba(255, 255, 255, $opacity);
+  backdrop-filter: blur($blur);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+// =====================
+// 悬停抬升效果 mixin
+// =====================
+@mixin hover-lift($distance: -4px, $shadow: var(--shadow-lg)) {
+  transition: all var(--transition-base);
+
+  &:hover {
+    transform: translateY($distance);
+    box-shadow: $shadow;
+  }
+}
+
+// =====================
+// 渐变文本 mixin
+// =====================
+@mixin gradient-text($start-color, $end-color) {
+  background: linear-gradient(135deg, $start-color, $end-color);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+// =====================
+// 装饰性顶部线条 mixin
+// =====================
+@mixin decorative-top-line($color: var(--color-primary-300)) {
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, $color, transparent);
+    opacity: 0.6;
+  }
+}
+
+// =====================
+// 淡入动画 mixin
+// =====================
+@mixin fade-in-up($duration: 0.4s, $delay: 0s) {
+  animation: fadeInUp $duration ease-out $delay;
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+// =====================
+// 圆形渐变背景 mixin
+// =====================
+@mixin radial-glow($color, $size: 300px, $opacity: 0.15) {
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: $size;
+    height: $size;
+    background: radial-gradient(
+      circle,
+      rgba($color, $opacity),
+      transparent 70%
+    );
+    border-radius: 50%;
+    transform: translate(30%, -30%);
+    pointer-events: none;
+  }
+}
+
+// =====================
+// 图标容器 mixin
+// =====================
+@mixin icon-container($size, $bg-color, $icon-color: white) {
+  width: $size;
+  height: $size;
+  border-radius: var(--radius-xl, 12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $bg-color;
+  color: $icon-color;
+  flex-shrink: 0;
+}
+
+// =====================
+// 状态徽章 mixin
+// =====================
+@mixin status-badge($bg-color, $text-color, $border-color) {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-xl);
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: linear-gradient(135deg, $bg-color, lighten($bg-color, 5%));
+  color: $text-color;
+  border: 1px solid $border-color;
+  box-shadow: var(--shadow-xs);
+}
+
+// =====================
+// 微光动画 mixin
+// =====================
+@mixin shimmer-effect {
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.3),
+      transparent
+    );
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(200%);
+    }
+  }
+}
+
+// =====================
+// 脉冲动画 mixin
+// =====================
+@mixin pulse-animation($duration: 2s) {
+  animation: pulse $duration infinite;
+
+  @keyframes pulse {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.05);
+      opacity: 0.9;
+    }
+  }
+}
+
+// =====================
+// 滚动条隐藏 mixin
+// =====================
+@mixin hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// =====================
+// 响应式断点 mixin
+// =====================
+@mixin respond-to($breakpoint) {
+  @if $breakpoint == 'mobile' {
+    @media (max-width: 768px) {
+      @content;
+    }
+  } @else if $breakpoint == 'tablet' {
+    @media (min-width: 769px) and (max-width: 1024px) {
+      @content;
+    }
+  } @else if $breakpoint == 'desktop' {
+    @media (min-width: 1025px) {
+      @content;
+    }
+  }
+}
+
+// =====================
+// 聚焦样式 mixin
+// =====================
+@mixin focus-ring($color: var(--color-primary-500), $offset: 2px) {
+  &:focus-visible {
+    outline: 2px solid $color;
+    outline-offset: $offset;
+  }
+}
+
+// =====================
+// 禁用状态 mixin
+// =====================
+@mixin disabled-state {
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
+
+// =====================
+// 弹性布局居中 mixin
+// =====================
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// =====================
+// 绝对定位居中 mixin
+// =====================
+@mixin absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+// =====================
+// 文本样式 mixin
+// =====================
+@mixin text-style(
+  $size,
+  $weight,
+  $color,
+  $line-height: var(--line-height-normal)
+) {
+  font-size: $size;
+  font-weight: $weight;
+  color: $color;
+  line-height: $line-height;
+}
+
+// =====================
+// 装饰性渐变覆盖 mixin
+// =====================
+@mixin gradient-overlay(
+  $direction: 135deg,
+  $start-opacity: 0.05,
+  $end-opacity: 0
+) {
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      $direction,
+      rgba(99, 102, 241, $start-opacity),
+      transparent 50%,
+      rgba(139, 92, 246, $start-opacity)
+    );
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--transition-base);
+  }
+
+  &:hover::before {
+    opacity: 1;
+  }
+}
+
+// =====================
+// 底部边框渐变 mixin
+// =====================
+@mixin gradient-bottom-border($color: var(--color-primary-200)) {
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--color-primary-600), $color);
+    border-radius: var(--radius-full);
+  }
+}

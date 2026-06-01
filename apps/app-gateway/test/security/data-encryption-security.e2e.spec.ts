@@ -4,6 +4,11 @@ import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app/app.module';
 import * as _crypto from 'crypto';
+import { AppGatewayNatsService } from '../../src/nats/app-gateway-nats.service';
+import { createMockAppGatewayNatsService } from '../utils/mock-nats';
+
+// Set extended timeout for security tests
+jest.setTimeout(120000);
 
 /**
  * 🔐 DATA SECURITY & ENCRYPTION TESTS
@@ -25,7 +30,7 @@ describe('🔐 Data Security & Encryption Tests', () => {
   let app: INestApplication;
   let adminToken: string;
   let userToken: string;
-  let _testUserId: string;
+  let testUserId: string;
   let testOrganizationId: string;
 
   const testAdmin = {
@@ -55,9 +60,14 @@ describe('🔐 Data Security & Encryption Tests', () => {
   };
 
   beforeAll(async () => {
+    const mockNatsService = createMockAppGatewayNatsService();
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(AppGatewayNatsService)
+      .useValue(mockNatsService)
+      .compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();

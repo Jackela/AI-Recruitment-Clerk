@@ -30,7 +30,9 @@ export class AnalyticsReportingService {
     private readonly repository: IAnalyticsRepository,
     private readonly auditLogger: IAuditLogger,
     private readonly sessionTracker: ISessionTracker,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * 执行数据隐私合规检查
@@ -217,7 +219,7 @@ export class AnalyticsReportingService {
 
       // 计算平均事件间隔
       let totalInterval = 0;
-      for (let i = 1; i < sortedEvents.length; i++) {
+      for(let i = 1; i < sortedEvents.length; i++) {
         const prevTime = new Date(sortedEvents[i - 1].getTimestamp()).getTime();
         const currTime = new Date(sortedEvents[i].getTimestamp()).getTime();
         totalInterval += currTime - prevTime;

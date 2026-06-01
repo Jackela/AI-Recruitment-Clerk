@@ -16,7 +16,9 @@ export class UsageLimitCreatedEvent implements DomainEvent {
     public readonly ip: string,
     public readonly dailyLimit: number,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -39,7 +41,9 @@ export class UsageLimitExceededEvent implements DomainEvent {
     public readonly availableQuota: number,
     public readonly reason: string,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -60,7 +64,9 @@ export class UsageRecordedEvent implements DomainEvent {
     public readonly newUsageCount: number,
     public readonly remainingQuota: number,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -83,7 +89,9 @@ export class BonusQuotaAddedEvent implements DomainEvent {
     public readonly bonusAmount: number,
     public readonly newTotalQuota: number,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -106,5 +114,7 @@ export class DailyUsageResetEvent implements DomainEvent {
     public readonly previousQuota: number,
     public readonly newDailyLimit: number,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }

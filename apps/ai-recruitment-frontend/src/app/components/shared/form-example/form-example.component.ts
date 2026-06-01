@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { FormGroup} from '@angular/forms';
 import {
@@ -322,7 +322,8 @@ import { ToastService } from '../../../services/toast.service';
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class FormExampleComponent {
   private readonly fb = inject(FormBuilder);
   private readonly toastService = inject(ToastService);

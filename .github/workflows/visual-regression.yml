@@ -1,0 +1,330 @@
+name: visual-regression
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'apps/ai-recruitment-frontend/**'
+      - 'apps/ai-recruitment-frontend-e2e/**'
+      - '.github/workflows/visual-regression.yml'
+  pull_request:
+    paths:
+      - 'apps/ai-recruitment-frontend/**'
+      - 'apps/ai-recruitment-frontend-e2e/**'
+      - '.github/workflows/visual-regression.yml'
+  workflow_dispatch:
+    inputs:
+      update-snapshots:
+        description: 'Update baseline snapshots'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      target-branch:
+        description: 'Target branch for snapshot update (for manual runs)'
+        required: false
+        default: 'main'
+        type: string
+
+env:
+  CI: true
+  NODE_OPTIONS: '--max-old-space-size=4096'
+
+jobs:
+  visual_regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - name: Cache Nx
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: |
+            .nx/cache
+            node_modules/.cache
+          key: ${{ runner.os }}-nx-${{ hashFiles('package-lock.json', '**/project.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nx-
+      - name: Cache Playwright browsers
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+      - name: Install dependencies
+        run: npm ci
+      - name: Install system dependencies for consistent fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-liberation fonts-noto-color-emoji
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      - name: Manage server lifecycle
+        uses: ./.github/actions/server-lifecycle
+        with:
+          port: 4200
+          build-command: 'NODE_OPTIONS="--max-old-space-size=4096" npx nx build ai-recruitment-frontend --configuration=webkit-test'
+          serve-command: 'STATIC_DIR=dist/apps/ai-recruitment-frontend/browser node scripts/proxy-server.cjs'
+          health-check-url: 'http://localhost:4200'
+          health-check-timeout: '60000'
+          verify-build-output: 'dist/apps/ai-recruitment-frontend/browser'
+          server-log-path: '/tmp/server.log'
+
+      # Determine execution mode based on event type and inputs
+      - name: Determine execution mode
+        id: execution-mode
+        run: |
+          # Check for manual update trigger
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.update-snapshots }}" == "true" ]]; then
+            echo "mode=update" >> $GITHUB_OUTPUT
+            echo "Execution mode: UPDATE (manual snapshot update requested)"
+          # For push events on main/develop - always update baseline
+          elif [[ "${{ github.event_name }}" == "push" && ("${{ github.ref }}" == "refs/heads/main" || "${{ github.ref }}" == "refs/heads/develop") ]]; then
+            echo "mode=update" >> $GITHUB_OUTPUT
+            echo "Execution mode: UPDATE (push to main/develop branch)"
+          else
+            echo "mode=test" >> $GITHUB_OUTPUT
+            echo "Execution mode: TEST (compare against baseline)"
+          fi
+
+      - name: Check for existing snapshots
+        id: check-snapshots
+        run: |
+          # Check if baseline snapshots exist (Playwright stores snapshots in *-snapshots directories)
+          SNAPSHOT_COUNT=$(find apps/ai-recruitment-frontend-e2e/src/visual -name "*.png" -path "*-snapshots*" 2>/dev/null | wc -l)
+          echo "Found $SNAPSHOT_COUNT existing snapshots"
+          if [ "$SNAPSHOT_COUNT" -gt 0 ]; then
+            echo "snapshots_exist=true" >> $GITHUB_OUTPUT
+          else
+            echo "snapshots_exist=false" >> $GITHUB_OUTPUT
+          fi
+
+      # Initialize baseline if no snapshots exist (first run)
+      - name: Initialize Baseline Snapshots
+        if: steps.check-snapshots.outputs.snapshots_exist != 'true'
+        timeout-minutes: 10
+        run: |
+          set -e
+          echo "No baseline snapshots found. Creating initial snapshots..."
+          npm run test:e2e:visual:update
+          echo "baseline_created=true" >> $GITHUB_OUTPUT
+        env:
+          E2E_SKIP_WEBSERVER: true
+
+      # Update snapshots when in update mode
+      - name: Update Baseline Snapshots
+        if: steps.execution-mode.outputs.mode == 'update' && steps.check-snapshots.outputs.snapshots_exist == 'true'
+        run: |
+          echo "Updating baseline snapshots..."
+          npm run test:e2e:visual:update
+        env:
+          E2E_SKIP_WEBSERVER: true
+
+      # Run visual regression tests (only in test mode)
+      - name: Run Visual Regression Tests
+        if: steps.execution-mode.outputs.mode == 'test'
+        id: visual-test
+        continue-on-error: true
+        run: |
+          npm run test:e2e:visual:ci
+          echo "test_result=success" >> $GITHUB_OUTPUT
+        env:
+          E2E_SKIP_WEBSERVER: true
+
+      - name: Set test result on failure
+        if: steps.execution-mode.outputs.mode == 'test' && steps.visual-test.outputs.test_result != 'success'
+        run: |
+          echo "test_result=failure" >> $GITHUB_ENV
+      - name: Upload Visual Regression Snapshots
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: visual-snapshots
+          path: |
+            apps/ai-recruitment-frontend-e2e/src/visual/**/*.png
+            apps/ai-recruitment-frontend-e2e/src/visual/**/*-snapshots/**/*.png
+          if-no-files-found: ignore
+          retention-days: 14
+      # Commit baseline snapshots to repository (only on main/develop push or manual update)
+      - name: Commit baseline snapshots to repository
+        if: |
+          (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')) ||
+          (github.event_name == 'workflow_dispatch' && github.event.inputs.update-snapshots == 'true')
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          # Check if there are any changes to snapshot files
+          if git diff --quiet HEAD -- apps/ai-recruitment-frontend-e2e/src/visual/**/*-snapshots/ 2>/dev/null; then
+            echo "No changes to baseline snapshots"
+          else
+            git add apps/ai-recruitment-frontend-e2e/src/visual/**/*-snapshots/
+
+            # Create commit message based on trigger
+            if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+              git commit -m "chore: update visual baseline snapshots [workflow dispatch]"
+            else
+              git commit -m "chore: update visual baseline snapshots from ${{ github.ref_name }} [${{ github.sha }}]"
+            fi
+
+            # Push to the current branch
+            git push
+            echo "✅ Baseline snapshots committed and pushed"
+          fi
+
+      - name: Upload Diffs on Failure
+        if: failure() || env.test_result == 'failure'
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: visual-diffs
+          path: |
+            apps/ai-recruitment-frontend-e2e/src/visual/**/*-diff.png
+            apps/ai-recruitment-frontend-e2e/src/visual/**/*-actual.png
+            apps/ai-recruitment-frontend-e2e/src/visual/**/*-expected.png
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload Playwright Report
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: playwright-visual-report
+          path: |
+            apps/ai-recruitment-frontend-e2e/playwright-report
+            apps/ai-recruitment-frontend-e2e/test-results
+          if-no-files-found: ignore
+          retention-days: 7
+
+      # Find and prepare diff images for PR comment
+      - name: Find diff images
+        if: github.event_name == 'pull_request' && (failure() || env.test_result == 'failure')
+        id: find-diffs
+        run: |
+          DIFF_FILES=$(find apps/ai-recruitment-frontend-e2e/src/visual -name "*-diff.png" 2>/dev/null | head -10)
+          if [ -n "$DIFF_FILES" ]; then
+            echo "found_diffs=true" >> $GITHUB_OUTPUT
+            echo "diff_count=$(echo "$DIFF_FILES" | wc -l)" >> $GITHUB_OUTPUT
+            # Create a summary of diffs
+            echo "$DIFF_FILES" | while read file; do
+              basename "$file"
+            done > /tmp/diff_summary.txt
+          else
+            echo "found_diffs=false" >> $GITHUB_OUTPUT
+          fi
+
+      # Post PR comment with visual test results
+      - name: Post PR Comment - Visual Test Success
+        if: github.event_name == 'pull_request' && steps.execution-mode.outputs.mode == 'test' && env.test_result != 'failure'
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const message = `## ✅ Visual Regression Tests Passed
+
+            All visual regression tests passed successfully.
+
+            - **Event**: ${{ github.event_name }}
+            - **Mode**: Test (comparison against baseline)
+            - **Branch**: ${{ github.head_ref }}
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            });
+
+      - name: Post PR Comment - Visual Test Failure
+        if: github.event_name == 'pull_request' && (failure() || env.test_result == 'failure')
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const fs = require('fs');
+            let diffSummary = '';
+
+            try {
+              diffSummary = fs.readFileSync('/tmp/diff_summary.txt', 'utf8');
+            } catch (e) {
+              diffSummary = 'No diff files found';
+            }
+
+            const message = `## ❌ Visual Regression Tests Failed
+
+            Visual differences detected between current changes and baseline.
+
+            ### Summary
+            - **Event**: ${{ github.event_name }}
+            - **Mode**: Test (comparison against baseline)
+            - **Branch**: ${{ github.head_ref }}
+
+            ### Differences Found
+            \`\`\`
+            ${diffSummary}
+            \`\`\`
+
+            ### Next Steps
+            1. Review the visual differences in the uploaded artifacts
+            2. If changes are intentional:
+               - Run the visual regression workflow with \\"Update baseline snapshots\\" option
+               - Or merge to main/develop to automatically update baseline
+            3. If changes are unintentional, fix the UI issues
+
+            ### Artifacts
+            - Visual Diffs: Download from workflow artifacts
+            - Playwright Report: Download from workflow artifacts
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            });
+
+      - name: Post PR Comment - Baseline Updated
+        if: github.event_name == 'pull_request' && steps.execution-mode.outputs.mode == 'update'
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const message = `## 📸 Visual Baseline Snapshots Updated
+
+            Baseline snapshots have been created/updated for this PR.
+
+            - **Event**: ${{ github.event_name }}
+            - **Mode**: Update (new baseline created)
+            - **Branch**: ${{ github.head_ref }}
+
+            **Note**: These baseline snapshots will be committed to the repository when this PR is merged to main/develop.
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            });
+
+      # Fail the job if visual tests failed in test mode
+      - name: Fail on visual test failure
+        if: steps.execution-mode.outputs.mode == 'test' && env.test_result == 'failure'
+        run: |
+          echo "❌ Visual regression tests failed. See PR comment and artifacts for details."
+          exit 1

@@ -1,11 +1,9 @@
 import type { OnInit, OnDestroy } from '@angular/core';
-import {
-  Component,
+import {Component,
   Input,
   Output,
   EventEmitter,
-  inject,
-} from '@angular/core';
+  inject, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
 
@@ -80,7 +78,8 @@ export interface MobileNavItem {
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class MobileNavigationComponent implements OnInit, OnDestroy {
   @Input() public pageTitle = '';
   @Input() public pageSubtitle = '';

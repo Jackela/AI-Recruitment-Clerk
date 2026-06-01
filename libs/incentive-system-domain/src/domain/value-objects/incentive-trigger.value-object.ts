@@ -74,6 +74,22 @@ export class IncentiveTrigger extends ValueObject<{
   }
 
   /**
+   * Retrieves trigger data.
+   * @returns The IncentiveTriggerData.
+   */
+  public getTriggerData(): IncentiveTriggerData {
+    return this.props.triggerData;
+  }
+
+  /**
+   * Retrieves qualified at date.
+   * @returns The Date.
+   */
+  public getQualifiedAt(): Date {
+    return this.props.qualifiedAt;
+  }
+
+  /**
    * Performs the is valid operation.
    * @returns The boolean value.
    */

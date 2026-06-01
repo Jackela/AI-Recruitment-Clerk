@@ -95,7 +95,9 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UserService,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * User registration endpoint for creating new accounts.

@@ -1,8 +1,8 @@
-import type { OnInit, OnDestroy} from '@angular/core';
-import { Component, inject } from '@angular/core';
+import type { OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import type { GuestState } from '../../store/guest/guest.state';
@@ -127,7 +127,9 @@ import * as GuestActions from '../../store/guest/guest.actions';
               [disabled]="isLoading$ | async"
               class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <span *ngIf="(isLoading$ | async) === false">获取反馈码参与活动</span>
+              <span *ngIf="(isLoading$ | async) === false"
+                >获取反馈码参与活动</span
+              >
               <span
                 *ngIf="isLoading$ | async"
                 class="flex items-center justify-center"
@@ -194,6 +196,8 @@ import * as GuestActions from '../../store/guest/guest.actions';
       }
     `,
   ],
+
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GuestLimitModalComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();

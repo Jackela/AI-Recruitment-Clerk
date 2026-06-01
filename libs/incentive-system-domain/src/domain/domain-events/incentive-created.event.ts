@@ -21,5 +21,7 @@ export class IncentiveCreatedEvent implements DomainEvent {
     public readonly currency: Currency,
     public readonly triggerType: TriggerType,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }

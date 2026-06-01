@@ -25,6 +25,14 @@ export const jobReducer = createReducer(
     error,
   })),
 
+  // Offline Mode - Load from cache/mock data
+  on(JobActions.loadJobsFromCache, (state, { jobs }) => ({
+    ...state,
+    jobs,
+    loading: false,
+    error: null,
+  })),
+
   // Load Single Job
   on(JobActions.loadJob, (state) => ({
     ...state,
@@ -78,41 +86,38 @@ export const jobReducer = createReducer(
   })),
 
   // WebSocket Job Updates
-  on(
-    JobActions.jobUpdatedViaWebSocket,
-    (state, { jobId, title, status }) => {
-      // Update the job in the jobs array
-      const updatedJobs = state.jobs.map((job) => {
-        if (job.id === jobId) {
-          return {
-            ...job,
+  on(JobActions.jobUpdatedViaWebSocket, (state, { jobId, title, status }) => {
+    // Update the job in the jobs array
+    const updatedJobs = state.jobs.map((job) => {
+      if (job.id === jobId) {
+        return {
+          ...job,
+          title,
+          status,
+          // Add any additional fields that might be updated
+        };
+      }
+      return job;
+    });
+
+    // Update selected job if it matches
+    const updatedSelectedJob =
+      state.selectedJob?.id === jobId
+        ? {
+            ...state.selectedJob,
             title,
             status,
-            // Add any additional fields that might be updated
-          };
-        }
-        return job;
-      });
+          }
+        : state.selectedJob;
 
-      // Update selected job if it matches
-      const updatedSelectedJob =
-        state.selectedJob?.id === jobId
-          ? {
-              ...state.selectedJob,
-              title,
-              status,
-            }
-          : state.selectedJob;
-
-      return {
-        ...state,
-        jobs: updatedJobs,
-        selectedJob: updatedSelectedJob,
-        // Clear any previous errors when receiving updates
-        error: null,
-      };
-    },
-  ),
+    return {
+      ...state,
+      jobs: updatedJobs,
+      selectedJob: updatedSelectedJob,
+      // Clear any previous errors when receiving updates
+      error: null,
+    };
+  }),
 
   on(
     JobActions.jobProgressViaWebSocket,
@@ -144,5 +149,23 @@ export const jobReducer = createReducer(
   on(JobActions.initializeWebSocketConnection, (state) => ({
     ...state,
     webSocketStatus: 'connecting' as const,
+  })),
+
+  // Offline Mode
+  on(JobActions.setOfflineMode, (state, { isOffline }) => ({
+    ...state,
+    isOffline,
+  })),
+
+  on(JobActions.connectionStatusChanged, (state, { isConnected, message }) => ({
+    ...state,
+    isOffline: !isConnected,
+    connectionMessage: message || null,
+  })),
+
+  on(JobActions.retryConnection, (state) => ({
+    ...state,
+    loading: true,
+    error: null,
   })),
 );

@@ -774,7 +774,7 @@ describe('WithCorrelation decorator', () => {
   it('should create context from request-like argument', async () => {
     class TestService {
       @WithCorrelation('test-service', 'test-operation')
-      async testMethod(_request: { headers: Record<string, string> }): Promise<string> {
+      public async testMethod(_request: { headers: Record<string, string> }): Promise<string> {
         const context = ErrorCorrelationManager.getContext();
         expect(context?.traceId).toBe('from-header');
         return 'success';
@@ -801,7 +801,7 @@ describe('WithCorrelation decorator', () => {
 
     class TestService {
       @WithCorrelation('decorator-service', 'decorator-op')
-      async testMethod(): Promise<string> {
+      public async testMethod(): Promise<string> {
         const context = ErrorCorrelationManager.getContext();
         // Should use existing context, not create new one
         expect(context?.traceId).toBe('existing-trace');
@@ -819,7 +819,7 @@ describe('WithCorrelation decorator', () => {
   it('should clear context on error', async () => {
     class TestService {
       @WithCorrelation('test-service', 'test-operation')
-      async failingMethod(): Promise<string> {
+      public async failingMethod(): Promise<string> {
         throw new Error('Method failed');
       }
     }

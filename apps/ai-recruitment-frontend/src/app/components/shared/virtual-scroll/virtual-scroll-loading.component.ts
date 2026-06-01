@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, ChangeDetectionStrategy} from '@angular/core';
 
 /**
  * Loading indicator component for virtual scroll.
@@ -62,7 +62,8 @@ import { Component } from '@angular/core';
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class VirtualScrollLoadingComponent {
   /** Loading message to display. */
   public message = '加载中...';

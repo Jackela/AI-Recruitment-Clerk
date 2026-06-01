@@ -80,7 +80,7 @@ export abstract class BaseService {
     let lastError: Error | undefined;
     let delay = retryConfig.retryDelay;
 
-    for (let attempt = 1; attempt <= retryConfig.maxRetries; attempt++) {
+    for(let attempt = 1; attempt <= retryConfig.maxRetries; attempt++) {
       try {
         const result = await operation();
         if (attempt > 1) {

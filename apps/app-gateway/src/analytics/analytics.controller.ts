@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { Public } from '../auth/decorators/public.decorator';
+import { AnalyticsService } from './analytics.service';
 import type {
   AnalyticsEventDto,
   PerformanceMetricDto,
@@ -16,8 +17,17 @@ import type {
   GenerateReportDto,
 } from './analytics.dto';
 
-function id(prefix: string): string {
-  return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
+interface ClientLogDto {
+  level: string;
+  message: string;
+  context?: string;
+  data?: Record<string, unknown>;
+  timestamp?: string;
+  error?: {
+    name?: string;
+    message?: string;
+    stack?: string;
+  };
 }
 
 /**
@@ -25,16 +35,21 @@ function id(prefix: string): string {
  */
 @Controller('analytics')
 export class AnalyticsController {
+  constructor(private readonly analyticsService = new AnalyticsService()) {
+    // Default service keeps isolated controller specs lightweight.
+  }
+
   /**
    * Records an analytics event.
-   * @param _body - The analytics event data.
+   * @param body - The analytics event data.
    * @param res - The response object.
    * @returns The result of the operation.
    */
   @Public()
   @Post('events')
   @HttpCode(HttpStatus.NO_CONTENT)
-  public event(@Body() _body: AnalyticsEventDto, @Res() res: Response): Response {
+  public event(@Body() body: AnalyticsEventDto, @Res() res: Response): Response {
+    this.analyticsService.recordEvent(body);
     // Bypass global interceptors for maximum performance in tests
     return res.status(HttpStatus.NO_CONTENT).send();
   }
@@ -47,8 +62,8 @@ export class AnalyticsController {
   @Public()
   @Post('metrics/performance')
   @HttpCode(HttpStatus.CREATED)
-  public perf(@Body() _body: PerformanceMetricDto): { metricId: string } {
-    return { metricId: id('met') };
+  public perf(@Body() body: PerformanceMetricDto): { metricId: string } {
+    return { metricId: this.analyticsService.recordPerformanceMetric(body) };
   }
 
   /**
@@ -59,8 +74,19 @@ export class AnalyticsController {
   @Public()
   @Post('metrics/business')
   @HttpCode(HttpStatus.CREATED)
-  public biz(@Body() _body: BusinessMetricDto): { metricId: string } {
-    return { metricId: id('met') };
+  public biz(@Body() body: BusinessMetricDto): { metricId: string } {
+    return { metricId: this.analyticsService.recordBusinessMetric(body) };
+  }
+
+  @Public()
+  @Post('logs/client')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public clientLog(
+    @Body() body: ClientLogDto,
+    @Res() res: Response,
+  ): Response {
+    this.analyticsService.recordClientLog(body);
+    return res.status(HttpStatus.NO_CONTENT).send();
   }
 
   /**
@@ -77,7 +103,7 @@ export class AnalyticsController {
     status: string;
   } {
     return {
-      reportId: id('rep'),
+      reportId: this.analyticsService.createReportId(),
       reportType: body.reportType,
       status: 'processing',
     };
@@ -91,10 +117,12 @@ export class AnalyticsController {
   @Post('export')
   @HttpCode(HttpStatus.OK)
   public export(): { exportId: string; status: string; url: string } {
+    const exportId = this.analyticsService.createExportId();
+
     return {
-      exportId: id('exp'),
+      exportId,
       status: 'completed',
-      url: `/exports/${id('exp')}.json`,
+      url: `/exports/${exportId}.json`,
     };
   }
 
@@ -105,10 +133,23 @@ export class AnalyticsController {
   @Public()
   @Get('dashboard')
   @HttpCode(HttpStatus.OK)
-  public dashboard(): { summary: { events: number; metrics: number }; charts: unknown[] } {
-    return {
-      summary: { events: 10, metrics: 5 },
-      charts: [],
-    };
+  public dashboard(): {
+    summary: { events: number; metrics: number; clientLogs: number };
+    charts: unknown[];
+  } {
+    return this.analyticsService.getDashboard();
+  }
+
+  @Public()
+  @Get('analysis-statistics')
+  @HttpCode(HttpStatus.OK)
+  public analysisStatistics(): {
+    todayAnalyses: number;
+    totalAnalyses: number;
+    averageScore: number;
+    successRate: number;
+    monthlyAnalyses: number;
+  } {
+    return this.analyticsService.getAnalysisStatistics();
   }
 }
