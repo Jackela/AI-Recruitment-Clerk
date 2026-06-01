@@ -5,6 +5,12 @@ All notable changes to the AI Recruitment Clerk project will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.2](https://github.com/Jackela/AI-Recruitment-Clerk/compare/v2.0.1...v2.0.2) (2026-06-01)
+
+### 🐛 Bug Fixes
+
+* **ci:** start cd-local smoke server ([d2e7f6d](https://github.com/Jackela/AI-Recruitment-Clerk/commit/d2e7f6d018ff2fc75adf0271b9aa30a36bc27295))
+
 ## [2.0.1](https://github.com/Jackela/AI-Recruitment-Clerk/compare/v2.0.0...v2.0.1) (2026-06-01)
 
 ### 🐛 Bug Fixes
