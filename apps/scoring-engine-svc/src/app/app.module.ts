@@ -11,6 +11,11 @@ import { ScoringEngineNatsService } from '../services/scoring-engine-nats.servic
 import { EnhancedSkillMatcherService } from '../services/enhanced-skill-matcher.service';
 import { ExperienceAnalyzerService } from '../services/experience-analyzer.service';
 import { CulturalFitAnalyzerService } from '../services/cultural-fit-analyzer.service';
+import { CulturalAlignmentScorer } from '../services/cultural-fit/cultural-alignment.scorer';
+import { CulturalFitFallbackHelper } from '../services/cultural-fit/cultural-fit-fallback.helper';
+import { CulturalFitIndicatorsAnalyzer } from '../services/cultural-fit/cultural-fit-indicators.analyzer';
+import { CulturalRecommendationGenerator } from '../services/cultural-fit/cultural-recommendation.generator';
+import { SoftSkillsAssessor } from '../services/cultural-fit/soft-skills.assessor';
 import { ScoringConfidenceService } from '../services/scoring-confidence.service';
 import { GeminiClient } from '@ai-recruitment-clerk/shared-dtos';
 import { NatsClient as LocalNatsClient } from '../nats/nats.client';
@@ -45,6 +50,11 @@ import { SecureConfigValidator } from '@app/shared-dtos';
     },
     EnhancedSkillMatcherService,
     ExperienceAnalyzerService,
+    CulturalAlignmentScorer,
+    CulturalFitFallbackHelper,
+    CulturalFitIndicatorsAnalyzer,
+    CulturalRecommendationGenerator,
+    SoftSkillsAssessor,
     CulturalFitAnalyzerService,
     ScoringConfidenceService,
     {
