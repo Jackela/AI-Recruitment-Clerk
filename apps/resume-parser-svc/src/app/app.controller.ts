@@ -21,7 +21,9 @@ export class AppController {
     private readonly appService: AppService,
     private readonly resumeRepository: ResumeRepository,
     private readonly gridFsService: GridFsService,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Retrieves data.

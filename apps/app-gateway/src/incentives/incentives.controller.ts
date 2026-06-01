@@ -20,7 +20,9 @@ import type { ApproveIncentiveDto } from './dto/approve-incentive.dto';
  */
 @Controller('incentives')
 export class IncentivesController {
-  constructor(private readonly incentivesService: IncentivesService) {}
+  constructor(private readonly incentivesService: IncentivesService) {
+  // Intentionally empty
+}
 
   /**
    * Creates a questionnaire incentive.

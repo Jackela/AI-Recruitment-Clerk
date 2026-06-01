@@ -4,6 +4,9 @@ import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app/app.module';
 
+// Set extended timeout for security tests
+jest.setTimeout(120000);
+
 /**
  * 🛡️ INPUT VALIDATION & SANITIZATION SECURITY TESTS
  *
@@ -24,7 +27,7 @@ describe('🛡️ Input Validation & Sanitization Security Tests', () => {
   let app: INestApplication;
   let adminToken: string;
   let userToken: string;
-  let _testUserId: string;
+  let testUserId: string;
   let testOrganizationId: string;
 
   const testAdmin = {

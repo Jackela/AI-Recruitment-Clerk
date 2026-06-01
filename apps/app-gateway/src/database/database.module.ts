@@ -10,14 +10,17 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
         const logger = new Logger('DatabaseModule');
-        const isTestEnv = 
-          process.env.NODE_ENV === 'test' || 
-          !!process.env.JEST_WORKER_ID || 
+        const isTestEnv =
+          process.env.NODE_ENV === 'test' ||
+          !!process.env.JEST_WORKER_ID ||
           process.env.CI === 'true';
 
         if (isTestEnv) {
           logger.log('Test environment detected - using MongoDB Memory Server');
           const mongod = await MongoMemoryServer.create({
+            binary: {
+              version: '7.0.5',
+            },
             instance: {
               port: 27018,
               dbName: 'test',
@@ -25,7 +28,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
           });
           const uri = mongod.getUri();
           logger.log(`MongoDB Memory Server started at ${uri}`);
-          
+
           return {
             uri,
             autoCreate: true,
@@ -34,15 +37,22 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
             socketTimeoutMS: 10000,
           };
         } else {
-          const mongoUri = configService.get<string>('MONGO_URL') || process.env.MONGO_URL;
-          
+          const mongoUri =
+            configService.get<string>('MONGO_URL') || process.env.MONGO_URL;
+
           if (!mongoUri) {
-            logger.error('MONGO_URL not configured - Production deployment requires MongoDB');
-            throw new Error('MONGO_URL not configured - Production deployment requires MongoDB');
+            logger.error(
+              'MONGO_URL not configured - Production deployment requires MongoDB',
+            );
+            throw new Error(
+              'MONGO_URL not configured - Production deployment requires MongoDB',
+            );
           }
 
-          logger.log(`Connecting to production MongoDB at ${mongoUri.replace(/\/\/.*@/, '//*****@')}`);
-          
+          logger.log(
+            `Connecting to production MongoDB at ${mongoUri.replace(/\/\/.*@/, '//*****@')}`,
+          );
+
           return {
             uri: mongoUri,
             retryAttempts: 3,

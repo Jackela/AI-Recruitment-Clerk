@@ -25,7 +25,9 @@ export class CircuitBreaker {
     private readonly threshold = 5,
     private readonly resetTimeoutMs = 60000,
     private readonly logger: Logger,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   public async execute<T>(fn: () => Promise<T>): Promise<T> {
     if (this.state === 'OPEN') {
@@ -85,7 +87,7 @@ export class RetryHandler {
     let lastError: Error | null = null;
     let delay = this.config.initialDelayMs;
 
-    for (let attempt = 1; attempt <= this.config.maxAttempts; attempt++) {
+    for(let attempt = 1; attempt <= this.config.maxAttempts; attempt++) {
       try {
         this.logger.debug(
           `Executing ${operationName} (attempt ${attempt}/${this.config.maxAttempts})`,

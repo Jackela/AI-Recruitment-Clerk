@@ -12,19 +12,19 @@ export type UserDocument = User & Document;
  */
 @Schema({ timestamps: true, collection: 'users' })
 export class User {
-  @Prop({ required: true, unique: true })
+  @Prop({ type: String, required: true, unique: true })
   public id = '';
 
-  @Prop({ required: true, unique: true, lowercase: true })
+  @Prop({ type: String, required: true, unique: true, lowercase: true })
   public email = '';
 
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   public password = '';
 
-  @Prop({ required: false, default: '' })
+  @Prop({ type: String, required: false, default: '' })
   public firstName = '';
 
-  @Prop({ required: false, default: '' })
+  @Prop({ type: String, required: false, default: '' })
   public lastName = '';
 
   @Prop({

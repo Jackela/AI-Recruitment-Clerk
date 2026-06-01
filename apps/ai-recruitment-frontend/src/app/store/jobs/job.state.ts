@@ -21,6 +21,9 @@ export interface JobState {
       timestamp: Date;
     };
   };
+  // Offline mode state
+  isOffline: boolean;
+  connectionMessage: string | null;
 }
 
 export const initialJobState: JobState = {
@@ -33,4 +36,7 @@ export const initialJobState: JobState = {
   webSocketConnected: false,
   webSocketStatus: 'disconnected',
   jobProgress: {},
+  // Offline mode state
+  isOffline: false,
+  connectionMessage: null,
 };

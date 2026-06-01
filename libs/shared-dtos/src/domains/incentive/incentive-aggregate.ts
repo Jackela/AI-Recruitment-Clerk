@@ -42,7 +42,9 @@ export class Incentive {
     private readonly createdAt: Date,
     private processedAt?: Date,
     private paidAt?: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   // ============================================================================
   // Factory Methods

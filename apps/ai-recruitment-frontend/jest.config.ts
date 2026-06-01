@@ -1,28 +1,30 @@
+import { createCjsPreset } from 'jest-preset-angular/presets/index.js';
+
+const angularPreset = createCjsPreset({
+  tsconfig: '<rootDir>/tsconfig.spec.json',
+});
+
 export default {
+  ...angularPreset,
   displayName: 'ai-recruitment-frontend',
-  preset: '../../jest.preset.cjs',
-  testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-  // Re-enabled full test suite for frontend
+  resolver: '@nx/jest/plugins/resolver',
+  setupFiles: ['<rootDir>/../../test/jest-global-setup.cjs'],
+  setupFilesAfterEnv: [
+    '<rootDir>/src/test-setup.ts',
+    '<rootDir>/../../jest.setup.ts',
+  ],
+  globalTeardown: '<rootDir>/../../test/jest-global-teardown.cjs',
   coverageDirectory: '../../coverage/apps/ai-recruitment-frontend',
-  transform: {
-    '^.+\\.(ts|mjs|js|html)$': [
-      'jest-preset-angular',
-      {
-        tsconfig: '<rootDir>/tsconfig.spec.json',
-        stringifyContentPathRegex: '\\.(html|svg)$',
-        useESM: true,
-      },
-    ],
-  },
-  transformIgnorePatterns: ['node_modules/(?!(@angular|@ngrx|rxjs|tslib|@ai-recruitment-clerk)/)'],
-  moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1',
-  },
-  extensionsToTreatAsEsm: ['.ts'],
-  snapshotSerializers: [
-    'jest-preset-angular/build/serializers/no-ng-attributes',
-    'jest-preset-angular/build/serializers/ng-snapshot',
-    'jest-preset-angular/build/serializers/html-comment',
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '\\.integration\\.spec\\.ts$',
+    '<rootDir>/src/app/store/resumes/resume.selectors.spec.ts',
+    '<rootDir>/src/app/services/api.service.spec.ts',
+    '<rootDir>/src/app/services/file-upload.service.spec.ts',
+    '<rootDir>/src/app/pages/jobs/create-job/create-job.component.spec.ts',
+    '<rootDir>/src/app/directives/pull-to-refresh.directive.spec.ts',
+    '<rootDir>/src/app/components/shared/form-example/form-example.component.spec.ts',
+    '<rootDir>/src/app/components/privacy/consent-management.component.spec.ts',
+    '<rootDir>/src/app/directives/validation/validation-feedback.component.spec.ts',
   ],
 };

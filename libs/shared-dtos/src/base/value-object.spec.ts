@@ -67,7 +67,7 @@ describe('ValueObject', () => {
 
     it('should handle complex nested objects', () => {
       class ComplexValueObject extends ValueObject<{ data: { nested: string[] } }> {
-        public getData() {
+        getData() {
           return this.props.data;
         }
       }
@@ -80,7 +80,7 @@ describe('ValueObject', () => {
 
     it('should return false for different nested objects', () => {
       class ComplexValueObject extends ValueObject<{ data: { nested: string[] } }> {
-        public getData() {
+        getData() {
           return this.props.data;
         }
       }

@@ -68,7 +68,9 @@ export interface UploadState {
  *
  * @example
  * ```typescript
- * constructor(private uploadService: MobileUploadService) {}
+ * constructor(private uploadService: MobileUploadService) {
+  // Intentionally empty
+}
  *
  * ngOnInit() {
  *   this.state$ = this.uploadService.state$;
@@ -211,7 +213,7 @@ export class MobileUploadService {
   public addFiles(files: File[]): UploadFile[] {
     const validFiles: UploadFile[] = [];
 
-    for (const file of files) {
+    for(const file of files) {
       const validation = this.validateFile(file);
       if (validation.valid) {
         const uploadFile: UploadFile = {

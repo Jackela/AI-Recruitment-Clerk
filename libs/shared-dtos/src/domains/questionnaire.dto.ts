@@ -107,7 +107,9 @@ export class Questionnaire {
     private readonly quality: SubmissionQuality,
     private readonly metadata: SubmissionMetadata,
     private status: QuestionnaireStatus,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   // 工厂方法
   /**

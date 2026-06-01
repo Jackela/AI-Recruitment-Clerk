@@ -119,7 +119,9 @@ export class LoadTestingService {
   constructor(
     private readonly configService: ConfigService,
     private readonly cacheService: CacheService,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * 执行负载测试
@@ -276,7 +278,7 @@ export class LoadTestingService {
     const totalWeight = endpoints.reduce((sum, ep) => sum + ep.weight, 0);
     let random = Math.random() * totalWeight;
 
-    for (const endpoint of endpoints) {
+    for(const endpoint of endpoints) {
       random -= endpoint.weight;
       if (random <= 0) {
         return endpoint;

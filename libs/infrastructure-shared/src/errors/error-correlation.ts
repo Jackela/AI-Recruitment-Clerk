@@ -11,7 +11,10 @@ export class ErrorCorrelationManager {
    * @param context - The context.
    * @returns The result of the operation.
    */
-  public static setContext(context: { traceId?: string; requestId?: string }): void {
+  public static setContext(context: {
+    traceId?: string;
+    requestId?: string;
+  }): void {
     this.context = context;
   }
 
@@ -20,7 +23,7 @@ export class ErrorCorrelationManager {
    * @returns The result of the operation.
    */
   public static getContext(): { traceId?: string; requestId?: string } {
-    return this.context;
+    return { ...this.context };
   }
 
   /**

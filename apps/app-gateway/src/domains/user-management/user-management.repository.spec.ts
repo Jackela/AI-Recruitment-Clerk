@@ -56,7 +56,7 @@ const createRepository = () => {
         };
     }
 
-    async save() {
+    public async save() {
       store.set(this.document.id, { ...this.document });
       return clone(this.document);
     }

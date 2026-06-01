@@ -38,7 +38,9 @@ export class DataTableScrollUtil {
     const { tableWrapper, destroy$, onScrollChange } = config;
 
     if (!tableWrapper?.nativeElement) {
-      return () => {};
+      return () => {
+  // Intentionally empty
+};
     }
 
     const scrollElement = tableWrapper.nativeElement;

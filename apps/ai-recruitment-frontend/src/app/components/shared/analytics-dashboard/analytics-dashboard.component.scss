@@ -1,3 +1,5 @@
+@use '../../../../styles/design-system/mixins.scss' as mixins;
+
 .analytics-dashboard {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -7,34 +9,20 @@
 }
 
 .analytics-section {
-  background: var(--color-bg-primary);
+  @include mixins.card-base;
   border-radius: var(--radius-2xl);
   padding: var(--space-6);
   box-shadow: var(--shadow-2xl);
   border: 1px solid var(--color-border-secondary);
-  position: relative;
-  overflow: hidden;
-  transition: all var(--transition-base);
+  @include mixins.decorative-top-line(var(--color-primary-300));
 
   &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      var(--color-primary-300),
-      transparent
-    );
     opacity: 0.6;
   }
 
+  @include mixins.hover-lift(-2px, var(--shadow-3xl));
+
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-3xl);
     border-color: var(--color-primary-300);
   }
 }
@@ -45,30 +33,15 @@
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-fantasy-h2);
   color: var(--color-text-fantasy);
-  background: linear-gradient(
-    135deg,
+  @include mixins.gradient-text(
     var(--color-primary-800),
     var(--color-royal-700)
   );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
   letter-spacing: -0.01em;
-  position: relative;
+  @include mixins.gradient-bottom-border(var(--color-royal-500));
 
   &::after {
-    content: '';
-    position: absolute;
-    bottom: -var(--space-1);
-    left: 0;
     width: 40px;
-    height: 2px;
-    background: linear-gradient(
-      90deg,
-      var(--color-primary-600),
-      var(--color-royal-500)
-    );
-    border-radius: var(--radius-full);
   }
 }
 

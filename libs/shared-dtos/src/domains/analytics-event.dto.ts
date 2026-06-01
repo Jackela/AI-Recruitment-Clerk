@@ -21,7 +21,9 @@ export class AnalyticsEventCreatedEvent implements DomainEvent {
     public readonly eventType: EventType,
     public readonly timestamp: string,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -42,7 +44,9 @@ export class SystemPerformanceEventCreatedEvent implements DomainEvent {
     public readonly duration: number,
     public readonly success: boolean,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -65,7 +69,9 @@ export class BusinessMetricEventCreatedEvent implements DomainEvent {
     public readonly metricUnit: MetricUnit,
     public readonly dimensions: Record<string, string>,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -84,7 +90,9 @@ export class AnalyticsEventValidatedEvent implements DomainEvent {
     public readonly sessionId: string,
     public readonly eventType: EventType,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -103,7 +111,9 @@ export class AnalyticsEventValidationFailedEvent implements DomainEvent {
     public readonly sessionId: string,
     public readonly errors: string[],
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -122,7 +132,9 @@ export class AnalyticsEventProcessedEvent implements DomainEvent {
     public readonly sessionId: string,
     public readonly eventType: EventType,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -137,7 +149,9 @@ export class AnalyticsEventAnonymizedEvent implements DomainEvent {
   constructor(
     public readonly eventId: string,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -154,5 +168,7 @@ export class AnalyticsEventExpiredEvent implements DomainEvent {
     public readonly eventId: string,
     public readonly sessionId: string,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }

@@ -40,7 +40,9 @@ export class ErrorCorrelationInterceptor implements NestInterceptor {
    * Initializes a new instance of the Error Correlation Interceptor.
    * @param serviceName - The service name.
    */
-  constructor(private readonly _serviceName: string) {}
+  constructor(private readonly _serviceName: string) {
+  // Intentionally empty
+}
 
   /**
    * Performs the intercept operation.

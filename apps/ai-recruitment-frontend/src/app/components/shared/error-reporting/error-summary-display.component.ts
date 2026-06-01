@@ -1,4 +1,4 @@
-import { Component, input, computed } from '@angular/core';
+import {Component, input, computed, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -102,7 +102,8 @@ export interface ErrorSummaryData {
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class ErrorSummaryDisplayComponent {
   /**
    * Error summary data to display.

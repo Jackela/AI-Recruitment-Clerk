@@ -1,0 +1,36 @@
+{
+  "homepage": {
+    "loadTime": 3000,
+    "size": 500000,
+    "description": "首页加载性能和资源大小预算"
+  },
+  "dashboard": {
+    "loadTime": 5000,
+    "size": 1000000,
+    "description": "仪表盘页面加载预算"
+  },
+  "upload": {
+    "duration": 30000,
+    "description": "文件上传最大允许时间"
+  },
+  "analysis": {
+    "duration": 60000,
+    "description": "简历分析任务完成时间预算"
+  },
+  "jobCreation": {
+    "duration": 10000,
+    "description": "职位创建流程完成时间"
+  },
+  "login": {
+    "loadTime": 3000,
+    "description": "登录页面加载时间"
+  },
+  "jobsList": {
+    "loadTime": 4000,
+    "description": "职位列表页面加载时间"
+  },
+  "candidateList": {
+    "loadTime": 4000,
+    "description": "候选人列表页面加载时间"
+  }
+}

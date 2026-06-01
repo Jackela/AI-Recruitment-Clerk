@@ -17,7 +17,9 @@ export class GeminiClient {
    * @param _config - The config.
    */
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  constructor(_config: GeminiConfig) {}
+  constructor(_config: GeminiConfig) {
+  // Intentionally empty
+}
   /**
    * Generates structured response.
    * @param _prompt - The prompt.

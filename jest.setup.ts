@@ -21,19 +21,24 @@ expect.extend({
     const pass = received instanceof constructor;
     return {
       pass,
-      message: () => pass
-        ? `expected ${received} not to be an instance of ${constructor.name}`
-        : `expected ${received} to be an instance of ${constructor.name}`
+      message: () =>
+        pass
+          ? `expected ${received} not to be an instance of ${constructor.name}`
+          : `expected ${received} to be an instance of ${constructor.name}`,
     };
   },
 });
 
 // Ensure test environment flag for conditional app wiring
-process.env.NODE_ENV = 'test';
+process.env['NODE_ENV'] = 'test';
 
 // Stabilize MongoDB Memory Server across environments
-process.env.MONGOMS_VERSION = process.env.MONGOMS_VERSION || '7.0.5';
-process.env.MONGOMS_DISABLE_MD5_CHECK = process.env.MONGOMS_DISABLE_MD5_CHECK || '1';
+process.env['MONGOMS_VERSION'] = process.env['MONGOMS_VERSION'] || '7.0.5';
+process.env['MONGOMS_DISABLE_MD5_CHECK'] =
+  process.env['MONGOMS_DISABLE_MD5_CHECK'] || '1';
+
+// Disable NATS connection in tests to prevent hanging
+process.env['NATS_OPTIONAL'] = 'true';
 
 // Disable NestJS logger noise during tests
 try {
@@ -68,9 +73,17 @@ process.emitWarning = ((warning: any, ...args: any[]) => {
 afterEach(async () => {
   try {
     await runCleanups();
-    
+
     // 清理时钟和定时器
     if (typeof jest !== 'undefined') {
+      // Only run pending timers if fake timers are active
+      try {
+        if (jest.isMockFunction(setTimeout)) {
+          jest.runOnlyPendingTimers();
+        }
+      } catch {
+        // Ignore if fake timers are not being used
+      }
       jest.useRealTimers();
       jest.clearAllTimers();
     }
@@ -96,7 +109,11 @@ const isStandardIoHandle = (handle: any): boolean => {
     return true;
   }
 
-  if (handle.constructor?.name === 'Pipe' && typeof fd === 'number' && fd <= 3) {
+  if (
+    handle.constructor?.name === 'Pipe' &&
+    typeof fd === 'number' &&
+    fd <= 3
+  ) {
     return true;
   }
 
@@ -126,15 +143,15 @@ const isStandardIoHandle = (handle: any): boolean => {
 afterAll(async () => {
   try {
     await runCleanups();
-    
+
     // 清理时钟和定时器
     if (typeof jest !== 'undefined') {
       jest.useRealTimers();
       jest.clearAllTimers();
     }
-    
+
     // 检查是否有遗留的活动句柄
-    if (process.env.NODE_ENV === 'test') {
+    if (process.env['NODE_ENV'] === 'test') {
       const rawHandles = (process as any)._getActiveHandles?.() || [];
       const activeHandles = rawHandles.filter(
         (handle: any) => !isStandardIoHandle(handle),
@@ -148,7 +165,7 @@ afterAll(async () => {
         console.warn(
           `⚠️  检测到活动句柄: ${activeHandles.length}, 活动请求: ${activeRequests.length}`,
         );
-        if (process.env.JEST_DEBUG_HANDLES === 'true') {
+        if (process.env['JEST_DEBUG_HANDLES'] === 'true') {
           activeHandles.forEach((handle: any, index: number) => {
             const name = handle?.constructor?.name ?? 'Unknown';
             const fd = handle?._handle?.fd ?? handle?.fd;
@@ -171,14 +188,14 @@ afterAll(async () => {
 beforeEach(() => {
   clearCleanups();
   // Accelerate DB initialization for app-gateway tests
-  process.env.SKIP_DB = process.env.SKIP_DB || 'true';
+  process.env['SKIP_DB'] = process.env['SKIP_DB'] || 'true';
 });
 
 // 设置测试超时
 jest.setTimeout(30000);
 
 // 禁用console.log以减少测试噪音（仅在CI环境）
-if (process.env.CI) {
+if (process.env['CI']) {
   console.log = jest.fn();
   console.info = jest.fn();
 }
@@ -211,13 +228,15 @@ const ignoredConsoleErrorPatterns = [
 ];
 console.error = (...args: any[]) => {
   const message = args.join(' ');
-  if (ignoredConsoleErrorPatterns.some((pattern) => message.includes(pattern))) {
+  if (
+    ignoredConsoleErrorPatterns.some((pattern) => message.includes(pattern))
+  ) {
     return;
   }
   originalConsoleError.apply(console, args);
 };
 
-if (!process.env.CI) {
+if (!process.env['CI']) {
   const originalConsoleWarn = console.warn;
   const ignoredConsoleWarnPatterns = [
     '[MONGOOSE] Warning: Duplicate schema index',

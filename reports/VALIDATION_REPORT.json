@@ -1,0 +1,199 @@
+{
+  "timestamp": "2026-03-18T07:22:11.560Z",
+  "summary": {
+    "status": "failed",
+    "totalTests": 125,
+    "passed": 119,
+    "failed": 6,
+    "warnings": 0
+  },
+  "details": {
+    "unit": {
+      "status": "passed",
+      "summary": {
+        "lines": {
+          "total": 1000,
+          "covered": 850,
+          "skipped": 0,
+          "pct": 85
+        },
+        "statements": {
+          "total": 1200,
+          "covered": 1000,
+          "skipped": 0,
+          "pct": 83.33
+        },
+        "functions": {
+          "total": 200,
+          "covered": 170,
+          "skipped": 0,
+          "pct": 85
+        },
+        "branches": {
+          "total": 500,
+          "covered": 400,
+          "skipped": 0,
+          "pct": 80
+        }
+      },
+      "coveragePercentage": 85
+    },
+    "ai": {
+      "status": "passed",
+      "summary": {
+        "totalValidations": 50,
+        "passed": 48,
+        "failed": 2,
+        "issues": [
+          {
+            "type": "false_positive",
+            "count": 1,
+            "severity": "low"
+          },
+          {
+            "type": "missed_detection",
+            "count": 1,
+            "severity": "medium"
+          }
+        ]
+      },
+      "modelAccuracy": 0.96
+    },
+    "visual": {
+      "status": "failed",
+      "summary": {
+        "totalSnapshots": 25,
+        "passed": 24,
+        "failed": 1,
+        "newSnapshots": 0,
+        "updatedSnapshots": 2
+      },
+      "failedTests": [
+        {
+          "name": "login-page-snapshot",
+          "diff": 0.05,
+          "threshold": 0.02
+        }
+      ]
+    },
+    "performance": {
+      "status": "passed",
+      "summary": {
+        "metrics": {
+          "firstContentfulPaint": 1200,
+          "largestContentfulPaint": 2500,
+          "timeToInteractive": 3000,
+          "totalBlockingTime": 150,
+          "cumulativeLayoutShift": 0.05
+        },
+        "thresholds": {
+          "firstContentfulPaint": 1800,
+          "largestContentfulPaint": 4000,
+          "timeToInteractive": 5000,
+          "totalBlockingTime": 300,
+          "cumulativeLayoutShift": 0.1
+        },
+        "violations": []
+      },
+      "score": 92
+    },
+    "accessibility": {
+      "status": "failed",
+      "summary": {
+        "violations": 2,
+        "warnings": 1,
+        "score": 85,
+        "criticalIssues": 0
+      },
+      "details": {
+        "violations": [
+          {
+            "impact": "serious",
+            "description": "表单元素缺少关联标签",
+            "target": "input#search",
+            "help": "表单元素必须具有可访问的标签"
+          },
+          {
+            "impact": "moderate",
+            "description": "颜色对比度不足",
+            "target": ".text-muted",
+            "help": "文本与背景颜色对比度至少为 4.5:1"
+          }
+        ],
+        "warnings": [
+          {
+            "description": "建议使用更语义化的 HTML5 标签"
+          }
+        ]
+      }
+    },
+    "comprehensive": {
+      "status": "passed",
+      "summary": {
+        "totalChecks": 100,
+        "passed": 95,
+        "failed": 5,
+        "categories": {
+          "security": {
+            "passed": 20,
+            "failed": 0
+          },
+          "performance": {
+            "passed": 18,
+            "failed": 2
+          },
+          "reliability": {
+            "passed": 19,
+            "failed": 1
+          },
+          "maintainability": {
+            "passed": 18,
+            "failed": 2
+          },
+          "usability": {
+            "passed": 20,
+            "failed": 0
+          }
+        }
+      },
+      "recommendations": [
+        {
+          "priority": "medium",
+          "category": "性能",
+          "message": "建议优化数据库查询，减少N+1查询问题"
+        },
+        {
+          "priority": "low",
+          "category": "可维护性",
+          "message": "建议增加更多代码注释"
+        }
+      ]
+    }
+  },
+  "recommendations": [
+    {
+      "priority": "high",
+      "category": "可访问性",
+      "message": "发现 0 个关键可访问性问题"
+    },
+    {
+      "priority": "medium",
+      "category": "视觉回归",
+      "message": "发现 1 个视觉回归问题，请审查UI变更"
+    },
+    {
+      "priority": "medium",
+      "category": "性能",
+      "message": "建议优化数据库查询，减少N+1查询问题"
+    },
+    {
+      "priority": "low",
+      "category": "可维护性",
+      "message": "建议增加更多代码注释"
+    }
+  ],
+  "metadata": {
+    "version": "1.0.0",
+    "generatedBy": "generate-validation-report.js"
+  }
+}

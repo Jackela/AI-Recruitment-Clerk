@@ -13,4 +13,4 @@ export {
   type PhoneValidationOptions,
   type IdValidationOptions,
   type SchemaDefinition,
-} from './validation.util.js';
+} from './validation.util';

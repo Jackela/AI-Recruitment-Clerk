@@ -17,5 +17,7 @@ export class QuestionnaireValidationFailedEvent implements DomainEvent {
     public readonly validationErrors: string[],
     public readonly submissionData: Partial<RawSubmissionData>,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }

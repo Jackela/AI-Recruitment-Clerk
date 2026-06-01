@@ -34,7 +34,7 @@ export class IncentiveCalculationsService {
       rejected: 0,
     };
 
-    for (const incentive of incentives) {
+    for(const incentive of incentives) {
       const amount = incentive.getRewardAmount();
       totalAmount += amount;
 
@@ -92,7 +92,7 @@ export class IncentiveCalculationsService {
       rejected: 0,
     };
 
-    for (const incentive of allIncentives) {
+    for(const incentive of allIncentives) {
       totalAmount += incentive.getRewardAmount();
       uniqueIPs.add(incentive.getRecipientIP());
 

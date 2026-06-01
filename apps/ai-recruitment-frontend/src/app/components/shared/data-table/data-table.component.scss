@@ -209,11 +209,23 @@
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   background: var(--color-bg-primary);
+  outline: none;
 
   // Enhanced mobile scrolling
   @media (max-width: 768px) {
     border-radius: var(--radius-xl);
     box-shadow: inset 0 0 0 1px var(--color-border-secondary);
+  }
+
+  // Keyboard navigation focus styles
+  &:focus-visible {
+    outline: 2px solid var(--color-primary-500);
+    outline-offset: 2px;
+  }
+
+  &.keyboard-active {
+    outline: 2px solid var(--color-primary-500);
+    outline-offset: 2px;
   }
 }
 
@@ -370,6 +382,24 @@
         }
       }
 
+      // Keyboard navigation focus styles
+      &.focused {
+        background: linear-gradient(
+          135deg,
+          var(--color-primary-50),
+          var(--color-royal-50)
+        );
+        box-shadow: inset 0 0 0 2px var(--color-primary-500);
+
+        &::before {
+          height: 100%;
+        }
+
+        td {
+          position: relative;
+        }
+      }
+
       td {
         padding: var(--space-4) var(--space-5);
         font-family: var(--font-family-body);
@@ -377,6 +407,7 @@
         font-weight: var(--font-weight-normal);
         color: var(--color-text-primary);
         position: relative;
+        outline: none;
 
         &.checkbox-column {
           text-align: center;
@@ -384,6 +415,29 @@
 
         &.actions-column {
           text-align: center;
+        }
+
+        // Keyboard focused cell styles
+        &.focused {
+          background: var(--color-primary-100);
+          box-shadow: inset 0 0 0 2px var(--color-primary-600);
+
+          &::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            bottom: 2px;
+            border: 2px dashed var(--color-primary-400);
+            border-radius: var(--radius-sm);
+            pointer-events: none;
+          }
+        }
+
+        &:focus-visible {
+          outline: 2px solid var(--color-primary-500);
+          outline-offset: -2px;
         }
       }
     }

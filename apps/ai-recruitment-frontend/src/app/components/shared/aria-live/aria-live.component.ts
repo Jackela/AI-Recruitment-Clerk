@@ -1,5 +1,10 @@
-import type { OnInit, OnDestroy} from '@angular/core';
-import { Component, inject, effect } from '@angular/core';
+import type { OnInit, OnDestroy } from '@angular/core';
+import {
+  Component,
+  inject,
+  effect,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AccessibilityService } from '../../../services/accessibility/accessibility.service';
 import { Subscription } from 'rxjs';
@@ -115,6 +120,8 @@ export interface LiveMessage {
       }
     `,
   ],
+
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AriaLiveComponent implements OnInit, OnDestroy {
   private accessibilityService = inject(AccessibilityService);
@@ -130,8 +137,11 @@ export class AriaLiveComponent implements OnInit, OnDestroy {
    */
   public ngOnInit(): void {
     // Subscribe to accessibility service live messages (test-compatible)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const isTestEnvironment = typeof (window as any).__karma__ !== 'undefined';
+    interface WindowWithKarma extends Window {
+      __karma__?: unknown;
+    }
+    const isTestEnvironment =
+      typeof (window as WindowWithKarma).__karma__ !== 'undefined';
     if (!isTestEnvironment) {
       // Production environment: use effect for reactive updates
       try {

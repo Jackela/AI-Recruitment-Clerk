@@ -35,9 +35,11 @@ import type { GuestUsageService } from '../services/guest-usage.service';
 import type { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
 import type { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
 import type {
-  GridFsService,
-  ResumeFileMetadata,
+  GridFsService} from '../../services/gridfs.service';
+import {
+  type ResumeFileMetadata,
 } from '../../services/gridfs.service';
+import type { GuestResumeAnalysisService } from '../services/guest-resume-analysis.service';
 
 interface GuestResumeUploadDto {
   candidateName?: string;
@@ -93,6 +95,7 @@ export class GuestResumeController {
     private readonly guestUsageService: GuestUsageService,
     private readonly natsClient: AppGatewayNatsService,
     private readonly gridFsService: GridFsService,
+    private readonly analysisService: GuestResumeAnalysisService,
   ) {}
 
   /**
@@ -202,6 +205,21 @@ export class GuestResumeController {
         uploadedAt: new Date(),
       };
 
+      await this.analysisService.createQueued({
+        analysisId,
+        deviceId: isAuthenticated ? undefined : deviceId,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        userId: isAuthenticated ? (req.user as any)?.id : undefined,
+        filename: file.originalname,
+        fileSize: file.size,
+        mimeType: file.mimetype,
+        candidateName: uploadData.candidateName || 'Anonymous',
+        candidateEmail: uploadData.candidateEmail,
+        notes: uploadData.notes,
+        isGuestMode: !isAuthenticated,
+        uploadedAt: analysisRequest.uploadedAt,
+      });
+
       // Store the file in GridFS and publish resume submission event to NATS
       let tempGridFsUrl = '';
       try {
@@ -238,6 +256,7 @@ export class GuestResumeController {
           file.originalname,
           fileMetadata,
         );
+        await this.analysisService.markProcessing(analysisId, tempGridFsUrl);
 
         this.logger.log(
           `Resume file stored in GridFS successfully: ${tempGridFsUrl}`,
@@ -275,6 +294,13 @@ export class GuestResumeController {
               cleanupErr,
             );
           }
+          await this.analysisService.markFailed(
+            analysisId,
+            publishResult.error ?? 'Failed to publish resume analysis event',
+          );
+          throw new Error(
+            publishResult.error ?? 'Failed to publish resume analysis event',
+          );
         } else {
           this.logger.log(
             `NATS publish succeeded for resumeId=${resumeId}, msgId=${publishResult.messageId}`,
@@ -340,6 +366,11 @@ export class GuestResumeController {
           analysisId,
           20000,
         );
+        if (!parsed?.resumeDto) {
+          throw new Error('Analysis result event did not include resume data');
+        }
+
+        await this.analysisService.markCompleted(parsed);
         this.logger.log(
           `Received analysis.resume.parsed for resumeId=${analysisId} (jobId=${parsed.jobId})`,
         );
@@ -512,94 +543,20 @@ export class GuestResumeController {
         throw new HttpException('Invalid analysis ID', HttpStatus.BAD_REQUEST);
       }
 
-      // 🚧 演示版本 - 返回模拟数据
-      // 生产版本将集成真实的AI简历解析服务
-      // TODO: 集成 ResumeParserService 进行真实文件解析
-      const mockResults = {
+      const record = await this.analysisService.findForRequest(
         analysisId,
-        status: 'completed',
-        progress: 100,
-        results: {
-          personalInfo: {
-            name: 'John Doe',
-            email: 'john.doe@email.com',
-            phone: '+1234567890',
-            location: 'New York, NY',
-          },
-          skills: [
-            {
-              name: 'JavaScript',
-              category: 'Programming',
-              proficiency: 'Advanced',
-            },
-            { name: 'React', category: 'Frontend', proficiency: 'Advanced' },
-            {
-              name: 'Node.js',
-              category: 'Backend',
-              proficiency: 'Intermediate',
-            },
-            {
-              name: 'Project Management',
-              category: 'Soft Skills',
-              proficiency: 'Advanced',
-            },
-          ],
-          experience: {
-            totalYears: 5,
-            positions: [
-              {
-                title: 'Senior Frontend Developer',
-                company: 'Tech Corp',
-                duration: '2021-Present',
-                responsibilities: [
-                  'Lead frontend development team',
-                  'Architect scalable React applications',
-                  'Mentor junior developers',
-                ],
-              },
-              {
-                title: 'Frontend Developer',
-                company: 'StartupXYZ',
-                duration: '2019-2021',
-                responsibilities: [
-                  'Developed responsive web applications',
-                  'Collaborated with UX/UI designers',
-                  'Implemented automated testing',
-                ],
-              },
-            ],
-          },
-          education: [
-            {
-              degree: "Bachelor's in Computer Science",
-              school: 'University of Technology',
-              year: '2019',
-              major: 'Software Engineering',
-            },
-          ],
-          summary: {
-            overallScore: 85,
-            strengths: [
-              'Strong frontend development skills',
-              'Leadership experience',
-              'Continuous learning mindset',
-              'Good communication skills',
-            ],
-            recommendations: [
-              'Consider expanding backend development skills',
-              'Explore cloud technologies (AWS/Azure)',
-              'Develop more experience with microservices architecture',
-            ],
-          },
-        },
-        completedAt: new Date().toISOString(),
-      };
+        _req,
+      );
+
+      if (!record) {
+        throw new HttpException('Analysis not found', HttpStatus.NOT_FOUND);
+      }
 
       this.logger.debug(`Analysis results retrieved: ${analysisId}`);
 
       return {
         success: true,
-        data: mockResults,
+        data: this.analysisService.toAnalysisResults(record),
       };
     } catch (error) {
       if (error instanceof HttpException) {
@@ -616,6 +573,50 @@ export class GuestResumeController {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  @Get('resume/detailed-results/:sessionId')
+  @UseGuards(OptionalJwtAuthGuard, GuestGuard)
+  @ApiOperation({
+    summary: 'Get detailed resume analysis results',
+    description: 'Return the detailed report payload for the frontend results page',
+  })
+  @ApiParam({
+    name: 'sessionId',
+    description: 'Session/analysis ID returned from upload',
+  })
+  public async getDetailedResults(
+    @Req() req: RequestWithDeviceId,
+    @Param('sessionId') sessionId: string,
+  ) {
+    if (!sessionId || !sessionId.startsWith('guest-analysis-')) {
+      throw new HttpException('Invalid session ID', HttpStatus.BAD_REQUEST);
+    }
+
+    const record = await this.analysisService.findForRequest(sessionId, req);
+    if (!record) {
+      throw new HttpException('Analysis not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (record.status !== 'completed') {
+      throw new HttpException(
+        {
+          success: false,
+          status: record.status,
+          progress: record.progress,
+          message:
+            record.errorMessage ||
+            (record.status === 'failed'
+              ? 'Analysis failed'
+              : 'Analysis is still processing'),
+        },
+        record.status === 'failed'
+          ? HttpStatus.UNPROCESSABLE_ENTITY
+          : HttpStatus.CONFLICT,
+      );
+    }
+
+    return this.analysisService.toDetailedResult(record);
   }
 
   /**

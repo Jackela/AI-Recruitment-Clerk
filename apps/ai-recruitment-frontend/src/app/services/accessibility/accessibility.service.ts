@@ -502,7 +502,7 @@ export class AccessibilityService {
           s.context === 'global'),
     );
 
-    for (const shortcut of activeShortcuts) {
+    for(const shortcut of activeShortcuts) {
       if (this.matchesShortcut(event, shortcut)) {
         event.preventDefault();
         shortcut.action();
@@ -541,7 +541,7 @@ export class AccessibilityService {
 
     let announcement = '';
 
-    switch (reason) {
+    switch(reason) {
       case 'navigation':
         announcement = `Focused ${role || tagName}${label ? ': ' + label : ''}`;
         break;
@@ -637,7 +637,7 @@ export class AccessibilityService {
     let adjustment = -20;
     let adjustedColor = color;
 
-    for (let i = 0; i < 10; i++) {
+    for(let i = 0; i < 10; i++) {
       const adjustedRgb = {
         r: Math.max(0, Math.min(255, rgb.r + adjustment)),
         g: Math.max(0, Math.min(255, rgb.g + adjustment)),

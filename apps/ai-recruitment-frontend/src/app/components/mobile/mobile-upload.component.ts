@@ -5,6 +5,7 @@ import {
   Output,
   EventEmitter,
   inject,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
@@ -27,7 +28,11 @@ import { MobileUploadService } from '../../services/mobile/mobile-upload.service
 @Component({
   selector: 'arc-mobile-upload',
   standalone: true,
-  imports: [CommonModule, MobileUploadZoneComponent, MobileUploadFileItemComponent],
+  imports: [
+    CommonModule,
+    MobileUploadZoneComponent,
+    MobileUploadFileItemComponent,
+  ],
   template: `
     <div class="mobile-upload-container">
       <!-- Upload Header -->
@@ -249,6 +254,7 @@ import { MobileUploadService } from '../../services/mobile/mobile-upload.service
       }
     `,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MobileUploadComponent implements OnInit, OnDestroy {
   @Input() public title = 'Upload Documents';
@@ -373,7 +379,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
   private startUpload(files: UploadFile[]): void {
     this.uploadStart.emit(files);
 
-    for (const file of files) {
+    for(const file of files) {
       this.uploadService.setFileUploading(file.id);
       this.simulateUpload(file);
     }

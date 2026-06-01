@@ -28,7 +28,9 @@ export class UsersController {
    * Initializes a new instance of the Users Controller.
    * @param userService - The user service.
    */
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) {
+  // Intentionally empty
+}
   /**
    * Retrieves profile.
    * @param req - The req.

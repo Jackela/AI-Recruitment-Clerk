@@ -1,0 +1,25 @@
+{
+  "status": "passed",
+  "totalChecks": 100,
+  "passed": 95,
+  "failed": 5,
+  "categories": {
+    "security": { "passed": 20, "failed": 0 },
+    "performance": { "passed": 18, "failed": 2 },
+    "reliability": { "passed": 19, "failed": 1 },
+    "maintainability": { "passed": 18, "failed": 2 },
+    "usability": { "passed": 20, "failed": 0 }
+  },
+  "recommendations": [
+    {
+      "priority": "medium",
+      "category": "性能",
+      "message": "建议优化数据库查询，减少N+1查询问题"
+    },
+    {
+      "priority": "low",
+      "category": "可维护性",
+      "message": "建议增加更多代码注释"
+    }
+  ]
+}

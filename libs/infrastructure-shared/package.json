@@ -1,7 +1,6 @@
 {
   "name": "@ai-recruitment-clerk/infrastructure-shared",
   "version": "1.0.0",
-  "type": "module",
   "main": "./dist/index.js",
   "exports": {
     ".": {

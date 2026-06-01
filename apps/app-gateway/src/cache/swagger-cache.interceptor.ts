@@ -23,7 +23,9 @@ export class SwaggerCacheInterceptor implements NestInterceptor {
    * Initializes a new instance of the Swagger Cache Interceptor.
    * @param cacheService - The cache service.
    */
-  constructor(private readonly cacheService: CacheService) {}
+  constructor(private readonly cacheService: CacheService) {
+  // Intentionally empty
+}
 
   /**
    * Performs the intercept operation.

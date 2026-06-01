@@ -29,7 +29,9 @@ export class AnalysisService {
    * Initializes a new instance of the Analysis Service.
    * @param natsClient - The nats client.
    */
-  constructor(private readonly natsClient: AppGatewayNatsService) {}
+  constructor(private readonly natsClient: AppGatewayNatsService) {
+  // Intentionally empty
+}
 
   /**
    * Performs the initiate analysis operation.

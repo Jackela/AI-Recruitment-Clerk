@@ -263,7 +263,7 @@ export class ExperienceCalculator {
     let totalMonths = 0;
     let currentEnd = sortedPositions[0].dateRange.start.date ?? new Date(0);
 
-    for (const position of sortedPositions) {
+    for(const position of sortedPositions) {
       const start = position.dateRange.start.date ?? new Date(0);
       const end = position.dateRange.end.isPresent
         ? new Date()
@@ -304,7 +304,7 @@ export class ExperienceCalculator {
       currentDate.getFullYear() - this.RECENT_YEARS_THRESHOLD,
     );
 
-    for (const position of positions) {
+    for(const position of positions) {
       if (position.isRelevant || position.relevanceScore > 0.7) {
         let duration = position.dateRange.duration.totalMonths;
 
@@ -400,7 +400,7 @@ export class ExperienceCalculator {
         return aStart.getTime() - bStart.getTime();
       });
 
-    for (let i = 1; i < sortedPositions.length; i++) {
+    for(let i = 1; i < sortedPositions.length; i++) {
       const prevEnd = sortedPositions[i - 1].dateRange.end.isPresent
         ? new Date()
         : (sortedPositions[i - 1].dateRange.end.date ?? new Date(0));
@@ -433,8 +433,8 @@ export class ExperienceCalculator {
   ): DateRange[] {
     const overlaps: DateRange[] = [];
 
-    for (let i = 0; i < positions.length; i++) {
-      for (let j = i + 1; j < positions.length; j++) {
+    for(let i = 0; i < positions.length; i++) {
+      for(let j = i + 1; j < positions.length; j++) {
         if (
           DateParser.checkDateRangeOverlap(
             positions[i].dateRange,

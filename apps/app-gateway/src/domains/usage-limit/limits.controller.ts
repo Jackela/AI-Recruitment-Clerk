@@ -47,7 +47,9 @@ export class LimitsController {
    */
   constructor(
     private readonly usageLimitService: UsageLimitIntegrationService,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the check usage limit operation.
