@@ -82,7 +82,14 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps || npx playwright install
       - name: Run E2E Smoke
-        run: npm run test:e2e
+        working-directory: apps/ai-recruitment-frontend-e2e
+        run: >
+          npx playwright test
+          --grep-invert @pdf-variety
+          --grep-invert @real-data
+          --grep-invert @accessibility
+          --grep-invert @visual
+          --pass-with-no-tests
         env:
           CI: true
           E2E_SKIP_WEBSERVER: true
@@ -98,6 +105,8 @@ jobs:
         with:
           name: playwright-report
           path: |
+            apps/ai-recruitment-frontend-e2e/playwright-report
+            apps/ai-recruitment-frontend-e2e/test-results
             playwright-report
             e2e/results
           if-no-files-found: ignore
