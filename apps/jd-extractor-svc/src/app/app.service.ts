@@ -182,7 +182,7 @@ export class AppService
   private async cleanupEventSubscriptions(): Promise<void> {
     try {
       // Unsubscribe from all active subscriptions
-      for (const [subject, _subscription] of this.subscriptions) {
+      for(const [subject, _subscription] of this.subscriptions) {
         // Cleanup subscription
         this.logger.log(`Cleaned up subscription for: ${subject}`);
       }

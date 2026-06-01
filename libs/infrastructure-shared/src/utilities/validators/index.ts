@@ -14,11 +14,11 @@ export type {
   PhoneValidationOptions,
   IdValidationOptions,
   SchemaDefinition,
-} from './validation.types.js';
+} from './validation.types';
 
 // Validators
-export { EmailValidator } from './email.validator.js';
-export { PhoneValidator } from './phone.validator.js';
-export { IdValidator } from './id.validator.js';
-export { SchemaValidator } from './schema.validator.js';
-export { Validator } from './validator.js';
+export { EmailValidator } from './email.validator';
+export { PhoneValidator } from './phone.validator';
+export { IdValidator } from './id.validator';
+export { SchemaValidator } from './schema.validator';
+export { Validator } from './validator';

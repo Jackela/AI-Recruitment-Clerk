@@ -1,9 +1,10 @@
-import type { OnInit } from '@angular/core';
-import { Component, inject } from '@angular/core';
+import type { OnInit, OnDestroy } from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import type { Observable } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import type { GuestState } from '../../store/guest/guest.state';
 import * as GuestActions from '../../store/guest/guest.actions';
 import { ToastService } from '../../services/toast.service';
@@ -81,7 +82,9 @@ import { ToastService } from '../../services/toast.service';
             class="bg-gray-50 p-4 rounded-lg mb-4"
             *ngIf="guestState$ | async as state"
           >
-            <label for="feedbackCodeInput" class="block text-sm font-medium text-gray-700 mb-2"
+            <label
+              for="feedbackCodeInput"
+              class="block text-sm font-medium text-gray-700 mb-2"
               >您的反馈码：</label
             >
             <div class="flex items-center space-x-2">
@@ -246,8 +249,9 @@ import { ToastService } from '../../services/toast.service';
       }
     `,
   ],
-})
-export class FeedbackCodeModalComponent implements OnInit {
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
+export class FeedbackCodeModalComponent implements OnInit, OnDestroy {
   public showModal$: Observable<boolean>;
   public guestState$: Observable<GuestState>;
   public isLoading$: Observable<boolean>;
@@ -258,6 +262,7 @@ export class FeedbackCodeModalComponent implements OnInit {
 
   private readonly store = inject(Store<{ guest: GuestState }>);
   private readonly toastService = inject(ToastService);
+  private readonly destroy$ = new Subject<void>();
 
   /**
    * Initializes a new instance of the Feedback Code Modal Component.
@@ -276,11 +281,19 @@ export class FeedbackCodeModalComponent implements OnInit {
    */
   public ngOnInit(): void {
     // Pre-populate redemption code with generated feedback code
-    this.guestState$.subscribe((state) => {
+    this.guestState$.pipe(takeUntil(this.destroy$)).subscribe((state) => {
       if (state.feedbackCode && !this.redemptionCode) {
         this.redemptionCode = state.feedbackCode;
       }
     });
+  }
+
+  /**
+   * Performs the ng on destroy operation.
+   */
+  public ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   /**

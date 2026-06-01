@@ -6,6 +6,20 @@ import type {
   AnalysisSummary,
 } from '../../services/guest/guest-api.service';
 
+export type GuestAnalysisStatus =
+  | 'idle'
+  | 'uploading'
+  | 'queued'
+  | 'processing'
+  | 'completed'
+  | 'failed'
+  | 'expired';
+
+export type GuestAnalysisResultStatus = Exclude<
+  GuestAnalysisStatus,
+  'idle' | 'uploading'
+>;
+
 /**
  * Defines the shape of the guest state.
  */
@@ -28,7 +42,7 @@ export interface GuestState {
   // Analysis tracking
   currentAnalysis: {
     analysisId: string | null;
-    status: 'idle' | 'uploading' | 'processing' | 'completed' | 'failed';
+    status: GuestAnalysisStatus;
     progress: number;
     filename: string | null;
     uploadedAt: string | null;
@@ -39,7 +53,7 @@ export interface GuestState {
   analysisResults: {
     [analysisId: string]: {
       analysisId: string;
-      status: 'processing' | 'completed' | 'failed';
+      status: GuestAnalysisResultStatus;
       progress: number;
       results?: {
         personalInfo: PersonalInfo;

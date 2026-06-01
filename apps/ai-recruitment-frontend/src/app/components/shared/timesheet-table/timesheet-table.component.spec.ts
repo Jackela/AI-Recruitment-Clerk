@@ -116,7 +116,9 @@ describe('TimesheetTableComponent (lightweight regression)', () => {
     fixture.detectChanges();
 
     const exportSpy = jest.spyOn(component.onExport, 'emit');
-    const exportUtilSpy = jest.spyOn(TimesheetExportUtil, 'exportData').mockImplementation(() => {});
+    const exportUtilSpy = jest.spyOn(TimesheetExportUtil, 'exportData').mockImplementation(() => {
+  // Intentionally empty
+});
 
     component.exportDataCsv();
 

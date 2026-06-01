@@ -11,7 +11,9 @@ export class AppController {
    * Initializes a new instance of the App Controller.
    * @param appService - The app service.
    */
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly appService: AppService) {
+  // Intentionally empty
+}
 
   /**
    * Retrieves data.

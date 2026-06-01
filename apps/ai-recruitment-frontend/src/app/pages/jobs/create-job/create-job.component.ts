@@ -1,18 +1,14 @@
-import type { OnInit, OnDestroy} from '@angular/core';
-import { Component, inject } from '@angular/core';
-import type {
-  FormGroup} from '@angular/forms';
-import {
-  FormBuilder,
-  Validators,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import type { OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import type { FormGroup } from '@angular/forms';
+import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import { takeUntil, filter } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import type { AppState } from '../../../store/app.state';
+import type { JobProgressValue } from '../../../store/jobs/job.model';
 import * as JobActions from '../../../store/jobs/job.actions';
 import * as JobSelectors from '../../../store/jobs/job.selectors';
 import { Router } from '@angular/router';
@@ -33,6 +29,7 @@ type TranslationDescriptor = {
   imports: [CommonModule, ReactiveFormsModule, TranslatePipe],
   templateUrl: './create-job.component.html',
   styleUrl: './create-job.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CreateJobComponent implements OnInit, OnDestroy {
   public createJobForm: FormGroup;
@@ -44,8 +41,7 @@ export class CreateJobComponent implements OnInit, OnDestroy {
   public webSocketStatus$: Observable<
     'connecting' | 'connected' | 'disconnected' | 'error'
   >;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public currentJobProgress$: Observable<any>;
+  public currentJobProgress$: Observable<Record<string, JobProgressValue>>;
 
   // Job creation progress tracking
   public createdJobId: string | null = null;
@@ -179,7 +175,9 @@ export class CreateJobComponent implements OnInit, OnDestroy {
    * Performs the job title operation.
    * @returns The result of the operation.
    */
-  public get jobTitle(): import('@angular/forms').AbstractControl<string> | null {
+  public get jobTitle():
+    | import('@angular/forms').AbstractControl<string>
+    | null {
     return this.createJobForm.get('jobTitle');
   }
 
@@ -244,7 +242,9 @@ export class CreateJobComponent implements OnInit, OnDestroy {
    * @param descriptor - The translation descriptor.
    * @returns The translated message or empty string when descriptor is null.
    */
-  public getFieldErrorMessage(descriptor: TranslationDescriptor | null): string {
+  public getFieldErrorMessage(
+    descriptor: TranslationDescriptor | null,
+  ): string {
     if (!descriptor) {
       return '';
     }
@@ -420,7 +420,9 @@ export class CreateJobComponent implements OnInit, OnDestroy {
     const currentProgress = this.getProgressPercentage();
     const steps = [
       {
-        label: this.i18nService.translate('jobs.createJob.progress.initializing'),
+        label: this.i18nService.translate(
+          'jobs.createJob.progress.initializing',
+        ),
         completed: currentProgress > 0,
         active: currentProgress > 0 && currentProgress <= 25,
       },

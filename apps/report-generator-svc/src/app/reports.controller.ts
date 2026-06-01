@@ -201,7 +201,9 @@ export class ReportsController {
     private readonly reportGeneratorService: ReportGeneratorService,
     private readonly reportRepository: ReportRepository,
     private readonly gridFsService: GridFsService,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Generates report.

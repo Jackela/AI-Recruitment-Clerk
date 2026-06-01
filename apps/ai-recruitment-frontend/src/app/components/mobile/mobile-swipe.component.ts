@@ -1,13 +1,13 @@
-import type {
-  ElementRef,
-  OnInit,
-  OnDestroy} from '@angular/core';
+import type { ElementRef, OnInit, OnDestroy } from '@angular/core';
 import {
   Component,
   Input,
   Output,
   EventEmitter,
   ViewChild,
+  HostListener,
+  ChangeDetectionStrategy,
+  signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -20,6 +20,7 @@ export interface SwipeAction {
   icon: string;
   color: 'primary' | 'success' | 'danger' | 'warning';
   width?: number;
+  keyboardShortcut?: string;
 }
 
 /**
@@ -42,7 +43,12 @@ export interface SwipeEvent<T = unknown> {
       class="mobile-swipe-container"
       #container
       [class.swiping]="isSwiping"
-      [class.actions-visible]="actionsVisible"
+      [class.actions-visible]="actionsVisible || keyboardActionsVisible"
+      tabindex="0"
+      [attr.aria-label]="ariaLabel"
+      [attr.aria-description]="keyboardHint"
+      (focus)="onFocus()"
+      (blur)="onBlur()"
       (touchstart)="onTouchStart($event)"
       (touchmove)="onTouchMove($event)"
       (touchend)="onTouchEnd($event)"
@@ -52,19 +58,25 @@ export interface SwipeEvent<T = unknown> {
       (mouseleave)="onMouseLeave($event)"
     >
       <!-- Swipe Actions Background -->
-      <div class="swipe-actions" #actionsContainer>
+      <div class="swipe-actions" #actionsContainer role="list">
         <button
-          *ngFor="let action of actions"
+          *ngFor="let action of actions; let i = index"
           class="swipe-action"
           [class]="'swipe-action--' + action.color"
+          [class.keyboard-focused]="isActionFocused(i)"
           [style.width.px]="action.width || 80"
           (click)="onActionClick(action)"
-          [attr.aria-label]="action.label"
+          [attr.aria-label]="getActionAriaLabel(action)"
+          [attr.tabindex]="isActionFocused(i) ? 0 : -1"
+          role="listitem"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
             <path [attr.d]="action.icon" />
           </svg>
           <span class="action-label">{{ action.label }}</span>
+          <span *ngIf="action.keyboardShortcut" class="shortcut-hint">{{
+            action.keyboardShortcut
+          }}</span>
         </button>
       </div>
 
@@ -75,6 +87,11 @@ export interface SwipeEvent<T = unknown> {
         [style.transform]="'translateX(' + translateX + 'px)'"
       >
         <ng-content></ng-content>
+      </div>
+
+      <!-- Keyboard Instructions (Screen Reader Only) -->
+      <div class="sr-only" role="region" aria-live="polite">
+        {{ keyboardHint }}
       </div>
     </div>
   `,
@@ -87,6 +104,12 @@ export interface SwipeEvent<T = unknown> {
         user-select: none;
         -webkit-user-select: none;
         touch-action: pan-y;
+        outline: none;
+
+        &:focus-visible {
+          outline: 2px solid #3498db;
+          outline-offset: 2px;
+        }
 
         &.swiping {
           .swipe-content {
@@ -124,9 +147,22 @@ export interface SwipeEvent<T = unknown> {
             transition: all 0.2s ease;
             min-width: 60px;
             padding: 8px;
+            outline: none;
 
             &:active {
               transform: scale(0.95);
+            }
+
+            &:focus-visible {
+              outline: 2px solid white;
+              outline-offset: -4px;
+              box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.5);
+            }
+
+            &.keyboard-focused {
+              transform: scale(1.05);
+              box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.5);
+              z-index: 10;
             }
 
             &--primary {
@@ -169,6 +205,15 @@ export interface SwipeEvent<T = unknown> {
               max-width: 100%;
             }
 
+            .shortcut-hint {
+              font-size: 9px;
+              opacity: 0.8;
+              margin-top: 2px;
+              padding: 1px 4px;
+              background: rgba(0, 0, 0, 0.2);
+              border-radius: 3px;
+            }
+
             svg {
               flex-shrink: 0;
             }
@@ -182,6 +227,18 @@ export interface SwipeEvent<T = unknown> {
           transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
           will-change: transform;
         }
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
       }
 
       @media (min-width: 768px) {
@@ -199,30 +256,53 @@ export interface SwipeEvent<T = unknown> {
       }
     `,
   ],
+
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MobileSwipeComponent<T = unknown> implements OnInit, OnDestroy {
   @Input() public actions: SwipeAction[] = [];
   @Input() public swipeThreshold = 80;
   @Input() public disabled = false;
   @Input() public item!: T;
+  @Input() public itemLabel = '项目';
 
   @Output() public swipeAction = new EventEmitter<SwipeEvent<T>>();
   @Output() public swipeStart = new EventEmitter<void>();
   @Output() public swipeEnd = new EventEmitter<void>();
+  @Output() public keyboardAction = new EventEmitter<SwipeEvent<T>>();
 
   @ViewChild('container') public container!: ElementRef<HTMLElement>;
   @ViewChild('content') public content!: ElementRef<HTMLElement>;
-  @ViewChild('actionsContainer') public actionsContainer!: ElementRef<HTMLElement>;
+  @ViewChild('actionsContainer')
+  public actionsContainer!: ElementRef<HTMLElement>;
 
   public translateX = 0;
   public isSwiping = false;
   public actionsVisible = false;
+  public keyboardActionsVisible = false;
 
   private startX = 0;
   private currentX = 0;
   private isDragging = false;
   private maxSwipeDistance = 0;
   private isMouseEvent = false;
+  private focusedActionIndex = signal<number>(-1);
+  private isKeyboardActive = signal<boolean>(false);
+
+  public get ariaLabel(): string {
+    return `${this.itemLabel}，按Tab键查看可执行的操作`;
+  }
+
+  public get keyboardHint(): string {
+    if (this.actions.length === 0) return '';
+    const shortcuts = this.actions
+      .filter((a) => a.keyboardShortcut)
+      .map((a) => `${a.keyboardShortcut}键${a.label}`)
+      .join('，');
+    return shortcuts
+      ? `快捷键：${shortcuts}。按Delete键删除，Enter键确认。`
+      : '按Enter键查看操作';
+  }
 
   /**
    * Performs the ng on init operation.
@@ -237,7 +317,6 @@ export class MobileSwipeComponent<T = unknown> implements OnInit, OnDestroy {
    * @returns The result of the operation.
    */
   public ngOnDestroy(): void {
-    // Clean up any ongoing interactions
     this.resetSwipe();
   }
 
@@ -245,6 +324,132 @@ export class MobileSwipeComponent<T = unknown> implements OnInit, OnDestroy {
     this.maxSwipeDistance = this.actions.reduce((total, action) => {
       return total + (action.width || 80);
     }, 0);
+  }
+
+  public onFocus(): void {
+    if (!this.keyboardActionsVisible && this.actions.length > 0) {
+      this.focusedActionIndex.set(-1);
+    }
+    this.isKeyboardActive.set(true);
+  }
+
+  public onBlur(): void {
+    if (!this.keyboardActionsVisible) {
+      this.isKeyboardActive.set(false);
+      this.focusedActionIndex.set(-1);
+    }
+  }
+
+  @HostListener('keydown', ['$event'])
+  public handleKeyboardEvent(event: KeyboardEvent): void {
+    if (this.disabled) return;
+
+    // Handle global shortcuts
+    const shortcutAction = this.actions.find(
+      (a) => a.keyboardShortcut === event.key,
+    );
+    if (shortcutAction) {
+      event.preventDefault();
+      this.swipeAction.emit({ action: shortcutAction, item: this.item });
+      this.keyboardAction.emit({ action: shortcutAction, item: this.item });
+      return;
+    }
+
+    switch(event.key) {
+      case 'Tab':
+        if (this.actions.length > 0) {
+          event.preventDefault();
+          this.keyboardActionsVisible = true;
+          if (event.shiftKey) {
+            this.previousAction();
+          } else {
+            this.nextAction();
+          }
+        }
+        break;
+
+      case 'ArrowRight':
+      case 'ArrowDown':
+        if (this.keyboardActionsVisible) {
+          event.preventDefault();
+          this.nextAction();
+        }
+        break;
+
+      case 'ArrowLeft':
+      case 'ArrowUp':
+        if (this.keyboardActionsVisible) {
+          event.preventDefault();
+          this.previousAction();
+        }
+        break;
+
+      case 'Enter':
+        if (this.keyboardActionsVisible && this.focusedActionIndex() >= 0) {
+          event.preventDefault();
+          const action = this.actions[this.focusedActionIndex()];
+          this.onActionClick(action);
+        } else if (!this.keyboardActionsVisible && this.actions.length > 0) {
+          event.preventDefault();
+          this.keyboardActionsVisible = true;
+          this.focusedActionIndex.set(0);
+        }
+        break;
+
+      case 'Delete':
+      case 'Backspace': {
+        event.preventDefault();
+        const deleteAction = this.actions.find(
+          (a) => a.id === 'delete' || a.color === 'danger',
+        );
+        if (deleteAction) {
+          this.swipeAction.emit({ action: deleteAction, item: this.item });
+          this.keyboardAction.emit({ action: deleteAction, item: this.item });
+        }
+        break;
+      }
+
+      case 'Escape':
+        if (this.keyboardActionsVisible) {
+          event.preventDefault();
+          this.hideKeyboardActions();
+        }
+        break;
+    }
+  }
+
+  private nextAction(): void {
+    const current = this.focusedActionIndex();
+    if (current < this.actions.length - 1) {
+      this.focusedActionIndex.set(current + 1);
+    } else {
+      this.focusedActionIndex.set(0);
+    }
+  }
+
+  private previousAction(): void {
+    const current = this.focusedActionIndex();
+    if (current > 0) {
+      this.focusedActionIndex.set(current - 1);
+    } else {
+      this.focusedActionIndex.set(this.actions.length - 1);
+    }
+  }
+
+  private hideKeyboardActions(): void {
+    this.keyboardActionsVisible = false;
+    this.focusedActionIndex.set(-1);
+  }
+
+  public isActionFocused(index: number): boolean {
+    return this.keyboardActionsVisible && this.focusedActionIndex() === index;
+  }
+
+  public getActionAriaLabel(action: SwipeAction): string {
+    const shortcut = action.keyboardShortcut
+      ? `，快捷键${action.keyboardShortcut}`
+      : '';
+    return `${action.label}${shortcut}`;
   }
 
   /**
@@ -381,6 +586,7 @@ export class MobileSwipeComponent<T = unknown> implements OnInit, OnDestroy {
   public onActionClick(action: SwipeAction): void {
     this.swipeAction.emit({ action, item: this.item });
     this.resetSwipe();
+    this.hideKeyboardActions();
   }
 
   /**

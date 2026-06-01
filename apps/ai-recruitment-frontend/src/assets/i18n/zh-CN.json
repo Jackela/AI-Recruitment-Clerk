@@ -85,5 +85,65 @@
     "confirmDelete": "确定要删除吗？",
     "noData": "暂无数据",
     "networkError": "网络错误，请稍后重试"
+  },
+  "charts": {
+    "bar_chart": "柱状图",
+    "pie_chart": "饼图",
+    "donut_chart": "环形图",
+    "label": "标签",
+    "value": "数值",
+    "bar_chart_description": "{{title}}，包含{{items}}个数据项"
+  },
+  "table": {
+    "search_label": "搜索表格数据",
+    "search_placeholder": "搜索...",
+    "clear_search": "清除搜索",
+    "export": "导出数据",
+    "select_all": "全选",
+    "select_row": "选择此行",
+    "actions": "操作",
+    "row_actions": "行操作",
+    "view": "查看",
+    "edit": "编辑",
+    "delete": "删除"
+  },
+  "empty": {
+    "default": {
+      "title": "暂无数据",
+      "description": "当前没有可显示的内容"
+    },
+    "search": {
+      "title": "未找到匹配结果",
+      "description": "尝试使用不同的关键词或清除筛选条件"
+    },
+    "error": {
+      "title": "出错了",
+      "description": "加载数据时发生错误，请稍后重试"
+    },
+    "success": {
+      "title": "已完成",
+      "description": "所有项目已处理完毕"
+    },
+    "jobs": {
+      "title": "暂无岗位",
+      "description": "您还没有创建任何职位，点击下方按钮创建您的第一个职位吧！"
+    },
+    "resumes": {
+      "title": "暂无简历",
+      "description": "还没有收到简历投递，发布职位后开始收集吧！"
+    },
+    "candidates": {
+      "title": "暂无候选人",
+      "description": "当前筛选条件下没有找到匹配的候选人"
+    },
+    "notifications": {
+      "title": "暂无通知",
+      "description": "您目前没有新的通知消息"
+    }
+  },
+  "jobs": {
+    "button": {
+      "createNew": "创建新职位"
+    }
   }
 }

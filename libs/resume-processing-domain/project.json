@@ -3,16 +3,20 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/resume-processing-domain/src",
   "projectType": "library",
+  "implicitDependencies": ["shared-dtos"],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
+        "rootDir": ".",
         "outputPath": "dist/libs/resume-processing-domain",
         "tsConfig": "libs/resume-processing-domain/tsconfig.json",
         "packageJson": "libs/resume-processing-domain/package.json",
-        "main": "libs/resume-processing-domain/src/index.ts"
-      }
+        "main": "libs/resume-processing-domain/src/index.ts",
+        "buildableProjectDepsInPackageJson": true
+      },
+      "dependsOn": ["^build"]
     },
     "lint": {
       "executor": "@nx/eslint:lint",

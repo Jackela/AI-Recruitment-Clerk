@@ -358,7 +358,7 @@ export class RateLimitMiddleware implements NestMiddleware {
       let totalQuestionnaires = 0;
       let totalPayments = 0;
 
-      for (const key of keys) {
+      for(const key of keys) {
         const recordStr = await this.redis?.get(key);
         if (recordStr) {
           const record: UsageRecord = JSON.parse(recordStr);

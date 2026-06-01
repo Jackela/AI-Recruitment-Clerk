@@ -5,6 +5,9 @@ import { GridFsService } from './gridfs.service';
 import { MongodbTestSetup } from '../testing/mongodb-test-setup';
 import { ResumeParserConfigService } from '../config';
 
+// Set timeout for integration tests
+jest.setTimeout(60000);
+
 describe('GridFsService Integration', () => {
   let service: GridFsService;
   let module: TestingModule;

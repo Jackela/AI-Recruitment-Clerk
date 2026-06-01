@@ -29,7 +29,9 @@ export class FeedbackCodeController {
    * Initializes a new instance of the Feedback Code Controller.
    * @param feedbackCodeService - The feedback code service.
    */
-  constructor(private readonly feedbackCodeService: FeedbackCodeService) {}
+  constructor(private readonly feedbackCodeService: FeedbackCodeService) {
+  // Intentionally empty
+}
 
   /**
    * Performs the record feedback code operation.

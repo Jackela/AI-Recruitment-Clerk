@@ -299,7 +299,7 @@ export class CacheService {
       (match) => match.similarity >= similarityThreshold,
     );
 
-    for (const match of relevantMatches) {
+    for(const match of relevantMatches) {
       let cached: T | null | undefined;
       try {
         cached = await this.cacheManager.get<T>(match.cacheKey);

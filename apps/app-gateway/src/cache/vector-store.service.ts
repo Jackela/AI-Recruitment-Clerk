@@ -207,7 +207,7 @@ export class VectorStoreService {
 
     const matches: VectorSearchResult[] = [];
 
-    for (let i = 1; i < rawResult.length; i += 2) {
+    for(let i = 1; i < rawResult.length; i += 2) {
       const entryKey = this.asString(rawResult[i]);
       const rawFields = rawResult[i + 1];
       if (!Array.isArray(rawFields)) {
@@ -246,7 +246,7 @@ export class VectorStoreService {
 
   private arrayToObject(fields: unknown[]): Record<string, string> {
     const result: Record<string, string> = {};
-    for (let i = 0; i < fields.length; i += 2) {
+    for(let i = 0; i < fields.length; i += 2) {
       const key = this.asString(fields[i]);
       const value = this.asString(fields[i + 1]);
       if (key) {

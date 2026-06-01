@@ -46,7 +46,9 @@ export class RewardsController {
    * Initializes a new instance of the Rewards Controller.
    * @param incentiveService - The incentive service.
    */
-  constructor(private readonly incentiveService: IncentiveIntegrationService) {}
+  constructor(private readonly incentiveService: IncentiveIntegrationService) {
+  // Intentionally empty
+}
 
   /**
    * Creates questionnaire incentive.

@@ -8,6 +8,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { JobsModule } from '../jobs/jobs.module';
+import { ReportsModule } from '../reports/reports.module';
 import { AnalysisModule } from '../analysis/analysis.module';
 import { AuthModule } from '../auth/auth.module';
 import { GuestModule } from '../guest/guest.module';
@@ -27,6 +28,7 @@ import { ScoringProxyController } from '../scoring/scoring-proxy.controller';
 import { ResumesController } from '../resumes/resumes.controller';
 import { QuestionnairesController } from '../questionnaires/questionnaires.controller';
 import { AnalyticsController } from '../analytics/analytics.controller';
+import { AnalyticsService } from '../analytics/analytics.service';
 import { IncentivesController } from '../incentives/incentives.controller';
 import { UsageLimitsController } from '../usage/usage-limits.controller';
 import { IncentivesService } from '../incentives/incentives.service';
@@ -88,6 +90,7 @@ const isTestEnv = getNodeEnv() === 'test';
           AuthModule,
           GuestModule,
           JobsModule,
+          ReportsModule,
           AnalysisModule,
           DomainsModule,
           CommonModule,
@@ -123,6 +126,7 @@ const isTestEnv = getNodeEnv() === 'test';
     QuestionnairesService,
     IncentivesService,
     UsageLimitsService,
+    AnalyticsService,
     RollbackService,
     MetricsService,
     ...(isTestEnv ? [] : [ProductionSecurityValidator]),

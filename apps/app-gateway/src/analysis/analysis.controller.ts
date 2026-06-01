@@ -36,7 +36,9 @@ export class AnalysisController {
    * Initializes a new instance of the Analysis Controller.
    * @param analysisService - The analysis service.
    */
-  constructor(private readonly analysisService: AnalysisService) {}
+  constructor(private readonly analysisService: AnalysisService) {
+  // Intentionally empty
+}
 
   /**
    * Performs the start analysis operation.

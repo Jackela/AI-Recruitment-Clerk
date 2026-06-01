@@ -3,13 +3,8 @@
  * 专门处理Railway生产环境Redis连接问题
  */
 
-import type {
-  OnModuleInit,
-  OnModuleDestroy} from '@nestjs/common';
-import {
-  Injectable,
-  Logger
-} from '@nestjs/common';
+import type { OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import type { ConfigService } from '@nestjs/config';
 
 /**
@@ -33,7 +28,9 @@ export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
    * Initializes a new instance of the Redis Connection Service.
    * @param configService - The config service.
    */
-  constructor(private configService: ConfigService) {}
+  constructor(private configService: ConfigService) {
+    // Intentionally empty
+  }
 
   /**
    * Performs the on module init operation.
@@ -126,7 +123,8 @@ export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
     } catch (error: unknown) {
       this.connectionState = 'error';
       this.reconnectAttempts++;
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       this.logger.error(`❌ Redis连接失败: ${errorMessage}`);
 
       // 如果重连次数未超限，启动重连
@@ -237,7 +235,8 @@ export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
         await this.redisClient.quit();
         this.logger.log('🧹 Redis连接已清理');
       } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
         this.logger.warn(`Redis清理失败: ${errorMessage}`);
       }
       this.redisClient = null;

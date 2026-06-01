@@ -2,27 +2,9 @@ const { NxAppWebpackPlugin } = require('@nx/webpack/app-plugin');
 const { join } = require('path');
 
 module.exports = {
-  // Build the gateway as CommonJS to avoid `require` in ESM runtime errors
-  experiments: {
-    outputModule: false,
-  },
-  mode: 'production',
-  target: 'node20',
   output: {
     path: join(__dirname, '../../dist/apps/app-gateway'),
-    // Use .cjs to ensure Node treats it as CommonJS even with root package type: module
     filename: 'main.cjs',
-    module: false,
-    chunkFormat: 'commonjs',
-    library: {
-      type: 'commonjs2',
-    },
-    environment: {
-      module: false,
-      dynamicImport: true,
-      const: true,
-      arrowFunction: true,
-    },
   },
   resolve: {
     alias: {
@@ -30,7 +12,6 @@ module.exports = {
         __dirname,
         './webpack.alias-stubs/class-transformer/storage.js',
       ),
-      // Force-bundle internal libs instead of treating them as external packages
       '@ai-recruitment-clerk/shared-dtos': join(
         __dirname,
         '../../libs/shared-dtos/src/index.ts',
@@ -76,12 +57,9 @@ module.exports = {
       main: './src/main.ts',
       tsConfig: './tsconfig.app.json',
       assets: ['./src/assets'],
-      optimization: true,
+      optimization: false,
       outputHashing: 'none',
       generatePackageJson: false,
-      typeCheck: true,
-      // Ensure CommonJS output to be compatible with Node runtime in this repo
-      outputModule: false,
     }),
   ],
 };

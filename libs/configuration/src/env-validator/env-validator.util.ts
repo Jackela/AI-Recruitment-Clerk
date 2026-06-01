@@ -227,7 +227,7 @@ export class EnvValidator {
     const missingVars: string[] = [];
     const invalidVars: Array<{ name: string; reason: string }> = [];
 
-    for (const config of this.schema.variables) {
+    for(const config of this.schema.variables) {
       const result = this.validateVar(config);
       results.push(result);
 
@@ -304,7 +304,7 @@ export class EnvValidator {
    */
   public getAll(): Record<string, string | undefined> {
     const result: Record<string, string | undefined> = {};
-    for (const config of this.schema.variables) {
+    for(const config of this.schema.variables) {
       result[config.name] = process.env[config.name];
     }
     return result;
@@ -317,7 +317,7 @@ export class EnvValidator {
     console.log(`\n[EnvValidator] ${this.schema.serviceName} - Environment Summary:`);
     console.log('='.repeat(60));
 
-    for (const config of this.schema.variables) {
+    for(const config of this.schema.variables) {
       const value = process.env[config.name];
       const isSet = value !== undefined && value !== '';
       const status = isSet ? '✓' : '✗';

@@ -1,5 +1,5 @@
 import type { OnInit, OnDestroy } from '@angular/core';
-import { Component, computed, inject } from '@angular/core';
+import {Component, computed, inject, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ProgressFeedbackService,
@@ -97,7 +97,8 @@ import { Subject } from 'rxjs';
   `,
   styleUrls: ['./status-notifications.component.css'],
   animations: [],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class StatusNotificationsComponent implements OnInit, OnDestroy {
   private readonly feedbackService = inject(ProgressFeedbackService);
 

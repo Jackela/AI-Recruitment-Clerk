@@ -18,7 +18,9 @@ export class IncentiveCreationResult {
     public readonly success: boolean,
     public readonly data?: IncentiveSummary,
     public readonly errors?: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the success operation.
@@ -52,7 +54,9 @@ export class IncentiveValidationResult {
       status: IncentiveStatus;
     },
     public readonly errors?: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the success operation.
@@ -90,7 +94,9 @@ export class IncentiveApprovalResult {
       rewardAmount: number;
     },
     public readonly errors?: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the success operation.
@@ -127,7 +133,9 @@ export class IncentiveRejectionResult {
       rejectionReason: string;
     },
     public readonly errors?: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the success operation.
@@ -167,7 +175,9 @@ export class PaymentProcessingResult {
       status: IncentiveStatus;
     },
     public readonly errors?: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the success operation.
@@ -209,7 +219,9 @@ export class BatchPaymentResult {
       results: BatchPaymentItem[];
     },
     public readonly errors?: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the success operation.
@@ -247,7 +259,9 @@ export class IncentiveStatsResult {
       system?: SystemIncentiveStatistics;
     },
     public readonly errors?: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the success operation.
@@ -282,7 +296,9 @@ export class PendingIncentivesResult {
       priority: IncentivePriority;
     }>,
     public readonly errors?: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the success operation.
@@ -330,7 +346,7 @@ export interface IPIncentiveStatistics {
   paidAmount: number;
   pendingAmount: number;
   statusBreakdown: {
-    pending: number;
+    pending_validation: number;
     approved: number;
     paid: number;
     rejected: number;
@@ -349,7 +365,7 @@ export interface SystemIncentiveStatistics {
   paidAmount: number;
   pendingAmount: number;
   statusBreakdown: {
-    pending: number;
+    pending_validation: number;
     approved: number;
     paid: number;
     rejected: number;

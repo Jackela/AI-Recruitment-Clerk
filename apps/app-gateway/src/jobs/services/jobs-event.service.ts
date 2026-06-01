@@ -59,7 +59,9 @@ export class JobsEventService {
     private readonly cacheService: CacheService,
     private readonly webSocketGateway: WebSocketGateway,
     private readonly semanticCacheService: JobsSemanticCacheService,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Initializes NATS event subscriptions for job processing workflow.

@@ -93,7 +93,9 @@ export class EnhancedSkillMatcherService {
    * Initializes a new instance of the Enhanced Skill Matcher Service.
    * @param geminiClient - The gemini client.
    */
-  constructor(private readonly geminiClient: GeminiClient) {}
+  constructor(private readonly geminiClient: GeminiClient) {
+  // Intentionally empty
+}
 
   /**
    * Enhanced skill matching with AI-driven semantic analysis
@@ -123,7 +125,7 @@ export class EnhancedSkillMatcherService {
       };
 
       // Process each job skill requirement
-      for (const jobSkill of jobSkills) {
+      for(const jobSkill of jobSkills) {
         const matchResult = await this.findBestSkillMatch(
           resumeSkills,
           jobSkill,
@@ -180,7 +182,7 @@ export class EnhancedSkillMatcherService {
     const normalizedJobSkill = SkillsTaxonomy.normalizeSkill(jobSkill.name);
 
     // 1. Try exact match (based on original skill text equality)
-    for (const resumeSkill of resumeSkills) {
+    for(const resumeSkill of resumeSkills) {
       if (resumeSkill.toLowerCase() === jobSkill.name.toLowerCase()) {
         return {
           skill: resumeSkill,
@@ -194,7 +196,7 @@ export class EnhancedSkillMatcherService {
     }
 
     // 2. Try synonym/fuzzy match from taxonomy
-    for (const resumeSkill of resumeSkills) {
+    for(const resumeSkill of resumeSkills) {
       const normalizedResume = SkillsTaxonomy.normalizeSkill(resumeSkill);
       const aliasMap: Record<string, string> = {
         js: 'javascript',
@@ -228,7 +230,7 @@ export class EnhancedSkillMatcherService {
     // 3. Try related skills match (only for non-required skills to avoid false positives)
     if (!jobSkill.required) {
       const relatedSkills = SkillsTaxonomy.getRelatedSkills(normalizedJobSkill);
-      for (const resumeSkill of resumeSkills) {
+      for(const resumeSkill of resumeSkills) {
         if (relatedSkills.includes(resumeSkill)) {
           return {
             skill: resumeSkill,
@@ -440,7 +442,7 @@ export class EnhancedSkillMatcherService {
     let totalPossibleScore = 0;
     let achievedScore = 0;
 
-    for (const jobSkill of jobSkills) {
+    for(const jobSkill of jobSkills) {
       const weight = jobSkill.required
         ? jobSkill.weight * 1.5
         : jobSkill.weight;
@@ -531,7 +533,7 @@ export class EnhancedSkillMatcherService {
       relatedMatches: 0,
     };
 
-    for (const jobSkill of jobSkills) {
+    for(const jobSkill of jobSkills) {
       const normalizedJobSkill = SkillsTaxonomy.normalizeSkill(jobSkill.name);
 
       if (normalizedResumeSkills.includes(normalizedJobSkill)) {

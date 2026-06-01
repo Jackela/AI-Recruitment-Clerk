@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, ChangeDetectionStrategy} from '@angular/core';
 
 /**
  * Empty state component for virtual scroll.
@@ -32,7 +32,8 @@ import { Component } from '@angular/core';
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class VirtualScrollEmptyComponent {
   /** Empty state message to display. */
   public message = '暂无数据';

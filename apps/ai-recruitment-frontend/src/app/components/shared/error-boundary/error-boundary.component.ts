@@ -1,13 +1,10 @@
-import type { OnInit } from '@angular/core';
-import {
-  Component,
-  signal,
-  inject,
-} from '@angular/core';
+import type { OnInit, OnDestroy } from '@angular/core';
+import {Component, signal, inject, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, type Event as RouterEvent } from '@angular/router';
 import { ToastService } from '../../../services/toast.service';
 import { ErrorDisplayComponent } from './error-display.component';
+import { Subject, takeUntil, filter } from 'rxjs';
 
 // Re-export GlobalErrorHandler for backward compatibility
 export { GlobalErrorHandler } from './global-error-handler';
@@ -52,10 +49,12 @@ export interface ErrorInfo {
     }
   `,
   styles: [],
-})
-export class ErrorBoundaryComponent implements OnInit {
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
+export class ErrorBoundaryComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly toastService = inject(ToastService);
+  private readonly destroy$ = new Subject<void>();
 
   // Error state
   public hasError = signal(false);
@@ -72,7 +71,9 @@ export class ErrorBoundaryComponent implements OnInit {
   /**
    * Computed signal for error display data.
    */
-  public errorDisplayData = signal<import('./error-display.component').ErrorDisplayData>({
+  public errorDisplayData = signal<
+    import('./error-display.component').ErrorDisplayData
+  >({
     message: '',
     timestamp: new Date(),
   });
@@ -85,12 +86,25 @@ export class ErrorBoundaryComponent implements OnInit {
     this.loadErrorHistory();
 
     // Listen for navigation events to reset error state
-    this.router.events.subscribe((event) => {
-      // Reset error state on successful navigation
-      if (event.constructor.name === 'NavigationEnd') {
+    this.router.events
+      .pipe(
+        takeUntil(this.destroy$),
+        filter(
+          (event: RouterEvent) => event.constructor.name === 'NavigationEnd',
+        ),
+      )
+      .subscribe(() => {
+        // Reset error state on successful navigation
         this.resetError();
-      }
-    });
+      });
+  }
+
+  /**
+   * Performs the ng on destroy operation.
+   */
+  public ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private loadErrorHistory(): void {

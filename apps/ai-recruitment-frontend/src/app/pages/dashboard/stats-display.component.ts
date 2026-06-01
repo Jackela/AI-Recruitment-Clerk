@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import {Component, Input, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { SystemHealth } from '../../services/dashboard-api.service';
 import type { GuestStats } from './dashboard.service';
@@ -181,7 +181,8 @@ import type { GuestStats } from './dashboard.service';
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class StatsDisplayComponent {
   /**
    * System health data to display

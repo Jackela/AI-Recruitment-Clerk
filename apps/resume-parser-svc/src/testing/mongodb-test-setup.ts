@@ -17,6 +17,9 @@ export class MongodbTestSetup {
   public static async startMongoMemoryServer(): Promise<string> {
     if (!this.mongoServer) {
       this.mongoServer = await MongoMemoryServer.create({
+        binary: {
+          version: '7.0.5',
+        },
         instance: {
           dbName: 'test-db',
           port: 27018, // Use different port to avoid conflicts
@@ -70,7 +73,10 @@ export class MongodbTestSetup {
   /**
    * Create mock connection provider for dependency injection
    */
-  public static getMockConnectionProvider(connectionName = 'resume-parser'): { provide: string; useValue: unknown } {
+  public static getMockConnectionProvider(connectionName = 'resume-parser'): {
+    provide: string;
+    useValue: unknown;
+  } {
     const mockConnection = {
       readyState: 1,
       db: {
@@ -123,13 +129,15 @@ export class MongodbTestSetup {
   /**
    * Clean up all test collections
    */
-  public static async cleanupCollections(connection: Connection): Promise<void> {
+  public static async cleanupCollections(
+    connection: Connection,
+  ): Promise<void> {
     if (!connection || connection.readyState !== 1) {
       return;
     }
 
     const collections = connection.collections;
-    for (const key in collections) {
+    for(const key in collections) {
       if (Object.prototype.hasOwnProperty.call(collections, key)) {
         await collections[key].deleteMany({});
       }

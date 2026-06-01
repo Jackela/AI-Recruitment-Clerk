@@ -1,12 +1,11 @@
-import type {
-  OnInit,
-  OnDestroy} from '@angular/core';
+import type { OnInit, OnDestroy } from '@angular/core';
 import {
   Component,
   Input,
   Output,
   EventEmitter,
   inject,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -34,7 +33,12 @@ import {
 @Component({
   selector: 'arc-mobile-results',
   standalone: true,
-  imports: [CommonModule, FormsModule, MobileResultsDisplayComponent, MobileResultsFilterComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MobileResultsDisplayComponent,
+    MobileResultsFilterComponent,
+  ],
   template: `
     <div class="mobile-results-container">
       <!-- Results Header -->
@@ -333,6 +337,7 @@ import {
       }
     `,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MobileResultsComponent implements OnInit, OnDestroy {
   private readonly resultsService = inject(MobileResultsService);

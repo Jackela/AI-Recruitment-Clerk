@@ -3,15 +3,18 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/shared-nats-client/src",
   "projectType": "library",
+  "implicitDependencies": ["shared-dtos"],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
+        "rootDir": ".",
         "outputPath": "dist/libs/shared-nats-client",
         "tsConfig": "libs/shared-nats-client/tsconfig.lib.json",
         "packageJson": "libs/shared-nats-client/package.json",
-        "main": "libs/shared-nats-client/src/index.ts"
+        "main": "libs/shared-nats-client/src/index.ts",
+        "buildableProjectDepsInPackageJson": true
       }
     },
     "lint": {

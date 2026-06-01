@@ -20,7 +20,9 @@ import {
 export class DataSubjectRightsService {
   private readonly logger = new Logger(DataSubjectRightsService.name);
 
-  constructor() {}
+  constructor() {
+  // Intentionally empty
+}
 
   /**
    * Create a new data subject rights request
@@ -88,7 +90,7 @@ export class DataSubjectRightsService {
     );
 
     try {
-      switch (request.requestType) {
+      switch(request.requestType) {
         case DataSubjectRightType.ACCESS:
           // Auto-generate data export
           await natsClient.publish('rights.request.process', {

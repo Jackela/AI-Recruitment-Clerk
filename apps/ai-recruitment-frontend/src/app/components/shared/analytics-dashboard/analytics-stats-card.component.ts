@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import {Component, input, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -94,7 +94,8 @@ import { CommonModule } from '@angular/common';
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class AnalyticsStatsCardComponent {
   /** The value to display (e.g., count, percentage) */
   public readonly value = input.required<string | number>();

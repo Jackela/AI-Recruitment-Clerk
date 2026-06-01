@@ -93,7 +93,9 @@ export class ExtractionServiceContracts {
   constructor(
     private readonly llmService: LlmService,
     private readonly natsClient: NatsClient,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Extracts structured job requirements from JD text with quality guarantees
@@ -331,7 +333,7 @@ export class ExtractionServiceContracts {
   private extractJobTitle(jdText: string): string {
     // Try to extract job title from the first few lines
     const lines = jdText.split('\n').slice(0, 5);
-    for (const line of lines) {
+    for(const line of lines) {
       const cleanLine = line.trim();
       if (cleanLine.length > 10 && cleanLine.length < 100) {
         // Check if it looks like a job title

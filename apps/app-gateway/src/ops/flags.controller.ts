@@ -1,6 +1,17 @@
-import { Body, Controller, Delete, Get, HttpCode, NotFoundException, Param, Post, UseGuards, BadRequestException } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  NotFoundException,
+  Param,
+  Post,
+  UseGuards,
+  BadRequestException,
+} from '@nestjs/common';
 import type { FeatureFlag } from './flags.store';
-import { FlagsStore } from './flags.store';
+import { flagsStore } from './flags.store';
 import { OpsGuard } from './ops.guard';
 import { OpsPermissionsGuard } from './ops-permissions.guard';
 import { Permissions } from '../auth/decorators/permissions.decorator';
@@ -55,7 +66,9 @@ function validateCohort(value: unknown): string {
   const SAFE_COHORT_REGEX = /^[a-zA-Z0-9_\-/]+$/;
 
   if (!SAFE_COHORT_REGEX.test(str)) {
-    throw new BadRequestException(`Cohort "${str}" contains invalid characters`);
+    throw new BadRequestException(
+      `Cohort "${str}" contains invalid characters`,
+    );
   }
   return str.slice(0, 100); // Limit length
 }
@@ -95,14 +108,14 @@ export class FlagsController {
   @Permissions(Permission.SYSTEM_CONFIG)
   public list(): FlagsListResponse {
     // Data is already validated when stored, no additional sanitization needed
-    return { items: FlagsStore.list() };
+    return { items: flagsStore.list() };
   }
 
   @Get(':key')
   @Permissions(Permission.SYSTEM_CONFIG)
   public get(@Param('key') key: string): FeatureFlag {
     validateFlagKey(key);
-    const flag = FlagsStore.get(key);
+    const flag = flagsStore.get(key);
     if (!flag) throw new NotFoundException('Flag not found');
     // Data is already validated when stored
     return flag;
@@ -117,13 +130,13 @@ export class FlagsController {
     // Validate and sanitize string fields at input time
     // This prevents malicious data from ever being stored
     const description = validateAndSanitizeDescription(body.description);
-    const cohorts = body.cohorts?.map(c => validateCohort(c));
+    const cohorts = body.cohorts?.map((c) => validateCohort(c));
     const updatedBy = validateUpdatedBy(body.updatedBy);
 
     // basic normalization
     const pct = Math.max(0, Math.min(100, Number(body.rolloutPercentage ?? 0)));
     // Only store validated fields - do NOT spread body to avoid including unvalidated properties
-    return FlagsStore.upsert({
+    return flagsStore.upsert({
       key: body.key,
       rolloutPercentage: pct,
       enabled: !!body.enabled,
@@ -138,7 +151,7 @@ export class FlagsController {
   @Permissions(Permission.SYSTEM_CONFIG)
   public remove(@Param('key') key: string): void {
     validateFlagKey(key);
-    const existed = FlagsStore.delete(key);
+    const existed = flagsStore.delete(key);
     if (!existed) throw new NotFoundException('Flag not found');
   }
 }

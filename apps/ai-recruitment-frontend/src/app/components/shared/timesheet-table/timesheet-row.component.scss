@@ -1,4 +1,4 @@
-@import '../../../../styles/variables';
+@import '../../../../styles/_variables.scss';
 
 // Status-based row styling
 tr[arc-timesheet-row] {
@@ -28,17 +28,17 @@ tr[arc-timesheet-row] {
 }
 
 .checkbox-column {
-  width: 40px;
+  width: var(--space-10);
   text-align: center;
 }
 
 .actions-column {
-  width: 120px;
+  width: calc(var(--space-10) * 3);
   text-align: center;
 
   .action-buttons {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--space-2);
     justify-content: center;
     align-items: center;
   }
@@ -46,9 +46,9 @@ tr[arc-timesheet-row] {
   .action-btn {
     background: none;
     border: none;
-    padding: 0.25rem;
+    padding: var(--space-1);
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: var(--radius-md);
     transition: background-color 0.2s;
 
     &:hover {
@@ -82,8 +82,8 @@ tr[arc-timesheet-row] {
 // Status badge styling
 .status-badge {
   display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-xl);
   font-size: 0.75rem;
   font-weight: 500;
 
@@ -111,8 +111,8 @@ tr[arc-timesheet-row] {
 // Badge styling for boolean values
 .badge {
   display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-xl);
   font-size: 0.75rem;
   font-weight: 500;
 

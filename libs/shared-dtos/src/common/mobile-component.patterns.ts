@@ -123,7 +123,7 @@ export abstract class BaseMobileComponent implements OnInit, OnDestroy {
     direction: 'left' | 'right' | 'up' | 'down',
     data?: unknown,
   ): void {
-    switch (direction) {
+    switch(direction) {
       case 'left':
         this.swipeLeft.emit(data);
         break;

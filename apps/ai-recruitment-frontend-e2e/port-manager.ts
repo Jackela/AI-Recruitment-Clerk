@@ -38,8 +38,8 @@ export class PortManager {
     // Initialize server configurations
     this.serverConfigs.set('mock-api', {
       name: 'Mock API Server',
-      defaultPort: 3001,
-      fallbackPorts: [3002, 3003, 3004, 3005],
+      defaultPort: 3000,
+      fallbackPorts: [3001, 3002, 3003, 3004],
       healthPath: '/api/health',
       maxRetries: 3,
     });
@@ -105,9 +105,6 @@ export class PortManager {
       }
     }
 
-    if (process.env['E2E_USE_REAL_API'] !== 'true') {
-      ports.add(3000);
-    }
 
     if (process.env['E2E_SKIP_WEBSERVER'] === 'true') {
       ports.add(4200);
@@ -483,7 +480,10 @@ export class PortManager {
 
     // Sequential cleanup to prevent race conditions
     for (const port of Array.from(allPorts)) {
-      if (Number.isFinite(activeDevServerPort) && port === activeDevServerPort) {
+      if (
+        Number.isFinite(activeDevServerPort) &&
+        port === activeDevServerPort
+      ) {
         console.log(
           `🛡️ Skipping cleanup for active dev server port ${port} (managed by Playwright)`,
         );
