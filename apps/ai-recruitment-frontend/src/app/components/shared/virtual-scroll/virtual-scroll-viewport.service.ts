@@ -92,7 +92,7 @@ export class VirtualScrollViewportService<T = unknown> {
     const start = this.startIndex();
     if (this.config?.enableDynamicHeight) {
       let height = 0;
-      for (let i = 0; i < start; i++) {
+      for(let i = 0; i < start; i++) {
         height += this.getItemHeight(this.items[i], i);
       }
       return height;
@@ -108,7 +108,7 @@ export class VirtualScrollViewportService<T = unknown> {
     const total = this.items.length;
     if (this.config?.enableDynamicHeight) {
       let height = 0;
-      for (let i = end; i < total; i++) {
+      for(let i = end; i < total; i++) {
         height += this.getItemHeight(this.items[i], i);
       }
       return height;

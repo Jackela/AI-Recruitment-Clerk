@@ -177,11 +177,15 @@ describe('DeviceIdService', () => {
       const consoleSpy = jest
         .spyOn(console, 'warn')
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        .mockImplementation(() => {});
+        .mockImplementation(() => {
+  // Intentionally empty
+});
       const errorSpy = jest
         .spyOn(console, 'error')
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        .mockImplementation(() => {});
+        .mockImplementation(() => {
+  // Intentionally empty
+});
 
       // Override the global localStorage mock to throw errors
       Object.defineProperty(window, 'localStorage', {

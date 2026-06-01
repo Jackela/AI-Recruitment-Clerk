@@ -31,11 +31,10 @@ export class ConfidenceReportService {
     // For a more comprehensive analysis, we would need multiple scoring runs
     // For now, we estimate variance based on confidence levels
 
-    const skillsVariance = (100 - componentScores.skills.confidence) / 10;
-    const experienceVariance =
-      (100 - componentScores.experience.confidence) / 10;
+    const skillsVariance = (1 - componentScores.skills.confidence) * 10;
+    const experienceVariance = (1 - componentScores.experience.confidence) * 10;
     const culturalFitVariance =
-      (100 - componentScores.culturalFit.confidence) / 10;
+      (1 - componentScores.culturalFit.confidence) * 10;
 
     const overallVariance = Math.sqrt(
       (Math.pow(skillsVariance, 2) +
@@ -44,14 +43,14 @@ export class ConfidenceReportService {
         3,
     );
 
-    const stabilityScore = Math.max(0, 100 - overallVariance * 10);
+    const stabilityScore = Math.max(0, Math.round(100 - overallVariance * 10));
 
     return {
       skillsVariance: Math.round(skillsVariance * 10) / 10,
       experienceVariance: Math.round(experienceVariance * 10) / 10,
       culturalFitVariance: Math.round(culturalFitVariance * 10) / 10,
       overallVariance: Math.round(overallVariance * 10) / 10,
-      stabilityScore: Math.round(stabilityScore),
+      stabilityScore,
     };
   }
 
@@ -137,13 +136,16 @@ export class ConfidenceReportService {
 
     // Calculate confidence interval based on variance
     const variance = confidenceMetrics.scoreVariance.overallVariance;
-    const confidenceInterval = variance * 1.96; // 95% confidence interval
+    const confidenceInterval = Math.round(variance * 1.96 * 2); // 95% confidence interval, doubled for range
 
     return {
-      minScore: Math.max(0, Math.round(currentScore - confidenceInterval)),
-      maxScore: Math.min(100, Math.round(currentScore + confidenceInterval)),
+      minScore: Math.max(0, Math.round(currentScore - confidenceInterval / 2)),
+      maxScore: Math.min(
+        100,
+        Math.round(currentScore + confidenceInterval / 2),
+      ),
       mostLikelyScore: currentScore,
-      confidenceInterval: Math.round(confidenceInterval * 2),
+      confidenceInterval,
     };
   }
 

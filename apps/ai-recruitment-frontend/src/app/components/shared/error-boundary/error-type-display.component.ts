@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import {Component, input, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -80,7 +80,8 @@ export interface DisplayedError {
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class ErrorTypeDisplayComponent {
   /** The error severity */
   public readonly errorType = input.required<

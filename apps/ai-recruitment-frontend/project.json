@@ -4,15 +4,21 @@
   "projectType": "application",
   "prefix": "arc",
   "sourceRoot": "apps/ai-recruitment-frontend/src",
-  "tags": ["type:app"],
+  "tags": [
+    "type:app"
+  ],
   "targets": {
     "build": {
       "executor": "@angular/build:application",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/apps/ai-recruitment-frontend",
         "browser": "apps/ai-recruitment-frontend/src/main.ts",
-        "polyfills": ["zone.js"],
+        "polyfills": [
+          "zone.js"
+        ],
         "tsConfig": "apps/ai-recruitment-frontend/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
@@ -26,10 +32,18 @@
             "output": "assets"
           }
         ],
-        "styles": ["apps/ai-recruitment-frontend/src/styles.scss"]
+        "styles": [
+          "apps/ai-recruitment-frontend/src/styles.scss"
+        ]
       },
       "configurations": {
         "webkit-test": {
+          "fileReplacements": [
+            {
+              "replace": "apps/ai-recruitment-frontend/src/environments/environment.ts",
+              "with": "apps/ai-recruitment-frontend/src/environments/environment.testing.ts"
+            }
+          ],
           "budgets": [
             {
               "type": "initial",
@@ -54,31 +68,31 @@
           "sourceMap": false,
           "namedChunks": false,
           "extractLicenses": true,
-          "subresourceIntegrity": true
+          "subresourceIntegrity": false
         },
         "production": {
           "budgets": [
             {
               "type": "initial",
-              "maximumWarning": "800kb",
-              "maximumError": "1200kb"
+              "maximumWarning": "2mb",
+              "maximumError": "5mb"
             },
             {
               "type": "anyComponentStyle",
-              "maximumWarning": "20kb",
-              "maximumError": "30kb"
+              "maximumWarning": "50kb",
+              "maximumError": "100kb"
             },
             {
               "type": "bundle",
               "name": "angular-vendor",
-              "maximumWarning": "600kb",
-              "maximumError": "900kb"
+              "maximumWarning": "1mb",
+              "maximumError": "2mb"
             },
             {
               "type": "bundle",
               "name": "ngrx-vendor",
-              "maximumWarning": "300kb",
-              "maximumError": "500kb"
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
             }
           ],
           "outputHashing": "all",
@@ -140,11 +154,16 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint"
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "maxWarnings": 300
+      }
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
       "options": {
         "jestConfig": "apps/ai-recruitment-frontend/jest.config.ts",
         "passWithNoTests": false

@@ -17,7 +17,9 @@ import type { GrantBonusDto } from './dto/grant-bonus.dto';
  */
 @Controller('usage-limits')
 export class UsageLimitsController {
-  constructor(private readonly usageLimitsService: UsageLimitsService) {}
+  constructor(private readonly usageLimitsService: UsageLimitsService) {
+  // Intentionally empty
+}
   /**
    * Performs the check operation.
    * @returns The result of the operation.

@@ -47,7 +47,9 @@ export class GuestController {
    * Initializes a new instance of the Guest Controller.
    * @param guestUsageService - The guest usage service.
    */
-  constructor(private readonly guestUsageService: GuestUsageService) {}
+  constructor(private readonly guestUsageService: GuestUsageService) {
+  // Intentionally empty
+}
 
   /**
    * Generates feedback code.

@@ -42,7 +42,9 @@ export class QuotasController {
    */
   constructor(
     private readonly usageLimitService: UsageLimitIntegrationService,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the add bonus quota operation.

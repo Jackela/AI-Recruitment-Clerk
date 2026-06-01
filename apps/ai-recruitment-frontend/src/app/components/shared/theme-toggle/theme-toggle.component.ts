@@ -1,4 +1,5 @@
-import { Component, computed, inject } from '@angular/core';
+import type { OnDestroy } from '@angular/core';
+import {Component, computed, inject, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { Theme } from '../../../services/theme/theme.service';
 import { ThemeService } from '../../../services/theme/theme.service';
@@ -397,8 +398,9 @@ import { ThemeService } from '../../../services/theme/theme.service';
       }
     `,
   ],
-})
-export class ThemeToggleComponent {
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
+export class ThemeToggleComponent implements OnDestroy {
   public dropdownOpen = false;
 
   // Expose theme service properties
@@ -406,6 +408,7 @@ export class ThemeToggleComponent {
   public isDarkMode = computed(() => this.themeService.isDarkMode());
 
   private themeService = inject(ThemeService);
+  private outsideClickHandler: ((event: MouseEvent) => void) | null = null;
 
   /**
    * Initializes a new instance of the Theme Toggle Component.
@@ -413,6 +416,15 @@ export class ThemeToggleComponent {
   constructor() {
     // Close dropdown on outside click
     this.setupOutsideClickHandler();
+  }
+
+  /**
+   * Performs the ng on destroy operation.
+   */
+  public ngOnDestroy(): void {
+    if (this.outsideClickHandler) {
+      document.removeEventListener('click', this.outsideClickHandler);
+    }
   }
 
   /**
@@ -445,7 +457,7 @@ export class ThemeToggleComponent {
    */
   public getThemeLabel(): string {
     const theme = this.currentTheme();
-    switch (theme) {
+    switch(theme) {
       case 'light':
         return '明亮';
       case 'dark':
@@ -458,13 +470,14 @@ export class ThemeToggleComponent {
   }
 
   private setupOutsideClickHandler(): void {
-    document.addEventListener('click', (event) => {
+    this.outsideClickHandler = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       const container = target.closest('.theme-toggle-mobile');
 
       if (!container && this.dropdownOpen) {
         this.dropdownOpen = false;
       }
-    });
+    };
+    document.addEventListener('click', this.outsideClickHandler);
   }
 }

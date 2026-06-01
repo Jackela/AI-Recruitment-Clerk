@@ -170,7 +170,7 @@ export class ConsentManagementService {
       }
 
       // Update consent status based on purpose
-      switch (withdrawConsentDto.purpose) {
+      switch(withdrawConsentDto.purpose) {
         case ConsentPurpose.MARKETING_COMMUNICATIONS:
           userProfile.marketingConsent = ConsentStatus.WITHDRAWN;
           break;

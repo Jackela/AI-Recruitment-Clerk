@@ -17,7 +17,10 @@ import { CommonModule } from '@angular/common';
 import { AccessibleCardDirective } from '../../../directives/accessibility/accessible-card.directive';
 import { AccessibilityService } from '../../../services/accessibility/accessibility.service';
 import { Subject } from 'rxjs';
-import { BentoGridItemComponent, type BentoGridItem } from './bento-grid-item.component';
+import {
+  BentoGridItemComponent,
+  type BentoGridItem,
+} from './bento-grid-item.component';
 import {
   BentoGridLayoutService,
   type BentoGridLayoutConfig,
@@ -124,7 +127,8 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
       this.layoutService.shouldUseSingleColumn(
         this._currentColumns,
         item.size || 'medium',
-      ) && (item.size === 'large' || item.size === 'wide' || item.size === 'feature')
+      ) &&
+      (item.size === 'large' || item.size === 'wide' || item.size === 'feature')
     );
   }
 
@@ -226,8 +230,15 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const scheduleAnimation = (callback: () => void): void => {
       if ('requestIdleCallback' in window) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (window as any).requestIdleCallback(callback, { timeout: 100 });
+        interface WindowWithIdleCallback extends Window {
+          requestIdleCallback(
+            callback: IdleRequestCallback,
+            options?: IdleRequestOptions,
+          ): number;
+        }
+        (window as WindowWithIdleCallback).requestIdleCallback(callback, {
+          timeout: 100,
+        });
       } else {
         setTimeout(callback, 0);
       }
@@ -237,24 +248,23 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
       threshold: 0.1,
       rootMargin: '50px 0px',
     };
-    this.intersectionObserver = new IntersectionObserver(
-      (entries) => {
-        scheduleAnimation(() => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('animate-in');
-              this.intersectionObserver?.unobserve(entry.target);
-            }
-          });
+    this.intersectionObserver = new IntersectionObserver((entries) => {
+      scheduleAnimation(() => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate-in');
+            this.intersectionObserver?.unobserve(entry.target);
+          }
         });
-      },
-      observerOptions,
-    );
+      });
+    }, observerOptions);
 
     requestAnimationFrame(() => {
       const items =
         this.gridContainer?.nativeElement?.querySelectorAll('.bento-item');
-      items?.forEach((item: Element) => this.intersectionObserver?.observe(item));
+      items?.forEach((item: Element) =>
+        this.intersectionObserver?.observe(item),
+      );
     });
   }
 

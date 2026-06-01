@@ -32,7 +32,9 @@ export class SecretsManagerService implements OnModuleInit {
    * Initializes a new instance of the Secrets Manager Service.
    * @param configService - The config service.
    */
-  constructor(private configService: ConfigService) {}
+  constructor(private configService: ConfigService) {
+  // Intentionally empty
+}
 
   /**
    * Performs the on module init operation.
@@ -290,7 +292,7 @@ export class SecretsManagerService implements OnModuleInit {
     const freq = new Map<string, number>();
 
     // 统计字符频率
-    for (const char of str) {
+    for(const char of str) {
       freq.set(char, (freq.get(char) || 0) + 1);
     }
 
@@ -375,7 +377,9 @@ export class SecretsManagerService implements OnModuleInit {
 /**
  * 使用示例:
  *
- * constructor(private secretsManager: SecretsManagerService) {}
+ * constructor(private secretsManager: SecretsManagerService) {
+  // Intentionally empty
+}
  *
  * // 验证密钥
  * const validation = this.secretsManager.validateAllSecrets();

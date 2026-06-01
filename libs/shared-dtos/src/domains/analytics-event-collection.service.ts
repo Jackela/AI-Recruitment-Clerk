@@ -26,7 +26,9 @@ export class AnalyticsEventCollectionService {
     private readonly auditLogger: IAuditLogger,
     private readonly privacyService: IPrivacyService,
     private readonly sessionTracker: ISessionTracker,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * 创建用户交互事件
@@ -86,7 +88,7 @@ export class AnalyticsEventCollectionService {
 
       // 发布领域事件
       const events = event.getUncommittedEvents();
-      for (const domainEvent of events) {
+      for(const domainEvent of events) {
         await this.eventBus.publish(domainEvent);
       }
       event.markEventsAsCommitted();
@@ -149,7 +151,7 @@ export class AnalyticsEventCollectionService {
 
       // 发布领域事件
       const events = event.getUncommittedEvents();
-      for (const domainEvent of events) {
+      for(const domainEvent of events) {
         await this.eventBus.publish(domainEvent);
       }
       event.markEventsAsCommitted();
@@ -212,7 +214,7 @@ export class AnalyticsEventCollectionService {
 
       // 发布领域事件
       const events = event.getUncommittedEvents();
-      for (const domainEvent of events) {
+      for(const domainEvent of events) {
         await this.eventBus.publish(domainEvent);
       }
       event.markEventsAsCommitted();

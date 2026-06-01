@@ -571,7 +571,7 @@ export class SkillsTaxonomy {
     let totalScore = 0;
     const processedSkills = new Set<string>();
 
-    for (const skill of skills) {
+    for(const skill of skills) {
       const normalized = this.normalizeSkill(skill);
       if (processedSkills.has(normalized)) continue;
 
@@ -595,7 +595,7 @@ export class SkillsTaxonomy {
   public static groupSkillsByCategory(skills: string[]): Record<string, string[]> {
     const groups: Record<string, string[]> = {};
 
-    for (const skill of skills) {
+    for(const skill of skills) {
       const normalized = this.normalizeSkill(skill);
       const skillInfo = this.getSkillInfo(normalized);
 
@@ -619,9 +619,9 @@ export class SkillsTaxonomy {
     const suggestions = new Set<string>();
     const existingSkills = new Set(skills.map((s) => this.normalizeSkill(s)));
 
-    for (const skill of skills) {
+    for(const skill of skills) {
       const relatedSkills = this.getRelatedSkills(skill);
-      for (const related of relatedSkills) {
+      for(const related of relatedSkills) {
         if (!existingSkills.has(related)) {
           suggestions.add(related);
         }
@@ -641,7 +641,7 @@ export class SkillsTaxonomy {
     let bestMatch: string | null = null;
     let bestScore = 0;
 
-    for (const mapping of this.SKILL_MAPPINGS) {
+    for(const mapping of this.SKILL_MAPPINGS) {
       // Check canonical name
       const canonicalScore = this.calculateSimilarity(
         cleanInput,
@@ -653,7 +653,7 @@ export class SkillsTaxonomy {
       }
 
       // Check synonyms
-      for (const synonym of mapping.synonyms) {
+      for(const synonym of mapping.synonyms) {
         const synonymScore = this.calculateSimilarity(
           cleanInput,
           synonym.toLowerCase(),
@@ -685,8 +685,8 @@ export class SkillsTaxonomy {
     for (let i = 0; i <= len1; i++) matrix[i][0] = i;
     for (let j = 0; j <= len2; j++) matrix[0][j] = j;
 
-    for (let i = 1; i <= len1; i++) {
-      for (let j = 1; j <= len2; j++) {
+    for(let i = 1; i <= len1; i++) {
+      for(let j = 1; j <= len2; j++) {
         const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
         matrix[i][j] = Math.min(
           matrix[i - 1][j] + 1, // deletion

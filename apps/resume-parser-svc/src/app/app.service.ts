@@ -43,7 +43,9 @@ export class AppService
     private readonly gridFsService: GridFsService,
     private readonly natsService: ResumeParserNatsService,
     private readonly parsingService: ParsingService,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Retrieves data.

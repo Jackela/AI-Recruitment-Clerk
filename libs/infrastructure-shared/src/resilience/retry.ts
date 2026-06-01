@@ -57,7 +57,7 @@ export class RetryUtility {
 
     let lastError: Error | undefined;
 
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    for(let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         return await operation();
       } catch (error) {

@@ -230,7 +230,7 @@ export class AccessibilityTester {
     });
 
     // Check for proper heading hierarchy
-    for (let i = 1; i < levels.length; i++) {
+    for(let i = 1; i < levels.length; i++) {
       if (levels[i] > levels[i - 1] + 1) {
         issues.push({
           type: 'warning',

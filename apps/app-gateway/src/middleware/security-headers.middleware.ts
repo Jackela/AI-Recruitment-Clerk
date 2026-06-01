@@ -22,7 +22,9 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
    * Initializes a new instance of the Security Headers Middleware.
    * @param configService - The config service.
    */
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly configService: ConfigService) {
+  // Intentionally empty
+}
 
   /**
    * Performs the use operation.

@@ -493,20 +493,20 @@ class AnalyticsDomainService {
     // intentionally empty - fallback implementation
   }
 
-  async trackEvent(_event: DomainEvent): Promise<void> {
+  public async trackEvent(_event: DomainEvent): Promise<void> {
     // intentionally empty - fallback implementation
   }
 
-  async recordMetric(_metric: Record<string, unknown>): Promise<void> {
+  public async recordMetric(_metric: Record<string, unknown>): Promise<void> {
     // intentionally empty - fallback implementation
   }
 
-  async generateReport(_type: ReportType): Promise<Record<string, unknown>> {
+  public async generateReport(_type: ReportType): Promise<Record<string, unknown>> {
     // intentionally empty - fallback implementation
     return {};
   }
 
-  async createUserInteractionEvent(
+  public async createUserInteractionEvent(
     _sessionId: string,
     _userId: string,
     eventType: EventType,
@@ -524,7 +524,7 @@ class AnalyticsDomainService {
     };
   }
 
-  async createBusinessMetricEvent(
+  public async createBusinessMetricEvent(
     _metricName: string,
     _value: number,
     _unit: MetricUnit,
@@ -540,7 +540,7 @@ class AnalyticsDomainService {
     };
   }
 
-  async createSystemPerformanceEvent(
+  public async createSystemPerformanceEvent(
     _operation: string,
     _duration: number,
     _success: boolean,
@@ -549,34 +549,34 @@ class AnalyticsDomainService {
     return { success: true, data: { id: 'test-perf', status: EventStatus.PROCESSED } };
   }
 
-  async processBatchEvents(_eventIds: string[]): Promise<BatchEventResult> {
+  public async processBatchEvents(_eventIds: string[]): Promise<BatchEventResult> {
     return { success: true, processedCount: _eventIds.length };
   }
 
-  async performPrivacyComplianceCheck(_eventId: string): Promise<PrivacyComplianceCheckResult> {
+  public async performPrivacyComplianceCheck(_eventId: string): Promise<PrivacyComplianceCheckResult> {
     return { success: true, compliant: true };
   }
 
-  async generateDataRetentionReport(
+  public async generateDataRetentionReport(
     _startDate: Date,
     _endDate: Date,
   ): Promise<DataRetentionReportResult> {
     return { success: true, report: {} };
   }
 
-  async getSessionAnalytics(_sessionId: string, _timeRange?: TimeRange): Promise<SessionAnalyticsResult> {
+  public async getSessionAnalytics(_sessionId: string, _timeRange?: TimeRange): Promise<SessionAnalyticsResult> {
     return { success: true, analytics: {} };
   }
 
-  async getEventProcessingMetrics(_timeRange: TimeRange): Promise<EventProcessingMetricsResult> {
+  public async getEventProcessingMetrics(_timeRange: TimeRange): Promise<EventProcessingMetricsResult> {
     return { success: true, metrics: {} };
   }
 
-  async getDataPrivacyMetrics(_timeRange: TimeRange): Promise<DataPrivacyMetricsResult> {
+  public async getDataPrivacyMetrics(_timeRange: TimeRange): Promise<DataPrivacyMetricsResult> {
     return { success: true, metrics: {} };
   }
 
-  async validateReportingAccess(
+  public async validateReportingAccess(
     _userRole: string,
     _reportType: ReportType,
     _dataScope: DataScope,

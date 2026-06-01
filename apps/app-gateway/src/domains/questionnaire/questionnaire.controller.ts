@@ -50,7 +50,9 @@ export class QuestionnaireController {
    */
   constructor(
     private readonly questionnaireService: QuestionnaireIntegrationService,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Creates questionnaire.

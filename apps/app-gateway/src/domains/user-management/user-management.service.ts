@@ -50,7 +50,9 @@ export class UserManagementService {
     private readonly userCrudService: UserCrudService,
     private readonly userAuthService: UserAuthService,
     private readonly userService: UserService,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Updates user.

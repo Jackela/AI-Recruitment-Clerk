@@ -334,7 +334,7 @@ export class ReportAnalyticsRepository {
     return this.performanceMonitor.executeWithMonitoring(
       async () => {
         let dateGrouping;
-        switch (granularity) {
+        switch(granularity) {
           case 'week':
             dateGrouping = {
               year: { $year: '$generatedAt' },
@@ -405,7 +405,7 @@ export class ReportAnalyticsRepository {
   ): string {
     const { year, month, day, week } = dateGroup;
 
-    switch (granularity) {
+    switch(granularity) {
       case 'week':
         return `${year}-W${(week || 1).toString().padStart(2, '0')}`;
       case 'month':

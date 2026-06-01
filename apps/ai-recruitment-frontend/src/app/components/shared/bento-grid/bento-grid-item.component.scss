@@ -1,5 +1,7 @@
+@use '../../../../styles/design-system/mixins.scss' as mixins;
+
 .bento-item {
-  background: var(--color-bg-primary);
+  @include mixins.card-base;
   border-radius: var(--radius-2xl);
   padding: var(--space-6);
   border: 1px solid var(--color-border-secondary);
@@ -8,22 +10,10 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: var(--shadow-sm);
-  backdrop-filter: blur(8px);
+
+  @include mixins.decorative-top-line(var(--color-primary-200));
 
   &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      var(--color-primary-200),
-      transparent
-    );
     opacity: 0;
     transition: opacity var(--duration-300) var(--ease-out);
   }
@@ -113,28 +103,19 @@
   }
 
   &.variant-primary {
-    background: linear-gradient(
-      135deg,
+    @include mixins.gradient-card(
       var(--color-primary-900),
-      var(--color-royal-800)
+      var(--color-royal-800),
+      1
     );
-    color: white;
-    box-shadow: 0 8px 32px rgba(26, 35, 126, 0.3);
-    border-color: var(--color-primary-700);
 
     .bento-icon {
-      background: rgba(255, 255, 255, 0.15);
+      @include mixins.glass-effect(0.15, 0);
       color: white;
-      border-color: rgba(255, 255, 255, 0.3);
     }
 
     .bento-title {
       color: white;
-    }
-
-    &:hover {
-      box-shadow: 0 16px 48px rgba(26, 35, 126, 0.4);
-      transform: translateY(-4px);
     }
 
     &::before {
@@ -148,106 +129,70 @@
   }
 
   &.variant-success {
-    background: linear-gradient(
-      135deg,
+    @include mixins.gradient-card(
       var(--color-emerald-800),
-      var(--color-success-700)
+      var(--color-success-700),
+      1
     );
-    color: white;
-    box-shadow: 0 8px 32px rgba(27, 94, 32, 0.3);
-    border-color: var(--color-success-600);
 
     .bento-icon {
-      background: rgba(255, 255, 255, 0.15);
+      @include mixins.glass-effect(0.15, 0);
       color: white;
-      border-color: rgba(255, 255, 255, 0.3);
     }
 
     .bento-title {
       color: white;
-    }
-
-    &:hover {
-      box-shadow: 0 16px 48px rgba(27, 94, 32, 0.4);
-      transform: translateY(-4px);
     }
   }
 
   &.variant-warning {
-    background: linear-gradient(
-      135deg,
+    @include mixins.gradient-card(
       var(--color-warning-600),
-      var(--color-ember-700)
+      var(--color-ember-700),
+      1
     );
-    color: white;
-    box-shadow: 0 8px 32px rgba(255, 179, 0, 0.3);
-    border-color: var(--color-warning-500);
 
     .bento-icon {
-      background: rgba(255, 255, 255, 0.15);
+      @include mixins.glass-effect(0.15, 0);
       color: white;
-      border-color: rgba(255, 255, 255, 0.3);
     }
 
     .bento-title {
       color: white;
-    }
-
-    &:hover {
-      box-shadow: 0 16px 48px rgba(255, 179, 0, 0.4);
-      transform: translateY(-4px);
     }
   }
 
   &.variant-info {
-    background: linear-gradient(
-      135deg,
+    @include mixins.gradient-card(
       var(--color-info-600),
-      var(--color-primary-600)
+      var(--color-primary-600),
+      1
     );
-    color: white;
-    box-shadow: 0 8px 32px rgba(2, 119, 189, 0.3);
-    border-color: var(--color-info-500);
 
     .bento-icon {
-      background: rgba(255, 255, 255, 0.15);
+      @include mixins.glass-effect(0.15, 0);
       color: white;
-      border-color: rgba(255, 255, 255, 0.3);
     }
 
     .bento-title {
       color: white;
-    }
-
-    &:hover {
-      box-shadow: 0 16px 48px rgba(2, 119, 189, 0.4);
-      transform: translateY(-4px);
     }
   }
 
   &.variant-error {
-    background: linear-gradient(
-      135deg,
+    @include mixins.gradient-card(
       var(--color-error-700),
-      var(--color-danger-600)
+      var(--color-danger-600),
+      1
     );
-    color: white;
-    box-shadow: 0 8px 32px rgba(211, 47, 47, 0.3);
-    border-color: var(--color-error-600);
 
     .bento-icon {
-      background: rgba(255, 255, 255, 0.15);
+      @include mixins.glass-effect(0.15, 0);
       color: white;
-      border-color: rgba(255, 255, 255, 0.3);
     }
 
     .bento-title {
       color: white;
-    }
-
-    &:hover {
-      box-shadow: 0 16px 48px rgba(211, 47, 47, 0.4);
-      transform: translateY(-4px);
     }
   }
 
@@ -278,7 +223,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: var(--spacing-4, 1rem);
+  margin-bottom: var(--space-4, 1rem);
 }
 
 .bento-badge {
@@ -299,7 +244,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-2, 0.5rem);
+  gap: var(--space-2, 0.5rem);
   min-width: 0;
 
   .bento-title,
@@ -317,15 +262,10 @@
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-tight);
   margin-bottom: var(--space-1);
-  color: var(--color-primary-800);
-  background: linear-gradient(
-    135deg,
+  @include mixins.gradient-text(
     var(--color-primary-800),
     var(--color-royal-700)
   );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 
   .size-small & {
     font-size: var(--font-size-xl);
@@ -379,33 +319,33 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: var(--spacing-4, 1rem);
-  gap: var(--spacing-4, 1rem);
+  margin-top: var(--space-4, 1rem);
+  gap: var(--space-4, 1rem);
 }
 
 .bento-trend {
   display: flex;
   align-items: center;
-  gap: var(--spacing-2, 0.5rem);
+  gap: var(--space-2, 0.5rem);
   font-size: 0.875rem;
 }
 
 .trend-indicator {
   display: flex;
   align-items: center;
-  gap: var(--spacing-1, 0.25rem);
+  gap: var(--space-1, 0.25rem);
   font-weight: 600;
 
   &.trend-up {
-    color: #10b981;
+    color: var(--color-success-700, #558b2f);
   }
 
   &.trend-down {
-    color: #ef4444;
+    color: var(--color-error-700, #c62828);
   }
 
   &.trend-neutral {
-    color: #6b7280;
+    color: var(--color-text-secondary, #616161);
   }
 }
 
@@ -415,10 +355,9 @@
 }
 
 .bento-action {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  @include mixins.glass-effect(0.2, 0);
   color: inherit;
-  padding: var(--spacing-2, 0.5rem) var(--spacing-4, 1rem);
+  padding: var(--space-2, 0.5rem) var(--space-4, 1rem);
   border-radius: var(--border-radius-md, 8px);
   font-size: 0.875rem;
   font-weight: 500;
@@ -431,9 +370,9 @@
   }
 
   .variant-default & {
-    background: var(--color-background, #f8f9fa);
-    border-color: var(--color-border, #e9ecef);
-    color: var(--color-text, #495057);
+    background: var(--color-bg-primary);
+    border-color: var(--color-border-primary);
+    color: var(--color-text-primary);
 
     &:hover {
       background: var(--color-border, #e9ecef);

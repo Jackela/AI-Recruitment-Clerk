@@ -1,7 +1,13 @@
 import type { TemplateRef } from '@angular/core';
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BentoIconComponent } from './bento-icon.component';
+import { BentoIconComponent } from './icons/bento-icon.component';
 
 /**
  * Defines the shape of the bento grid item.
@@ -105,10 +111,7 @@ export interface BentoGridItem {
             *ngIf="item.trend"
             [attr.aria-label]="getTrendAriaLabel()"
           >
-            <span
-              class="trend-indicator"
-              [class]="'trend-' + item.trend.type"
-            >
+            <span class="trend-indicator" [class]="'trend-' + item.trend.type">
               <svg
                 *ngIf="item.trend.type === 'up'"
                 width="16"
@@ -166,14 +169,13 @@ export interface BentoGridItem {
       <!-- Custom Template -->
       <ng-container *ngIf="item.customTemplate">
         <ng-container
-          *ngTemplateOutlet="
-            item.customTemplate;
-            context: { $implicit: item }
-          "
+          *ngTemplateOutlet="item.customTemplate; context: { $implicit: item }"
         ></ng-container>
       </ng-container>
     </div>
   `,
+
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BentoGridItemComponent {
   @Input({ required: true }) public item!: BentoGridItem;

@@ -54,7 +54,7 @@ test.describe('WebKit Complete Test Suite', () => {
       // Fallback: check for any meaningful content
       const bodyText = await page.locator('body').textContent();
       expect(bodyText).toBeTruthy();
-      expect(bodyText.length).toBeGreaterThan(100);
+      expect(bodyText?.length).toBeGreaterThan(100);
       console.log('✅ WebKit meaningful content detected (title fallback)');
     }
   });

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -48,6 +48,8 @@ export interface CandidateCardData {
         [src]="candidate.avatar"
         [alt]="candidate.name"
         class="avatar-image"
+        loading="lazy"
+        decoding="async"
       />
       <div *ngIf="!candidate.avatar" class="avatar-placeholder">
         {{ candidate.name.charAt(0).toUpperCase() }}
@@ -205,6 +207,8 @@ export interface CandidateCardData {
       }
     `,
   ],
+
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MobileCandidateCardComponent {
   @Input() public candidate!: CandidateCardData;

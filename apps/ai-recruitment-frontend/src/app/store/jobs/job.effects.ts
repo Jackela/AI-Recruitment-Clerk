@@ -1,25 +1,24 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { of, EMPTY } from 'rxjs';
-import {
-  catchError,
-  map,
-  mergeMap,
-  tap,
-  switchMap,
-} from 'rxjs/operators';
+import { of, EMPTY, from } from 'rxjs';
+import { catchError, map, mergeMap, tap, switchMap } from 'rxjs/operators';
 import { ApiService } from '../../services/api.service';
 import { WebSocketService } from '../../services/websocket.service';
+import { ConnectionService } from '../../core/services/connection.service';
 import * as JobActions from './job.actions';
 
 /**
- * Represents the job effects.
+ * Job Effects - Handles all side effects for job management.
+ *
+ * IMPORTANT: This application requires backend services for AI analysis.
+ * When backend is unavailable, operations fail with clear error messages.
  */
 @Injectable()
 export class JobEffects {
   private readonly actions$ = inject(Actions);
   private readonly apiService = inject(ApiService);
   private readonly webSocketService = inject(WebSocketService);
+  private readonly connectionService = inject(ConnectionService);
 
   public loadJobs$;
   public loadJob$;
@@ -31,21 +30,45 @@ export class JobEffects {
   public listenToJobUpdates$;
   public listenToJobProgress$;
   public webSocketConnectionStatus$;
+  public retryConnection$;
 
   constructor() {
     this.loadJobs$ = createEffect(() =>
       this.actions$.pipe(
         ofType(JobActions.loadJobs),
-        mergeMap(() =>
-          this.apiService.getAllJobs().pipe(
-            map((jobs) => JobActions.loadJobsSuccess({ jobs })),
-            catchError((error) =>
-              of(
-                JobActions.loadJobsFailure({
-                  error: error.message || 'Failed to load jobs',
-                }),
-              ),
-            ),
+        switchMap(() =>
+          from(this.connectionService.checkBackendConnection()).pipe(
+            switchMap((isConnected) => {
+              if (!isConnected) {
+                // Backend unavailable - fail with clear error
+                // Do NOT show mock data as this is an AI analysis application
+                return of(
+                  JobActions.loadJobsFailure({
+                    error:
+                      '后端服务不可用。AI Recruitment Clerk 需要后端服务才能正常工作。请确保后端服务已启动。',
+                  }),
+                );
+              }
+
+              // Backend available, proceed with normal API call
+              return this.apiService.getAllJobs().pipe(
+                mergeMap((jobs) => [
+                  JobActions.setOfflineMode({ isOffline: false }),
+                  JobActions.connectionStatusChanged({
+                    isConnected: true,
+                    message: '已连接到后端服务',
+                  }),
+                  JobActions.loadJobsSuccess({ jobs }),
+                ]),
+                catchError((error) =>
+                  of(
+                    JobActions.loadJobsFailure({
+                      error: error.message || '加载岗位列表失败',
+                    }),
+                  ),
+                ),
+              );
+            }),
           ),
         ),
       ),
@@ -60,7 +83,7 @@ export class JobEffects {
             catchError((error) =>
               of(
                 JobActions.loadJobFailure({
-                  error: error.message || 'Failed to load job',
+                  error: error.message || '加载岗位详情失败',
                 }),
               ),
             ),
@@ -78,7 +101,7 @@ export class JobEffects {
             catchError((error) =>
               of(
                 JobActions.createJobFailure({
-                  error: error.message || 'Failed to create job',
+                  error: error.message || '创建岗位失败',
                 }),
               ),
             ),
@@ -90,9 +113,6 @@ export class JobEffects {
     this.createJobSuccess$ = createEffect(() =>
       this.actions$.pipe(
         ofType(JobActions.createJobSuccess),
-        // Note: Navigation removed to allow progress tracking UI to remain visible
-        // The CreateJobComponent will handle navigation after progress completion
-        // Reload jobs list after creation
         map(() => JobActions.loadJobs()),
       ),
     );
@@ -103,7 +123,6 @@ export class JobEffects {
       this.actions$.pipe(
         ofType(JobActions.initializeWebSocketConnection),
         switchMap(({ sessionId, organizationId }) => {
-          // Connect to WebSocket and listen for connection status changes
           this.webSocketService.connectWithJobSubscription(
             sessionId,
             undefined,
@@ -193,10 +212,49 @@ export class JobEffects {
           ofType(JobActions.webSocketConnectionStatusChanged),
           tap(({ status }) => {
             console.log(`WebSocket connection status changed to: ${status}`);
-            // You can add toast notifications here if needed
           }),
         ),
       { dispatch: false },
+    );
+
+    // Retry connection effect
+    this.retryConnection$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(JobActions.retryConnection),
+        switchMap(() =>
+          from(this.connectionService.retryConnection()).pipe(
+            switchMap((isConnected) => {
+              if (isConnected) {
+                // Connection restored, reload jobs from API
+                return this.apiService.getAllJobs().pipe(
+                  mergeMap((jobs) => [
+                    JobActions.setOfflineMode({ isOffline: false }),
+                    JobActions.connectionStatusChanged({
+                      isConnected: true,
+                      message: '连接已恢复！正在从服务器加载数据。',
+                    }),
+                    JobActions.loadJobsSuccess({ jobs }),
+                  ]),
+                  catchError((error) =>
+                    of(
+                      JobActions.loadJobsFailure({
+                        error: error.message || '重新加载岗位列表失败',
+                      }),
+                    ),
+                  ),
+                );
+              } else {
+                // Still offline - fail with error
+                return of(
+                  JobActions.loadJobsFailure({
+                    error: '后端服务仍然不可用。请检查服务状态后重试。',
+                  }),
+                );
+              }
+            }),
+          ),
+        ),
+      ),
     );
   }
 }

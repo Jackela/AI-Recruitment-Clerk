@@ -1,13 +1,11 @@
 import type { OnInit, OnDestroy ,
   ElementRef} from '@angular/core';
-import {
-  Component,
+import {Component,
   Input,
   Output,
   EventEmitter,
   inject,
-  ViewChild
-} from '@angular/core';
+  ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
 import { MobileUploadService } from '../../services/mobile/mobile-upload.service';
@@ -220,7 +218,8 @@ import { MobileUploadService } from '../../services/mobile/mobile-upload.service
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class MobileUploadZoneComponent implements OnInit, OnDestroy {
   @Input() public placeholderText = 'Tap to upload or drag files';
   @Input() public multiple = true;

@@ -1,6 +1,4 @@
-import type {
-  OnInit,
-  OnDestroy} from '@angular/core';
+import type { OnInit, OnDestroy } from '@angular/core';
 import {
   Component,
   Input,
@@ -9,14 +7,15 @@ import {
   HostListener,
   signal,
   computed,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 
 // Import configuration
-import type {
-  TimesheetColumn} from '../../../../lib/config/table-config';
+import type { TimesheetColumn } from '../../../../lib/config/table-config';
 import {
   TIMESHEET_VIEW_CONFIGS,
   TIMESHEET_BREAKPOINTS,
@@ -25,10 +24,7 @@ import {
 } from '../../../../lib/config/table-config';
 
 // Import base table interfaces
-import type {
-  SortEvent,
-  PageEvent,
-} from '../data-table/data-table.component';
+import type { SortEvent, PageEvent } from '../data-table/data-table.component';
 
 // Import extracted components
 import { TimesheetRowComponent } from './timesheet-row.component';
@@ -72,9 +68,12 @@ export type TimesheetViewType = keyof typeof TIMESHEET_VIEW_CONFIGS;
     TimesheetRowComponent,
     TimesheetToolbarComponent,
     TimesheetPaginationComponent,
+    TranslatePipe,
   ],
   templateUrl: './timesheet-table.component.html',
   styleUrls: ['./timesheet-table.component.scss'],
+
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TimesheetTableComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
@@ -97,16 +96,26 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
   @Output() public bulkDelete = new EventEmitter<TimesheetEntry[]>();
   @Output() public viewChange = new EventEmitter<TimesheetViewType>();
 
-  /** @deprecated Use sortChange instead */ @Output() public onSort = this.sortChange;
-  /** @deprecated Use pageChange instead */ @Output() public onPageChangeDeprecated = this.pageChange;
-  /** @deprecated Use selectionChange instead */ @Output() public onSelectionChange = this.selectionChange;
-  /** @deprecated Use viewEntry instead */ @Output() public onView = this.viewEntry;
-  /** @deprecated Use editEntry instead */ @Output() public onEdit = this.editEntry;
-  /** @deprecated Use deleteEntry instead */ @Output() public onDelete = this.deleteEntry;
-  /** @deprecated Use exportData instead */ @Output() public onExport = this.exportData;
-  /** @deprecated Use bulkEdit instead */ @Output() public onBulkEdit = this.bulkEdit;
-  /** @deprecated Use bulkDelete instead */ @Output() public onBulkDelete = this.bulkDelete;
-  /** @deprecated Use viewChange instead */ @Output() public onViewChange = this.viewChange;
+  /** @deprecated Use sortChange instead */ @Output() public onSort =
+    this.sortChange;
+  /** @deprecated Use pageChange instead */ @Output()
+  public onPageChangeDeprecated = this.pageChange;
+  /** @deprecated Use selectionChange instead */ @Output()
+  public onSelectionChange = this.selectionChange;
+  /** @deprecated Use viewEntry instead */ @Output() public onView =
+    this.viewEntry;
+  /** @deprecated Use editEntry instead */ @Output() public onEdit =
+    this.editEntry;
+  /** @deprecated Use deleteEntry instead */ @Output() public onDelete =
+    this.deleteEntry;
+  /** @deprecated Use exportData instead */ @Output() public onExport =
+    this.exportData;
+  /** @deprecated Use bulkEdit instead */ @Output() public onBulkEdit =
+    this.bulkEdit;
+  /** @deprecated Use bulkDelete instead */ @Output() public onBulkDelete =
+    this.bulkDelete;
+  /** @deprecated Use viewChange instead */ @Output() public onViewChange =
+    this.viewChange;
 
   // State management
   public searchTerm = '';
@@ -137,7 +146,9 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
 
   public tableOptions = computed(() => {
     const viewConfig = getViewConfig(this.currentViewType);
-    return viewConfig ? viewConfig.options : TIMESHEET_VIEW_CONFIGS.full.options;
+    return viewConfig
+      ? viewConfig.options
+      : TIMESHEET_VIEW_CONFIGS.full.options;
   });
 
   // Data processing computed properties
@@ -179,7 +190,9 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
   });
 
   public totalItems = computed(() => this.filteredData().length);
-  public totalPages = computed(() => Math.ceil(this.totalItems() / this.pageSize));
+  public totalPages = computed(() =>
+    Math.ceil(this.totalItems() / this.pageSize),
+  );
 
   public paginatedData = computed(() => {
     const start = this.currentPage() * this.pageSize;
@@ -209,7 +222,7 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
     const keys = key.split('.');
     let value: unknown = entry;
 
-    for (const k of keys) {
+    for(const k of keys) {
       value = (value as Record<string, unknown>)?.[k];
     }
 
@@ -269,7 +282,9 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
 
   public handleSort(column: string): void {
     // Find column configuration to check if sortable
-    const columnConfig = this.displayedColumns().find(col => col.key === column);
+    const columnConfig = this.displayedColumns().find(
+      (col) => col.key === column,
+    );
     if (!columnConfig?.sortable) return;
 
     if (this.sortColumn() === column) {
@@ -298,24 +313,28 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
 
   // Selection methods
   public isSelected(entry: TimesheetEntry): boolean {
-    return this.selectedEntries().some(selected => selected.id === entry.id);
+    return this.selectedEntries().some((selected) => selected.id === entry.id);
   }
 
   public isAllSelected(): boolean {
     const pageData = this.paginatedData();
-    return pageData.length > 0 && pageData.every((entry) => this.isSelected(entry));
+    return (
+      pageData.length > 0 && pageData.every((entry) => this.isSelected(entry))
+    );
   }
 
   public isSomeSelected(): boolean {
     const pageData = this.paginatedData();
-    return pageData.some((entry) => this.isSelected(entry)) && !this.isAllSelected();
+    return (
+      pageData.some((entry) => this.isSelected(entry)) && !this.isAllSelected()
+    );
   }
 
   public toggleSelect(entry: TimesheetEntry): void {
     if (!this.tableOptions().selectable) return;
 
     const selected = [...this.selectedEntries()];
-    const index = selected.findIndex(s => s.id === entry.id);
+    const index = selected.findIndex((s) => s.id === entry.id);
 
     if (index > -1) {
       selected.splice(index, 1);
@@ -341,7 +360,7 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
     if (this.isAllSelected()) {
       // Deselect all on current page
       pageData.forEach((entry) => {
-        const index = selected.findIndex(s => s.id === entry.id);
+        const index = selected.findIndex((s) => s.id === entry.id);
         if (index > -1) {
           selected.splice(index, 1);
         }
@@ -349,7 +368,7 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
     } else {
       // Select all on current page
       pageData.forEach((entry) => {
-        if (!selected.some(s => s.id === entry.id)) {
+        if (!selected.some((s) => s.id === entry.id)) {
           selected.push(entry);
         }
       });
@@ -360,7 +379,10 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
   }
 
   // Pagination methods
-  public handlePageChange(event: { pageIndex: number; pageSize: number }): void {
+  public handlePageChange(event: {
+    pageIndex: number;
+    pageSize: number;
+  }): void {
     this.currentPage.set(event.pageIndex);
     if (event.pageSize !== this.pageSize) {
       this.pageSize = event.pageSize;
@@ -381,6 +403,9 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
   // Export functionality
   public exportDataCsv(): void {
     this.exportData.emit();
-    TimesheetExportUtil.exportData(this.filteredData(), this.displayedColumns());
+    TimesheetExportUtil.exportData(
+      this.filteredData(),
+      this.displayedColumns(),
+    );
   }
 }

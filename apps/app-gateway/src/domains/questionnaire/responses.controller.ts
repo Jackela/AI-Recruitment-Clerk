@@ -40,7 +40,9 @@ export class ResponsesController {
    */
   constructor(
     private readonly questionnaireService: QuestionnaireIntegrationService,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the submit questionnaire operation.

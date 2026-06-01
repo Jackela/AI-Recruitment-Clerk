@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import {Component, input, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -101,7 +101,8 @@ export interface SkillItem {
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class AnalyticsSkillsListComponent {
   /** Array of skills to display */
   public readonly skills = input.required<SkillItem[]>();

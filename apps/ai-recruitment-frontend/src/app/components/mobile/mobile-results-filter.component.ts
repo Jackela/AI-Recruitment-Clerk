@@ -4,6 +4,7 @@ import {
   Input,
   Output,
   EventEmitter,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -276,6 +277,8 @@ export interface FilterOption {
       }
     `,
   ],
+
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MobileResultsFilterComponent implements OnInit, OnDestroy {
   @Input() public isOpen = false;
@@ -345,7 +348,10 @@ export class MobileResultsFilterComponent implements OnInit, OnDestroy {
    * @param filterType - The type of filter to toggle ('status' | 'experience')
    * @param value - The value to toggle
    */
-  public toggleFilter(filterType: 'status' | 'experience', value: string): void {
+  public toggleFilter(
+    filterType: 'status' | 'experience',
+    value: string,
+  ): void {
     const filterArray = this.filters[filterType];
     const index = filterArray.indexOf(value);
 

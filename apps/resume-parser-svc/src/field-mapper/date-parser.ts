@@ -198,7 +198,7 @@ export class DateParser {
     }
 
     // Try each pattern
-    for (const { pattern, format, confidence } of this.DATE_PATTERNS) {
+    for(const { pattern, format, confidence } of this.DATE_PATTERNS) {
       const match = trimmed.match(pattern);
       if (match) {
         const parsedDate = this.parseWithPattern(match, format);
@@ -355,7 +355,7 @@ export class DateParser {
     let earliest: Date | null = null;
     let latest: Date | null = null;
 
-    for (const range of ranges) {
+    for(const range of ranges) {
       if (range.start.date) {
         if (!earliest || range.start.date < earliest) {
           earliest = range.start.date;
@@ -381,7 +381,7 @@ export class DateParser {
     format: string,
   ): Date | null {
     try {
-      switch (format) {
+      switch(format) {
         case 'YYYY-MM-DD':
           return new Date(
             parseInt(match[1]),

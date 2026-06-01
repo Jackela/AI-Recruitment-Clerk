@@ -7,6 +7,11 @@ import { WebSocketDemoController } from './controllers/websocket-demo.controller
 import { WebSocketModule } from '../websocket/websocket.module';
 import { GuestGuard } from './guards/guest.guard';
 import { GuestUsage, GuestUsageSchema } from './schemas/guest-usage.schema';
+import {
+  GuestResumeAnalysis,
+  GuestResumeAnalysisSchema,
+} from './schemas/guest-resume-analysis.schema';
+import { GuestResumeAnalysisService } from './services/guest-resume-analysis.service';
 import { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
 import { GridFsService } from '../services/gridfs.service';
 
@@ -17,6 +22,7 @@ import { GridFsService } from '../services/gridfs.service';
   imports: [
     MongooseModule.forFeature([
       { name: GuestUsage.name, schema: GuestUsageSchema },
+      { name: GuestResumeAnalysis.name, schema: GuestResumeAnalysisSchema },
     ]),
     forwardRef(() => WebSocketModule),
   ],
@@ -27,10 +33,16 @@ import { GridFsService } from '../services/gridfs.service';
   ],
   providers: [
     GuestUsageService,
+    GuestResumeAnalysisService,
     GuestGuard,
     AppGatewayNatsService,
     GridFsService,
   ],
-  exports: [GuestUsageService, GuestGuard, GridFsService],
+  exports: [
+    GuestUsageService,
+    GuestResumeAnalysisService,
+    GuestGuard,
+    GridFsService,
+  ],
 })
 export class GuestModule {}

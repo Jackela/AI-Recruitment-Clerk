@@ -441,3 +441,26 @@
     max-width: none;
   }
 }
+
+// Footer styles
+.app-footer {
+  padding: var(--space-4) var(--space-6);
+  margin-top: auto;
+  background-color: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border-primary);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.footer-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-text {
+  margin: 0;
+  font-size: var(--font-size-xs);
+}

@@ -9,4 +9,4 @@ export {
   createDtoValidationPipe,
   type DtoValidationPipeOptions,
   type FormattedValidationError,
-} from './dto-validation.pipe.js';
+} from './dto-validation.pipe';

@@ -368,7 +368,7 @@ export class DashboardService {
     type: 'started' | 'progress' | 'completed' | 'failed';
     analysisId: string;
   }): void {
-    switch (event.type) {
+    switch(event.type) {
       case 'started':
         this.progressFeedback.showInfo(
           '分析开始',
@@ -480,7 +480,7 @@ export class DashboardService {
    * @returns Localized status text
    */
   public getSystemStatusText(status?: string): string {
-    switch (status) {
+    switch(status) {
       case 'healthy':
         return '正常';
       case 'warning':

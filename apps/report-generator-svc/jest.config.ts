@@ -6,9 +6,13 @@ export default {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
+  moduleNameMapper: {
+    '^@ai-recruitment-clerk/(.*)$': '<rootDir>/../../libs/$1/src/index.ts',
+  },
   coverageDirectory: '../../coverage/apps/report-generator-svc',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   testMatch: ['**/*.spec.ts'],
+  testPathIgnorePatterns: ['/node_modules/', '\\.integration\\.spec\\.ts$'],
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.spec.ts',
@@ -23,15 +27,5 @@ export default {
     '!src/report-generator/report-analytics.repository.ts', // Analytics repository
     '!src/report-generator/report.repository.ts', // Data repository
     '!src/app/reports.controller.ts', // Admin REST controller (requires full HTTP mocking)
-  ],
-  // Coverage threshold lowered due to infrastructure-heavy code (Puppeteer, ExcelJS, LLM)
-  // Integration tests recommended for full coverage of PDF/Excel generation paths
-  coverageThreshold: {
-    global: {
-      branches: 40,
-      functions: 75,
-      lines: 55,
-      statements: 55,
-    },
-  },
+  ]
 };

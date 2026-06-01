@@ -1,12 +1,5 @@
-import type {
-  OnInit,
-  OnDestroy} from '@angular/core';
-import {
-  Directive,
-  ElementRef,
-  Input,
-  inject,
-} from '@angular/core';
+import type { OnInit, OnDestroy } from '@angular/core';
+import { Directive, ElementRef, Input, inject } from '@angular/core';
 import { AccessibilityService } from '../../services/accessibility/accessibility.service';
 
 /**
@@ -42,9 +35,9 @@ export class AccessibleCardDirective implements OnInit, OnDestroy {
   /**
    * Performs the ng on destroy operation.
    */
-  // eslint-disable-next-line @angular-eslint/no-empty-lifecycle-method
   public ngOnDestroy(): void {
     // Cleanup happens automatically via framework
+    // Intentionally empty - directive state is managed by Angular's lifecycle
   }
 
   private setupAccessibility(): void {

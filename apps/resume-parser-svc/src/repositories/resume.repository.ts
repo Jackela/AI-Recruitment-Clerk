@@ -274,7 +274,7 @@ export class ResumeRepository {
 
         // Optimize sort to match index order
         let sortOption: SortOption;
-        switch (sortBy) {
+        switch(sortBy) {
           case 'confidence':
             sortOption = { processingConfidence: -1, processedAt: -1 };
             break;
@@ -345,7 +345,7 @@ export class ResumeRepository {
             $size: {
               $filter: {
                 input: '$skills',
-                cond: { $in: ['$$this', skills] },
+                cond: { $in: ['$this', skills] },
               },
             },
           },
@@ -355,7 +355,7 @@ export class ResumeRepository {
                 $size: {
                   $filter: {
                     input: '$skills',
-                    cond: { $in: ['$$this', skills] },
+                    cond: { $in: ['$this', skills] },
                   },
                 },
               },

@@ -5,6 +5,7 @@ import {
   Output,
   EventEmitter,
   inject,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { UploadFile } from '../../services/mobile/mobile-upload.service';
@@ -33,6 +34,8 @@ import { MobileUploadService } from '../../services/mobile/mobile-upload.service
           [src]="file.preview"
           [alt]="file.name"
           class="preview-image"
+          loading="lazy"
+          decoding="async"
         />
         <div *ngIf="!file.preview" class="preview-placeholder">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -255,6 +258,8 @@ import { MobileUploadService } from '../../services/mobile/mobile-upload.service
       }
     `,
   ],
+
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MobileUploadFileItemComponent implements OnInit {
   @Input() public file!: UploadFile;

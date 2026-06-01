@@ -22,7 +22,9 @@ export class IncentiveValidationResult {
   constructor(
     public readonly isValid: boolean,
     public readonly errors: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 // ============================================================================
@@ -39,7 +41,9 @@ export class PaymentResult {
     public readonly amount?: number,
     public readonly currency?: Currency,
     public readonly error?: string,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the success operation.

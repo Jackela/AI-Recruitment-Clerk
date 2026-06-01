@@ -1,13 +1,13 @@
-@import '../../../../styles/variables';
+@import '../../../../styles/_variables.scss';
 
 .table-toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
+  padding: var(--space-4);
   background-color: $background-light;
   border-bottom: 1px solid $border-color;
-  gap: 1rem;
+  gap: var(--space-4);
 
   @include respond-to-mobile {
     flex-direction: column;
@@ -19,7 +19,7 @@
 .toolbar-right {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-4);
 
   @include respond-to-mobile {
     width: 100%;
@@ -46,16 +46,16 @@
 
 .search-icon {
   position: absolute;
-  left: 0.75rem;
+  left: var(--space-3);
   color: $text-secondary;
   pointer-events: none;
 }
 
 .search-input {
   width: 100%;
-  padding: 0.5rem 2.5rem 0.5rem 2.5rem;
+  padding: var(--space-2) var(--space-10) var(--space-2) var(--space-10);
   border: 1px solid $border-color;
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   font-size: 0.875rem;
 
   &:focus {
@@ -66,10 +66,10 @@
 
 .clear-btn {
   position: absolute;
-  right: 0.5rem;
+  right: var(--space-2);
   background: none;
   border: none;
-  padding: 0.25rem;
+  padding: var(--space-1);
   cursor: pointer;
   color: $text-secondary;
 
@@ -79,9 +79,9 @@
 }
 
 .view-selector {
-  padding: 0.5rem;
+  padding: var(--space-2);
   border: 1px solid $border-color;
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   background-color: $background-white;
   color: $text-color;
   font-size: 0.875rem;
@@ -96,10 +96,10 @@
 .export-btn {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
   border: 1px solid $border-color;
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   background-color: $background-white;
   color: $text-color;
   font-size: 0.875rem;
@@ -119,13 +119,13 @@
 
 .bulk-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .bulk-btn {
-  padding: 0.5rem 1rem;
+  padding: var(--space-2) var(--space-4);
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s;

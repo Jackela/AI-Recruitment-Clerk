@@ -349,7 +349,7 @@ export class ErrorHandler {
       context: errorDetails.context,
     };
 
-    switch (errorDetails.severity) {
+    switch(errorDetails.severity) {
       case ErrorSeverity.CRITICAL:
         this.logger.fatal(logMessage, logData);
         break;

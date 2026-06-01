@@ -339,7 +339,7 @@ export abstract class ServiceNatsClient extends BaseNatsClient {
 
     // 订阅服务特定的主题
     const subjects = this.getServiceSubjects();
-    for (const subject of subjects) {
+    for(const subject of subjects) {
       await this.subscribe(subject, this.handleMessage.bind(this));
     }
   }

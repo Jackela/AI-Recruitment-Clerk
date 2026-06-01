@@ -46,7 +46,7 @@ export class RetryUtility {
 
     let lastError: Error | unknown;
 
-    for (let attempt = 1; attempt <= config.maxAttempts; attempt++) {
+    for(let attempt = 1; attempt <= config.maxAttempts; attempt++) {
       try {
         this.logger.debug(
           `Attempting operation (attempt ${attempt}/${config.maxAttempts})`,
@@ -163,7 +163,9 @@ export class CircuitBreaker {
   private constructor(
     private readonly name: string,
     private readonly options: CircuitBreakerOptions,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Retrieves instance.
@@ -199,10 +201,8 @@ export class CircuitBreaker {
     try {
       const result = await operation();
 
-      if (this.state === 'HALF_OPEN') {
-        this.reset();
-        // Circuit breaker moving to CLOSED state
-      }
+      // Reset failures on success
+      this.reset();
 
       return result;
     } catch (error) {

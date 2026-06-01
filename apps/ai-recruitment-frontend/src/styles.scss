@@ -6,6 +6,7 @@
 // Performance optimized imports with @use for better compilation
 @use './styles/design-system/tokens.scss';
 @use './styles/design-system/components.scss';
+@use './styles/design-system/mixins.scss';
 
 // Modular styles with performance considerations
 @use './styles/mobile.scss';
@@ -456,5 +457,401 @@ body {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+// =====================
+// 共享工具类 - 来自 mixins
+// =====================
+
+// 渐变文本
+.gradient-text {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-600),
+    var(--color-royal-600)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+// 玻璃效果
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+// 玻璃效果 - 深色
+.glass-effect-dark {
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+// 隐藏滚动条但保持功能
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// 悬停抬升效果
+.hover-lift {
+  transition: all var(--transition-base);
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+// 悬停轻微抬升
+.hover-lift-sm {
+  transition: all var(--transition-base);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+// 卡片基础样式
+.card-base {
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+
+  &:hover {
+    box-shadow: var(--shadow-md);
+  }
+}
+
+// 卡片 - 可交互
+.card-interactive {
+  cursor: pointer;
+  transition: all var(--transition-base);
+
+  &:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+  }
+
+  &:focus-within {
+    outline: 2px solid var(--color-primary-500);
+    outline-offset: 2px;
+  }
+}
+
+// 渐变按钮 - 主要
+.gradient-btn-primary {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-600),
+    var(--color-royal-600)
+  );
+  color: white;
+  border: none;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+  }
+}
+
+// 渐变按钮 - 成功
+.gradient-btn-success {
+  background: linear-gradient(
+    135deg,
+    var(--color-success-500),
+    var(--color-emerald-500)
+  );
+  color: white;
+  border: none;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+  }
+}
+
+// 渐变按钮 - 警告
+.gradient-btn-warning {
+  background: linear-gradient(
+    135deg,
+    var(--color-warning-500),
+    var(--color-amber-500)
+  );
+  color: white;
+  border: none;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+  }
+}
+
+// 渐变按钮 - 错误
+.gradient-btn-error {
+  background: linear-gradient(
+    135deg,
+    var(--color-error-500),
+    var(--color-red-600)
+  );
+  color: white;
+  border: none;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+  }
+}
+
+// 文本截断 - 单行
+.text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// 文本截断 - 两行
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// 文本截断 - 三行
+.text-truncate-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// 淡入动画
+.fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+// 淡入上移动画
+.fade-in-up {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+// 脉冲动画
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+// 旋转动画
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+// 微光动画
+.shimmer {
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.3),
+      transparent
+    );
+    animation: shimmer 2s infinite;
+  }
+}
+
+// 聚焦环
+.focus-ring {
+  &:focus-visible {
+    outline: 2px solid var(--color-primary-500);
+    outline-offset: 2px;
+  }
+}
+
+// 禁用状态
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+// Flex 居中
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Flex 列
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+// Flex 行
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+// 绝对居中
+.absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+// 全宽
+.w-full {
+  width: 100%;
+}
+
+// 全高
+.h-full {
+  height: 100%;
+}
+
+// 圆角 - 小
+.rounded-sm {
+  border-radius: var(--radius-sm);
+}
+
+// 圆角 - 中
+.rounded-md {
+  border-radius: var(--radius-md);
+}
+
+// 圆角 - 大
+.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+
+// 圆角 - 超大
+.rounded-xl {
+  border-radius: var(--radius-xl);
+}
+
+// 圆角 - 2xl
+.rounded-2xl {
+  border-radius: var(--radius-2xl);
+}
+
+// 圆角 - 全圆
+.rounded-full {
+  border-radius: var(--radius-full);
+}
+
+// 阴影 - 小
+.shadow-sm {
+  box-shadow: var(--shadow-sm);
+}
+
+// 阴影 - 中
+.shadow-md {
+  box-shadow: var(--shadow-md);
+}
+
+// 阴影 - 大
+.shadow-lg {
+  box-shadow: var(--shadow-lg);
+}
+
+// 阴影 - 超大
+.shadow-xl {
+  box-shadow: var(--shadow-xl);
+}
+
+// 阴影 - 2xl
+.shadow-2xl {
+  box-shadow: var(--shadow-2xl);
+}
+
+// =====================
+// 关键帧动画定义
+// =====================
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+// =====================
+// 响应式工具类
+// =====================
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .show-mobile-only {
+    display: none !important;
   }
 }
