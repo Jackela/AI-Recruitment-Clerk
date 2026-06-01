@@ -31,7 +31,9 @@ export class UsageLimit {
     private quotaAllocation: QuotaAllocation,
     private usageTracking: UsageTracking,
     private lastResetAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   // 工厂方法 - 创建新的使用限制
   /**

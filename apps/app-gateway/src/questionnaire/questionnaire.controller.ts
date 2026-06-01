@@ -75,7 +75,9 @@ export class QuestionnaireController {
   constructor(
     private readonly questionnaireService: QuestionnaireIntegrationService,
     private readonly rateLimitMiddleware: RateLimitMiddleware,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Retrieves questionnaire template.

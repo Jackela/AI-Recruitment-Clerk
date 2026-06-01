@@ -22,7 +22,9 @@ export class IncentiveValidationService {
   constructor(
     private readonly repository: IIncentiveRepository,
     private readonly auditLogger: IAuditLogger,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Validates if a questionnaire incentive can be created.
@@ -161,7 +163,9 @@ export class ReferralEligibilityResult {
     public readonly isEligible: boolean,
     public readonly errors?: string[],
     public readonly existingReferral?: boolean,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   static eligible(): ReferralEligibilityResult {
     return new ReferralEligibilityResult(true);
@@ -179,7 +183,9 @@ export class BatchPaymentValidationResult {
   private constructor(
     public readonly isValid: boolean,
     public readonly errors?: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   static valid(): BatchPaymentValidationResult {
     return new BatchPaymentValidationResult(true);

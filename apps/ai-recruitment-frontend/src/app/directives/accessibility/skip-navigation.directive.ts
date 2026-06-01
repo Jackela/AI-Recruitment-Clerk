@@ -109,7 +109,7 @@ export class SkipNavigationDirective implements OnInit {
     let targetElement: HTMLElement | null = null;
 
     // Find the first matching element
-    for (const target of targets) {
+    for(const target of targets) {
       targetElement = document.querySelector(target) as HTMLElement;
       if (targetElement) break;
     }

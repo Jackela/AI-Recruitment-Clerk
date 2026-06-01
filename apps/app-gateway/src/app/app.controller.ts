@@ -28,7 +28,9 @@ export class AppController {
     private readonly natsClient: NatsClientService,
     private readonly cacheService: CacheService,
     private readonly cacheWarmupService: CacheWarmupService,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Retrieves welcome.

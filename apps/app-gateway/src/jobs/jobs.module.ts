@@ -6,6 +6,7 @@ import { JobRepository } from '../repositories/job.repository';
 import { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
 import { Job, JobSchema } from '../schemas/job.schema';
 import { AppCacheModule } from '../cache/cache.module';
+import { ReportsModule } from '../reports/reports.module';
 
 /**
  * Configures the jobs module.
@@ -13,6 +14,7 @@ import { AppCacheModule } from '../cache/cache.module';
 @Module({
   imports: [
     AppCacheModule,
+    ReportsModule,
     MongooseModule.forFeature([{ name: Job.name, schema: JobSchema }]),
   ],
   controllers: [JobsController],

@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import {Component, Input, Output, EventEmitter, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export type AlertType = 'success' | 'info' | 'warning' | 'danger';
@@ -178,7 +178,8 @@ export type AlertType = 'success' | 'info' | 'warning' | 'danger';
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class AlertComponent {
   @Input() public type: AlertType = 'info';
   @Input() public title = '';

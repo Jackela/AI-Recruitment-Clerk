@@ -24,7 +24,9 @@ export class RolesGuard implements CanActivate {
    * Initializes a new instance of the Roles Guard.
    * @param reflector - The reflector.
    */
-  constructor(private reflector: Reflector) {}
+  constructor(private reflector: Reflector) {
+  // Intentionally empty
+}
 
   /**
    * Performs the can activate operation.

@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { of, throwError } from 'rxjs';
 import type { Action } from '@ngrx/store';
 import { ResumeEffects } from './resume.effects';
@@ -69,89 +69,79 @@ describe('ResumeEffects', () => {
   });
 
   describe('loadResumesByJob$', () => {
-    it('should return loadResumesByJobSuccess action on successful API call', (done) => {
+    it('should return loadResumesByJobSuccess action on successful API call', async () => {
       apiService.getResumesByJobId.mockReturnValue(of(mockResumeListItems));
 
       actions$ = of(ResumeActions.loadResumesByJob({ jobId: 'job1' }));
 
-      effects.loadResumesByJob$.subscribe((action) => {
-        expect(action).toEqual(
-          ResumeActions.loadResumesByJobSuccess({
-            resumes: mockResumeListItems,
-          }),
-        );
-        expect(apiService.getResumesByJobId).toHaveBeenCalledWith('job1');
-        done();
-      });
+      const action = await effects.loadResumesByJob$.toPromise();
+      expect(action).toEqual(
+        ResumeActions.loadResumesByJobSuccess({
+          resumes: mockResumeListItems,
+        }),
+      );
+      expect(apiService.getResumesByJobId).toHaveBeenCalledWith('job1');
     });
 
-    it('should return loadResumesByJobFailure action on API error', (done) => {
+    it('should return loadResumesByJobFailure action on API error', async () => {
       const error = new Error('Network error');
       apiService.getResumesByJobId.mockReturnValue(throwError(() => error));
 
       actions$ = of(ResumeActions.loadResumesByJob({ jobId: 'job1' }));
 
-      effects.loadResumesByJob$.subscribe((action) => {
-        expect(action).toEqual(
-          ResumeActions.loadResumesByJobFailure({
-            error: 'Network error',
-          }),
-        );
-        done();
-      });
+      const action = await effects.loadResumesByJob$.toPromise();
+      expect(action).toEqual(
+        ResumeActions.loadResumesByJobFailure({
+          error: 'Network error',
+        }),
+      );
     });
 
-    it('should handle API error with custom message', (done) => {
+    it('should handle API error with custom message', async () => {
       const error = { message: 'Custom error message' };
       apiService.getResumesByJobId.mockReturnValue(throwError(() => error));
 
       actions$ = of(ResumeActions.loadResumesByJob({ jobId: 'job1' }));
 
-      effects.loadResumesByJob$.subscribe((action) => {
-        expect(action).toEqual(
-          ResumeActions.loadResumesByJobFailure({
-            error: 'Custom error message',
-          }),
-        );
-        done();
-      });
+      const action = await effects.loadResumesByJob$.toPromise();
+      expect(action).toEqual(
+        ResumeActions.loadResumesByJobFailure({
+          error: 'Custom error message',
+        }),
+      );
     });
   });
 
   describe('loadResume$', () => {
-    it('should return loadResumeSuccess action on successful API call', (done) => {
+    it('should return loadResumeSuccess action on successful API call', async () => {
       apiService.getResumeById.mockReturnValue(of(mockResume));
 
       actions$ = of(ResumeActions.loadResume({ resumeId: 'resume1' }));
 
-      effects.loadResume$.subscribe((action) => {
-        expect(action).toEqual(
-          ResumeActions.loadResumeSuccess({ resume: mockResume }),
-        );
-        expect(apiService.getResumeById).toHaveBeenCalledWith('resume1');
-        done();
-      });
+      const action = await effects.loadResume$.toPromise();
+      expect(action).toEqual(
+        ResumeActions.loadResumeSuccess({ resume: mockResume }),
+      );
+      expect(apiService.getResumeById).toHaveBeenCalledWith('resume1');
     });
 
-    it('should return loadResumeFailure action on API error', (done) => {
+    it('should return loadResumeFailure action on API error', async () => {
       const error = new Error('Resume not found');
       apiService.getResumeById.mockReturnValue(throwError(() => error));
 
       actions$ = of(ResumeActions.loadResume({ resumeId: 'nonexistent' }));
 
-      effects.loadResume$.subscribe((action) => {
-        expect(action).toEqual(
-          ResumeActions.loadResumeFailure({
-            error: 'Resume not found',
-          }),
-        );
-        done();
-      });
+      const action = await effects.loadResume$.toPromise();
+      expect(action).toEqual(
+        ResumeActions.loadResumeFailure({
+          error: 'Resume not found',
+        }),
+      );
     });
   });
 
   describe('uploadResumes$', () => {
-    it('should return uploadResumesSuccess action on successful API call', (done) => {
+    it('should return uploadResumesSuccess action on successful API call', async () => {
       const files = [
         new File(['content'], 'resume1.pdf', { type: 'application/pdf' }),
       ];
@@ -159,18 +149,16 @@ describe('ResumeEffects', () => {
 
       actions$ = of(ResumeActions.uploadResumes({ jobId: 'job1', files }));
 
-      effects.uploadResumes$.subscribe((action) => {
-        expect(action).toEqual(
-          ResumeActions.uploadResumesSuccess({
-            response: mockUploadResponse,
-          }),
-        );
-        expect(apiService.uploadResumes).toHaveBeenCalledWith('job1', files);
-        done();
-      });
+      const action = await effects.uploadResumes$.toPromise();
+      expect(action).toEqual(
+        ResumeActions.uploadResumesSuccess({
+          response: mockUploadResponse,
+        }),
+      );
+      expect(apiService.uploadResumes).toHaveBeenCalledWith('job1', files);
     });
 
-    it('should return uploadResumesFailure action on API error', (done) => {
+    it('should return uploadResumesFailure action on API error', async () => {
       const files = [
         new File(['content'], 'resume1.pdf', { type: 'application/pdf' }),
       ];
@@ -179,43 +167,35 @@ describe('ResumeEffects', () => {
 
       actions$ = of(ResumeActions.uploadResumes({ jobId: 'job1', files }));
 
-      effects.uploadResumes$.subscribe((action) => {
-        expect(action).toEqual(
-          ResumeActions.uploadResumesFailure({
-            error: 'Upload failed',
-          }),
-        );
-        done();
-      });
+      const action = await effects.uploadResumes$.toPromise();
+      expect(action).toEqual(
+        ResumeActions.uploadResumesFailure({
+          error: 'Upload failed',
+        }),
+      );
     });
   });
 
   describe('uploadResumesSuccess$', () => {
-    it('should trigger loadResumesByJob action after successful upload', (done) => {
+    it('should trigger loadResumesByJob action after successful upload', async () => {
       actions$ = of(
         ResumeActions.uploadResumesSuccess({ response: mockUploadResponse }),
       );
 
-      effects.uploadResumesSuccess$.subscribe((action) => {
-        expect(action).toEqual(
-          ResumeActions.loadResumesByJob({ jobId: 'job1' }),
-        );
-        done();
-      });
+      const action = await effects.uploadResumesSuccess$.toPromise();
+      expect(action).toEqual(ResumeActions.loadResumesByJob({ jobId: 'job1' }));
     });
   });
 
   describe('Effect Integration', () => {
-    it('should chain loadResumesByJob and loadResumesByJobSuccess effects', (done) => {
+    it('should chain loadResumesByJob and loadResumesByJobSuccess effects', async () => {
       apiService.getResumesByJobId.mockReturnValue(of(mockResumeListItems));
 
       actions$ = of(ResumeActions.loadResumesByJob({ jobId: 'job1' }));
 
-      effects.loadResumesByJob$.subscribe((successAction) => {
-        expect(successAction.type).toBe('[Resume] Load Resumes By Job Success');
-        expect(apiService.getResumesByJobId).toHaveBeenCalled();
-        done();
-      });
+      const successAction = await effects.loadResumesByJob$.toPromise();
+      expect(successAction.type).toBe('[Resume] Load Resumes By Job Success');
+      expect(apiService.getResumesByJobId).toHaveBeenCalled();
     });
   });
 });

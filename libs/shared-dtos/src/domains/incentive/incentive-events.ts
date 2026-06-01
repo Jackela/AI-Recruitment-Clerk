@@ -30,7 +30,9 @@ export class IncentiveCreatedEvent implements DomainEvent {
     public readonly currency: Currency,
     public readonly triggerType: TriggerType,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 // ============================================================================
@@ -53,7 +55,9 @@ export class IncentiveValidatedEvent implements DomainEvent {
     public readonly recipientIP: string,
     public readonly rewardAmount: number,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 // ============================================================================
@@ -76,7 +80,9 @@ export class IncentiveValidationFailedEvent implements DomainEvent {
     public readonly recipientIP: string,
     public readonly errors: string[],
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 // ============================================================================
@@ -101,7 +107,9 @@ export class IncentiveApprovedEvent implements DomainEvent {
     public readonly rewardAmount: number,
     public readonly reason: string,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 // ============================================================================
@@ -124,7 +132,9 @@ export class IncentiveRejectedEvent implements DomainEvent {
     public readonly recipientIP: string,
     public readonly reason: string,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 // ============================================================================
@@ -153,7 +163,9 @@ export class IncentivePaidEvent implements DomainEvent {
     public readonly paymentMethod: PaymentMethod,
     public readonly transactionId: string,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 // ============================================================================
@@ -176,5 +188,7 @@ export class PaymentFailedEvent implements DomainEvent {
     public readonly recipientIP: string,
     public readonly error: string,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }

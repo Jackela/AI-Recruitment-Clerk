@@ -177,7 +177,7 @@ export class PullToRefreshDirective implements OnInit {
    * Finds a touch in the touch list by identifier.
    */
   private findTouchByIdentifier(e: TouchEvent): Touch | null {
-    for (let i = 0; i < e.touches.length; i++) {
+    for(let i = 0; i < e.touches.length; i++) {
       if (e.touches[i].identifier === this.touchIdentifier) {
         return e.touches[i];
       }
@@ -189,7 +189,7 @@ export class PullToRefreshDirective implements OnInit {
    * Checks if the current touch identifier still exists in the touch list.
    */
   private touchExistsInList(e: TouchEvent): boolean {
-    for (let i = 0; i < e.touches.length; i++) {
+    for(let i = 0; i < e.touches.length; i++) {
       if (e.touches[i].identifier === this.touchIdentifier) {
         return true;
       }

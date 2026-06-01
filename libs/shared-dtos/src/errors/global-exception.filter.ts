@@ -5,7 +5,8 @@
 
 import type {
   ExceptionFilter,
-  ArgumentsHost} from '@nestjs/common';
+  ArgumentsHost,
+} from '@nestjs/common';
 import {
   Catch,
   HttpException,
@@ -100,7 +101,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
    * @param exception - The exception.
    * @param host - The host.
    */
-  public catch(exception: unknown, host: ArgumentsHost): void {
+  catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
@@ -335,7 +336,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
       const { severity } = error.enhancedDetails;
       const logMessage = `${request.method} ${request.path} - ${error.enhancedDetails.code}: ${error.enhancedDetails.message}`;
 
-      switch (severity) {
+      switch(severity) {
         case 'critical':
         case 'high':
           this.logger.error(logMessage, error.stack);

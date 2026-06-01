@@ -400,7 +400,7 @@ export class LlmReportMapperService {
   public mapRecommendationDecision(
     decision?: string,
   ): LlmCandidateData['recommendation'] {
-    switch (decision) {
+    switch(decision) {
       case 'hire':
         return 'hire';
       case 'interview':

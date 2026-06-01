@@ -53,7 +53,9 @@ export class ResumeParserIntegrationService {
   constructor(
     private readonly visionLlmService: VisionLlmService,
     private readonly fieldMapperService: FieldMapperService,
-  ) {}
+  ) {
+  // Intentionally empty
+}
   // validateOptions removed - no longer needed
 
   /**
@@ -193,7 +195,7 @@ export class ResumeParserIntegrationService {
       error?: string;
     }> = [];
 
-    for (const resume of resumes) {
+    for(const resume of resumes) {
       try {
         const result = await this.parseResume(
           resume.pdfBuffer,
@@ -311,7 +313,7 @@ export class ResumeParserIntegrationService {
     const maxRetries = options.retryAttempts ?? 2;
     let lastError: Error | null = null;
 
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    for(let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         this.logger.debug(
           `Vision LLM extraction attempt ${attempt}/${maxRetries}`,
@@ -419,7 +421,7 @@ export class ResumeParserIntegrationService {
     let consistencyScore = 1.0;
 
     // Check date consistency in work experience
-    for (const exp of resume.workExperience) {
+    for(const exp of resume.workExperience) {
       if (exp.startDate && exp.endDate && exp.endDate !== 'present') {
         const startDate = new Date(exp.startDate);
         const endDate = new Date(exp.endDate);

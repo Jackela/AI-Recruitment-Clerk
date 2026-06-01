@@ -16,7 +16,9 @@ export class ParsingRetryService {
     { timestamp: number; hash: string; attempts: number }
   >();
 
-  constructor(private readonly eventService: ParsingEventService) {}
+  constructor(private readonly eventService: ParsingEventService) {
+  // Intentionally empty
+}
 
   /**
    * Handles processing errors with retry logic.

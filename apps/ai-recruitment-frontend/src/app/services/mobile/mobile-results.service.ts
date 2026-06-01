@@ -81,7 +81,9 @@ export interface ResultsState {
  *
  * @example
  * ```typescript
- * constructor(private resultsService: MobileResultsService) {}
+ * constructor(private resultsService: MobileResultsService) {
+  // Intentionally empty
+}
  *
  * ngOnInit() {
  *   this.resultsService.setCandidates(this.candidates);
@@ -274,7 +276,7 @@ export class MobileResultsService {
     sorted.sort((a, b) => {
       let comparison = 0;
 
-      switch (field) {
+      switch(field) {
         case 'score':
           comparison = a.score - b.score;
           break;

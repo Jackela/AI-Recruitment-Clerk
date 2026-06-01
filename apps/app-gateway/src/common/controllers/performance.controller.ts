@@ -302,7 +302,9 @@ export class PerformanceController {
     private readonly cacheService: CacheService,
     private readonly cacheOptimization: CacheOptimizationService,
     private readonly dbOptimization: DatabaseOptimizationMiddleware,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Retrieves performance stats.

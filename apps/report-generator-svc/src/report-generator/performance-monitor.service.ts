@@ -536,7 +536,7 @@ export class PerformanceMonitorService {
 
     // Clean performance history
     const beforeCount = this.performanceHistory.length;
-    while (
+    while(
       this.performanceHistory.length > 0 &&
       this.performanceHistory[0].startTime < cutoffTime
     ) {

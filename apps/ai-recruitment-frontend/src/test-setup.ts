@@ -23,7 +23,9 @@ Object.defineProperty(window, 'matchMedia', {
 // Mock window.ResizeObserver for responsive tests
 global.ResizeObserver = class ResizeObserver {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  constructor(_callback: ResizeObserverCallback) {}
+  constructor(_callback: ResizeObserverCallback) {
+  // Intentionally empty
+}
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   public observe(): void {}
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -39,7 +41,9 @@ global.IntersectionObserver = class IntersectionObserver {
   public thresholds: ReadonlyArray<number> = [];
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  constructor(_callback: IntersectionObserverCallback) {}
+  constructor(_callback: IntersectionObserverCallback) {
+  // Intentionally empty
+}
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   public observe(): void {}
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -112,7 +116,9 @@ interface JasmineSpy extends MockFn {
           jestSpy.mockImplementation(fn),
         callThrough: () => jestSpy.mockImplementation(),
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        stub: () => jestSpy.mockImplementation(() => {}),
+        stub: () => jestSpy.mockImplementation(() => {
+  // Intentionally empty
+}),
         throwError: (error: Error | unknown) =>
           jestSpy.mockImplementation(() => {
             throw error;
@@ -138,7 +144,9 @@ interface JasmineSpy extends MockFn {
         jestSpy.mockImplementation(fn),
       callThrough: () => jestSpy.mockImplementation(),
       // eslint-disable-next-line @typescript-eslint/no-empty-function
-      stub: () => jestSpy.mockImplementation(() => {}),
+      stub: () => jestSpy.mockImplementation(() => {
+  // Intentionally empty
+}),
       throwError: (error: Error | unknown) =>
         jestSpy.mockImplementation(() => {
           throw error;
@@ -167,7 +175,9 @@ interface JasmineSpy extends MockFn {
       jestSpy.mockImplementation(fn),
     callThrough: () => jestSpy.mockImplementation(),
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    stub: () => jestSpy.mockImplementation(() => {}),
+    stub: () => jestSpy.mockImplementation(() => {
+  // Intentionally empty
+}),
     throwError: (error: unknown) =>
       jestSpy.mockImplementation(() => {
         throw error;

@@ -229,7 +229,7 @@ export class NotificationService {
     const now = new Date();
     let updatedCount = 0;
 
-    for (const notification of notifications) {
+    for(const notification of notifications) {
       if (!notification.readAt) {
         notification.readAt = now;
         updatedCount++;

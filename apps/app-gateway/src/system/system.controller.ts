@@ -1,19 +1,17 @@
 import {
+  BadRequestException,
+  Body,
   Controller,
   Get,
-  Post,
-  
-  Body,
-  
-  Query,
-  UseGuards,
   HttpCode,
+  HttpException,
   HttpStatus,
-  
-  BadRequestException,
+  Optional,
+  Post,
+  Query,
   ServiceUnavailableException,
   Res,
-  HttpException,
+  UseGuards,
 } from '@nestjs/common';
 import type { Response } from 'express';
 import {
@@ -23,6 +21,21 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import type { CacheService } from '../cache/cache.service';
+import type { HealthCheckService } from '../common/services/health-check.service';
+import type { ServiceHealth, SystemHealth } from '../common/services/health-check.service';
+import type { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
+import type { MetricsService } from '../ops/metrics.service';
+
+type IntegrationStatus = 'passed' | 'failed' | 'skipped';
+
+interface IntegrationCheckResult {
+  name: string;
+  status: IntegrationStatus;
+  duration: number;
+  details?: Record<string, unknown>;
+  error?: string;
+}
 
 /**
  * Exposes endpoints for system.
@@ -31,6 +44,15 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 @ApiBearerAuth()
 @Controller('system')
 export class SystemController {
+  constructor(
+    @Optional() private readonly healthCheckService?: HealthCheckService,
+    @Optional() private readonly cacheService?: CacheService,
+    @Optional() private readonly natsService?: AppGatewayNatsService,
+    @Optional() private readonly metricsService?: MetricsService,
+  ) {
+    // Optional dependencies keep the controller testable in isolated specs.
+  }
+
   /**
    * Retrieves system health.
    * @returns A promise that resolves to { success: boolean; data: any }.
@@ -47,33 +69,24 @@ export class SystemController {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async getSystemHealth(): Promise<{ success: boolean; data: any }> {
     try {
-      const startTime = process.uptime();
-      const memoryUsage = process.memoryUsage();
+      const systemHealth =
+        (await this.healthCheckService?.getSystemHealth()) ??
+        this.buildFallbackSystemHealth();
+      const memoryUsage = this.getMemoryUsageMb();
 
       return {
         success: true,
         data: {
-          status: 'healthy',
+          status: systemHealth.overall,
           timestamp: new Date().toISOString(),
-          services: [
-            {
-              name: 'app-gateway',
-              status: 'healthy',
-              uptime: Math.floor(startTime),
-              memory: {
-                rss: Math.round(memoryUsage.rss / 1024 / 1024),
-                heapUsed: Math.round(memoryUsage.heapUsed / 1024 / 1024),
-                heapTotal: Math.round(memoryUsage.heapTotal / 1024 / 1024),
-              },
-            },
-          ],
-          uptime: Math.floor(startTime),
-          version: '1.0.0',
+          services: systemHealth.services,
+          uptime: Math.floor(process.uptime()),
+          version: systemHealth.version,
           environment: process.env.NODE_ENV || 'development',
           memory: {
-            rss: `${Math.round(memoryUsage.rss / 1024 / 1024)}MB`,
-            heapUsed: `${Math.round(memoryUsage.heapUsed / 1024 / 1024)}MB`,
-            heapTotal: `${Math.round(memoryUsage.heapTotal / 1024 / 1024)}MB`,
+            rss: `${memoryUsage.rss}MB`,
+            heapUsed: `${memoryUsage.heapUsed}MB`,
+            heapTotal: `${memoryUsage.heapTotal}MB`,
           },
         },
       };
@@ -139,23 +152,29 @@ export class SystemController {
           HttpStatus.TOO_MANY_REQUESTS,
         );
       }
+
+      const systemHealth =
+        (await this.healthCheckService?.getSystemHealth()) ??
+        this.buildFallbackSystemHealth();
+      const serviceCounts = this.countServices(systemHealth.services);
+      const operationalStatus = this.mapOverallStatus(systemHealth.overall);
+
       return {
         success: true,
         data: {
-          status: 'operational',
-          version: '1.0.0',
+          status: operationalStatus,
+          version: systemHealth.version,
           environment: process.env.NODE_ENV || 'development',
           uptime: Math.floor(process.uptime()),
-          services: {
-            total: 1,
-            healthy: 1,
-            degraded: 0,
-            unhealthy: 0,
-          },
+          services: serviceCounts,
           lastUpdated: new Date().toISOString(),
         },
       };
     } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         message: 'Failed to retrieve system status',
         error: (error as Error).message,
@@ -199,26 +218,50 @@ export class SystemController {
     };
   }
 
-  // System metrics stub
   /**
    * Retrieves metrics.
-   * @param _timeRange - The time range.
+   * @param timeRange - The time range.
    * @returns The result of the operation.
    */
   @UseGuards(JwtAuthGuard)
   @Get('metrics')
   @HttpCode(HttpStatus.OK)
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  public async getMetrics(@Query('timeRange') _timeRange?: string) {
+  public async getMetrics(@Query('timeRange') timeRange?: string) {
+    const memoryUsage = this.getMemoryUsageMb();
+    const cacheMetrics = this.cacheService?.getMetrics();
+    const natsHealth = await this.getNatsHealth();
+    const opsSnapshot = this.metricsService?.getSnapshot();
+
     return {
-      performance: { averageResponseTime: 123 },
-      resources: { cpuUsage: 12.3, memoryUsage: 456 },
-      requests: { total: 1000, success: 980, errors: 20 },
-      errors: { rate: 0.02 },
+      timeRange: timeRange ?? 'current',
+      performance: {
+        averageResponseTime: null,
+        uptimeSeconds: Math.floor(process.uptime()),
+      },
+      resources: {
+        cpuUsage: this.estimateProcessCpuUsage(),
+        memoryUsage: memoryUsage.heapUsed,
+        memory: memoryUsage,
+      },
+      requests: {
+        total: opsSnapshot?.exposure ?? 0,
+        success: opsSnapshot?.success ?? 0,
+        errors: opsSnapshot?.error ?? 0,
+        cancelled: opsSnapshot?.cancel ?? 0,
+        successRate: opsSnapshot?.successRate ?? 0,
+      },
+      cache: cacheMetrics ?? null,
+      messaging: natsHealth,
+      errors: {
+        rate:
+          opsSnapshot && opsSnapshot.exposure > 0
+            ? opsSnapshot.error / opsSnapshot.exposure
+            : 0,
+      },
     };
   }
 
-  // Integration test runner stub
   /**
    * Performs the run integration operation.
    * @param body - The body.
@@ -229,16 +272,228 @@ export class SystemController {
   @HttpCode(HttpStatus.OK)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-function-return-type
   public async runIntegration(@Body() body: any) {
+    const testSuite = body?.testSuite || 'default';
+    const requestedChecks = this.resolveIntegrationChecks(body);
+    const startedAt = Date.now();
+    const results = await Promise.all(
+      requestedChecks.map((check) => this.runIntegrationCheck(check)),
+    );
+    const passed = results.filter((result) => result.status === 'passed').length;
+    const failed = results.filter((result) => result.status === 'failed').length;
+
     return {
-      testSuite: body?.testSuite || 'default',
-      totalTests: 5,
-      passed: 5,
-      failed: 0,
-      duration: 100,
-      results: [
-        { name: 'auth', status: 'passed' },
-        { name: 'resumes', status: 'passed' },
+      testSuite,
+      totalTests: results.length,
+      passed,
+      failed,
+      duration: Date.now() - startedAt,
+      results,
+    };
+  }
+
+  public getStatus(): { status: string; timestamp: string } {
+    return {
+      status: 'operational',
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  public async getHealth(): Promise<{ healthy: boolean; timestamp: string }> {
+    const systemHealth =
+      (await this.healthCheckService?.getSystemHealth()) ??
+      this.buildFallbackSystemHealth();
+
+    return {
+      healthy: systemHealth.overall !== 'unhealthy',
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  private buildFallbackSystemHealth(): SystemHealth {
+    const memoryUsage = this.getMemoryUsageMb();
+
+    return {
+      overall: 'healthy',
+      timestamp: new Date(),
+      uptime: Math.floor(process.uptime()),
+      version: process.env.npm_package_version || '1.0.0',
+      services: [
+        {
+          name: 'app-gateway',
+          status: 'healthy',
+          lastCheck: new Date(),
+          metadata: {
+            memory: memoryUsage,
+          },
+        },
       ],
+    };
+  }
+
+  private countServices(services: ServiceHealth[]): {
+    total: number;
+    healthy: number;
+    degraded: number;
+    unhealthy: number;
+  } {
+    return {
+      total: services.length,
+      healthy: services.filter((service) => service.status === 'healthy')
+        .length,
+      degraded: services.filter((service) => service.status === 'degraded')
+        .length,
+      unhealthy: services.filter((service) => service.status === 'unhealthy')
+        .length,
+    };
+  }
+
+  private mapOverallStatus(
+    overall: SystemHealth['overall'],
+  ): 'operational' | 'degraded' | 'maintenance' | 'outage' {
+    if (overall === 'unhealthy') {
+      return 'outage';
+    }
+
+    if (overall === 'degraded') {
+      return 'degraded';
+    }
+
+    return 'operational';
+  }
+
+  private getMemoryUsageMb(): {
+    rss: number;
+    heapUsed: number;
+    heapTotal: number;
+    external: number;
+  } {
+    const memoryUsage = process.memoryUsage();
+
+    return {
+      rss: Math.round(memoryUsage.rss / 1024 / 1024),
+      heapUsed: Math.round(memoryUsage.heapUsed / 1024 / 1024),
+      heapTotal: Math.round(memoryUsage.heapTotal / 1024 / 1024),
+      external: Math.round(memoryUsage.external / 1024 / 1024),
+    };
+  }
+
+  private estimateProcessCpuUsage(): number {
+    const cpuUsage = process.cpuUsage();
+    const elapsedMicros = Math.max(1, process.uptime() * 1_000_000);
+    const usedMicros = cpuUsage.user + cpuUsage.system;
+
+    return Math.round((usedMicros / elapsedMicros) * 10000) / 100;
+  }
+
+  private async getNatsHealth(): Promise<Record<string, unknown> | null> {
+    if (!this.natsService) {
+      return null;
+    }
+
+    try {
+      return (await this.natsService.getHealthStatus()) as unknown as Record<
+        string,
+        unknown
+      >;
+    } catch (error) {
+      return {
+        status: 'unhealthy',
+        error: (error as Error).message,
+      };
+    }
+  }
+
+  private resolveIntegrationChecks(body: unknown): string[] {
+    if (
+      body &&
+      typeof body === 'object' &&
+      Array.isArray((body as { checks?: unknown }).checks)
+    ) {
+      return (body as { checks: unknown[] }).checks
+        .filter((check): check is string => typeof check === 'string')
+        .map((check) => check.trim())
+        .filter(Boolean);
+    }
+
+    return ['process', 'health', 'cache', 'nats'];
+  }
+
+  private async runIntegrationCheck(
+    name: string,
+  ): Promise<IntegrationCheckResult> {
+    const startedAt = Date.now();
+
+    try {
+      switch (name) {
+        case 'process':
+          return this.buildIntegrationResult(name, startedAt, true, {
+            uptime: process.uptime(),
+            memory: this.getMemoryUsageMb(),
+          });
+        case 'health': {
+          const health =
+            (await this.healthCheckService?.getSystemHealth()) ??
+            this.buildFallbackSystemHealth();
+          return this.buildIntegrationResult(
+            name,
+            startedAt,
+            health.overall !== 'unhealthy',
+            { overall: health.overall, services: health.services.length },
+          );
+        }
+        case 'cache': {
+          const cacheMetrics = this.cacheService?.getMetrics();
+          if (!cacheMetrics) {
+            return this.buildIntegrationResult(name, startedAt, false, {
+              reason: 'cache service unavailable',
+            }, 'skipped');
+          }
+          return this.buildIntegrationResult(name, startedAt, true, {
+            metrics: cacheMetrics,
+          });
+        }
+        case 'nats': {
+          const natsHealth = await this.getNatsHealth();
+          if (!natsHealth) {
+            return this.buildIntegrationResult(name, startedAt, false, {
+              reason: 'nats service unavailable',
+            }, 'skipped');
+          }
+          const healthy =
+            natsHealth.status === 'healthy' ||
+            natsHealth.connected === true ||
+            natsHealth.isConnected === true;
+          return this.buildIntegrationResult(name, startedAt, healthy, {
+            health: natsHealth,
+          });
+        }
+        default:
+          return this.buildIntegrationResult(name, startedAt, false, {
+            reason: 'unknown integration check',
+          }, 'skipped');
+      }
+    } catch (error) {
+      return {
+        name,
+        status: 'failed',
+        duration: Date.now() - startedAt,
+        error: (error as Error).message,
+      };
+    }
+  }
+
+  private buildIntegrationResult(
+    name: string,
+    startedAt: number,
+    passed: boolean,
+    details?: Record<string, unknown>,
+    overrideStatus?: IntegrationStatus,
+  ): IntegrationCheckResult {
+    return {
+      name,
+      status: overrideStatus ?? (passed ? 'passed' : 'failed'),
+      duration: Date.now() - startedAt,
+      details,
     };
   }
 }

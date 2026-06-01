@@ -16,7 +16,9 @@ import {
  *
  * @example
  * ```typescript
- * constructor(private readonly userCrudService: UserCrudService) {}
+ * constructor(private readonly userCrudService: UserCrudService) {
+  // Intentionally empty
+}
  *
  * async getUser(id: string) {
  *   return this.userCrudService.findById(id);
@@ -29,7 +31,9 @@ export class UserCrudService {
    * Initializes a new instance of the User CRUD Service.
    * @param userService - The user service (data access layer).
    */
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) {
+  // Intentionally empty
+}
 
   /**
    * Finds a user by ID.

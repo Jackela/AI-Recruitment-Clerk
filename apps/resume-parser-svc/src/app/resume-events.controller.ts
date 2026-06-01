@@ -22,7 +22,9 @@ export class ResumeEventsController implements OnModuleInit {
   constructor(
     private readonly natsService: ResumeParserNatsService,
     private readonly parsingService: ParsingService,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the on module init operation.

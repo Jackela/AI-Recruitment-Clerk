@@ -214,7 +214,7 @@ export class ContractValidator {
     }> = [];
 
     // Check type mismatches for common fields
-    for (const key of frontendKeys) {
+    for(const key of frontendKeys) {
       if (backendKeys.has(key)) {
         const frontendType = typeof frontendData[key];
         const backendType = typeof backendData[key];

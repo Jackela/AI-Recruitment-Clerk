@@ -16,7 +16,9 @@ export class SessionCacheService {
    * Initializes a new instance of the Session Cache Service.
    * @param redis - The redis.
    */
-  constructor(private readonly redis: RedisClient) {}
+  constructor(private readonly redis: RedisClient) {
+  // Intentionally empty
+}
 
   /**
    * 缓存会话数据
@@ -118,7 +120,7 @@ export class SessionCacheService {
 
     let cleanedCount = 0;
 
-    for (const key of keys) {
+    for(const key of keys) {
       const ttl = await this.redis.ttl(key);
       if (ttl === -1 || ttl === -2) {
         // TTL = -1 表示没设置过期，-2 表示已过期

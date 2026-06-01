@@ -21,7 +21,9 @@ export class RiskScore {
   constructor(
     public readonly score: number,
     public readonly factors: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -114,7 +116,7 @@ export class UsageTrackerHelper {
   ): IPRiskAssessment[] {
     const riskAssessments: IPRiskAssessment[] = [];
 
-    for (const usageLimit of usageLimits) {
+    for(const usageLimit of usageLimits) {
       const assessment = this.generateIPRiskAssessment(usageLimit);
       if (assessment) {
         riskAssessments.push(assessment);

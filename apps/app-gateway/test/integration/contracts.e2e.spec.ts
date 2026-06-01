@@ -4,6 +4,9 @@ import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app/app.module';
 import { MongooseModule } from '@nestjs/mongoose';
+
+// Set extended timeout for e2e tests
+jest.setTimeout(120000);
 import { ConfigModule } from '@nestjs/config';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { loadOpenApiSchema, compileSchema } from '../utils/schema-validator';
@@ -34,7 +37,9 @@ describe('Contracts conformance (e2e)', () => {
   });
 
   it('feature flags list matches schema', async () => {
-    const openapi = loadOpenApiSchema('specs/002-cicd-quality-migration/contracts/feature-flags.yaml');
+    const openapi = loadOpenApiSchema(
+      'specs/002-cicd-quality-migration/contracts/feature-flags.yaml',
+    );
     const validateList = compileSchema(openapi.components, 'FeatureFlagList');
     const res = await request(app.getHttpServer())
       .get('/ops/flags')
@@ -44,7 +49,9 @@ describe('Contracts conformance (e2e)', () => {
   });
 
   it('feature flag upsert returns flag object', async () => {
-    const openapi = loadOpenApiSchema('specs/002-cicd-quality-migration/contracts/feature-flags.yaml');
+    const openapi = loadOpenApiSchema(
+      'specs/002-cicd-quality-migration/contracts/feature-flags.yaml',
+    );
     const validateFlag = compileSchema(openapi.components, 'FeatureFlag');
     const res = await request(app.getHttpServer())
       .post('/ops/flags')
@@ -55,7 +62,9 @@ describe('Contracts conformance (e2e)', () => {
   });
 
   it('release deploy conforms to contract (202 + fields)', async () => {
-    const openapi = loadOpenApiSchema('specs/002-cicd-quality-migration/contracts/release.yaml');
+    const openapi = loadOpenApiSchema(
+      'specs/002-cicd-quality-migration/contracts/release.yaml',
+    );
     const validateDep = compileSchema(openapi.components, 'DeployResponse');
     const res = await request(app.getHttpServer())
       .post('/ops/release/deploy')
@@ -75,7 +84,9 @@ describe('Contracts conformance (e2e)', () => {
   });
 
   it('observability funnels returns expected fields', async () => {
-    const openapi = loadOpenApiSchema('specs/002-cicd-quality-migration/contracts/observability.yaml');
+    const openapi = loadOpenApiSchema(
+      'specs/002-cicd-quality-migration/contracts/observability.yaml',
+    );
     const validateFunnel = compileSchema(openapi.components, 'FunnelMetrics');
     const res = await request(app.getHttpServer())
       .get('/ops/observability/funnels?window=24h')

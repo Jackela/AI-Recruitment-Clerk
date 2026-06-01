@@ -48,7 +48,9 @@ export class ReportsController {
    * Initializes a new instance of the Reports Controller.
    * @param analyticsService - The analytics service.
    */
-  constructor(private readonly analyticsService: AnalyticsIntegrationService) {}
+  constructor(private readonly analyticsService: AnalyticsIntegrationService) {
+  // Intentionally empty
+}
 
   /**
    * Retrieves user behavior analysis.

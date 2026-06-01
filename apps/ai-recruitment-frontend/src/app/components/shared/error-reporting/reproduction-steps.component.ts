@@ -1,4 +1,4 @@
-import { Component, output, model } from '@angular/core';
+import {Component, output, model, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -148,7 +148,8 @@ import { CommonModule } from '@angular/common';
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class ReproductionStepsComponent {
   /**
    * Current reproduction steps (two-way bindable).

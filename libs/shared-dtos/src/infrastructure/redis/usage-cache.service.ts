@@ -14,7 +14,9 @@ export class UsageCacheService {
    * Initializes a new instance of the Usage Cache Service.
    * @param redis - The redis.
    */
-  constructor(private readonly redis: RedisClient) {}
+  constructor(private readonly redis: RedisClient) {
+  // Intentionally empty
+}
 
   /**
    * 获取IP今日使用次数
@@ -192,10 +194,10 @@ export class UsageCacheService {
 
     let cleanedCount = 0;
 
-    for (const pattern of patterns) {
+    for(const pattern of patterns) {
       const keys = await this.redis.keys(pattern);
 
-      for (const key of keys) {
+      for(const key of keys) {
         const ttl = await this.redis.ttl(key);
         if (ttl === -2) {
           // 已过期

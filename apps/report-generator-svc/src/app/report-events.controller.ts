@@ -51,7 +51,9 @@ export class ReportEventsController implements OnModuleInit, OnModuleDestroy {
   constructor(
     private readonly natsService: ReportGeneratorNatsService,
     private readonly reportGeneratorService: ReportGeneratorService,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the on module init operation.
@@ -211,7 +213,7 @@ export class ReportEventsController implements OnModuleInit, OnModuleDestroy {
 
       // Generate report based on type
       let reportId: string;
-      switch (reportType) {
+      switch(reportType) {
         case 'match-analysis':
           reportId = await this.generateMatchAnalysisReport(jobId, resumeId);
           break;

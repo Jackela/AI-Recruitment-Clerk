@@ -16,5 +16,7 @@ export class UsageLimitCreatedEvent implements DomainEvent {
     public readonly ip: string,
     public readonly dailyLimit: number,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }

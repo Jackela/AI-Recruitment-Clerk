@@ -85,6 +85,22 @@ export class IncentiveReward extends ValueObject<{
   }
 
   /**
+   * Retrieves reward type.
+   * @returns The RewardType.
+   */
+  public getRewardType(): RewardType {
+    return this.props.rewardType;
+  }
+
+  /**
+   * Retrieves calculation method.
+   * @returns The string.
+   */
+  public getCalculationMethod(): string {
+    return this.props.calculationMethod;
+  }
+
+  /**
    * Performs the is valid operation.
    * @returns The boolean value.
    */

@@ -1,11 +1,16 @@
-import { Component, computed, inject } from '@angular/core';
+import type { OnDestroy} from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type {
   Language,
-  LanguageConfig} from '../../../services/i18n/i18n.service';
-import {
-  I18nService
+  LanguageConfig,
 } from '../../../services/i18n/i18n.service';
+import { I18nService } from '../../../services/i18n/i18n.service';
 
 /**
  * Represents the language selector component.
@@ -295,8 +300,10 @@ import {
       }
     `,
   ],
+
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LanguageSelectorComponent {
+export class LanguageSelectorComponent implements OnDestroy {
   public dropdownOpen = false;
 
   // Expose i18n service properties
@@ -307,6 +314,8 @@ export class LanguageSelectorComponent {
   public availableLanguages!: LanguageConfig[];
 
   private i18nService = inject(I18nService);
+  private outsideClickHandler: ((event: MouseEvent) => void) | null = null;
+  private keyboardHandler: ((event: KeyboardEvent) => void) | null = null;
 
   /**
    * Initializes a new instance of the Language Selector Component.
@@ -318,6 +327,18 @@ export class LanguageSelectorComponent {
 
     // Close dropdown on escape key
     this.setupKeyboardHandler();
+  }
+
+  /**
+   * Performs the ng on destroy operation.
+   */
+  public ngOnDestroy(): void {
+    if (this.outsideClickHandler) {
+      document.removeEventListener('click', this.outsideClickHandler);
+    }
+    if (this.keyboardHandler) {
+      document.removeEventListener('keydown', this.keyboardHandler);
+    }
   }
 
   /**
@@ -364,18 +385,19 @@ export class LanguageSelectorComponent {
   }
 
   private setupOutsideClickHandler(): void {
-    document.addEventListener('click', (event) => {
+    this.outsideClickHandler = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       const container = target.closest('.language-selector');
 
       if (!container && this.dropdownOpen) {
         this.dropdownOpen = false;
       }
-    });
+    };
+    document.addEventListener('click', this.outsideClickHandler);
   }
 
   private setupKeyboardHandler(): void {
-    document.addEventListener('keydown', (event) => {
+    this.keyboardHandler = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && this.dropdownOpen) {
         this.dropdownOpen = false;
 
@@ -407,6 +429,6 @@ export class LanguageSelectorComponent {
 
         options[nextIndex]?.focus();
       }
-    });
+    };
   }
 }

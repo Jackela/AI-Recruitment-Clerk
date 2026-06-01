@@ -43,7 +43,9 @@ export class MetricsController {
    * Initializes a new instance of the Metrics Controller.
    * @param analyticsService - The analytics service.
    */
-  constructor(private readonly analyticsService: AnalyticsIntegrationService) {}
+  constructor(private readonly analyticsService: AnalyticsIntegrationService) {
+  // Intentionally empty
+}
 
   /**
    * Performs the track event operation.

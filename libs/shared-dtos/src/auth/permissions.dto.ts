@@ -119,7 +119,9 @@ export class RequiredPermissions {
    * Initializes a new instance of the Required Permissions.
    * @param permissions - The permissions.
    */
-  constructor(public permissions: Permission[]) {}
+  constructor(public permissions: Permission[]) {
+  // Intentionally empty
+}
 }
 
 /**

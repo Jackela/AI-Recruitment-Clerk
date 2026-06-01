@@ -1,5 +1,5 @@
 import type { OnInit, OnDestroy } from '@angular/core';
-import { Component, Input, inject } from '@angular/core';
+import {Component, Input, inject, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, BehaviorSubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -9,7 +9,6 @@ import {
 import type { ProgressUpdate } from '../../../services/websocket.service';
 import { ToastService } from '../../../services/toast.service';
 import { ProgressTimelineComponent } from './progress-timeline.component';
-import { ProgressMilestoneComponent } from './progress-milestone.component';
 import { ProgressLogComponent } from './progress-log.component';
 import type {
   ProgressMessage,
@@ -28,7 +27,6 @@ import type {
   imports: [
     CommonModule,
     ProgressTimelineComponent,
-    ProgressMilestoneComponent,
     ProgressLogComponent,
   ],
   template: `
@@ -205,7 +203,8 @@ import type {
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class ProgressTrackerComponent implements OnInit, OnDestroy {
   private readonly webSocketService = inject(WebSocketService);
   private readonly toastService = inject(ToastService);
@@ -313,7 +312,7 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
     const t: ProgressMessage['type'] = allowed.includes(msgType) ? msgType : 'info';
     this.addMessage(t, message.data?.message || '状态更新');
 
-    switch (message.type) {
+    switch(message.type) {
       case 'step_change':
         if (message.data?.currentStep) {
           const progressValue = message.data['progress'];
@@ -429,7 +428,7 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
    * @returns The string value.
    */
   public getStatusText(status: string | null): string {
-    switch (status) {
+    switch(status) {
       case 'connected':
         return '已连接';
       case 'connecting':

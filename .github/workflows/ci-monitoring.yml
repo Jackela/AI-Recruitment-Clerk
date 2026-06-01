@@ -1,0 +1,282 @@
+name: 📊 CI Monitoring
+
+on:
+  workflow_run:
+    workflows: ['ci', '📊 Test Coverage']
+    types:
+      - completed
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+  pull-requests: write
+  actions: read
+
+env:
+  CI: true
+
+jobs:
+  test-metrics:
+    name: 📊 Collect Test Metrics
+    runs-on: ubuntu-latest
+    if: always()
+    timeout-minutes: 10
+
+    outputs:
+      test_duration: ${{ steps.duration.outputs.duration }}
+      failure_rate: ${{ steps.analysis.outputs.failure_rate }}
+      test_passed: ${{ steps.analysis.outputs.passed }}
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: |
+          npm ci --legacy-peer-deps --prefer-offline || npm install --legacy-peer-deps
+
+      - name: ⏱️ Record Test Duration
+        id: duration
+        run: |
+          START_TIME=${{ github.event.workflow_run.run_started_at || github.event.head_commit.timestamp }}
+          if [ -n "$START_TIME" ]; then
+            START_UNIX=$(date -d "$START_TIME" +%s)
+            END_UNIX=$(date +%s)
+            DURATION=$((END_UNIX - START_UNIX))
+            echo "duration=$DURATION" >> $GITHUB_OUTPUT
+            echo "⏱️ Test duration: ${DURATION}s"
+          else
+            echo "duration=0" >> $GITHUB_OUTPUT
+            echo "⚠️ Could not calculate duration"
+          fi
+
+      - name: 📥 Download Test Results
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        if: github.event.workflow_run.id
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+          path: ./artifacts
+
+      - name: 🔍 Analyze Test Results
+        id: analysis
+        run: |
+          # Initialize counters
+          TOTAL=0
+          PASSED=0
+          FAILED=0
+          SKIPPED=0
+
+          # Look for test results in artifacts
+          if [ -d "./artifacts" ]; then
+            for result_file in $(find ./artifacts -name "*.json" -o -name "junit.xml" 2>/dev/null); do
+              echo "Processing: $result_file"
+              
+              # Try to parse JSON results
+              if [[ "$result_file" == *.json ]]; then
+                PASSED_COUNT=$(jq -r '.stats.tests // .numPassedTests // 0' "$result_file" 2>/dev/null || echo 0)
+                FAILED_COUNT=$(jq -r '.stats.failures // .numFailedTests // 0' "$result_file" 2>/dev/null || echo 0)
+                SKIPPED_COUNT=$(jq -r '.stats.skipped // .numPendingTests // 0' "$result_file" 2>/dev/null || echo 0)
+                
+                PASSED=$((PASSED + PASSED_COUNT))
+                FAILED=$((FAILED + FAILED_COUNT))
+                SKIPPED=$((SKIPPED + SKIPPED_COUNT))
+              fi
+            done
+          fi
+
+          # Also check coverage summary if available
+          if [ -f "coverage/coverage-summary.json" ]; then
+            echo "📊 Found coverage summary"
+          fi
+
+          TOTAL=$((PASSED + FAILED + SKIPPED))
+
+          if [ $TOTAL -gt 0 ]; then
+            FAILURE_RATE=$(echo "scale=4; $FAILED / $TOTAL" | bc)
+            echo "failure_rate=$FAILURE_RATE" >> $GITHUB_OUTPUT
+            echo "passed=$([ $FAILED -eq 0 ] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+            echo "📊 Test Summary:"
+            echo "   Total: $TOTAL"
+            echo "   Passed: $PASSED"
+            echo "   Failed: $FAILED"
+            echo "   Skipped: $SKIPPED"
+            echo "   Failure Rate: $(echo "$FAILURE_RATE * 100" | bc)%"
+          else
+            echo "failure_rate=0" >> $GITHUB_OUTPUT
+            echo "passed=true" >> $GITHUB_OUTPUT
+            echo "⚠️ No test results found"
+          fi
+
+      - name: ⚠️ Check Failure Rate Threshold
+        run: |
+          FAILURE_RATE="${{ steps.analysis.outputs.failure_rate }}"
+          THRESHOLD=0.1  # 10%
+
+          if (( $(echo "$FAILURE_RATE > $THRESHOLD" | bc -l) )); then
+            echo "::warning::⚠️ Test failure rate is high: $(echo "$FAILURE_RATE * 100" | bc)% (threshold: 10%)"
+          else
+            echo "✅ Test failure rate is acceptable: $(echo "$FAILURE_RATE * 100" | bc)%"
+          fi
+
+      - name: 📤 Upload Metrics
+        if: env.METRICS_API_URL
+        run: |
+          curl -X POST ${{ secrets.METRICS_API_URL }} \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.METRICS_API_KEY }}" \
+            -d "{
+              \"project\": \"ai-recruitment-clerk\",
+              \"duration\": ${{ steps.duration.outputs.duration || 0 }},
+              \"timestamp\": \"$(date -Iseconds)\",
+              \"failure_rate\": ${{ steps.analysis.outputs.failure_rate || 0 }},
+              \"passed\": ${{ steps.analysis.outputs.passed == 'true' }},
+              \"run_id\": \"${{ github.run_id }}\",
+              \"commit\": \"${{ github.sha }}\",
+              \"branch\": \"${{ github.ref_name }}\"
+            }" || echo "⚠️ Failed to upload metrics"
+        env:
+          METRICS_API_URL: ${{ secrets.METRICS_API_URL }}
+          METRICS_API_KEY: ${{ secrets.METRICS_API_KEY }}
+
+  coverage-badge:
+    name: 🏆 Generate Coverage Badge
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs: [test-metrics]
+    timeout-minutes: 5
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: 📊 Generate Badge
+        run: |
+          if [ -f "coverage/coverage-summary.json" ]; then
+            COVERAGE=$(node -e "console.log(Math.round(JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json', 'utf8')).total.lines.pct))")
+            echo "coverage=$COVERAGE" >> $GITHUB_ENV
+            
+            # Determine badge color
+            if [ $COVERAGE -ge 80 ]; then
+              COLOR="brightgreen"
+            elif [ $COVERAGE -ge 60 ]; then
+              COLOR="green"
+            elif [ $COVERAGE -ge 40 ]; then
+              COLOR="yellow"
+            else
+              COLOR="red"
+            fi
+            
+            echo "badge_color=$COLOR" >> $GITHUB_ENV
+            echo "📊 Coverage: $COVERAGE%"
+          else
+            echo "coverage=unknown" >> $GITHUB_ENV
+            echo "badge_color=lightgrey" >> $GITHUB_ENV
+          fi
+
+      - name: 🏆 Update Badge in README
+        run: |
+          if [ -f "README.md" ] && [ "$coverage" != "unknown" ]; then
+            sed -i "s/\[coverage\]:.*/[coverage]: https:\/\/img.shields.io\/badge\/coverage-${coverage}%25-${badge_color}/" README.md || true
+            echo "✅ Badge updated"
+          fi
+
+  slack-notification:
+    name: 💬 Slack Notification
+    runs-on: ubuntu-latest
+    if: always() && (failure() || github.event.workflow_run.conclusion == 'failure')
+    needs: [test-metrics]
+    timeout-minutes: 5
+
+    steps:
+      - name: 💬 Notify Slack on Failure
+        if: env.SLACK_WEBHOOK_URL
+        uses: 8398a7/action-slack@3641f016fcf90c04dd76def40fd5c467ba7d0b95 # v3.16.0
+        with:
+          status: ${{ job.status }}
+          channel: '#ci-alerts'
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+          text: |
+            ❌ *CI Pipeline Failed*
+
+            Repository: ${{ github.repository }}
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            Author: ${{ github.actor }}
+
+            🔗 <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  pr-comment:
+    name: 💬 PR Test Results Comment
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && always()
+    needs: [test-metrics]
+    timeout-minutes: 5
+
+    steps:
+      - name: 💬 Comment PR with Test Results
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            const duration = '${{ needs.test-metrics.outputs.test_duration }}' || 'N/A';
+            const failureRate = '${{ needs.test-metrics.outputs.failure_rate }}' || '0';
+            const passed = '${{ needs.test-metrics.outputs.test_passed }}' === 'true';
+
+            // Calculate failure rate percentage
+            const failureRatePct = (parseFloat(failureRate) * 100).toFixed(2);
+
+            let body = '🧪 **CI Test Results**\n\n';
+            body += '| Metric | Value |\n';
+            body += '|--------|-------|\n';
+            body += `| **Status** | ${passed ? '✅ Passed' : '❌ Failed'} |\n`;
+            body += `| **Duration** | ${duration !== 'N/A' ? duration + 's' : 'N/A'} |\n`;
+            body += `| **Failure Rate** | ${failureRatePct}% |\n`;
+            body += '\n---\n';
+            body += '*📊 Generated by CI Monitoring*';
+
+            // Find existing comment
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.data.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('CI Test Results')
+            );
+
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }

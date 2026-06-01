@@ -1,8 +1,14 @@
 import type { OnDestroy } from '@angular/core';
-import { Component, signal, inject } from '@angular/core';
+import {
+  Component,
+  signal,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import type { HttpErrorResponse } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { GuestApiService } from '../../services/guest/guest-api.service';
@@ -16,6 +22,7 @@ import { ProgressTrackerComponent } from '../../components/shared/progress-track
   selector: 'arc-upload-resume',
   standalone: true,
   imports: [CommonModule, FormsModule, ProgressTrackerComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="container">
       <h2>智能简历分析</h2>
@@ -25,6 +32,7 @@ import { ProgressTrackerComponent } from '../../components/shared/progress-track
         (submit)="onSubmit($event)"
         *ngIf="!analysisId()"
         class="upload-form"
+        data-testid="resume-upload-form"
       >
         <div class="form-section">
           <h3>候选人信息 (可选)</h3>
@@ -60,13 +68,14 @@ import { ProgressTrackerComponent } from '../../components/shared/progress-track
 
         <div class="form-section">
           <h3>上传简历</h3>
-          <div class="file-upload">
+          <div class="file-upload" data-testid="file-upload-area">
             <input
               type="file"
               (change)="onFileChange($event)"
               accept=".pdf,.doc,.docx,.txt"
               id="resume-file"
               class="file-input"
+              data-testid="file-input"
             />
             <label for="resume-file" class="file-label">
               <svg
@@ -417,6 +426,7 @@ export class UploadResumeComponent implements OnDestroy {
 
   private readonly guestApi = inject(GuestApiService);
   private readonly webSocketService = inject(WebSocketService);
+  private readonly router = inject(Router);
 
   /**
    * Performs the on file change operation.
@@ -498,7 +508,8 @@ export class UploadResumeComponent implements OnDestroy {
       .subscribe((completion) => {
         this.analysisComplete.set(true);
         this.reportUrl.set(
-          ((completion as { result?: { reportUrl?: string } })?.result?.reportUrl as string) || '',
+          ((completion as { result?: { reportUrl?: string } })?.result
+            ?.reportUrl as string) || '',
         );
         this.output.set(JSON.stringify(completion, null, 2));
       });
@@ -536,11 +547,9 @@ export class UploadResumeComponent implements OnDestroy {
    * Performs the view detailed results operation.
    */
   public viewDetailedResults(): void {
-    // 导航到详细结果页面
     const sessionId = this.analysisId();
     if (sessionId) {
-      // Navigation to results page with sessionId
-      // TODO: 实现导航逻辑
+      this.router.navigate(['/results', sessionId]);
     }
   }
 
