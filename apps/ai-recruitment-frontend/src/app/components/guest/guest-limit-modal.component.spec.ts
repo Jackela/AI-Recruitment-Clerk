@@ -1,10 +1,10 @@
-import type { ComponentFixture} from '@angular/core/testing';
+import type { ComponentFixture } from '@angular/core/testing';
 import { TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { GuestLimitModalComponent } from './guest-limit-modal.component';
-import type { GuestState} from '../../store/guest/guest.state';
+import type { GuestState } from '../../store/guest/guest.state';
 import { initialGuestState } from '../../store/guest/guest.state';
 import * as GuestActions from '../../store/guest/guest.actions';
 
@@ -65,10 +65,11 @@ describe('GuestLimitModalComponent', () => {
     component.error$ = mockState.pipe(map((state) => state.error));
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
+afterEach(() => {
+jest.clearAllMocks();
     mockState.complete();
-  });
+    jest.useRealTimers();
+});
 
   it('should create', () => {
     expect(component).toBeTruthy();
@@ -258,7 +259,7 @@ describe('GuestLimitModalComponent', () => {
       }
     });
 
-    it('should auto-close modal after 30 seconds', (done) => {
+    it('should auto-close modal after 30 seconds', () => {
       jest.useFakeTimers();
 
       // Start with modal open to trigger the timer
@@ -277,7 +278,6 @@ describe('GuestLimitModalComponent', () => {
       );
 
       jest.useRealTimers();
-      done();
     });
 
     it('should not auto-close if modal is already closed', () => {

@@ -235,6 +235,9 @@ TODO.md
 SCRATCH.md
 PERSONAL_*.md
 
+# Git worktrees for isolated development
+.worktrees/
+
 # Project-specific ignores
 # AI/ML model files and caches
 *.pickle

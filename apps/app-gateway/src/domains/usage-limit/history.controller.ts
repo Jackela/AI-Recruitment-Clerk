@@ -44,7 +44,9 @@ export class HistoryController {
    */
   constructor(
     private readonly usageLimitService: UsageLimitIntegrationService,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Retrieves usage limits.

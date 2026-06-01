@@ -40,7 +40,9 @@ export class TemplatesController {
    */
   constructor(
     private readonly questionnaireService: QuestionnaireIntegrationService,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Retrieves questionnaire templates.

@@ -751,7 +751,9 @@ export class EventValidationResult {
   constructor(
     public readonly isValid: boolean,
     public readonly errors: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -766,5 +768,7 @@ export class PrivacyComplianceResult {
   constructor(
     public readonly isCompliant: boolean,
     public readonly errors: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }

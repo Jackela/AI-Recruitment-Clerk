@@ -23,7 +23,9 @@ export class CacheWarmupService implements OnApplicationBootstrap {
   constructor(
     private readonly cacheService: CacheService,
     private readonly jobRepository: JobRepository,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the on application bootstrap operation.

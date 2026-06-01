@@ -65,22 +65,32 @@ export class DataQualityService {
     if (!resume.contactInfo.phone) score -= 10;
 
     // Work experience completeness
-    if (resume.workExperience.length === 0) score -= 30;
-    const incompleteExperience = resume.workExperience.filter(
-      (exp) => !exp.company || !exp.position || !exp.startDate || !exp.summary,
-    ).length;
-    score -= (incompleteExperience / resume.workExperience.length) * 20;
+    if (resume.workExperience.length === 0) {
+      score -= 30;
+    } else {
+      const incompleteExperience = resume.workExperience.filter(
+        (exp) =>
+          !exp.company || !exp.position || !exp.startDate || !exp.summary,
+      ).length;
+      score -= (incompleteExperience / resume.workExperience.length) * 20;
+    }
 
     // Education completeness
-    if (resume.education.length === 0) score -= 15;
-    const incompleteEducation = resume.education.filter(
-      (edu) => !edu.school || !edu.degree,
-    ).length;
-    score -= (incompleteEducation / Math.max(1, resume.education.length)) * 10;
+    if (resume.education.length === 0) {
+      score -= 15;
+    } else {
+      const incompleteEducation = resume.education.filter(
+        (edu) => !edu.school || !edu.degree,
+      ).length;
+      score -= (incompleteEducation / resume.education.length) * 10;
+    }
 
     // Skills completeness
-    if (resume.skills.length === 0) score -= 20;
-    if (resume.skills.length < 5) score -= 10;
+    if (resume.skills.length === 0) {
+      score -= 20;
+    } else if (resume.skills.length < 5) {
+      score -= 10;
+    }
 
     return Math.max(0, score);
   }
@@ -101,8 +111,12 @@ export class DataQualityService {
     score -= progressionIssues * 5;
 
     // Skills vs experience consistency
-    const skillConsistencyScore = this.checkSkillConsistency(resume);
-    score = Math.min(score, skillConsistencyScore);
+    // Only apply skill consistency penalty for resumes with few skills (<= 5)
+    // For resumes with many skills, it's acceptable if not all are mentioned
+    if (resume.skills.length <= 5) {
+      const skillConsistencyScore = this.checkSkillConsistency(resume);
+      score = Math.min(score, skillConsistencyScore);
+    }
 
     return Math.max(0, score);
   }
@@ -136,19 +150,16 @@ export class DataQualityService {
 
   private assessDetailLevel(resume: ResumeDTO): number {
     let score = 0;
-    let totalItems = 0;
 
     // Work experience detail
-    for (const exp of resume.workExperience) {
-      totalItems++;
+    for(const exp of resume.workExperience) {
       if (exp.summary && exp.summary.length > 50) score += 25;
       else if (exp.summary && exp.summary.length > 20) score += 15;
       else if (exp.summary) score += 5;
     }
 
     // Education detail
-    for (const edu of resume.education) {
-      totalItems++;
+    for(const edu of resume.education) {
       if (edu.major) score += 15;
       else score += 5;
     }
@@ -157,9 +168,8 @@ export class DataQualityService {
     if (resume.skills.length > 10) score += 20;
     else if (resume.skills.length > 5) score += 15;
     else if (resume.skills.length > 0) score += 10;
-    totalItems++;
 
-    return totalItems > 0 ? Math.min(100, score / totalItems) : 0;
+    return Math.min(100, score);
   }
 
   private identifyDataQualityIssues(
@@ -202,17 +212,25 @@ export class DataQualityService {
   ): number {
     let inconsistencies = 0;
 
-    for (const exp of workExperience) {
-      try {
-        const startDate = new Date(exp.startDate);
-        const endDate =
-          exp.endDate === 'present' ? new Date() : new Date(exp.endDate);
+    for(const exp of workExperience) {
+      const startDate = new Date(exp.startDate);
+      const endDate =
+        exp.endDate === 'present' ? new Date() : new Date(exp.endDate);
 
-        if (startDate > endDate) inconsistencies++;
-        if (startDate > new Date()) inconsistencies++;
-      } catch {
+      // Check for invalid dates
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
         inconsistencies++;
+        continue;
       }
+
+      // Check for future start date
+      if (startDate > new Date()) {
+        inconsistencies++;
+        continue;
+      }
+
+      // Check for start date after end date
+      if (startDate > endDate) inconsistencies++;
     }
 
     return inconsistencies;
@@ -231,7 +249,7 @@ export class DataQualityService {
 
     // Check for overlapping positions (might indicate inconsistency)
     let overlaps = 0;
-    for (let i = 1; i < sorted.length; i++) {
+    for(let i = 1; i < sorted.length; i++) {
       const prevEnd =
         sorted[i - 1].endDate === 'present'
           ? new Date()

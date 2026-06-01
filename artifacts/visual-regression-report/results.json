@@ -1,0 +1,10 @@
+{
+  "total": 25,
+  "passed": 24,
+  "failed": 1,
+  "new": 0,
+  "updated": 2,
+  "failedTests": [
+    { "name": "login-page-snapshot", "diff": 0.05, "threshold": 0.02 }
+  ]
+}

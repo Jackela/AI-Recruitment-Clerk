@@ -11,7 +11,9 @@ export class ConditionalThrottlerGuard implements CanActivate {
   constructor(
     private readonly configService: ConfigService,
     private readonly throttlerGuard: ThrottlerGuard,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
     const enabled =

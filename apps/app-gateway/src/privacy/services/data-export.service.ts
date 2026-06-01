@@ -17,7 +17,9 @@ import type { DataExportFormat } from '@ai-recruitment-clerk/shared-dtos';
 export class DataExportService {
   private readonly logger = new Logger(DataExportService.name);
 
-  constructor() {}
+  constructor() {
+  // Intentionally empty
+}
 
   /**
    * Generate secure download URL for a data export package

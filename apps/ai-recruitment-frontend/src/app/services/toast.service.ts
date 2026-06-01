@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { ProgressFeedbackService } from './feedback/progress-feedback.service';
+import { I18nService } from './i18n/i18n.service';
 import type { Observable} from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
@@ -23,6 +24,7 @@ export class ToastService {
   private activeToastIds: string[] = [];
 
   private progressFeedback = inject(ProgressFeedbackService);
+  private i18n = inject(I18nService);
 
   /**
    * Performs the success operation.
@@ -87,18 +89,7 @@ export class ToastService {
   }
 
   private getTitle(type: 'success' | 'error' | 'warning' | 'info'): string {
-    switch (type) {
-      case 'success':
-        return '成功';
-      case 'error':
-        return '错误';
-      case 'warning':
-        return '警告';
-      case 'info':
-        return '信息';
-      default:
-        return '通知';
-    }
+    return this.i18n.translate(`toast.titles.${type}`);
   }
 
   private remove(toast: ToastMessage): void {

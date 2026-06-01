@@ -47,3 +47,14 @@ export interface CreateJobRequest {
 export interface CreateJobResponse {
   jobId: string;
 }
+
+/**
+ * Defines the shape of the job progress value.
+ */
+export interface JobProgressValue {
+  step: string;
+  progress: number;
+  message?: string;
+  estimatedTimeRemaining?: number;
+  timestamp: Date;
+}

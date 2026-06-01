@@ -467,7 +467,7 @@ export class IncentiveDomainService {
    */
   private async publishDomainEvents(incentive: Incentive): Promise<void> {
     const events = incentive.getUncommittedEvents();
-    for (const event of events) {
+    for(const event of events) {
       await this.eventBus.publish(event);
     }
     incentive.markEventsAsCommitted();

@@ -461,7 +461,7 @@ export class ErrorUtils {
     let lastError: Error | undefined;
     let delay = baseDelay;
 
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    for(let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         return await operation();
       } catch (error) {

@@ -1,5 +1,10 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3001/api',
+  testMode: true,
+  apiUrl: 'http://localhost:3000/api',
   frontendUrl: 'http://localhost:4202',
+  remoteLogging: {
+    enabled: false,
+    endpoint: '',
+  },
 };

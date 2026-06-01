@@ -32,6 +32,18 @@ export interface LogContext {
   [key: string]: unknown;
 }
 
+export type ErrorSeverityLevel = 'critical' | 'high' | 'medium' | 'low';
+
+/**
+ * Structured error metadata used by error-handling tests and shared services.
+ */
+export interface StructuredErrorLogContext extends LogContext {
+  severity?: ErrorSeverityLevel;
+  businessImpact?: string;
+  userImpact?: string;
+  recoveryStrategies?: string[];
+}
+
 /**
  * Log entry structure
  */
@@ -85,9 +97,69 @@ export class Logger {
    * @param trace - Optional stack trace or error object
    * @param context - Optional log context
    */
-  public error(message: string, trace?: string | Error, context?: LogContext): void {
+  public error(
+    message: string,
+    trace?: string | Error,
+    context?: LogContext,
+  ): void {
     const logEntry = this.formatLogEntry('error', message, context, trace);
-    this.nestLogger.error(logEntry.message, trace);
+    this.nestLogger.error(
+      logEntry.message,
+      trace,
+      this.serializeContext(logEntry),
+    );
+  }
+
+  /**
+   * Log fatal message when the underlying Nest logger supports it.
+   * @param message - Fatal message
+   * @param context - Optional log context
+   */
+  public fatal(message: string, context?: LogContext): void {
+    const logEntry = this.formatLogEntry('fatal', message, context);
+    const loggerWithFatal = this.nestLogger as NestLogger & {
+      fatal?: (message: string, context?: string) => void;
+    };
+
+    if (typeof loggerWithFatal.fatal === 'function') {
+      loggerWithFatal.fatal(logEntry.message, this.serializeContext(logEntry));
+      return;
+    }
+
+    this.nestLogger.error(
+      logEntry.message,
+      undefined,
+      this.serializeContext(logEntry),
+    );
+  }
+
+  /**
+   * Log structured errors with severity-to-level mapping.
+   * @param message - Error message
+   * @param context - Structured error context
+   * @param error - Optional error object
+   */
+  public logError(
+    message: string,
+    context: StructuredErrorLogContext = {},
+    error?: Error,
+  ): void {
+    const severity = context.severity ?? 'high';
+
+    switch (severity) {
+      case 'critical':
+        this.fatal(message, context);
+        break;
+      case 'high':
+        this.error(message, error, context);
+        break;
+      case 'medium':
+        this.warn(message, context);
+        break;
+      case 'low':
+        this.debug(message, context);
+        break;
+    }
   }
 
   /**
@@ -97,7 +169,7 @@ export class Logger {
    */
   public warn(message: string, context?: LogContext): void {
     const logEntry = this.formatLogEntry('warn', message, context);
-    this.nestLogger.warn(logEntry.message);
+    this.nestLogger.warn(logEntry.message, this.serializeContext(logEntry));
   }
 
   /**
@@ -107,7 +179,7 @@ export class Logger {
    */
   public log(message: string, context?: LogContext): void {
     const logEntry = this.formatLogEntry('log', message, context);
-    this.nestLogger.log(logEntry.message);
+    this.nestLogger.log(logEntry.message, this.serializeContext(logEntry));
   }
 
   /**
@@ -117,7 +189,7 @@ export class Logger {
    */
   public debug(message: string, context?: LogContext): void {
     const logEntry = this.formatLogEntry('debug', message, context);
-    this.nestLogger.debug(logEntry.message);
+    this.nestLogger.debug(logEntry.message, this.serializeContext(logEntry));
   }
 
   /**
@@ -166,7 +238,11 @@ export class Logger {
     context?: LogContext,
     error?: Error | string,
   ): LogEntry {
-    const mergedContext = { ...this.defaultContext, ...this.presetContext, ...context };
+    const mergedContext = {
+      ...this.defaultContext,
+      ...this.presetContext,
+      ...context,
+    };
 
     // Build context string for log message
     const contextParts: string[] = [];
@@ -183,16 +259,33 @@ export class Logger {
       contextParts.push(`user:${mergedContext.userId}`);
     }
 
-    const contextStr = contextParts.length > 0 ? ` ${contextParts.join(' ')}` : '';
+    const contextStr =
+      contextParts.length > 0 ? ` ${contextParts.join(' ')}` : '';
     const formattedMessage = `${message}${contextStr}`;
 
     return {
       timestamp: new Date().toISOString(),
       level,
       message: formattedMessage,
-      context: Object.keys(mergedContext).length > 0 ? mergedContext : undefined,
+      context:
+        Object.keys(mergedContext).length > 0 ? mergedContext : undefined,
       error: error instanceof Error ? error : undefined,
     };
+  }
+
+  private serializeContext(logEntry: LogEntry): string {
+    return JSON.stringify({
+      timestamp: logEntry.timestamp,
+      level: logEntry.level,
+      context: logEntry.context,
+      error: logEntry.error
+        ? {
+            name: logEntry.error.name,
+            message: logEntry.error.message,
+            stack: logEntry.error.stack,
+          }
+        : undefined,
+    });
   }
 }
 
@@ -202,7 +295,10 @@ export class Logger {
  * @param options - Logger options
  * @returns Logger instance
  */
-export function createLogger(context?: string, options?: LoggerOptions): Logger {
+export function createLogger(
+  context?: string,
+  options?: LoggerOptions,
+): Logger {
   return new Logger(context, options);
 }
 

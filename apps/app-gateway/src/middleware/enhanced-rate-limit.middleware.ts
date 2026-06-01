@@ -521,21 +521,20 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
 
   private getClientIP(req: Request): string {
     // Handle various proxy headers
-    const forwarded = req.headers['x-forwarded-for'] as string;
+    const forwarded = req.headers?.['x-forwarded-for'] as string;
     if (forwarded) {
       return forwarded.split(',')[0].trim();
     }
 
     return (
-      (req.headers['x-real-ip'] as string) ??
-      (req.headers['x-client-ip'] as string) ??
+      (req.headers?.['x-real-ip'] as string) ??
+      (req.headers?.['x-client-ip'] as string) ??
       req.connection?.remoteAddress ??
       req.socket?.remoteAddress ??
       req.ip ??
       'unknown'
     );
   }
-
   private generateFingerprint(ip: string, userAgent: string): string {
     // Simple fingerprinting - in production, you might want more sophisticated methods
     const combined = `${ip}:${userAgent}`;
@@ -575,7 +574,7 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
       }>,
     };
 
-    for (const key of keys) {
+    for(const key of keys) {
       const recordStr = await this.redis?.get(key);
       if (recordStr) {
         const record: SecurityRateLimitRecord = JSON.parse(recordStr);
@@ -644,7 +643,7 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
       reason?: string;
     }> = [];
 
-    for (const key of keys) {
+    for(const key of keys) {
       const lockInfo = await this.redis.get(key);
       if (lockInfo) {
         const parsed = JSON.parse(lockInfo) as { lockedUntil?: number; reason?: string };

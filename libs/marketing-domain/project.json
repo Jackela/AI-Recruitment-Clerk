@@ -3,11 +3,13 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/marketing-domain/src",
   "projectType": "library",
+  "implicitDependencies": ["shared-dtos"],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
+        "rootDir": ".",
         "outputPath": "dist/libs/marketing-domain",
         "tsConfig": "libs/marketing-domain/tsconfig.json",
         "packageJson": "libs/marketing-domain/package.json",

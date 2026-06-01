@@ -7,7 +7,9 @@ export class UsageRecordResult {
     private readonly currentUsage?: number,
     private readonly remainingQuota?: number,
     private readonly error?: string,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the success operation.

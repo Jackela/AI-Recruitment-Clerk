@@ -16,5 +16,7 @@ export class IncentiveRejectedEvent implements DomainEvent {
     public readonly recipientIP: string,
     public readonly reason: string,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }

@@ -160,7 +160,7 @@ export class Validator {
     return (value: unknown) => {
       const allErrors: string[] = [];
 
-      for (const validator of validators) {
+      for(const validator of validators) {
         const result = validator(value);
         if (!result.isValid) {
           allErrors.push(...result.errors);

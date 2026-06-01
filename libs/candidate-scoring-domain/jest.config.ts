@@ -6,7 +6,7 @@ export default {
     '^.+\\.[tj]s$': [
       'ts-jest',
       {
-        tsconfig: '<rootDir>/tsconfig.json',
+        tsconfig: '<rootDir>/tsconfig.spec.json',
         useESM: true,
       },
     ],
@@ -18,5 +18,5 @@ export default {
     '!src/**/*.spec.ts',
     '!src/**/*.test.ts',
     '!src/**/index.ts',
-  ],
+  ]
 };

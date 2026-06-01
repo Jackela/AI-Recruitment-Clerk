@@ -483,7 +483,7 @@ export class ScoringEngineServiceContracts {
     };
 
     // Adjust based on seniority level
-    switch (jdDto.seniority) {
+    switch(jdDto.seniority) {
       case 'junior':
         weights = { ...weights, skillsWeight: 0.5, experienceWeight: 0.25 };
         break;

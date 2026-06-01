@@ -22,7 +22,9 @@ type InternalUser = UserDto & {
  *
  * @example
  * ```typescript
- * constructor(private readonly userAuthService: UserAuthService) {}
+ * constructor(private readonly userAuthService: UserAuthService) {
+  // Intentionally empty
+}
  *
  * async validateLogin(userId: string, password: string) {
  *   return this.userAuthService.verifyPassword(userId, password);
@@ -37,7 +39,9 @@ export class UserAuthService {
    * Initializes a new instance of the User Authentication Service.
    * @param userService - The user service (data access layer).
    */
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) {
+  // Intentionally empty
+}
 
   /**
    * Verifies a user's password.

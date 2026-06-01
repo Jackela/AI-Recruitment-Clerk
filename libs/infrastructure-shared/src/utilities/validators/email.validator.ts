@@ -93,7 +93,7 @@ export class EmailValidator {
     }
 
     // Check for suspicious patterns
-    for (const pattern of this.SUSPICIOUS_PATTERNS) {
+    for(const pattern of this.SUSPICIOUS_PATTERNS) {
       if (pattern.test(normalizedEmail)) {
         errors.push(`${errorPrefix} contains invalid patterns`);
         break;
@@ -140,7 +140,7 @@ export class EmailValidator {
         ['guerrillamail.com', /guerrillamail\.com$/i],
       ];
 
-      for (const [_, pattern] of tempMailPatterns) {
+      for(const [_, pattern] of tempMailPatterns) {
         if (pattern.test(normalizedEmail)) {
           warnings.push(`${errorPrefix} appears to be a temporary email address`);
           break;

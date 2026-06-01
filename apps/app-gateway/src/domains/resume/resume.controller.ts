@@ -44,11 +44,11 @@ import type { ResumeService } from './resume.service';
 class ResumeFileTypeValidator extends FileValidator<Record<string, unknown>, Express.Multer.File> {
   protected readonly validationOptions: Record<string, unknown> = {};
 
-  buildErrorMessage(): string {
+  public buildErrorMessage(): string {
     return 'Invalid file type. Only PDF, DOC, and DOCX files are allowed.';
   }
 
-  isValid(file?: Express.Multer.File): boolean {
+  public isValid(file?: Express.Multer.File): boolean {
     if (!file) return false;
     const allowedMimeTypes = [
       'application/pdf',
@@ -76,7 +76,9 @@ export class ResumeController {
    * Initializes a new instance of the Resume Controller.
    * @param resumeService - The resume service.
    */
-  constructor(private readonly resumeService: ResumeService) {}
+  constructor(private readonly resumeService: ResumeService) {
+  // Intentionally empty
+}
 
   /**
    * Performs the upload resume operation.

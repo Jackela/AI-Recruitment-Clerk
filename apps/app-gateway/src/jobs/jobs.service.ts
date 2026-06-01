@@ -6,8 +6,7 @@ import { ResumeUploadResponseDto } from './dto/resume-upload.dto';
 import type { MulterFile } from './types/multer.types';
 import { JobListDto, JobDetailDto } from './dto/job-response.dto';
 import type { ResumeListItemDto, ResumeDetailDto } from './dto/resume-response.dto';
-import type { AnalysisReportDto } from './dto/report-response.dto';
-import { ReportsListDto } from './dto/report-response.dto';
+import { AnalysisReportDto, ReportsListDto } from './dto/report-response.dto';
 import type { JobRepository } from '../repositories/job.repository';
 import type { UserDto } from '@ai-recruitment-clerk/user-management-domain';
 import { UserRole } from '@ai-recruitment-clerk/user-management-domain';
@@ -19,6 +18,7 @@ import type { Job } from '../schemas/job.schema';
 import type { WebSocketGateway } from '../websocket/websocket.gateway';
 import type { ConfigService } from '@nestjs/config';
 import { JobsSemanticCacheService, JobsEventService } from './services';
+import type { ReportsService } from '../reports/reports.service';
 
 /**
  * Main facade service for jobs functionality.
@@ -36,6 +36,7 @@ export class JobsService implements OnModuleInit {
     private readonly jobRepository: JobRepository,
     private readonly natsClient: AppGatewayNatsService,
     private readonly cacheService: CacheService,
+    private readonly reportsService: ReportsService,
     webSocketGateway: WebSocketGateway,
     configService: ConfigService,
   ) {
@@ -421,10 +422,8 @@ export class JobsService implements OnModuleInit {
         throw new NotFoundException(`Job with ID ${jobId} not found`);
       }
 
-      this.logger.warn(
-        `Report retrieval for job ${jobId} should be handled by ReportService`,
-      );
-      return new ReportsListDto(jobId, []);
+      const reports = await this.reportsService.getReportsByJobId(jobId);
+      return new ReportsListDto(jobId, reports.reports);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -443,11 +442,19 @@ export class JobsService implements OnModuleInit {
    * @returns A promise that resolves to AnalysisReportDto.
    */
   public async getReportById(reportId: string): Promise<AnalysisReportDto> {
-    this.logger.warn(
-      `Report retrieval for reportId ${reportId} should be handled by ReportService`,
-    );
-    throw new NotFoundException(
-      'Report operations should be handled by ReportService',
+    const report = await this.reportsService.getReportById(reportId);
+    return new AnalysisReportDto(
+      report.id,
+      '',
+      report.jobId,
+      report.candidateName,
+      report.matchScore,
+      report.oneSentenceSummary,
+      [],
+      [],
+      [],
+      [],
+      report.generatedAt,
     );
   }
 }

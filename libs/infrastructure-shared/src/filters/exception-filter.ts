@@ -21,7 +21,7 @@ export class StandardizedGlobalExceptionFilter {
    * @param _host - The host.
    * @returns The result of the operation.
    */
-  public catch(exception: Error | unknown, _host: ExecutionHost): void {
+  catch(exception: Error | unknown, _host: ExecutionHost): void {
     // Basic error handling
     // Touch config to satisfy TS6133/TS6138 when not used by minimal impl
     void this._config;

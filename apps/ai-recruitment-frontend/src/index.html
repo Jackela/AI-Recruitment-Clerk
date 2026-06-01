@@ -28,12 +28,34 @@
     <meta name="apple-mobile-web-app-title" content="ARC Mobile" />
 
     <!-- Performance Optimization -->
+    <!-- DNS 预解析和预连接 -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- 字体预加载 -->
+    <link
+      rel="preload"
+      href="https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuGKYAZ9hjp-Ek-_EeA.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="https://fonts.gstatic.com/s/cinzel/v23/8vIU7ww63mVu7gtR-kwKxNvkNOjw-tbnfY3lCQ.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cinzel:wght@400;500;600;700&family=Cinzel+Decorative:wght@400;700&display=swap"
       rel="stylesheet"
     />
+
+    <!-- 预取常用资源 -->
+    <link rel="prefetch" href="/assets/icons/icon-192x192.png" />
 
     <!-- Critical CSS -->
     <style>

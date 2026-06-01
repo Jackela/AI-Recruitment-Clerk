@@ -113,3 +113,21 @@ export const webSocketConnectionStatusChanged = createAction(
   '[Job] WebSocket Connection Status Changed',
   props<{ status: 'connecting' | 'connected' | 'disconnected' | 'error' }>(),
 );
+
+// Offline Mode Actions
+export const setOfflineMode = createAction(
+  '[Job] Set Offline Mode',
+  props<{ isOffline: boolean }>(),
+);
+
+export const loadJobsFromCache = createAction(
+  '[Job] Load Jobs from Cache',
+  props<{ jobs: JobListItem[] }>(),
+);
+
+export const connectionStatusChanged = createAction(
+  '[Job] Connection Status Changed',
+  props<{ isConnected: boolean; message?: string }>(),
+);
+
+export const retryConnection = createAction('[Job] Retry Connection');

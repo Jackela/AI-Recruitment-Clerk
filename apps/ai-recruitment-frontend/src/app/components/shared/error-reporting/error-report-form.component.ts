@@ -1,4 +1,4 @@
-import { Component, output, inject, input } from '@angular/core';
+import {Component, output, inject, input, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { FormGroup } from '@angular/forms';
 import {
@@ -246,7 +246,8 @@ export interface ErrorReportFormData {
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class ErrorReportFormComponent {
   private readonly fb = inject(FormBuilder);
   private readonly errorReporting = inject(ErrorReportingService);

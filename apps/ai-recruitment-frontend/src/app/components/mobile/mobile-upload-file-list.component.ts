@@ -3,6 +3,7 @@ import {
   Input,
   Output,
   EventEmitter,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -58,6 +59,8 @@ export interface UploadFile {
               [src]="file.preview"
               [alt]="file.name"
               class="preview-image"
+              loading="lazy"
+              decoding="async"
             />
             <div *ngIf="!file.preview" class="preview-placeholder">
               <svg
@@ -96,10 +99,7 @@ export interface UploadFile {
 
             <!-- Progress Bar -->
             <div class="progress-bar" *ngIf="file.status === 'uploading'">
-              <div
-                class="progress-fill"
-                [style.width.%]="file.progress"
-              ></div>
+              <div class="progress-fill" [style.width.%]="file.progress"></div>
             </div>
           </div>
 
@@ -334,6 +334,7 @@ export interface UploadFile {
       }
     `,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MobileUploadFileListComponent {
   @Input({ required: true })

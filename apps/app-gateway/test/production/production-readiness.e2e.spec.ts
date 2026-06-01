@@ -5,6 +5,11 @@ import request from 'supertest';
 import { AppModule } from '../../src/app/app.module';
 import * as _fs from 'fs';
 import * as _path from 'path';
+import { AppGatewayNatsService } from '../../src/nats/app-gateway-nats.service';
+import { createMockAppGatewayNatsService } from '../utils/mock-nats';
+
+// Set extended timeout for production readiness tests
+jest.setTimeout(120000);
 
 /**
  * 🚀 PRODUCTION READINESS VALIDATION TESTS
@@ -25,7 +30,7 @@ describe('🚀 Production Readiness Validation Tests', () => {
   let app: INestApplication;
   let adminToken: string;
   let userToken: string;
-  let _testUserId: string;
+  let testUserId: string;
   let testOrganizationId: string;
 
   const testAdmin = {
@@ -43,9 +48,14 @@ describe('🚀 Production Readiness Validation Tests', () => {
   };
 
   beforeAll(async () => {
+    const mockNatsService = createMockAppGatewayNatsService();
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(AppGatewayNatsService)
+      .useValue(mockNatsService)
+      .compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
@@ -374,7 +384,7 @@ describe('🚀 Production Readiness Validation Tests', () => {
               )
               .send(endpoint.body || {});
           } else {
-            const _response = await request(app.getHttpServer())
+            _response = await request(app.getHttpServer())
               .get(endpoint.path)
               .set(
                 'Authorization',

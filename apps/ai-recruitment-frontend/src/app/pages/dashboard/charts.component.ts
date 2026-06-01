@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import {Component, Input, Output, EventEmitter, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { ActivityItem } from '../../services/dashboard-api.service';
 
@@ -326,7 +326,8 @@ import type { ActivityItem } from '../../services/dashboard-api.service';
       }
     `,
   ],
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class ChartsComponent {
   /**
    * List of activities to display

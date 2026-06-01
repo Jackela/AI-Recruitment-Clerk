@@ -1,0 +1,19 @@
+{
+  "status": "warning",
+  "score": 85,
+  "violations": [
+    {
+      "impact": "serious",
+      "description": "表单元素缺少关联标签",
+      "target": "input#search",
+      "help": "表单元素必须具有可访问的标签"
+    },
+    {
+      "impact": "moderate",
+      "description": "颜色对比度不足",
+      "target": ".text-muted",
+      "help": "文本与背景颜色对比度至少为 4.5:1"
+    }
+  ],
+  "warnings": [{ "description": "建议使用更语义化的 HTML5 标签" }]
+}

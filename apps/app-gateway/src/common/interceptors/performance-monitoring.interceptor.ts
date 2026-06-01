@@ -45,7 +45,9 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
    * Initializes a new instance of the Performance Monitoring Interceptor.
    * @param cacheService - The cache service.
    */
-  constructor(private readonly cacheService: CacheService) {}
+  constructor(private readonly cacheService: CacheService) {
+  // Intentionally empty
+}
 
   /**
    * Performs the intercept operation.

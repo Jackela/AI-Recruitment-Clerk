@@ -28,7 +28,9 @@ export class ProductionSecurityValidator {
    * Initializes a new instance of the Production Security Validator.
    * @param configService - The config service.
    */
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly configService: ConfigService) {
+  // Intentionally empty
+}
 
   /**
    * Validates all security-critical configuration
@@ -314,7 +316,7 @@ export class ProductionSecurityValidator {
       // Hex strings should have good distribution of hex characters
       const charCounts: Record<string, number> = {};
 
-      for (const char of lowerValue) {
+      for(const char of lowerValue) {
         charCounts[char] = (charCounts[char] || 0) + 1;
       }
 

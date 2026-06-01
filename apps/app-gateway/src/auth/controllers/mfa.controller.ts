@@ -46,7 +46,9 @@ export class MfaController {
    * Initializes a new instance of the Mfa Controller.
    * @param mfaService - The mfa service.
    */
-  constructor(private readonly mfaService: MfaService) {}
+  constructor(private readonly mfaService: MfaService) {
+  // Intentionally empty
+}
 
   /**
    * Retrieves mfa status.

@@ -3,6 +3,7 @@
 > **Intelligent Recruitment Assistant - AI-Powered Resume & Job Matching System**
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-22.x-green)](https://nodejs.org/)
 [![NestJS](https://img.shields.io/badge/NestJS-11-red)](https://nestjs.com/)
 [![Angular](https://img.shields.io/badge/Angular-20-red)](https://angular.io/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-6.x-green)](https://www.mongodb.com/)
@@ -25,6 +26,17 @@ AI Recruitment Clerk is an **event-driven microservices system** that automates 
 - 📊 **Smart Report Generation**: Automated generation of detailed matching analysis reports
 
 ## 📚 Documentation Navigation
+
+### Prerequisites
+
+| Requirement | Version | Notes                                                      |
+| ----------- | ------- | ---------------------------------------------------------- |
+| **Node.js** | 22.x    | Recommended version; Node 20.x still supported             |
+| npm         | 10+     | Included with Node.js                                      |
+| MongoDB     | 7.0+    | [Download](https://www.mongodb.com/try/download/community) |
+| NATS Server | 2.10+   | [Download](https://nats.io/download/)                      |
+
+> ⚠️ **Important**: This project now supports Node.js 22.x. Node.js 20.x is still supported for backward compatibility. Use `.nvmrc` or `nvm use` to switch to the correct version.
 
 ### Project Phoenix (C2C Coach)
 
@@ -599,6 +611,51 @@ scripts\validate-system.bat   # Windows
 scripts\run-e2e-tests.bat     # Windows
 ```
 
+### Run Edge Case Tests
+
+The system includes comprehensive edge case testing covering boundary conditions, concurrent operations, and error scenarios:
+
+```bash
+# Run all edge case tests
+npx jest --testPathPatterns="edge-cases"
+
+# Run specific module edge cases
+npx jest jobs.edge-cases
+npx jest resumes.edge-cases
+npx jest auth.edge-cases
+npx jest analysis.edge-cases
+
+# Run with coverage report
+npx jest --testPathPatterns="edge-cases" --coverage
+```
+
+**Edge Case Coverage**: 130+ test cases across 4 modules
+
+- ✅ Empty/null/undefined inputs
+- ✅ Boundary values (MAX_INT, empty strings, unicode)
+- ✅ Concurrent operations and race conditions
+- ✅ Timeout scenarios and slow responses
+- ✅ Security edge cases (SQL injection, XSS)
+
+See [EDGE_CASE_TESTING.md](./EDGE_CASE_TESTING.md) for complete documentation.
+
+### Run Error Handling Tests
+
+Error handling coverage includes Nest interceptors, guards, service integration recovery, structured logging, error transformation, and frontend HTTP error handling:
+
+```bash
+# Generate the documented aggregate coverage report
+npm run test:coverage
+
+# Run focused backend error handling specs
+npx jest --config libs/shared-dtos/jest.config.js --runInBand --runTestsByPath libs/shared-dtos/src/errors/error-interceptors.correlation.spec.ts libs/shared-dtos/src/errors/error-interceptors.logging.spec.ts libs/shared-dtos/src/errors/error-interceptors.performance.spec.ts libs/shared-dtos/src/errors/error-interceptors.recovery.spec.ts libs/shared-dtos/src/interceptors/global-error.interceptor.spec.ts libs/shared-dtos/src/errors/error-transformation.spec.ts
+
+# Run focused frontend HTTP error handling specs
+npx jest --config apps/ai-recruitment-frontend/jest.config.ts --runInBand --runTestsByPath apps/ai-recruitment-frontend/src/app/interceptors/http-error.interceptor.errors.spec.ts
+```
+
+See [TESTING.md](./TESTING.md) for error handling test patterns, shared utilities, and coverage report locations.
+
 ### Service URLs (After Deployment)
 
 - **Frontend Application**: http://localhost:4200
@@ -626,3 +683,4 @@ scripts\run-e2e-tests.bat     # Windows
 - ✅ **Ready for User Acceptance Testing (UAT)**
 
 > 💡 The system can now be deployed with a single command and provides a complete, functional AI recruitment platform ready for production use.
+> // Force fresh CodeQL analysis

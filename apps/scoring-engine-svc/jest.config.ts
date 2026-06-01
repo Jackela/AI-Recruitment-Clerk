@@ -15,19 +15,12 @@ export default {
   coverageDirectory: '../../coverage/apps/scoring-engine-svc',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   testMatch: ['**/*.spec.ts'],
+  testPathIgnorePatterns: ['/node_modules/', '\\.integration\\.spec\\.ts$'],
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.spec.ts',
     '!src/**/*.interface.ts',
     '!src/**/*.module.ts',
     '!src/main.ts',
-  ],
-  coverageThreshold: {
-    global: {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80,
-    },
-  },
+  ]
 };

@@ -3,11 +3,13 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/report-generation-domain/src",
   "projectType": "library",
+  "implicitDependencies": ["shared-dtos"],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
+        "rootDir": ".",
         "outputPath": "dist/libs/report-generation-domain",
         "tsConfig": "libs/report-generation-domain/tsconfig.json",
         "packageJson": "libs/report-generation-domain/package.json",

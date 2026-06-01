@@ -77,7 +77,7 @@ export class CrossServiceValidator {
         });
       } else {
         // Run validations sequentially
-        for (const rule of options.rules) {
+        for(const rule of options.rules) {
           try {
             await this.validateRule(rule, data[rule.field], transformedData);
           } catch (error: unknown) {
@@ -230,7 +230,7 @@ export class CrossServiceValidator {
     value: any,
   ): Promise<boolean> {
     // Simulate validation logic based on service and endpoint
-    switch (service) {
+    switch(service) {
       case 'user-service':
         if (endpoint === 'validate-user') {
           return typeof value === 'string' && value.length > 0;

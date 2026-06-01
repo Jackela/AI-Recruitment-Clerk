@@ -261,7 +261,7 @@ export class ErrorHandlingService implements ErrorHandler {
     errorResponse: StandardizedErrorResponse,
     context: ErrorContext,
   ): void {
-    switch (errorResponse.error.type) {
+    switch(errorResponse.error.type) {
       case 'AUTHENTICATION_ERROR':
         this.handleAuthenticationError(errorResponse, context);
         break;
@@ -284,7 +284,7 @@ export class ErrorHandlingService implements ErrorHandler {
     httpError: HttpErrorResponse,
     _context: ErrorContext,
   ): void {
-    switch (httpError.status) {
+    switch(httpError.status) {
       case 401:
         this.redirectToLogin();
         break;
@@ -436,7 +436,7 @@ export class ErrorHandlingService implements ErrorHandler {
 
   private showUserNotification(notification: ErrorNotification): void {
     if (this.toastService) {
-      switch (notification.type) {
+      switch(notification.type) {
         case 'error':
           this.toastService.error(
             notification.userMessage || notification.message,
@@ -457,7 +457,7 @@ export class ErrorHandlingService implements ErrorHandler {
   }
 
   private mapSeverityToType(severity: string): 'error' | 'warning' | 'info' {
-    switch (severity) {
+    switch(severity) {
       case 'critical':
       case 'high':
         return 'error';

@@ -117,7 +117,7 @@ export class GlobalErrorHandler implements ErrorHandler {
       errorInfo.severity || 'medium',
     );
 
-    switch (errorInfo.severity) {
+    switch(errorInfo.severity) {
       case 'critical':
         this.toastService.error(message, duration);
         break;
@@ -273,7 +273,7 @@ export class GlobalErrorHandler implements ErrorHandler {
     );
 
     // Implement recovery strategies based on error category
-    switch (structuredError.category) {
+    switch(structuredError.category) {
       case 'network':
         // For network errors, could retry or show offline indicator
         console.log('Network error recovery: checking connectivity');
@@ -310,7 +310,7 @@ export class GlobalErrorHandler implements ErrorHandler {
   }
 
   private getNotificationDuration(severity: string): number {
-    switch (severity) {
+    switch(severity) {
       case 'critical':
         return 15000;
       case 'high':

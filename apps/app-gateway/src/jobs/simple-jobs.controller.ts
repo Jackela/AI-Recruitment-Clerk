@@ -23,7 +23,9 @@ export class SimpleJobsController {
    * Initializes a new instance of the Simple Jobs Controller.
    * @param jobsService - The jobs service.
    */
-  constructor(private readonly jobsService: JobsService) {}
+  constructor(private readonly jobsService: JobsService) {
+  // Intentionally empty
+}
   /**
    * Retrieves all jobs.
    * @returns The result of the operation.

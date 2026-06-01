@@ -1,7 +1,8 @@
 import type {
   NestInterceptor,
   ExecutionContext,
-  CallHandler} from '@nestjs/common';
+  CallHandler,
+} from '@nestjs/common';
 import {
   Injectable,
   ServiceUnavailableException,
@@ -9,7 +10,7 @@ import {
   Logger,
   Inject,
 } from '@nestjs/common';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { throwError, of } from 'rxjs';
 import { catchError, timeout, retry, tap } from 'rxjs/operators';
 import type { Cache } from 'cache-manager';
@@ -26,6 +27,7 @@ export interface ServiceIntegrationOptions {
   cacheTTL?: number;
   requiredServices?: string[];
   validateServices?: boolean;
+  serviceHealthChecks?: Record<string, () => boolean | Promise<boolean>>;
   circuitBreaker?: {
     threshold?: number;
     timeout?: number;
@@ -38,7 +40,9 @@ export interface ServiceIntegrationOptions {
  */
 @Injectable()
 export class ServiceIntegrationInterceptor implements NestInterceptor {
-  private readonly logger: Logger = new Logger(ServiceIntegrationInterceptor.name);
+  private readonly logger: Logger = new Logger(
+    ServiceIntegrationInterceptor.name,
+  );
   private circuitBreakerStates: Map<
     string,
     {
@@ -69,7 +73,29 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
     next: CallHandler,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<Observable<any>> {
+    const timeoutMs = this.options.timeout ?? 30000; // 30 seconds default
+    const maxRetries = this.options.retries ?? 3;
+
+    // Check if context has switchToHttp method (for HTTP requests)
+    if (!context.switchToHttp) {
+      // Non-HTTP context (like WebSocket, RPC), skip request-specific logic
+      return next.handle().pipe(
+        timeout(timeoutMs),
+        retry(maxRetries),
+        catchError((error) => {
+          this.logger.error(
+            `Service integration error: ${error.message}`,
+            error.stack,
+          );
+          return throwError(() => error);
+        }),
+      );
+    }
+
     const request = context.switchToHttp().getRequest();
+    if (!request) {
+      throw new Error('Invalid context');
+    }
     const handler = context.getHandler();
     const className = context.getClass().name;
     const methodName = handler.name;
@@ -96,9 +122,6 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
     if (this.options.validateServices && this.options.requiredServices) {
       await this.validateRequiredServices(this.options.requiredServices);
     }
-
-    const timeoutMs = this.options.timeout || 30000; // 30 seconds default
-    const maxRetries = this.options.retries || 3;
 
     return next.handle().pipe(
       timeout(timeoutMs),
@@ -147,69 +170,72 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
     );
   }
 
-  private generateCacheKey(request: { url?: string; query?: Record<string, unknown>; body?: unknown }, operationId: string): string {
-    if (this.options.cacheKey) {
-      return this.options.cacheKey;
-    }
-
-    // Generate cache key based on operation and request parameters
-    const params = JSON.stringify({
-      url: request.url,
-      query: request.query,
-      body: request.body,
-    });
-    const hash = Buffer.from(params).toString('base64').slice(0, 16);
-    return `service:${operationId}:${hash}`;
+  /**
+   * Generates a cache key.
+   * @param request - The request.
+   * @param operationId - The operation id.
+   * @returns The cache key.
+   */
+  private generateCacheKey(request: unknown, operationId: string): string {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const body = (request as any).body;
+    const bodyHash = body ? JSON.stringify(body) : '';
+    return `service:${operationId}:${bodyHash}`;
   }
 
+  /**
+   * Validates the required services.
+   * @param services - The services.
+   */
   private async validateRequiredServices(services: string[]): Promise<void> {
-    const validationPromises = services.map(async (service) => {
-      try {
-        // Implement health check for each service
-        // This is a placeholder - implement actual service health checks
-        return { service, healthy: true };
-      } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        this.logger.warn(
-          `Service ${service} is not available: ${errorMessage}`,
-        );
-        return { service, healthy: false };
+    this.logger.debug(`Validating services: ${services.join(', ')}`);
+
+    const unavailableServices: string[] = [];
+
+    for (const service of services) {
+      const healthCheck = this.options.serviceHealthChecks?.[service];
+      const isAvailable = healthCheck ? await healthCheck() : true;
+
+      if (!isAvailable) {
+        unavailableServices.push(service);
       }
-    });
+    }
 
-    const results = await Promise.all(validationPromises);
-    const unhealthyServices = results.filter((r) => !r.healthy);
-
-    if (unhealthyServices.length > 0) {
+    if (unavailableServices.length > 0) {
       throw new ServiceUnavailableException(
-        `Required services unavailable: ${unhealthyServices.map((s) => s.service).join(', ')}`,
+        `Required services unavailable: ${unavailableServices.join(', ')}`,
       );
     }
   }
 
+  /**
+   * Checks if circuit breaker is open.
+   * @param operationId - The operation id.
+   * @returns True if circuit breaker is open, false otherwise.
+   */
   private isCircuitBreakerOpen(operationId: string): boolean {
     const state = this.circuitBreakerStates.get(operationId);
-    if (!state || !this.options.circuitBreaker) return false;
+    if (!state) return false;
 
-    const { threshold = 5, resetTimeout = 60000 } = this.options.circuitBreaker;
-
-    if (!state.isOpen) {
-      return state.failures >= threshold;
+    if (state.isOpen) {
+      const now = Date.now();
+      const resetTimeout = this.options.circuitBreaker?.resetTimeout || 60000;
+      if (now - state.lastFailure > resetTimeout) {
+        // Try half-open state
+        state.isOpen = false;
+        return false;
+      }
+      return true;
     }
 
-    // Check if reset timeout has passed
-    if (Date.now() - state.lastFailure > resetTimeout) {
-      state.isOpen = false;
-      state.failures = 0;
-      return false;
-    }
-
-    return true;
+    return false;
   }
 
+  /**
+   * Records a failure.
+   * @param operationId - The operation id.
+   */
   private recordFailure(operationId: string): void {
-    if (!this.options.circuitBreaker) return;
-
     const state = this.circuitBreakerStates.get(operationId) || {
       failures: 0,
       isOpen: false,
@@ -219,7 +245,7 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
     state.failures++;
     state.lastFailure = Date.now();
 
-    const { threshold = 5 } = this.options.circuitBreaker;
+    const threshold = this.options.circuitBreaker?.threshold || 5;
     if (state.failures >= threshold) {
       state.isOpen = true;
       this.logger.warn(`Circuit breaker opened for ${operationId}`);
@@ -228,26 +254,32 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
     this.circuitBreakerStates.set(operationId, state);
   }
 
+  /**
+   * Resets the circuit breaker.
+   * @param operationId - The operation id.
+   */
   private resetCircuitBreaker(operationId: string): void {
-    const state = this.circuitBreakerStates.get(operationId);
-    if (state) {
-      state.failures = 0;
-      state.isOpen = false;
-      this.circuitBreakerStates.set(operationId, state);
-    }
+    this.circuitBreakerStates.delete(operationId);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private handleFallback(operationId: string, error: { message?: string }): Observable<any> {
-    this.logger.warn(`Using fallback for ${operationId}`);
+  /**
+   * Handles the fallback.
+   * @param operationId - The operation id.
+   * @param error - The error.
+   * @returns The fallback result.
+   */
+  private handleFallback(
+    operationId: string,
+    error: Error,
+  ): Observable<{ fallback: true; operationId: string; error: string }> {
+    this.logger.warn(`Using fallback response for ${operationId}`, {
+      error: error.message,
+    });
 
-    // Return a default fallback response
     return of({
-      success: false,
-      error: 'Service temporarily unavailable',
-      message: 'Using fallback response due to service issues',
       fallback: true,
-      originalError: error.message,
+      operationId,
+      error: error.message,
     });
   }
 }

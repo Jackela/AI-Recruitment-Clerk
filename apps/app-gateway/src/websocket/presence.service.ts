@@ -347,7 +347,7 @@ export class PresenceService {
       }
     }
 
-    for (const userId of usersToCleanup) {
+    for(const userId of usersToCleanup) {
       await this.setUserOffline(userId);
     }
 

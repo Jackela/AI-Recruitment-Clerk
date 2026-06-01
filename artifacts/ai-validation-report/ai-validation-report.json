@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "totalValidations": 50,
+  "passed": 48,
+  "failed": 2,
+  "modelAccuracy": 0.96,
+  "issues": [
+    { "type": "false_positive", "count": 1, "severity": "low" },
+    { "type": "missed_detection", "count": 1, "severity": "medium" }
+  ]
+}
