@@ -17,6 +17,7 @@ import type {
 } from '../store/resumes/resume.model';
 import type {
   AnalysisReport,
+  ReportListItem,
   ReportsList,
 } from '../store/reports/report.model';
 import type {
@@ -24,6 +25,30 @@ import type {
   GapAnalysisResult,
 } from '../interfaces/gap-analysis.interface';
 import { environment } from '../../environments/environment';
+
+export interface ReportCatalogResponse {
+  reports: ReportListItem[];
+  totalCount: number;
+}
+
+export interface GenerateReportRequest {
+  analysisId?: string;
+  jobId?: string;
+  resumeId?: string;
+  candidateName?: string;
+  jobTitle?: string;
+  matchScore?: number;
+  summary?: string;
+  format?: 'pdf' | 'excel';
+}
+
+export interface AnalysisStatisticsResponse {
+  todayAnalyses: number;
+  totalAnalyses: number;
+  averageScore: number;
+  successRate: number;
+  monthlyAnalyses: number;
+}
 
 /**
  * Provides api functionality.
@@ -150,6 +175,30 @@ export class ApiService {
     );
   }
 
+  public getReports(filters: {
+    jobId?: string;
+    analysisId?: string;
+    status?: string;
+  } = {}): Observable<ReportCatalogResponse> {
+    const params = Object.fromEntries(
+      Object.entries(filters).filter(([, value]) => !!value),
+    ) as Record<string, string>;
+    return this.withTimeoutAndRetry(
+      this.http.get<ReportCatalogResponse>(`${this.baseUrl}/reports`, {
+        params,
+      }),
+      { reports: [], totalCount: 0 },
+    );
+  }
+
+  public generateReport(
+    request: GenerateReportRequest,
+  ): Observable<ReportListItem> {
+    return this.withTimeoutAndRetry(
+      this.http.post<ReportListItem>(`${this.baseUrl}/reports/generate`, request),
+    );
+  }
+
   /**
    * Retrieves report by id.
    * @param reportId - The report id.
@@ -158,6 +207,21 @@ export class ApiService {
   public getReportById(reportId: string): Observable<AnalysisReport> {
     return this.withTimeoutAndRetry(
       this.http.get<AnalysisReport>(`${this.baseUrl}/reports/${reportId}`),
+    );
+  }
+
+  public getAnalysisStatistics(): Observable<AnalysisStatisticsResponse> {
+    return this.withTimeoutAndRetry(
+      this.http.get<AnalysisStatisticsResponse>(
+        `${this.baseUrl}/analytics/analysis-statistics`,
+      ),
+      {
+        todayAnalyses: 0,
+        totalAnalyses: 0,
+        averageScore: 0,
+        successRate: 0,
+        monthlyAnalyses: 0,
+      },
     );
   }
 

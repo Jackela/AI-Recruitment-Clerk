@@ -1,5 +1,6 @@
 import type { ComponentFixture} from '@angular/core/testing';
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { UploadResumeComponent } from './upload-resume.component';
 import { GuestApiService } from '../../services/guest/guest-api.service';
 import { WebSocketService } from '../../services/websocket.service';
@@ -12,14 +13,15 @@ describe('UploadResumeComponent', () => {
     await TestBed.configureTestingModule({
       imports: [UploadResumeComponent],
       providers: [
+        provideRouter([]),
         {
           provide: GuestApiService,
           useValue: {
-            // eslint-disable-next-line @typescript-eslint/no-empty-function
+             
             analyzeResume: () => ({ subscribe: () => {
   // Intentionally empty
 } }),
-            // eslint-disable-next-line @typescript-eslint/no-empty-function
+             
             getDemoAnalysis: () => ({ subscribe: () => {
   // Intentionally empty
 } }),
@@ -30,7 +32,7 @@ describe('UploadResumeComponent', () => {
           useValue: {
             onCompletion: () => ({ pipe: () => ({ subscribe: () => ({}) }) }),
             onError: () => ({ pipe: () => ({ subscribe: () => ({}) }) }),
-            // eslint-disable-next-line @typescript-eslint/no-empty-function
+             
             disconnect: () => {
   // Intentionally empty
 },

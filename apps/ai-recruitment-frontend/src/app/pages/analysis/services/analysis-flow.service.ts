@@ -122,6 +122,7 @@ export class AnalysisFlowService {
     error: import('../../../services/websocket.service').ErrorData,
   ): void {
     const errorMsg = error?.error || error?.message || '分析过程中发生未知错误';
+    this.toastService.error(errorMsg);
     this.state.setError(errorMsg);
     this.steps.markCurrentStepError();
   }

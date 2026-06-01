@@ -1,6 +1,8 @@
 import type { OnModuleInit } from '@nestjs/common';
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import mongoose from 'mongoose';
+import { Socket } from 'node:net';
 
 /**
  * Defines the shape of the service health.
@@ -199,17 +201,24 @@ export class HealthCheckService implements OnModuleInit {
 
   private async performHttpHealthCheck(
     url: string,
-    _timeout: number,
+    timeout: number,
   ): Promise<{ healthy: boolean; metadata?: Record<string, unknown> }> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+
     try {
-      // TODO: Replace mock with actual HTTP client (e.g., using fetch with abort signal)
-      // Mock implementation - 90% success rate
-      const healthy = Math.random() > 0.1;
+      const response = await fetch(url, {
+        method: 'GET',
+        signal: controller.signal,
+      });
+      const healthy = response.status >= 200 && response.status < 400;
 
       return {
         healthy,
         metadata: {
           url,
+          statusCode: response.status,
+          statusText: response.statusText,
           timestamp: new Date().toISOString(),
         },
       };
@@ -221,6 +230,8 @@ export class HealthCheckService implements OnModuleInit {
           error: error.message,
         },
       };
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 
@@ -264,19 +275,23 @@ export class HealthCheckService implements OnModuleInit {
     this.registerHealthCheck({
       name: 'database',
       healthCheck: async () => {
-        try {
-          // Mock database health check
-          const healthy = Math.random() > 0.05; // 95% success rate
-          return {
-            healthy,
-            metadata: {
-              connectionPool: healthy ? 'active' : 'degraded',
-              queryTime: Math.random() * 100,
-            },
-          };
-        } catch {
-          return { healthy: false };
-        }
+        const readyState = mongoose.connection.readyState;
+        const stateNames: Record<number, string> = {
+          0: 'disconnected',
+          1: 'connected',
+          2: 'connecting',
+          3: 'disconnecting',
+        };
+
+        return {
+          healthy: readyState === 1,
+          metadata: {
+            readyState,
+            state: stateNames[readyState] ?? 'unknown',
+            host: mongoose.connection.host ?? null,
+            name: mongoose.connection.name ?? null,
+          },
+        };
       },
     });
 
@@ -364,19 +379,22 @@ export class HealthCheckService implements OnModuleInit {
     this.registerHealthCheck({
       name: 'nats',
       healthCheck: async () => {
-        try {
-          // Mock NATS health check
-          const healthy = Math.random() > 0.02; // 98% success rate
+        const natsUrl =
+          process.env.NATS_URL ??
+          process.env.NATS_SERVERS ??
+          process.env.NATS_SERVER;
+
+        if (!natsUrl) {
           return {
-            healthy,
+            healthy: false,
             metadata: {
-              connectedServers: healthy ? 1 : 0,
-              totalMessages: Math.floor(Math.random() * 1000),
+              configured: false,
+              reason: 'NATS_URL is not configured',
             },
           };
-        } catch {
-          return { healthy: false };
         }
+
+        return this.performTcpHealthCheck(natsUrl, 3000);
       },
     });
 
@@ -394,6 +412,53 @@ export class HealthCheckService implements OnModuleInit {
         url: `http://${service}:3000/health`,
         timeout: 5000,
       });
+    });
+  }
+
+  private async performTcpHealthCheck(
+    target: string,
+    timeout: number,
+  ): Promise<{ healthy: boolean; metadata?: Record<string, unknown> }> {
+    const firstTarget = target.split(',')[0]?.trim() ?? target;
+    const parsedTarget = firstTarget.includes('://')
+      ? new URL(firstTarget)
+      : new URL(`nats://${firstTarget}`);
+    const host = parsedTarget.hostname;
+    const port = Number(parsedTarget.port || 4222);
+
+    return new Promise((resolve) => {
+      const socket = new Socket();
+      let settled = false;
+
+      const finish = (
+        healthy: boolean,
+        metadata: Record<string, unknown>,
+      ): void => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        socket.destroy();
+        resolve({ healthy, metadata });
+      };
+
+      socket.setTimeout(timeout);
+      socket.once('connect', () => {
+        finish(true, {
+          host,
+          port,
+          connected: true,
+          timestamp: new Date().toISOString(),
+        });
+      });
+      socket.once('timeout', () => {
+        finish(false, { host, port, error: 'timeout' });
+      });
+      socket.once('error', (error) => {
+        finish(false, { host, port, error: error.message });
+      });
+
+      socket.connect(port, host);
     });
   }
 }

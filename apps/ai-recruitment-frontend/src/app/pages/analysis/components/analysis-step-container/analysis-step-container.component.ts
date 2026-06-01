@@ -5,6 +5,7 @@
 
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { animate, style, transition, trigger } from '@angular/animations';
 import type { AnalysisState } from '../../types/analysis.types';
 
 @Component({
@@ -24,6 +25,17 @@ import type { AnalysisState } from '../../types/analysis.types';
         position: relative;
       }
     `,
+  ],
+  animations: [
+    trigger('stepTransition', [
+      transition('* => *', [
+        style({ opacity: 0.96, transform: 'translateY(2px)' }),
+        animate(
+          '120ms ease-out',
+          style({ opacity: 1, transform: 'translateY(0)' }),
+        ),
+      ]),
+    ]),
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

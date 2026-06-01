@@ -235,9 +235,23 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
   private handleLoadError(error: unknown): void {
     this.isLoading.set(false);
     this.hasError.set(true);
-    const err = error as { name?: string; status?: number; message?: string };
+    const err = error as {
+      name?: string;
+      status?: number;
+      message?: string;
+      error?: { status?: string; message?: string; progress?: number };
+    };
     if (err?.name === 'TimeoutError')
       this.errorMessage.set('请求超时，请检查网络连接后重试');
+    else if (err?.status === 409) {
+      const progress =
+        typeof err.error?.progress === 'number'
+          ? `（${err.error.progress}%）`
+          : '';
+      this.errorMessage.set(`分析仍在处理中${progress}，请稍后重试`);
+    }
+    else if (err?.status === 422)
+      this.errorMessage.set(err.error?.message || '分析失败，请重新上传简历');
     else if (err?.status === 404)
       this.errorMessage.set('未找到分析结果，请检查会话ID是否正确');
     else if (err?.status === 500)

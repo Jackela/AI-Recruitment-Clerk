@@ -1,5 +1,10 @@
 import type { OnInit, OnDestroy } from '@angular/core';
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import type { Observable } from 'rxjs';
@@ -360,7 +365,6 @@ export interface SparklineMeta {
     `,
   ],
 
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardChartsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
@@ -376,6 +380,9 @@ export class DashboardChartsComponent implements OnInit, OnDestroy {
    */
   @Input()
   public chartRefresh?: Observable<{ chartId: string }>;
+
+  @Output()
+  public chartRefreshRequested = new EventEmitter<string>();
 
   /**
    * Performs the ng on init operation.
@@ -406,10 +413,11 @@ export class DashboardChartsComponent implements OnInit, OnDestroy {
     if (chart) {
       chart.loading = true;
       chart.error = null;
-      // TODO: Implement actual chart refresh logic
-      setTimeout(() => {
+      this.chartRefreshRequested.emit(chartId);
+
+      if (!this.chartRefreshRequested.observed) {
         chart.loading = false;
-      }, 1000);
+      }
     }
   }
 
@@ -447,9 +455,9 @@ export class DashboardChartsComponent implements OnInit, OnDestroy {
       previous !== 0 ? ((current - previous) / Math.abs(previous)) * 100 : 0;
 
     let changeType: SparklineMeta['changeType'];
-    if (change > 0.1) {
+    if (change > 1) {
       changeType = 'increase';
-    } else if (change < -0.1) {
+    } else if (change < -1) {
       changeType = 'decrease';
     } else {
       changeType = 'neutral';
