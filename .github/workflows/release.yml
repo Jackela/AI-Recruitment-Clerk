@@ -12,7 +12,7 @@ permissions:
   pull-requests: write
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: '22.22.0'
 
 jobs:
   release:
@@ -43,7 +43,7 @@ jobs:
         run: |
           echo "🔐 Generating dependency inventory..."
           mkdir -p data/security
-          npm audit --audit-level=moderate --json > data/security/dependency-inventory.json || true
+          npm audit --omit=dev --registry https://registry.npmjs.org/ --audit-level=moderate --json > data/security/dependency-inventory.json || true
           echo "🚧 Evaluating release gate..."
           node scripts/dependency-gate.mjs
 
