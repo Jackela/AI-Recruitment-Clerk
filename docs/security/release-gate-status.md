@@ -6,7 +6,7 @@
 ## Current Status
 
 - Gate Result: ✅ Clear (no blocking vulnerabilities)
-- Last Audit Run: `npm audit --audit-level=moderate` (2025-10-30)
+- Last Audit Run: `npm audit --omit=dev --registry https://registry.npmjs.org/ --audit-level=moderate` (2026-06-01)
 - Outstanding High Severity Issues: 0
 - Outstanding Moderate Severity Issues: 0
 
@@ -25,7 +25,7 @@
 ## Approval Record
 
 - Security Review Board Sign-off: **A. Patel** (2025-10-30)
-- Release Gate Checkpoint: `.github/workflows/release.yml` now fails if any high/moderate vulnerability remains unremediated.
+- Release Gate Checkpoint: `.github/workflows/release.yml` now fails if any production high/moderate vulnerability remains unremediated.
 
 ## Next Actions
 

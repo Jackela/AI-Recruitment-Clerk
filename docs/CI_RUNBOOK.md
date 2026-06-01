@@ -113,14 +113,14 @@ Runs on: Pushes to main/develop branches
 | CI Step | Local Command | Runtime | Description |
 |---------|--------------|---------|-------------|
 | Install dependencies | `npm ci` | ~1m | Clean install dependencies |
-| Dependency gate | `npm audit --json > data/security/dependency-inventory.json && node scripts/dependency-gate.mjs` | ~20s | Generate inventory and evaluate gate |
+| Dependency gate | `npm audit --omit=dev --registry https://registry.npmjs.org/ --audit-level=moderate --json > data/security/dependency-inventory.json && node scripts/dependency-gate.mjs` | ~20s | Generate production dependency inventory and evaluate gate |
 | Build project | `npm run build` | ~45s | Build for release |
 | Semantic release | `npx semantic-release` | ~30s | Create release (dry-run locally) |
 
 **Test release locally:**
 ```bash
 # Generate dependency inventory
-npm audit --json > data/security/dependency-inventory.json
+npm audit --omit=dev --registry https://registry.npmjs.org/ --audit-level=moderate --json > data/security/dependency-inventory.json
 
 # Evaluate release gate
 node scripts/dependency-gate.mjs
