@@ -56,9 +56,17 @@ jobs:
       - name: Print affected graph
         run: npx nx show projects --affected --base=origin/main --head=HEAD
       - name: Print affected projects
+        id: affected_projects
         run: |
           echo "Affected projects:"
-          npx nx show projects --affected --base=origin/main --head=HEAD
+          AFFECTED_PROJECTS="$(npx nx show projects --affected --base=origin/main --head=HEAD | tr '\n' ' ')"
+          echo "$AFFECTED_PROJECTS"
+          echo "projects=$AFFECTED_PROJECTS" >> "$GITHUB_OUTPUT"
+          if echo " $AFFECTED_PROJECTS " | grep -qE " (ai-recruitment-frontend|ai-recruitment-frontend-e2e) "; then
+            echo "run_e2e=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_e2e=false" >> "$GITHUB_OUTPUT"
+          fi
           echo ""
           echo "Affected projects with test target:"
           npx nx print-affected --type=test --select=projects --base=origin/main --head=HEAD || echo "No test target projects affected"
@@ -71,7 +79,12 @@ jobs:
       - name: Build affected
         timeout-minutes: 15
         run: npx nx affected -t build --base=origin/main --head=HEAD --parallel=2
+      - name: Build frontend for affected E2E
+        if: steps.affected_projects.outputs.run_e2e == 'true'
+        timeout-minutes: 15
+        run: npx nx build ai-recruitment-frontend --configuration=production
       - name: Manage server lifecycle
+        if: steps.affected_projects.outputs.run_e2e == 'true'
         uses: ./.github/actions/server-lifecycle
         timeout-minutes: 5
         with:
@@ -83,6 +96,7 @@ jobs:
           verify-build-output: 'dist/apps/ai-recruitment-frontend/browser'
           server-log-path: '/tmp/server.log'
       - name: E2E affected
+        if: steps.affected_projects.outputs.run_e2e == 'true'
         timeout-minutes: 18
         # Skip app-gateway-e2e due to complex service dependencies
         # Skip @accessibility tests (pre-existing UI issues)
