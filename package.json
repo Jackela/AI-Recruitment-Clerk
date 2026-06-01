@@ -25,7 +25,7 @@
     "lint:fix": "npx nx run-many -t lint --all --parallel=3 --fix",
     "clean": "npx nx reset && rm -rf node_modules/.cache dist",
     "start:prod": "NODE_ENV=production node dist/apps/app-gateway/main.cjs",
-    "prepare": "husky install",
+    "prepare": "node scripts/husky-prepare.mjs",
     "postinstall": "echo 'Skipping build in postinstall'",
     "format": "prettier --write \"{apps,libs}/**/*.{ts,html,scss,js,json,md}\"",
     "test": "jest --config jest.config.mjs --passWithNoTests",
