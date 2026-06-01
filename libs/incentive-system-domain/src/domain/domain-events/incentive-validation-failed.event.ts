@@ -16,5 +16,7 @@ export class IncentiveValidationFailedEvent implements DomainEvent {
     public readonly recipientIP: string,
     public readonly errors: string[],
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }

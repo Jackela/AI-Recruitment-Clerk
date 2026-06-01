@@ -55,7 +55,9 @@ export class UserManagementController {
    * Initializes a new instance of the User Management Controller.
    * @param userManagementService - The user management service.
    */
-  constructor(private readonly userManagementService: UserManagementService) {}
+  constructor(private readonly userManagementService: UserManagementService) {
+  // Intentionally empty
+}
 
   /**
    * Retrieves user profile.

@@ -94,7 +94,9 @@ export class CacheOptimizationService implements OnModuleInit {
    * Initializes a new instance of the Cache Optimization Service.
    * @param cacheService - The cache service.
    */
-  constructor(private readonly cacheService: CacheService) {}
+  constructor(private readonly cacheService: CacheService) {
+    // Intentionally empty
+  }
 
   /**
    * Performs the on module init operation.
@@ -128,9 +130,7 @@ export class CacheOptimizationService implements OnModuleInit {
         this.logger.log('📋 Default cache optimization config saved');
       }
     } catch {
-      this.logger.warn(
-        'Failed to load cache optimization config',
-      );
+      this.logger.warn('Failed to load cache optimization config');
     }
   }
 
@@ -231,9 +231,7 @@ export class CacheOptimizationService implements OnModuleInit {
           this.logger.debug(`Unknown preload pattern: ${rule.pattern}`);
       }
     } catch {
-      this.logger.warn(
-        `Failed to execute preload rule ${rule.pattern}`,
-      );
+      this.logger.warn(`Failed to execute preload rule ${rule.pattern}`);
     }
   }
 

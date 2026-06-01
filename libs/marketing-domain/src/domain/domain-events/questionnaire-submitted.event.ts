@@ -21,5 +21,7 @@ export class QuestionnaireSubmittedEvent implements DomainEvent {
     public readonly bonusEligible: boolean,
     public readonly submissionData: SubmissionSummary,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import type { Observable } from 'rxjs';
 
 import { CommonModule } from '@angular/common';
@@ -109,7 +109,8 @@ import {
     </div>
   `,
   styleUrl: './analytics-dashboard.component.scss',
-})
+
+  changeDetection: ChangeDetectionStrategy.OnPush,})
 export class AnalyticsDashboardComponent {
   private readonly analyticsDataService = inject(AnalyticsDataService);
   public readonly dashboardData$: Observable<AnalyticsDashboardData>;

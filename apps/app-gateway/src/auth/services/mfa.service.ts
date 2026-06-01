@@ -17,10 +17,9 @@ import type {
   DisableMfaDto,
   GenerateBackupCodesDto,
   MfaStatusDto,
-  MfaSetupResponseDto} from '../dto/mfa.dto';
-import {
-  MfaMethod
+  MfaSetupResponseDto,
 } from '../dto/mfa.dto';
+import { MfaMethod } from '../dto/mfa.dto';
 import { UserProfile } from '../../schemas/user-profile.schema';
 import type { EmailService } from './email.service';
 import type { SmsService } from './sms.service';
@@ -105,7 +104,7 @@ export class MfaService {
       let secretKey: string | undefined;
       let backupCodes: string[] | undefined;
 
-      switch (enableMfaDto.method) {
+      switch(enableMfaDto.method) {
         case MfaMethod.TOTP: {
           const secret = speakeasy.generateSecret({
             name: `${this.issuerName} (${user.email})`,
@@ -190,7 +189,7 @@ export class MfaService {
       ...rawSettings,
       methods: (rawSettings.methods || []).map((method: string) => {
         // Convert string to MfaMethod enum
-        switch (method) {
+        switch(method) {
           case 'sms':
             return MfaMethod.SMS;
           case 'email':
@@ -254,7 +253,7 @@ export class MfaService {
         );
       } else {
         // Try all enabled methods
-        for (const method of mfaSettings.methods) {
+        for(const method of mfaSettings.methods) {
           if (
             await this.verifyTokenForMethod(
               mfaSettings,
@@ -449,7 +448,7 @@ export class MfaService {
     token: string,
     method: MfaMethod,
   ): Promise<boolean> {
-    switch (method) {
+    switch(method) {
       case MfaMethod.TOTP:
         if (!mfaSettings.totpSecret) return false;
         return speakeasy.totp.verify({
@@ -476,7 +475,7 @@ export class MfaService {
 
   private generateBackupCodes(): string[] {
     const codes: string[] = [];
-    for (let i = 0; i < this.backupCodesCount; i++) {
+    for(let i = 0; i < this.backupCodesCount; i++) {
       const code = crypto.randomBytes(4).toString('hex').toUpperCase();
       const formattedCode = `${code.substring(0, 4)}-${code.substring(4, 8)}`;
       codes.push(formattedCode);
@@ -507,7 +506,7 @@ export class MfaService {
     this.storeTemporaryToken(userId, token, expiresAt);
 
     try {
-      switch (method) {
+      switch(method) {
         case MfaMethod.SMS:
           if (user.mfaSettings.phoneNumber) {
             await this.smsService.sendSms(
@@ -534,6 +533,10 @@ export class MfaService {
         message: `Verification code sent via ${method.toUpperCase()}`,
       };
     } catch (error) {
+      // If it's already a BadRequestException (e.g., from invalid method), re-throw as-is
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
       this.logger.error(
         `Failed to send MFA token: ${error instanceof Error ? error.message : String(error)}`,
         error instanceof Error ? error.stack : undefined,
@@ -549,7 +552,11 @@ export class MfaService {
     { token: string; expiresAt: Date }
   >();
 
-  private storeTemporaryToken(userId: string, token: string, expiresAt: Date): void {
+  private storeTemporaryToken(
+    userId: string,
+    token: string,
+    expiresAt: Date,
+  ): void {
     // Clean up expired tokens
     this.cleanupExpiredTokens();
 

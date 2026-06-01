@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { Router } from '@angular/router';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { firstValueFrom, of, throwError } from 'rxjs';
 import type { Action } from '@ngrx/store';
 import { JobEffects } from './job.effects';
@@ -73,114 +73,100 @@ describe('JobEffects', () => {
   });
 
   describe('loadJobs$', () => {
-    it('should return loadJobsSuccess action on successful API call', (done) => {
+    it('should return loadJobsSuccess action on successful API call', async () => {
       apiService.getAllJobs.mockReturnValue(of(mockJobListItems));
 
       actions$ = of(JobActions.loadJobs());
 
-      effects.loadJobs$.subscribe((action) => {
-        expect(action).toEqual(
-          JobActions.loadJobsSuccess({ jobs: mockJobListItems }),
-        );
-        expect(apiService.getAllJobs).toHaveBeenCalled();
-        done();
-      });
+      const action = await effects.loadJobs$.toPromise();
+      expect(action).toEqual(
+        JobActions.loadJobsSuccess({ jobs: mockJobListItems }),
+      );
+      expect(apiService.getAllJobs).toHaveBeenCalled();
     });
 
-    it('should return loadJobsFailure action on API error', (done) => {
+    it('should return loadJobsFailure action on API error', async () => {
       const error = new Error('Network error');
       apiService.getAllJobs.mockReturnValue(throwError(() => error));
 
       actions$ = of(JobActions.loadJobs());
 
-      effects.loadJobs$.subscribe((action) => {
-        expect(action).toEqual(
-          JobActions.loadJobsFailure({
-            error: 'Network error',
-          }),
-        );
-        done();
-      });
+      const action = await effects.loadJobs$.toPromise();
+      expect(action).toEqual(
+        JobActions.loadJobsFailure({
+          error: 'Network error',
+        }),
+      );
     });
 
-    it('should handle API error with custom message', (done) => {
+    it('should handle API error with custom message', async () => {
       const error = { message: 'Custom error message' };
       apiService.getAllJobs.mockReturnValue(throwError(() => error));
 
       actions$ = of(JobActions.loadJobs());
 
-      effects.loadJobs$.subscribe((action) => {
-        expect(action).toEqual(
-          JobActions.loadJobsFailure({
-            error: 'Custom error message',
-          }),
-        );
-        done();
-      });
+      const action = await effects.loadJobs$.toPromise();
+      expect(action).toEqual(
+        JobActions.loadJobsFailure({
+          error: 'Custom error message',
+        }),
+      );
     });
   });
 
   describe('loadJob$', () => {
-    it('should return loadJobSuccess action on successful API call', (done) => {
+    it('should return loadJobSuccess action on successful API call', async () => {
       apiService.getJobById.mockReturnValue(of(mockJob));
 
       actions$ = of(JobActions.loadJob({ jobId: '1' }));
 
-      effects.loadJob$.subscribe((action) => {
-        expect(action).toEqual(JobActions.loadJobSuccess({ job: mockJob }));
-        expect(apiService.getJobById).toHaveBeenCalledWith('1');
-        done();
-      });
+      const action = await effects.loadJob$.toPromise();
+      expect(action).toEqual(JobActions.loadJobSuccess({ job: mockJob }));
+      expect(apiService.getJobById).toHaveBeenCalledWith('1');
     });
 
-    it('should return loadJobFailure action on API error', (done) => {
+    it('should return loadJobFailure action on API error', async () => {
       const error = new Error('Job not found');
       apiService.getJobById.mockReturnValue(throwError(() => error));
 
       actions$ = of(JobActions.loadJob({ jobId: 'nonexistent' }));
 
-      effects.loadJob$.subscribe((action) => {
-        expect(action).toEqual(
-          JobActions.loadJobFailure({
-            error: 'Job not found',
-          }),
-        );
-        done();
-      });
+      const action = await effects.loadJob$.toPromise();
+      expect(action).toEqual(
+        JobActions.loadJobFailure({
+          error: 'Job not found',
+        }),
+      );
     });
   });
 
   describe('createJob$', () => {
-    it('should return createJobSuccess action on successful API call', (done) => {
+    it('should return createJobSuccess action on successful API call', async () => {
       apiService.createJob.mockReturnValue(of(mockCreateJobResponse));
 
       actions$ = of(JobActions.createJob({ request: mockCreateJobRequest }));
 
-      effects.createJob$.subscribe((action) => {
-        expect(action).toEqual(
-          JobActions.createJobSuccess({
-            response: mockCreateJobResponse,
-          }),
-        );
-        expect(apiService.createJob).toHaveBeenCalledWith(mockCreateJobRequest);
-        done();
-      });
+      const action = await effects.createJob$.toPromise();
+      expect(action).toEqual(
+        JobActions.createJobSuccess({
+          response: mockCreateJobResponse,
+        }),
+      );
+      expect(apiService.createJob).toHaveBeenCalledWith(mockCreateJobRequest);
     });
 
-    it('should return createJobFailure action on API error', (done) => {
+    it('should return createJobFailure action on API error', async () => {
       const error = new Error('Validation failed');
       apiService.createJob.mockReturnValue(throwError(() => error));
 
       actions$ = of(JobActions.createJob({ request: mockCreateJobRequest }));
 
-      effects.createJob$.subscribe((action) => {
-        expect(action).toEqual(
-          JobActions.createJobFailure({
-            error: 'Validation failed',
-          }),
-        );
-        done();
-      });
+      const action = await effects.createJob$.toPromise();
+      expect(action).toEqual(
+        JobActions.createJobFailure({
+          error: 'Validation failed',
+        }),
+      );
     });
   });
 

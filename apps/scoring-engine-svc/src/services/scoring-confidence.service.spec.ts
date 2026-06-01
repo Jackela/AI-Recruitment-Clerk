@@ -1,6 +1,9 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
-import type { ComponentScores, ProcessingMetrics } from './scoring-confidence.service';
+import type {
+  ComponentScores,
+  ProcessingMetrics,
+} from './scoring-confidence.service';
 import { ScoringConfidenceService } from './scoring-confidence.service';
 import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 
@@ -69,14 +72,16 @@ describe('ScoringConfidenceService', () => {
           position: 'Senior Developer',
           startDate: '2020-01-01',
           endDate: '2023-01-01',
-          summary: 'Led team of 5 developers building scalable web applications using modern frameworks and best practices.',
+          summary:
+            'Led team of 5 developers building scalable web applications using modern frameworks and best practices.',
         },
         {
           company: 'StartupXYZ',
           position: 'Developer',
           startDate: '2018-01-01',
           endDate: '2020-01-01',
-          summary: 'Developed full-stack applications and improved system performance by 40%.',
+          summary:
+            'Developed full-stack applications and improved system performance by 40%.',
         },
       ],
       education: [
@@ -158,7 +163,9 @@ describe('ScoringConfidenceService', () => {
 
       expect(report).toBeDefined();
       expect(report.confidenceMetrics.dataQuality.score).toBeDefined();
-      expect(report.confidenceMetrics.dataQuality.issues.length).toBeGreaterThan(0);
+      expect(
+        report.confidenceMetrics.dataQuality.issues.length,
+      ).toBeGreaterThan(0);
     });
 
     it('should handle poor processing metrics', () => {
@@ -175,8 +182,12 @@ describe('ScoringConfidenceService', () => {
       );
 
       expect(report).toBeDefined();
-      expect(report.confidenceMetrics.analysisReliability.score).toBeLessThanOrEqual(70);
-      expect(report.confidenceMetrics.analysisReliability.uncertainties.length).toBeGreaterThan(0);
+      expect(
+        report.confidenceMetrics.analysisReliability.score,
+      ).toBeLessThanOrEqual(70);
+      expect(
+        report.confidenceMetrics.analysisReliability.uncertainties.length,
+      ).toBeGreaterThan(0);
     });
 
     it('should return fallback report on error', () => {
@@ -205,8 +216,12 @@ describe('ScoringConfidenceService', () => {
         mockProcessingMetrics,
       );
 
-      expect(report.reliabilityBand.minScore).toBeLessThanOrEqual(report.reliabilityBand.mostLikelyScore);
-      expect(report.reliabilityBand.maxScore).toBeGreaterThanOrEqual(report.reliabilityBand.mostLikelyScore);
+      expect(report.reliabilityBand.minScore).toBeLessThanOrEqual(
+        report.reliabilityBand.mostLikelyScore,
+      );
+      expect(report.reliabilityBand.maxScore).toBeGreaterThanOrEqual(
+        report.reliabilityBand.mostLikelyScore,
+      );
       expect(report.reliabilityBand.minScore).toBeGreaterThanOrEqual(0);
       expect(report.reliabilityBand.maxScore).toBeLessThanOrEqual(100);
     });
@@ -218,9 +233,15 @@ describe('ScoringConfidenceService', () => {
         mockProcessingMetrics,
       );
 
-      expect(['A', 'B', 'C', 'D', 'F']).toContain(report.qualityIndicators.dataQualityGrade);
-      expect(['A', 'B', 'C', 'D', 'F']).toContain(report.qualityIndicators.analysisDepthGrade);
-      expect(['A', 'B', 'C', 'D', 'F']).toContain(report.qualityIndicators.reliabilityGrade);
+      expect(['A', 'B', 'C', 'D', 'F']).toContain(
+        report.qualityIndicators.dataQualityGrade,
+      );
+      expect(['A', 'B', 'C', 'D', 'F']).toContain(
+        report.qualityIndicators.analysisDepthGrade,
+      );
+      expect(['A', 'B', 'C', 'D', 'F']).toContain(
+        report.qualityIndicators.reliabilityGrade,
+      );
     });
   });
 
@@ -279,7 +300,8 @@ describe('ScoringConfidenceService', () => {
           skills: ['JavaScript'],
         };
 
-        const assessment = dataQualityService.assessDataQuality(incompleteResume);
+        const assessment =
+          dataQualityService.assessDataQuality(incompleteResume);
 
         expect(assessment.factors.completeness).toBeLessThan(70);
         expect(assessment.issues).toContain(
@@ -307,7 +329,8 @@ describe('ScoringConfidenceService', () => {
           skills: ['JavaScript'],
         };
 
-        const assessment = dataQualityService.assessDataQuality(inconsistentResume);
+        const assessment =
+          dataQualityService.assessDataQuality(inconsistentResume);
 
         expect(assessment.factors.consistency).toBeLessThan(100);
       });
@@ -424,7 +447,9 @@ describe('ScoringConfidenceService', () => {
           skills: [],
         };
 
-        const assessment = dataQualityService.assessDataQuality(emptyExperienceResume);
+        const assessment = dataQualityService.assessDataQuality(
+          emptyExperienceResume,
+        );
 
         expect(assessment.issues).toContain('No work experience provided');
       });
@@ -441,7 +466,8 @@ describe('ScoringConfidenceService', () => {
           skills: ['JavaScript', 'HTML'],
         };
 
-        const assessment = dataQualityService.assessDataQuality(fewSkillsResume);
+        const assessment =
+          dataQualityService.assessDataQuality(fewSkillsResume);
 
         expect(assessment.issues).toContain('Very few skills listed');
       });
@@ -466,7 +492,8 @@ describe('ScoringConfidenceService', () => {
           skills: [],
         };
 
-        const assessment = dataQualityService.assessDataQuality(noSummaryResume);
+        const assessment =
+          dataQualityService.assessDataQuality(noSummaryResume);
 
         expect(assessment.factors.detail).toBeLessThan(50);
       });
@@ -488,7 +515,10 @@ describe('ScoringConfidenceService', () => {
         errorRates: [0, 0, 0],
       };
 
-      const assessment = analysisReliabilityService.assessAnalysisReliability(mockComponentScores, goodMetrics);
+      const assessment = analysisReliabilityService.assessAnalysisReliability(
+        mockComponentScores,
+        goodMetrics,
+      );
 
       expect(assessment.score).toBeGreaterThan(70);
       expect(assessment.factors.algorithmConfidence).toBeGreaterThan(70);
@@ -502,7 +532,10 @@ describe('ScoringConfidenceService', () => {
         errorRates: [0, 0, 0],
       };
 
-      const assessment = analysisReliabilityService.assessAnalysisReliability(mockComponentScores, slowMetrics);
+      const assessment = analysisReliabilityService.assessAnalysisReliability(
+        mockComponentScores,
+        slowMetrics,
+      );
 
       expect(assessment.factors.aiResponseQuality).toBeLessThan(90);
     });
@@ -514,10 +547,15 @@ describe('ScoringConfidenceService', () => {
         errorRates: [0, 0, 0],
       };
 
-      const assessment = analysisReliabilityService.assessAnalysisReliability(mockComponentScores, fallbackMetrics);
+      const assessment = analysisReliabilityService.assessAnalysisReliability(
+        mockComponentScores,
+        fallbackMetrics,
+      );
 
       expect(assessment.factors.aiResponseQuality).toBeLessThan(70);
-      expect(assessment.uncertainties).toContain('High reliance on fallback methods');
+      expect(assessment.uncertainties).toContain(
+        'High reliance on fallback methods',
+      );
     });
 
     it('should penalize high error rates', () => {
@@ -527,7 +565,10 @@ describe('ScoringConfidenceService', () => {
         errorRates: [0.5, 0.6, 0.4],
       };
 
-      const assessment = analysisReliabilityService.assessAnalysisReliability(mockComponentScores, errorMetrics);
+      const assessment = analysisReliabilityService.assessAnalysisReliability(
+        mockComponentScores,
+        errorMetrics,
+      );
 
       expect(assessment.factors.aiResponseQuality).toBeLessThan(70);
     });
@@ -546,7 +587,10 @@ describe('ScoringConfidenceService', () => {
       };
 
       expect(() => {
-        analysisReliabilityService.assessAnalysisReliability(mockScores, emptyMetrics);
+        analysisReliabilityService.assessAnalysisReliability(
+          mockScores,
+          emptyMetrics,
+        );
       }).not.toThrow();
     });
   });
@@ -573,12 +617,13 @@ describe('ScoringConfidenceService', () => {
 
       it('should calculate high stability for high confidence scores', () => {
         const highConfidenceScores: ComponentScores = {
-          skills: { score: 85, confidence: 95, evidenceStrength: 90 },
-          experience: { score: 78, confidence: 96, evidenceStrength: 92 },
-          culturalFit: { score: 92, confidence: 94, evidenceStrength: 91 },
+          skills: { score: 85, confidence: 0.95, evidenceStrength: 90 },
+          experience: { score: 78, confidence: 0.96, evidenceStrength: 92 },
+          culturalFit: { score: 92, confidence: 0.94, evidenceStrength: 91 },
         };
 
-        const variance = confidenceReportService.calculateScoreVariance(highConfidenceScores);
+        const variance =
+          confidenceReportService.calculateScoreVariance(highConfidenceScores);
 
         expect(variance.stabilityScore).toBeGreaterThan(90);
       });
@@ -590,7 +635,8 @@ describe('ScoringConfidenceService', () => {
           culturalFit: { score: 92, confidence: 0.3, evidenceStrength: 40 },
         };
 
-        const variance = confidenceReportService.calculateScoreVariance(lowConfidenceScores);
+        const variance =
+          confidenceReportService.calculateScoreVariance(lowConfidenceScores);
 
         expect(variance.stabilityScore).toBeLessThan(70);
       });
@@ -600,7 +646,12 @@ describe('ScoringConfidenceService', () => {
       it('should determine high certainty level for good metrics', () => {
         const goodDataQuality = {
           score: 90,
-          factors: { completeness: 90, consistency: 90, recency: 90, detail: 90 },
+          factors: {
+            completeness: 90,
+            consistency: 90,
+            recency: 90,
+            detail: 90,
+          },
           issues: [],
         };
         const goodReliability = {
@@ -621,11 +672,12 @@ describe('ScoringConfidenceService', () => {
           stabilityScore: 95,
         };
 
-        const certainty = confidenceReportService.calculateRecommendationCertainty(
-          goodDataQuality,
-          goodReliability,
-          goodVariance,
-        );
+        const certainty =
+          confidenceReportService.calculateRecommendationCertainty(
+            goodDataQuality,
+            goodReliability,
+            goodVariance,
+          );
 
         expect(certainty.level).toBe('high');
         expect(certainty.score).toBeGreaterThan(80);
@@ -635,7 +687,12 @@ describe('ScoringConfidenceService', () => {
       it('should determine medium certainty level for moderate metrics', () => {
         const moderateDataQuality = {
           score: 65,
-          factors: { completeness: 65, consistency: 65, recency: 65, detail: 65 },
+          factors: {
+            completeness: 65,
+            consistency: 65,
+            recency: 65,
+            detail: 65,
+          },
           issues: ['Some missing information'],
         };
         const moderateReliability = {
@@ -656,11 +713,12 @@ describe('ScoringConfidenceService', () => {
           stabilityScore: 70,
         };
 
-        const certainty = confidenceReportService.calculateRecommendationCertainty(
-          moderateDataQuality,
-          moderateReliability,
-          moderateVariance,
-        );
+        const certainty =
+          confidenceReportService.calculateRecommendationCertainty(
+            moderateDataQuality,
+            moderateReliability,
+            moderateVariance,
+          );
 
         expect(certainty.level).toBe('medium');
         expect(certainty.score).toBeGreaterThanOrEqual(60);
@@ -670,7 +728,12 @@ describe('ScoringConfidenceService', () => {
       it('should determine low certainty level for poor metrics', () => {
         const poorDataQuality = {
           score: 40,
-          factors: { completeness: 40, consistency: 40, recency: 40, detail: 40 },
+          factors: {
+            completeness: 40,
+            consistency: 40,
+            recency: 40,
+            detail: 40,
+          },
           issues: ['Missing critical information', 'Inconsistencies detected'],
         };
         const poorReliability = {
@@ -691,11 +754,12 @@ describe('ScoringConfidenceService', () => {
           stabilityScore: 40,
         };
 
-        const certainty = confidenceReportService.calculateRecommendationCertainty(
-          poorDataQuality,
-          poorReliability,
-          poorVariance,
-        );
+        const certainty =
+          confidenceReportService.calculateRecommendationCertainty(
+            poorDataQuality,
+            poorReliability,
+            poorVariance,
+          );
 
         expect(certainty.level).toBe('low');
         expect(certainty.score).toBeLessThan(60);
@@ -708,7 +772,12 @@ describe('ScoringConfidenceService', () => {
         const metrics = {
           dataQuality: {
             score: 85,
-            factors: { completeness: 85, consistency: 85, recency: 85, detail: 85 },
+            factors: {
+              completeness: 85,
+              consistency: 85,
+              recency: 85,
+              detail: 85,
+            },
             issues: [],
           },
           analysisReliability: {
@@ -731,12 +800,17 @@ describe('ScoringConfidenceService', () => {
           recommendationCertainty: {
             level: 'high' as const,
             score: 80,
-            factors: { scoringConsistency: 80, dataCompleteness: 80, algorithmMaturity: 80 },
+            factors: {
+              scoringConsistency: 80,
+              dataCompleteness: 80,
+              algorithmMaturity: 80,
+            },
             riskFactors: [],
           },
         };
 
-        const indicators = confidenceReportService.generateQualityIndicators(metrics);
+        const indicators =
+          confidenceReportService.generateQualityIndicators(metrics);
 
         expect(indicators.dataQualityGrade).toBe('B');
         expect(indicators.analysisDepthGrade).toBe('C');
@@ -749,7 +823,12 @@ describe('ScoringConfidenceService', () => {
         const excellentMetrics = {
           dataQuality: {
             score: 95,
-            factors: { completeness: 95, consistency: 95, recency: 95, detail: 95 },
+            factors: {
+              completeness: 95,
+              consistency: 95,
+              recency: 95,
+              detail: 95,
+            },
             issues: [],
           },
           analysisReliability: {
@@ -772,7 +851,11 @@ describe('ScoringConfidenceService', () => {
           recommendationCertainty: {
             level: 'high' as const,
             score: 95,
-            factors: { scoringConsistency: 95, dataCompleteness: 95, algorithmMaturity: 95 },
+            factors: {
+              scoringConsistency: 95,
+              dataCompleteness: 95,
+              algorithmMaturity: 95,
+            },
             riskFactors: [],
           },
         };
@@ -783,10 +866,11 @@ describe('ScoringConfidenceService', () => {
           reliabilityGrade: 'A' as const,
         };
 
-        const recommendations = confidenceReportService.generateConfidenceRecommendations(
-          excellentMetrics,
-          qualityIndicators,
-        );
+        const recommendations =
+          confidenceReportService.generateConfidenceRecommendations(
+            excellentMetrics,
+            qualityIndicators,
+          );
 
         expect(recommendations.scoringReliability).toBe('high');
         expect(recommendations.actionItems.length).toBe(0);
@@ -797,7 +881,12 @@ describe('ScoringConfidenceService', () => {
         const poorMetrics = {
           dataQuality: {
             score: 60,
-            factors: { completeness: 60, consistency: 60, recency: 60, detail: 60 },
+            factors: {
+              completeness: 60,
+              consistency: 60,
+              recency: 60,
+              detail: 60,
+            },
             issues: [],
           },
           analysisReliability: {
@@ -820,7 +909,11 @@ describe('ScoringConfidenceService', () => {
           recommendationCertainty: {
             level: 'medium' as const,
             score: 65,
-            factors: { scoringConsistency: 65, dataCompleteness: 65, algorithmMaturity: 65 },
+            factors: {
+              scoringConsistency: 65,
+              dataCompleteness: 65,
+              algorithmMaturity: 65,
+            },
             riskFactors: [],
           },
         };
@@ -831,10 +924,11 @@ describe('ScoringConfidenceService', () => {
           reliabilityGrade: 'C' as const,
         };
 
-        const recommendations = confidenceReportService.generateConfidenceRecommendations(
-          poorMetrics,
-          qualityIndicators,
-        );
+        const recommendations =
+          confidenceReportService.generateConfidenceRecommendations(
+            poorMetrics,
+            qualityIndicators,
+          );
 
         expect(recommendations.scoringReliability).toBe('medium');
         expect(recommendations.actionItems.length).toBeGreaterThan(0);
@@ -844,7 +938,12 @@ describe('ScoringConfidenceService', () => {
         const lowConfidenceMetrics = {
           dataQuality: {
             score: 50,
-            factors: { completeness: 50, consistency: 50, recency: 50, detail: 50 },
+            factors: {
+              completeness: 50,
+              consistency: 50,
+              recency: 50,
+              detail: 50,
+            },
             issues: [],
           },
           analysisReliability: {
@@ -867,7 +966,11 @@ describe('ScoringConfidenceService', () => {
           recommendationCertainty: {
             level: 'low' as const,
             score: 45,
-            factors: { scoringConsistency: 45, dataCompleteness: 45, algorithmMaturity: 45 },
+            factors: {
+              scoringConsistency: 45,
+              dataCompleteness: 45,
+              algorithmMaturity: 45,
+            },
             riskFactors: [],
           },
         };
@@ -878,14 +981,19 @@ describe('ScoringConfidenceService', () => {
           reliabilityGrade: 'F' as const,
         };
 
-        const recommendations = confidenceReportService.generateConfidenceRecommendations(
-          lowConfidenceMetrics,
-          qualityIndicators,
-        );
+        const recommendations =
+          confidenceReportService.generateConfidenceRecommendations(
+            lowConfidenceMetrics,
+            qualityIndicators,
+          );
 
         expect(recommendations.scoringReliability).toBe('low');
-        expect(recommendations.riskMitigation).toContain('Treat scoring results as preliminary only');
-        expect(recommendations.riskMitigation).toContain('Conduct additional assessment methods');
+        expect(recommendations.riskMitigation).toContain(
+          'Treat scoring results as preliminary only',
+        );
+        expect(recommendations.riskMitigation).toContain(
+          'Conduct additional assessment methods',
+        );
       });
     });
 
@@ -897,7 +1005,8 @@ describe('ScoringConfidenceService', () => {
           culturalFit: { score: 80, confidence: 0.8, evidenceStrength: 75 },
         };
 
-        const fallback = confidenceReportService.fallbackConfidenceReport(mockScores);
+        const fallback =
+          confidenceReportService.fallbackConfidenceReport(mockScores);
 
         expect(fallback.overallConfidence).toBe(50);
         expect(fallback.recommendations.scoringReliability).toBe('medium');
@@ -913,10 +1022,15 @@ describe('ScoringConfidenceService', () => {
           culturalFit: { score: 80, confidence: 0.8, evidenceStrength: 75 },
         };
 
-        const fallback = confidenceReportService.fallbackConfidenceReport(mockScores);
+        const fallback =
+          confidenceReportService.fallbackConfidenceReport(mockScores);
 
-        expect(fallback.recommendations.actionItems).toContain('Manual review recommended');
-        expect(fallback.recommendations.riskMitigation).toContain('Use as preliminary screening only');
+        expect(fallback.recommendations.actionItems).toContain(
+          'Manual review recommended',
+        );
+        expect(fallback.recommendations.riskMitigation).toContain(
+          'Use as preliminary screening only',
+        );
       });
     });
   });

@@ -116,7 +116,7 @@ export class QuotaCalculatorHelper {
     const hourlyUsage = new Map<number, number>();
     const dailyUsage = new Map<string, number>();
 
-    for (const usageLimit of usageLimits) {
+    for(const usageLimit of usageLimits) {
       const stats = usageLimit.getUsageStatistics();
 
       // Track usage by hour
@@ -159,7 +159,7 @@ export class QuotaCalculatorHelper {
     let maxUsage = 0;
     let peakHour = 0;
 
-    for (const [hour, usage] of hourlyUsage) {
+    for(const [hour, usage] of hourlyUsage) {
       if (usage > maxUsage) {
         maxUsage = usage;
         peakHour = hour;

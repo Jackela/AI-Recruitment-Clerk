@@ -1,8 +1,4 @@
-import type {
-  OnInit,
-  OnDestroy,
-  ElementRef,
-} from '@angular/core';
+import type { OnInit, OnDestroy, ElementRef } from '@angular/core';
 import {
   Component,
   Input,
@@ -10,6 +6,7 @@ import {
   EventEmitter,
   ViewChild,
   effect,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { TemplateRef } from '@angular/core';
@@ -78,7 +75,9 @@ import { VirtualScrollEmptyComponent } from './virtual-scroll-empty.component';
       <arc-virtual-scroll-loading *ngIf="viewport.isLoading()" />
 
       <!-- Empty State -->
-      <arc-virtual-scroll-empty *ngIf="items.length === 0 && !viewport.isLoading()">
+      <arc-virtual-scroll-empty
+        *ngIf="items.length === 0 && !viewport.isLoading()"
+      >
         <ng-content select="[empty-state]">
           <p>暂无数据</p>
         </ng-content>
@@ -86,6 +85,8 @@ import { VirtualScrollEmptyComponent } from './virtual-scroll-empty.component';
     </div>
   `,
   styleUrls: ['./virtual-scroll.component.scss'],
+
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
   @ViewChild('scrollContainer', { static: true })
@@ -111,7 +112,10 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
   constructor() {
     // Setup infinite scroll effect if enabled
     effect(() => {
-      if (this.config.enableInfiniteScroll && this.viewport.shouldTriggerLoadMore()) {
+      if (
+        this.config.enableInfiniteScroll &&
+        this.viewport.shouldTriggerLoadMore()
+      ) {
         this.loadMore.emit();
       }
     });

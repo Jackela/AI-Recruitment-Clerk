@@ -181,7 +181,9 @@ export class I18nService {
       .pipe(
         catchError((error) => {
           console.error(`Failed to load translations for ${language}:`, error);
-          this.toastService.warning('语言包加载失败，已使用内置翻译');
+          this.toastService.warning(
+            this.translate('messages.translationLoadFailed'),
+          );
           return of(fallbackTranslations);
         }),
         tap((translations) => {
@@ -250,7 +252,11 @@ export class I18nService {
     this.loadTranslations(language);
 
     const config = this.languages[language];
-    this.toastService.success(`语言已切换到${config.nativeName}`);
+    this.toastService.success(
+      this.translate('messages.languageSwitched', {
+        nativeName: config.nativeName,
+      }),
+    );
   }
 
   /**
@@ -280,7 +286,7 @@ export class I18nService {
     const keys = key.split('.');
     let value: unknown = translations;
 
-    for (const k of keys) {
+    for(const k of keys) {
       if (typeof value === 'object' && value !== null) {
         value = (value as Record<string, unknown>)[k];
       } else {
@@ -298,10 +304,7 @@ export class I18nService {
     if (params) {
       let result = value;
       Object.entries(params).forEach(([param, val]) => {
-        result = result.replace(
-          new RegExp(`{{${param}}}`, 'g'),
-          String(val),
-        );
+        result = result.replace(new RegExp(`{{${param}}}`, 'g'), String(val));
       });
       return result;
     }

@@ -18,7 +18,9 @@ interface ImpactSummary {
 @Controller('ops/impact')
 @UseGuards(OpsGuard, OpsPermissionsGuard)
 export class ImpactController {
-  constructor(private readonly metrics: MetricsService) {}
+  constructor(private readonly metrics: MetricsService) {
+  // Intentionally empty
+}
 
   @Get()
   @Permissions(Permission.VIEW_ANALYTICS)

@@ -422,7 +422,7 @@ export class ResumeParserException extends EnhancedAppException {
   }
 
   private getRecoveryStrategies(code: ResumeParserErrorCode): string[] {
-    switch (code) {
+    switch(code) {
       case ResumeParserErrorCode.FILE_PARSE_FAILED:
         return [
           'Try alternative parser',

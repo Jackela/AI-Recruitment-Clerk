@@ -1,12 +1,16 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { of, throwError } from 'rxjs';
 import type { Action } from '@ngrx/store';
 import { ReportEffects } from './report.effects';
 import { ApiService } from '../../services/api.service';
 import * as ReportActions from './report.actions';
-import type { AnalysisReport, ReportsList, ReportListItem } from './report.model';
+import type {
+  AnalysisReport,
+  ReportsList,
+  ReportListItem,
+} from './report.model';
 
 describe('ReportEffects', () => {
   let actions$: Observable<Action>;
@@ -62,98 +66,86 @@ describe('ReportEffects', () => {
   });
 
   describe('loadReportsByJob$', () => {
-    it('should return loadReportsByJobSuccess action on successful API call', (done) => {
+    it('should return loadReportsByJobSuccess action on successful API call', async () => {
       apiService.getReportsByJobId.mockReturnValue(of(mockReportsList));
 
       actions$ = of(ReportActions.loadReportsByJob({ jobId: 'job1' }));
 
-      effects.loadReportsByJob$.subscribe((action) => {
-        expect(action).toEqual(
-          ReportActions.loadReportsByJobSuccess({
-            reportsList: mockReportsList,
-          }),
-        );
-        expect(apiService.getReportsByJobId).toHaveBeenCalledWith('job1');
-        done();
-      });
+      const action = await effects.loadReportsByJob$.toPromise();
+      expect(action).toEqual(
+        ReportActions.loadReportsByJobSuccess({
+          reportsList: mockReportsList,
+        }),
+      );
+      expect(apiService.getReportsByJobId).toHaveBeenCalledWith('job1');
     });
 
-    it('should return loadReportsByJobFailure action on API error', (done) => {
+    it('should return loadReportsByJobFailure action on API error', async () => {
       const error = new Error('Network error');
       apiService.getReportsByJobId.mockReturnValue(throwError(() => error));
 
       actions$ = of(ReportActions.loadReportsByJob({ jobId: 'job1' }));
 
-      effects.loadReportsByJob$.subscribe((action) => {
-        expect(action).toEqual(
-          ReportActions.loadReportsByJobFailure({
-            error: 'Network error',
-          }),
-        );
-        done();
-      });
+      const action = await effects.loadReportsByJob$.toPromise();
+      expect(action).toEqual(
+        ReportActions.loadReportsByJobFailure({
+          error: 'Network error',
+        }),
+      );
     });
 
-    it('should handle API error with custom message', (done) => {
+    it('should handle API error with custom message', async () => {
       const error = { message: 'Custom error message' };
       apiService.getReportsByJobId.mockReturnValue(throwError(() => error));
 
       actions$ = of(ReportActions.loadReportsByJob({ jobId: 'job1' }));
 
-      effects.loadReportsByJob$.subscribe((action) => {
-        expect(action).toEqual(
-          ReportActions.loadReportsByJobFailure({
-            error: 'Custom error message',
-          }),
-        );
-        done();
-      });
+      const action = await effects.loadReportsByJob$.toPromise();
+      expect(action).toEqual(
+        ReportActions.loadReportsByJobFailure({
+          error: 'Custom error message',
+        }),
+      );
     });
   });
 
   describe('loadReport$', () => {
-    it('should return loadReportSuccess action on successful API call', (done) => {
+    it('should return loadReportSuccess action on successful API call', async () => {
       apiService.getReportById.mockReturnValue(of(mockReport));
 
       actions$ = of(ReportActions.loadReport({ reportId: 'report1' }));
 
-      effects.loadReport$.subscribe((action) => {
-        expect(action).toEqual(
-          ReportActions.loadReportSuccess({ report: mockReport }),
-        );
-        expect(apiService.getReportById).toHaveBeenCalledWith('report1');
-        done();
-      });
+      const action = await effects.loadReport$.toPromise();
+      expect(action).toEqual(
+        ReportActions.loadReportSuccess({ report: mockReport }),
+      );
+      expect(apiService.getReportById).toHaveBeenCalledWith('report1');
     });
 
-    it('should return loadReportFailure action on API error', (done) => {
+    it('should return loadReportFailure action on API error', async () => {
       const error = new Error('Report not found');
       apiService.getReportById.mockReturnValue(throwError(() => error));
 
       actions$ = of(ReportActions.loadReport({ reportId: 'nonexistent' }));
 
-      effects.loadReport$.subscribe((action) => {
-        expect(action).toEqual(
-          ReportActions.loadReportFailure({
-            error: 'Report not found',
-          }),
-        );
-        done();
-      });
+      const action = await effects.loadReport$.toPromise();
+      expect(action).toEqual(
+        ReportActions.loadReportFailure({
+          error: 'Report not found',
+        }),
+      );
     });
   });
 
   describe('Effect Integration', () => {
-    it('should chain loadReportsByJob and loadReportsByJobSuccess effects', (done) => {
+    it('should chain loadReportsByJob and loadReportsByJobSuccess effects', async () => {
       apiService.getReportsByJobId.mockReturnValue(of(mockReportsList));
 
       actions$ = of(ReportActions.loadReportsByJob({ jobId: 'job1' }));
 
-      effects.loadReportsByJob$.subscribe((successAction) => {
-        expect(successAction.type).toBe('[Report] Load Reports By Job Success');
-        expect(apiService.getReportsByJobId).toHaveBeenCalled();
-        done();
-      });
+      const successAction = await effects.loadReportsByJob$.toPromise();
+      expect(successAction.type).toBe('[Report] Load Reports By Job Success');
+      expect(apiService.getReportsByJobId).toHaveBeenCalled();
     });
   });
 });

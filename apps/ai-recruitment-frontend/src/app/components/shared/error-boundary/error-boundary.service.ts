@@ -235,7 +235,7 @@ export class ErrorBoundaryService {
    * @returns Duration in milliseconds.
    */
   public getNotificationDuration(severity: string): number {
-    switch (severity) {
+    switch(severity) {
       case 'critical':
         return 15000;
       case 'high':

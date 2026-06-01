@@ -172,7 +172,7 @@ export class CacheService {
   public async get<T>(key: string, config?: CacheConfig): Promise<T | null> {
     const mergedConfig = { ...this.defaultConfig, ...config };
 
-    switch (mergedConfig.storage) {
+    switch(mergedConfig.storage) {
       case 'memory':
         return this.getFromMemory<T>(key);
       case 'session':
@@ -210,7 +210,7 @@ export class CacheService {
     // Apply eviction strategy if needed
     await this.applyEvictionStrategy(entry.size || 0, mergedConfig);
 
-    switch (mergedConfig.storage) {
+    switch(mergedConfig.storage) {
       case 'memory':
         this.setInMemory(entry);
         break;
@@ -240,7 +240,7 @@ export class CacheService {
   public async remove(key: string, config?: CacheConfig): Promise<void> {
     const mergedConfig = { ...this.defaultConfig, ...config };
 
-    switch (mergedConfig.storage) {
+    switch(mergedConfig.storage) {
       case 'memory':
         this.memoryCache.delete(key);
         break;
@@ -267,7 +267,7 @@ export class CacheService {
   public async clear(config?: CacheConfig): Promise<void> {
     const mergedConfig = { ...this.defaultConfig, ...config };
 
-    switch (mergedConfig.storage) {
+    switch(mergedConfig.storage) {
       case 'memory':
         this.memoryCache.clear();
         break;
@@ -452,7 +452,7 @@ export class CacheService {
       return;
     }
 
-    switch (config.strategy) {
+    switch(config.strategy) {
       case 'lru':
         await this.evictLRU(newItemSize, config);
         break;
@@ -474,7 +474,7 @@ export class CacheService {
     );
 
     let freedSize = 0;
-    for (const [key, entry] of entries) {
+    for(const [key, entry] of entries) {
       if (freedSize >= targetSize) break;
       freedSize += entry.size || 0;
       await this.remove(key, config);
@@ -490,7 +490,7 @@ export class CacheService {
     );
 
     let freedSize = 0;
-    for (const [key, entry] of entries) {
+    for(const [key, entry] of entries) {
       if (freedSize >= targetSize) break;
       freedSize += entry.size || 0;
       await this.remove(key, config);
@@ -504,7 +504,7 @@ export class CacheService {
     const entries = Array.from(this.memoryCache.entries());
 
     let freedSize = 0;
-    for (const [key, entry] of entries) {
+    for(const [key, entry] of entries) {
       if (freedSize >= targetSize) break;
       freedSize += entry.size || 0;
       await this.remove(key, config);

@@ -45,7 +45,9 @@ export class SecurityController {
   constructor(
     private readonly securityMonitorService: SecurityMonitorService,
     private readonly rateLimitService: EnhancedRateLimitMiddleware,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Retrieves security events.

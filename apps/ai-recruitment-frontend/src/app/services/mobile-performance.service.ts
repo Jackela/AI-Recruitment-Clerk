@@ -146,7 +146,7 @@ export class MobilePerformanceService {
    * Handle performance observer entries.
    */
   private handlePerformanceEntry(entry: PerformanceEntry): void {
-    switch (entry.entryType) {
+    switch(entry.entryType) {
       case 'largest-contentful-paint':
         this.updateMetric('lcp', entry.startTime);
         break;

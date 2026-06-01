@@ -1,6 +1,5 @@
-import type { OnDestroy} from '@angular/core';
-import { Injectable, inject } from '@angular/core';
-import type { Observable} from 'rxjs';
+import { Injectable, inject, type OnDestroy } from '@angular/core';
+import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { filter, takeUntil, map } from 'rxjs/operators';
 import type { Socket } from 'socket.io-client';
@@ -42,6 +41,8 @@ export interface AnalysisResult {
   score: number;
   summary: string;
   skills: string[];
+  details?: unknown;
+  reportUrl?: string;
   experience: {
     totalYears: number;
     positions: Array<{
@@ -69,6 +70,7 @@ export interface CompletionData {
  */
 export interface ErrorData {
   error: string;
+  message: string;
   code?: string;
 }
 

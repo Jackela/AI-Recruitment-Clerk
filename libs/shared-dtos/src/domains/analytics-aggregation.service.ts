@@ -26,7 +26,9 @@ export class AnalyticsAggregationService {
     private readonly repository: IAnalyticsRepository,
     private readonly eventBus: IDomainEventBus,
     private readonly auditLogger: IAuditLogger,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * 批量处理事件
@@ -51,7 +53,7 @@ export class AnalyticsAggregationService {
       const results: BatchProcessingItem[] = [];
       let successCount = 0;
 
-      for (const event of events) {
+      for(const event of events) {
         if (event.getStatus() !== EventStatus.PENDING_PROCESSING) {
           results.push({
             eventId: event.getId().getValue(),
@@ -68,7 +70,7 @@ export class AnalyticsAggregationService {
 
           // 发布领域事件
           const domainEvents = event.getUncommittedEvents();
-          for (const domainEvent of domainEvents) {
+          for(const domainEvent of domainEvents) {
             await this.eventBus.publish(domainEvent);
           }
           event.markEventsAsCommitted();

@@ -18,5 +18,7 @@ export class IncentiveApprovedEvent implements DomainEvent {
     public readonly rewardAmount: number,
     public readonly reason: string,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }

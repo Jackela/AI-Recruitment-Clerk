@@ -8,7 +8,7 @@ export class MongoTestHelper {
     if (!this.instance) {
       this.instance = await MongoMemoryServer.create({
         binary: {
-          version: '7.0.0',
+          version: '7.0.5',
         },
         instance: {
           dbName: 'test-db',

@@ -61,6 +61,7 @@ export * from './errors/error-correlation';
 export * from './errors/enhanced-error-types';
 export * from './errors/domain-errors';
 export * from './errors/error-response-formatter';
+export * from './errors/error-transformation';
 export * from './errors/structured-logging';
 export * from './errors/global-exception.filter';
 export * from './errors/error-interceptors';

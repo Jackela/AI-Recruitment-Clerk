@@ -54,7 +54,7 @@ interface InternalDtoValidationPipeOptions {
  */
 const DEFAULT_OPTIONS: InternalDtoValidationPipeOptions = {
   whitelist: true,
-  forbidNonWhitelisted: true,
+  forbidNonWhitelisted: false,
   transform: true,
   validateCustomDecorators: true,
 };
@@ -106,7 +106,7 @@ export class DtoValidationPipe implements PipeTransform<unknown> {
       return value;
     }
 
-    // Convert plain value to class instance
+    // Convert plain value to class instance for validation
     const object = plainToClass(metatype, value);
 
     // Perform validation using class-validator
@@ -127,7 +127,8 @@ export class DtoValidationPipe implements PipeTransform<unknown> {
       });
     }
 
-    return object;
+    // Return class instance if transform is enabled, otherwise return original value
+    return this.options.transform ? object : value;
   }
 
   /**

@@ -98,7 +98,9 @@ export class CollaborationService {
    * Initializes a new instance of the Collaboration Service.
    * @param cacheService - The cache service.
    */
-  constructor(private readonly cacheService: CacheService) {}
+  constructor(private readonly cacheService: CacheService) {
+  // Intentionally empty
+}
 
   /**
    * Create or join a collaboration room
@@ -233,7 +235,7 @@ export class CollaborationService {
 
     const resolved: EditConflict[] = [];
 
-    for (const conflict of conflicts) {
+    for(const conflict of conflicts) {
       // Simple last-write-wins resolution strategy
       conflict.resolution = 'accept';
       resolved.push(conflict);
@@ -316,7 +318,7 @@ export class CollaborationService {
       }
     }
 
-    for (const roomId of roomsToDelete) {
+    for(const roomId of roomsToDelete) {
       this.logger.log(`Cleaning up inactive room: ${roomId}`);
       this.rooms.delete(roomId);
       await this.cacheService.del(`collaboration:room:${roomId}`);

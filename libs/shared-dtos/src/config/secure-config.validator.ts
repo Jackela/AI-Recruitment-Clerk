@@ -132,7 +132,7 @@ export class SecureConfigValidator {
       // In production, all services must have proper API keys
       const criticalVars = ['GEMINI_API_KEY', 'MONGO_URL', 'JWT_SECRET'];
 
-      for (const varName of criticalVars) {
+      for(const varName of criticalVars) {
         const value = process.env[varName];
         if (!value) {
           errors.push(

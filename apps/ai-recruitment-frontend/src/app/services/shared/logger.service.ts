@@ -176,7 +176,7 @@ export class LoggerService {
     const contextStr = entry.context ? ` [${entry.context}]` : '';
     const fullMessage = `${prefix}${contextStr} ${entry.message}`;
 
-    switch (entry.level) {
+    switch(entry.level) {
       case LogLevel.DEBUG:
         console.debug(fullMessage, entry.data);
         break;
@@ -200,13 +200,41 @@ export class LoggerService {
    * Send error logs to remote logging service
    */
   private sendToRemoteLogging(entry: LogEntry): void {
-    // TODO: Implement remote logging integration
-    // This could send to services like Sentry, LogRocket, or custom backend
     try {
-      if (entry.level >= LogLevel.ERROR) {
-        // Example: Send to analytics or error tracking service
-        // analytics.track('error_logged', { message: entry.message, context: entry.context });
+      const remoteLogging = environment.remoteLogging;
+      if (!remoteLogging?.enabled || !remoteLogging.endpoint) {
+        return;
       }
+
+      const payload = JSON.stringify({
+        level: LogLevel[entry.level],
+        message: entry.message,
+        context: entry.context,
+        data: entry.data,
+        timestamp: entry.timestamp.toISOString(),
+        error: entry.error
+          ? {
+              name: entry.error.name,
+              message: entry.error.message,
+              stack: entry.error.stack,
+            }
+          : undefined,
+      });
+
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(
+          remoteLogging.endpoint,
+          new Blob([payload], { type: 'application/json' }),
+        );
+        return;
+      }
+
+      void fetch(remoteLogging.endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: payload,
+        keepalive: true,
+      });
     } catch (_err) {
       // Silently fail to avoid logging loops
     }

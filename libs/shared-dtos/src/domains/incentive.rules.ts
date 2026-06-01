@@ -77,7 +77,7 @@ export class IncentiveRules {
     }
 
     // 根据触发类型验证特定条件
-    switch (triggerType) {
+    switch(triggerType) {
       case TriggerType.QUESTIONNAIRE_COMPLETION: {
         const data = triggerData as QuestionnaireTriggerRulesData;
         if (!data.questionnaireId) {
@@ -132,7 +132,7 @@ export class IncentiveRules {
     triggerType: TriggerType,
     triggerData: TriggerRulesData,
   ): number {
-    switch (triggerType) {
+    switch(triggerType) {
       case TriggerType.QUESTIONNAIRE_COMPLETION:
         return this.calculateQuestionnaireReward((triggerData as QuestionnaireTriggerRulesData).qualityScore);
 
@@ -212,7 +212,7 @@ export class IncentiveRules {
   ): PaymentMethodValidationResult {
     const errors: string[] = [];
 
-    switch (paymentMethod) {
+    switch(paymentMethod) {
       case PaymentMethod.WECHAT_PAY:
         if (!contactInfo.wechat) {
           errors.push('WeChat ID is required for WeChat Pay');
@@ -403,7 +403,7 @@ export class IncentiveRules {
     }
 
     let validCount = 0;
-    for (const incentive of incentives) {
+    for(const incentive of incentives) {
       const eligibility = this.canPayIncentive(incentive);
       if (eligibility.isEligible) {
         validCount++;
@@ -496,7 +496,9 @@ export class IncentiveEligibilityResult {
     public readonly isEligible: boolean,
     public readonly errors: string[],
     public readonly expectedReward: number,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -513,7 +515,9 @@ export class PaymentEligibilityResult {
     public readonly isEligible: boolean,
     public readonly errors: string[],
     public readonly approvedAmount: number,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -530,7 +534,9 @@ export class PaymentMethodValidationResult {
     public readonly isValid: boolean,
     public readonly errors: string[],
     public readonly paymentMethod: PaymentMethod,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -547,7 +553,9 @@ export class IncentivePriority {
     public readonly score: number,
     public readonly level: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT',
     public readonly factors: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -570,7 +578,9 @@ export class IncentiveRiskAssessment {
     public readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
     public readonly riskFactors: string[],
     public readonly recommendedActions: string[],
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 /**
@@ -591,7 +601,9 @@ export class BatchPaymentValidationResult {
     public readonly warnings: string[],
     public readonly validIncentiveCount: number,
     public readonly totalAmount: number,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }
 
 // 接口定义

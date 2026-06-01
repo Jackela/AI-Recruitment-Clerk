@@ -38,7 +38,9 @@ export class MarketingAdminController {
    * Initializes a new instance of the Marketing Admin Controller.
    * @param feedbackCodeService - The feedback code service.
    */
-  constructor(private readonly feedbackCodeService: FeedbackCodeService) {}
+  constructor(private readonly feedbackCodeService: FeedbackCodeService) {
+  // Intentionally empty
+}
 
   /**
    * Retrieves dashboard stats.

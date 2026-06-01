@@ -43,7 +43,9 @@ import {
 export class UsageLimitAnalyticsController {
   constructor(
     private readonly usageLimitService: UsageLimitIntegrationService,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Retrieves usage statistics.

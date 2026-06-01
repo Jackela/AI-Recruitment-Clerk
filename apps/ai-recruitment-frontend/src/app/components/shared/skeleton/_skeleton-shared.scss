@@ -1,0 +1,60 @@
+/**
+ * Skeleton Component Library - Shared Styles
+ * 
+ * This file provides base CSS custom properties for skeleton components.
+ * Import this file in your global styles to customize skeleton appearance.
+ * 
+ * Usage:
+ *   @import 'path/to/skeleton-shared';
+ */
+
+// CSS Custom Properties
+:root {
+  // Light mode (default)
+  --skeleton-bg: var(--color-neutral-200);
+  --skeleton-shimmer: var(--color-neutral-100);
+  --skeleton-radius: var(--radius-sm, 4px);
+  --skeleton-animation-duration: 1.5s;
+}
+
+// Dark mode support
+[data-theme='dark'] {
+  --skeleton-bg: var(--color-neutral-700);
+  --skeleton-shimmer: var(--color-neutral-600);
+}
+
+// Base skeleton class (for reference, each component implements this internally)
+.skeleton-base {
+  background: var(--skeleton-bg);
+  border-radius: var(--skeleton-radius);
+
+  &.shimmer {
+    background: linear-gradient(
+      90deg,
+      var(--skeleton-bg) 25%,
+      var(--skeleton-shimmer) 50%,
+      var(--skeleton-bg) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer var(--skeleton-animation-duration) infinite;
+  }
+}
+
+// Shared shimmer animation
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+// Accessibility: Respect reduced motion preference
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-base.shimmer,
+  [class*='shimmer'] {
+    animation: none;
+    background: var(--skeleton-bg);
+  }
+}

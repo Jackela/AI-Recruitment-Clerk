@@ -81,7 +81,7 @@ export class TimesheetExportUtil {
     const keys = key.split('.');
     let value: unknown = entry;
 
-    for (const k of keys) {
+    for(const k of keys) {
       value = (value as Record<string, unknown>)?.[k];
     }
 

@@ -1,0 +1,12 @@
+{
+  "name": "AI Recruitment Clerk - Agent Browser Testing",
+  "baseUrl": "http://localhost:4200",
+  "defaultTimeout": 30000,
+  "headed": false,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "screenshotDir": "./agent-browser-screenshots",
+  "testResultsDir": "./agent-browser-results"
+}

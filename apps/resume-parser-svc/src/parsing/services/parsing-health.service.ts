@@ -21,7 +21,9 @@ export class ParsingHealthService {
   constructor(
     private readonly natsService: ResumeParserNatsService,
     private readonly retryService: ParsingRetryService,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs a health check of the parsing service.

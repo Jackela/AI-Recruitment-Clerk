@@ -201,7 +201,7 @@ export class NatsConnectionManager implements OnModuleDestroy {
 
     try {
       for await (const status of this.connection.status()) {
-        switch (status.type) {
+        switch(status.type) {
           case 'disconnect':
             this.logger.warn(
               `🟡 NATS disconnected from server: ${status.data}`,

@@ -45,10 +45,13 @@ export interface ResumeAnalysisResponse {
     analysisId: string;
     filename: string;
     uploadedAt: string;
-    estimatedCompletionTime: string;
+    estimatedCompletionTime?: string;
+    status?: 'queued' | 'processing' | 'completed' | 'failed' | 'expired';
     isGuestMode: boolean;
     fileSize: number;
     remainingUsage?: number;
+    results?: unknown;
+    completedAt?: string;
   };
 }
 
@@ -122,7 +125,7 @@ export interface AnalysisResultsResponse {
   success: boolean;
   data: {
     analysisId: string;
-    status: 'processing' | 'completed' | 'failed';
+    status: 'queued' | 'processing' | 'completed' | 'failed' | 'expired';
     progress: number;
     results?: {
       personalInfo: PersonalInfo;

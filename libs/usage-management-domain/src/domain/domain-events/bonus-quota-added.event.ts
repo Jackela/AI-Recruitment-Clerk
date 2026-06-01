@@ -21,5 +21,7 @@ export class BonusQuotaAddedEvent implements DomainEvent {
     public readonly bonusAmount: number,
     public readonly newTotalQuota: number,
     public readonly occurredAt: Date,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 }

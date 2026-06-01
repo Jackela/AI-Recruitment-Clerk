@@ -6,7 +6,13 @@ import { AppModule } from '../../src/app/app.module';
 import { JwtService } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
-import { getConnection } from 'mongoose';
+import mongoose from 'mongoose';
+import { AppGatewayNatsService } from '../../src/nats/app-gateway-nats.service';
+import { createMockAppGatewayNatsService } from '../utils/mock-nats';
+
+// Set extended timeout for integration tests - these tests make real HTTP requests
+// and need more time to complete, especially in CI environments
+jest.setTimeout(120000);
 
 /**
  * 📋 COMPREHENSIVE API INTEGRATION TEST SUITE
@@ -22,7 +28,7 @@ import { getConnection } from 'mongoose';
 
 describe('🚀 Comprehensive API Integration Tests', () => {
   let app: INestApplication;
-  let _jwtService: JwtService;
+  let jwtService: JwtService;
   let adminToken: string;
   let userToken: string;
   let hrManagerToken: string;
@@ -59,6 +65,8 @@ describe('🚀 Comprehensive API Integration Tests', () => {
   };
 
   beforeAll(async () => {
+    const mockNatsService = createMockAppGatewayNatsService();
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
@@ -71,7 +79,10 @@ describe('🚀 Comprehensive API Integration Tests', () => {
         ),
         AppModule,
       ],
-    }).compile();
+    })
+      .overrideProvider(AppGatewayNatsService)
+      .useValue(mockNatsService)
+      .compile();
 
     app = moduleFixture.createNestApplication();
     jwtService = moduleFixture.get<JwtService>(JwtService);
@@ -84,7 +95,7 @@ describe('🚀 Comprehensive API Integration Tests', () => {
     await cleanupIntegrationTestData();
     await app.close();
     // Explicitly close Mongoose connection to prevent open-handle warnings
-    const connection = getConnection('ai-recruitment-integration-test');
+    const connection = mongoose.connection;
     if (connection?.readyState === 1) {
       await connection.close();
     }
@@ -540,8 +551,8 @@ describe('🚀 Comprehensive API Integration Tests', () => {
   });
 
   describe('📈 Analytics and Reporting Integration', () => {
-    let _testEventId: string;
-    let _testMetricId: string;
+    let testEventId: string;
+    let testMetricId: string;
 
     it('should track events across complete user workflow', async () => {
       // Track user registration event

@@ -26,7 +26,9 @@ export class JdEventsController implements OnModuleInit {
   constructor(
     private readonly natsService: JdExtractorNatsService,
     private readonly llmService: LlmService,
-  ) {}
+  ) {
+  // Intentionally empty
+}
 
   /**
    * Performs the on module init operation.

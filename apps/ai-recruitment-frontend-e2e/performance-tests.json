@@ -1,0 +1,14 @@
+{
+  "name": "performance-tests",
+  "version": "1.0.0",
+  "description": "E2E Performance Testing Suite",
+  "scripts": {
+    "test:performance": "playwright test src/performance/ --project=chromium",
+    "test:performance:headed": "playwright test src/performance/ --project=chromium --headed",
+    "test:performance:page-load": "playwright test src/performance/page-load.spec.ts --project=chromium",
+    "test:performance:critical-path": "playwright test src/performance/critical-path.spec.ts --project=chromium",
+    "test:performance:file-upload": "playwright test src/performance/file-upload.spec.ts --project=chromium",
+    "test:performance:analysis": "playwright test src/performance/analysis.spec.ts --project=chromium",
+    "test:performance:report": "playwright test src/performance/ --project=chromium --reporter=html"
+  }
+}
