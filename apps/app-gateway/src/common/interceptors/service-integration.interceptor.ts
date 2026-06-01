@@ -27,6 +27,7 @@ export interface ServiceIntegrationOptions {
   cacheTTL?: number;
   requiredServices?: string[];
   validateServices?: boolean;
+  serviceHealthChecks?: Record<string, () => boolean | Promise<boolean>>;
   circuitBreaker?: {
     threshold?: number;
     timeout?: number;
@@ -72,8 +73,8 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
     next: CallHandler,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<Observable<any>> {
-    const timeoutMs = this.options.timeout || 30000; // 30 seconds default
-    const maxRetries = this.options.retries || 3;
+    const timeoutMs = this.options.timeout ?? 30000; // 30 seconds default
+    const maxRetries = this.options.retries ?? 3;
 
     // Check if context has switchToHttp method (for HTTP requests)
     if (!context.switchToHttp) {
@@ -187,8 +188,24 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
    * @param services - The services.
    */
   private async validateRequiredServices(services: string[]): Promise<void> {
-    // Implementation would check service health
     this.logger.debug(`Validating services: ${services.join(', ')}`);
+
+    const unavailableServices: string[] = [];
+
+    for (const service of services) {
+      const healthCheck = this.options.serviceHealthChecks?.[service];
+      const isAvailable = healthCheck ? await healthCheck() : true;
+
+      if (!isAvailable) {
+        unavailableServices.push(service);
+      }
+    }
+
+    if (unavailableServices.length > 0) {
+      throw new ServiceUnavailableException(
+        `Required services unavailable: ${unavailableServices.join(', ')}`,
+      );
+    }
   }
 
   /**
@@ -247,16 +264,22 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
 
   /**
    * Handles the fallback.
-   * @param _operationId - The operation id.
+   * @param operationId - The operation id.
    * @param error - The error.
    * @returns The fallback result.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private handleFallback(
-    _operationId: string,
+    operationId: string,
     error: Error,
-  ): Observable<never> {
-    // Implement fallback logic here
-    return throwError(() => error);
+  ): Observable<{ fallback: true; operationId: string; error: string }> {
+    this.logger.warn(`Using fallback response for ${operationId}`, {
+      error: error.message,
+    });
+
+    return of({
+      fallback: true,
+      operationId,
+      error: error.message,
+    });
   }
 }

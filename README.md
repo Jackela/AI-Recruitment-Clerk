@@ -639,6 +639,23 @@ npx jest --testPathPatterns="edge-cases" --coverage
 
 See [EDGE_CASE_TESTING.md](./EDGE_CASE_TESTING.md) for complete documentation.
 
+### Run Error Handling Tests
+
+Error handling coverage includes Nest interceptors, guards, service integration recovery, structured logging, error transformation, and frontend HTTP error handling:
+
+```bash
+# Generate the documented aggregate coverage report
+npm run test:coverage
+
+# Run focused backend error handling specs
+npx jest --config libs/shared-dtos/jest.config.js --runInBand --runTestsByPath libs/shared-dtos/src/errors/error-interceptors.correlation.spec.ts libs/shared-dtos/src/errors/error-interceptors.logging.spec.ts libs/shared-dtos/src/errors/error-interceptors.performance.spec.ts libs/shared-dtos/src/errors/error-interceptors.recovery.spec.ts libs/shared-dtos/src/interceptors/global-error.interceptor.spec.ts libs/shared-dtos/src/errors/error-transformation.spec.ts
+
+# Run focused frontend HTTP error handling specs
+npx jest --config apps/ai-recruitment-frontend/jest.config.ts --runInBand --runTestsByPath apps/ai-recruitment-frontend/src/app/interceptors/http-error.interceptor.errors.spec.ts
+```
+
+See [TESTING.md](./TESTING.md) for error handling test patterns, shared utilities, and coverage report locations.
+
 ### Service URLs (After Deployment)
 
 - **Frontend Application**: http://localhost:4200
@@ -666,4 +683,4 @@ See [EDGE_CASE_TESTING.md](./EDGE_CASE_TESTING.md) for complete documentation.
 - ✅ **Ready for User Acceptance Testing (UAT)**
 
 > 💡 The system can now be deployed with a single command and provides a complete, functional AI recruitment platform ready for production use.
-// Force fresh CodeQL analysis
+> // Force fresh CodeQL analysis
