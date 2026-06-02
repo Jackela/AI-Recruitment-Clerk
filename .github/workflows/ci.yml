@@ -151,7 +151,7 @@ jobs:
             echo "::warning::Test shard ${{ matrix.shard }} took ${duration}s (>10min)"
           fi
       - name: Upload coverage artifact
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: coverage-shard-${{ matrix.shard }}
           path: coverage/
@@ -261,7 +261,7 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: 📤 Upload Duration Metrics
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-metrics-${{ github.run_id }}
           path: ci-metrics/
@@ -325,7 +325,7 @@ jobs:
           E2E_SKIP_WEBSERVER: true
       - name: Upload Playwright report
         if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: playwright-report-shard-${{ matrix.shard }}
           path: |
