@@ -46,9 +46,9 @@
 
 ## Active Technologies
 
-- TypeScript (Node.js 20.x) + Nx build system, NestJS backend services, Angular frontend, Jest, Playwright, npm audit tooling (001-harden-deps)
+- TypeScript (Node.js 22.x) + Nx build system, NestJS backend services, Angular frontend, Jest, Playwright, npm audit tooling (001-harden-deps)
 - Existing service data stores (MongoDB/PostgreSQL) unchanged; no new storage required (001-harden-deps)
 
 ## Recent Changes
 
-- 001-harden-deps: Added TypeScript (Node.js 20.x) + Nx build system, NestJS backend services, Angular frontend, Jest, Playwright, npm audit tooling
+- 001-harden-deps: Added TypeScript (Node.js 22.x) + Nx build system, NestJS backend services, Angular frontend, Jest, Playwright, npm audit tooling

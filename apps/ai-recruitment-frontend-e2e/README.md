@@ -8,7 +8,7 @@ This directory contains Playwright end-to-end tests for the AI Recruitment Clerk
 
 ### Prerequisites
 
-1. **Node.js**: Version 20.18.0 or higher
+1. **Node.js**: Version 22.x (`>=22.0.0 <23.0.0`; use `.nvmrc`)
 2. **npm**: Version 10.0.0 or higher
 3. **Playwright Browsers**: Install via `npx playwright install --with-deps`
 
@@ -54,14 +54,14 @@ npx playwright test --debug
 
 ### Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PLAYWRIGHT_BASE_URL` | Base URL for the application | `http://localhost:4200` |
-| `DEV_SERVER_PORT` | Port for the dev/static server | `4200` |
-| `E2E_SKIP_WEBSERVER` | Skip Playwright webServer startup | `false` |
-| `E2E_USE_REAL_API` | Use real API instead of mock server | `false` |
-| `E2E_ENABLE_FIREFOX` | Enable Firefox test project | `false` |
-| `CI` | CI mode flag (auto-set in GitHub Actions) | `false` |
+| Variable              | Description                               | Default                 |
+| --------------------- | ----------------------------------------- | ----------------------- |
+| `PLAYWRIGHT_BASE_URL` | Base URL for the application              | `http://localhost:4200` |
+| `DEV_SERVER_PORT`     | Port for the dev/static server            | `4200`                  |
+| `E2E_SKIP_WEBSERVER`  | Skip Playwright webServer startup         | `false`                 |
+| `E2E_USE_REAL_API`    | Use real API instead of mock server       | `false`                 |
+| `E2E_ENABLE_FIREFOX`  | Enable Firefox test project               | `false`                 |
+| `CI`                  | CI mode flag (auto-set in GitHub Actions) | `false`                 |
 
 ### Mock Server
 
@@ -96,6 +96,7 @@ npx playwright show-report
 ### Debug Failed Tests
 
 Failed tests generate:
+
 - Screenshots (in `test-results/`)
 - Videos (in `test-results/`)
 - Traces (if configured)
@@ -111,6 +112,7 @@ Failed tests generate:
 The E2E tests run in GitHub Actions as part of the `e2e_smoke` job in `.github/workflows/ci.yml`.
 
 Timeout settings:
+
 - Job timeout: 40 minutes
 - Dev server startup: 60 seconds (static), 300 seconds (dev)
 - Individual test: 30 seconds

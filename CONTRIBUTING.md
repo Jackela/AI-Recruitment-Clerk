@@ -23,7 +23,7 @@ This project and everyone participating in it is governed by our [Code of Conduc
 
 ### Prerequisites
 
-- Node.js 20.18.0 or higher
+- Node.js 22.x (`>=22.0.0 <23.0.0`; use `.nvmrc`)
 - npm 10.0.0 or higher
 - Git
 - Docker Desktop (for containerized development)
@@ -33,6 +33,7 @@ This project and everyone participating in it is governed by our [Code of Conduc
 ### Development Setup
 
 1. **Fork the repository**
+
    ```bash
    # Click "Fork" on GitHub, then clone your fork
    git clone https://github.com/YOUR_USERNAME/AI-Recruitment-Clerk.git
@@ -40,16 +41,19 @@ This project and everyone participating in it is governed by our [Code of Conduc
    ```
 
 2. **Add upstream remote**
+
    ```bash
    git remote add upstream https://github.com/ORIGINAL_OWNER/AI-Recruitment-Clerk.git
    ```
 
 3. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 4. **Set up environment variables**
+
    ```bash
    cp .env.example .env
    # Edit .env with your configuration
@@ -117,6 +121,7 @@ Dependabot creates grouped pull requests to reduce review noise:
    - Review affected services and libraries
 
 2. **Run local verification**
+
    ```bash
    # Pull the branch locally
    git fetch origin
@@ -154,6 +159,7 @@ Currently, **no auto-merge** is enabled. All Dependabot PRs require manual revie
 #### Troubleshooting
 
 **Dependabot PR fails CI:**
+
 ```bash
 # Check for breaking changes
 npm ls <package-name>
@@ -163,6 +169,7 @@ npm install <package-name>@<previous-version>
 ```
 
 **Conflict with local changes:**
+
 ```bash
 # Rebase Dependabot branch
 git checkout chore/deps-XXX
@@ -170,6 +177,7 @@ git rebase main
 ```
 
 **Too many PRs open:**
+
 - Adjust `open-pull-requests-limit` in `.github/dependabot.yml`
 - Review and merge existing PRs to free up slots
 
@@ -300,7 +308,7 @@ describe('AuthService', () => {
       findByEmail: jest.fn(),
       save: jest.fn(),
     } as any;
-    
+
     service = new AuthService(mockUserRepository);
   });
 
@@ -315,7 +323,9 @@ describe('AuthService', () => {
 
     // Assert
     expect(result).toEqual(mockUser);
-    expect(mockUserRepository.findByEmail).toHaveBeenCalledWith(credentials.email);
+    expect(mockUserRepository.findByEmail).toHaveBeenCalledWith(
+      credentials.email,
+    );
   });
 });
 ```
@@ -327,7 +337,7 @@ This repo supports validating GitHub Actions locally with `act`.
 - Prerequisites:
   - Docker Desktop running
   - act >= 0.2.80 (`act --version`)
-  - Node >= 20.18 (matches repo engines)
+  - Node >= 22.0 and < 23.0 (matches repo engines)
 
 - Environment quirk:
   - Workflows check `env.ACT`. When set (act sets it automatically), steps that rely on GitHub-hosted services are skipped to avoid errors locally (e.g., artifact upload, CodeQL SARIF upload).
@@ -435,12 +445,14 @@ Closes #123"
 ### Before Submitting
 
 1. **Update your branch**
+
    ```bash
    git fetch upstream
    git rebase upstream/develop
    ```
 
 2. **Run quality checks**
+
    ```bash
    npm run lint          # Linting check
    npm run typecheck     # TypeScript compilation
@@ -448,7 +460,7 @@ Closes #123"
    npm run test:coverage # Generate coverage report
    npm run build         # Build project
    ```
-   
+
    **CI/CD Checks**: All pull requests automatically run:
    - ✅ Quality check (TypeScript + Lint + Security audit)
    - 🧪 Build & Test (Full test suite)
@@ -464,6 +476,7 @@ Closes #123"
 ### Submitting PR
 
 1. **Push to your fork**
+
    ```bash
    git push origin feature/your-feature-name
    ```
@@ -492,7 +505,7 @@ Closes #123"
    - ✅ **Quality Check**: TypeScript compilation + Lint + Security audit
    - 🧪 **Build & Test**: Full test suite execution
    - 📊 **Coverage Report**: Minimum 70% line coverage (target: 90% for new code)
-   - 🔒 **Security Scan**: 
+   - 🔒 **Security Scan**:
      - CodeQL analysis (JavaScript/TypeScript)
      - Dependency vulnerability scan
      - Secret scanning (TruffleHog + GitLeaks)
@@ -529,6 +542,7 @@ A clear and concise description of the bug.
 
 **To Reproduce**
 Steps to reproduce the behavior:
+
 1. Go to '...'
 2. Click on '...'
 3. See error
@@ -543,8 +557,9 @@ What actually happened.
 If applicable, add screenshots.
 
 **Environment:**
+
 - OS: [e.g., macOS 14.0]
-- Node.js: [e.g., 20.18.0]
+- Node.js: [e.g., 22.22.0]
 - npm: [e.g., 10.0.0]
 - Browser: [e.g., Chrome 120]
 
@@ -570,6 +585,7 @@ Alternative solutions or features considered.
 Any other context or screenshots.
 
 **Acceptance Criteria**
+
 - [ ] Criterion 1
 - [ ] Criterion 2
 ```
@@ -602,6 +618,7 @@ Any other context or screenshots.
 ## 🏆 Recognition
 
 Contributors will be recognized in:
+
 - README.md contributors section
 - CHANGELOG.md for significant contributions
 - GitHub Insights and contribution graphs
@@ -620,6 +637,7 @@ Contributors will be recognized in:
 All pull requests and pushes trigger automated workflows:
 
 #### 1. Quality Check (`.github/workflows/ci.yml`)
+
 - **Triggers**: Push/PR to main/develop
 - **Jobs**:
   - TypeScript compilation check
@@ -630,6 +648,7 @@ All pull requests and pushes trigger automated workflows:
 - **Timeout**: 15 minutes
 
 #### 2. Test Coverage (`.github/workflows/coverage.yml`)
+
 - **Triggers**: Push/PR to main/develop
 - **Jobs**:
   - Generate coverage report
@@ -639,6 +658,7 @@ All pull requests and pushes trigger automated workflows:
 - **Artifacts**: Coverage reports (14 days retention)
 
 #### 3. Security Scan (`.github/workflows/security.yml`)
+
 - **Triggers**: Push/PR to main/develop + Weekly schedule (Monday 9 AM UTC)
 - **Jobs**:
   - CodeQL analysis (JavaScript + TypeScript)
@@ -648,6 +668,7 @@ All pull requests and pushes trigger automated workflows:
 - **Artifacts**: Audit reports (30 days retention)
 
 #### 4. Semantic Release (`.github/workflows/release.yml`)
+
 - **Triggers**: Push to main/develop only (not PRs)
 - **Actions**:
   - Analyze conventional commits
@@ -661,6 +682,7 @@ All pull requests and pushes trigger automated workflows:
 ### Workflow Status Badges
 
 Add to your PR description to show CI status:
+
 ```markdown
 ![CI](https://github.com/Jackela/AI-Recruitment-Clerk/workflows/CI/badge.svg)
 ![Coverage](https://github.com/Jackela/AI-Recruitment-Clerk/workflows/Coverage/badge.svg)
@@ -670,22 +692,26 @@ Add to your PR description to show CI status:
 ### Troubleshooting CI Failures
 
 **TypeScript Errors**:
+
 ```bash
 npx tsc --noEmit --project tsconfig.ci.json
 ```
 
 **Test Failures**:
+
 ```bash
 npm test -- --verbose
 npm run test:coverage
 ```
 
 **Lint Issues**:
+
 ```bash
 npm run lint -- --fix
 ```
 
 **Security Vulnerabilities**:
+
 ```bash
 npm audit fix
 npm audit fix --force  # For breaking changes

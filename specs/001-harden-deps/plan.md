@@ -9,7 +9,7 @@ Eliminate all high- and moderate-severity dependency vulnerabilities across the 
 
 ## Technical Context
 
-**Language/Version**: TypeScript (Node.js 20.x)  
+**Language/Version**: TypeScript (Node.js 22.x)
 **Primary Dependencies**: Nx build system, NestJS backend services, Angular frontend, Jest, Playwright, npm audit tooling  
 **Storage**: Existing service data stores (MongoDB/PostgreSQL) unchanged; no new storage required  
 **Testing**: Nx-managed Jest unit/integration suites, contract validation workflows, Playwright E2E, dependency-scan CI jobs  
@@ -21,7 +21,7 @@ Eliminate all high- and moderate-severity dependency vulnerabilities across the 
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+_GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 
 - Gate 1 – Constitution Definition: Project constitution file currently contains placeholders and no enforceable principles. PASS with note: document true principles in a future governance update.
 - Post-Phase-1 Review: Design artifacts introduce no new constitution considerations; gate status remains PASS.
