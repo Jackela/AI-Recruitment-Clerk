@@ -5,6 +5,12 @@ All notable changes to the AI Recruitment Clerk project will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.5](https://github.com/Jackela/AI-Recruitment-Clerk/compare/v2.0.4...v2.0.5) (2026-06-04)
+
+### 🐛 Bug Fixes
+
+* **app-gateway:** preserve runtime DI tokens ([#91](https://github.com/Jackela/AI-Recruitment-Clerk/issues/91)) ([e609b9b](https://github.com/Jackela/AI-Recruitment-Clerk/commit/e609b9b6be56f75e1436f22688cffdfc44c13d92))
+
 ## [2.0.4](https://github.com/Jackela/AI-Recruitment-Clerk/compare/v2.0.3...v2.0.4) (2026-06-04)
 
 ### 🐛 Bug Fixes
