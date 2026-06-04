@@ -9,7 +9,6 @@ import { test, expect } from './fixtures';
 test.describe('Simple Firefox Test', () => {
   // Skip all tests in this suite for non-Firefox browsers
   test.beforeEach(async ({ browserName }) => {
-    // eslint-disable-next-line playwright/no-skipped-test
     test.skip(browserName !== 'firefox', 'This test suite is Firefox-specific');
   });
 
