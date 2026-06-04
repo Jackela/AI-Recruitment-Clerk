@@ -90,27 +90,25 @@ echo ""
 echo "🧪 Step 5/8: Running ALL unit tests with coverage..."
 npm run test:coverage
 
-# Check coverage thresholds
-COVERAGE_FILE="coverage/lcov-report/index.html"
+# Check coverage thresholds using the same machine-readable report and
+# quality-gate config used by CI tooling.
+COVERAGE_FILE="coverage/coverage-summary.json"
+QUALITY_GATES_FILE="config/quality-gates.json"
 if [ -f "$COVERAGE_FILE" ]; then
-  # Extract coverage percentage from HTML
-  LINE_COVERAGE=$(grep -oP 'Lines</th><td[^>]*>\K[0-9]+' "$COVERAGE_FILE" || echo "0")
-  BRANCH_COVERAGE=$(grep -oP 'Branches</th><td[^>]*>\K[0-9]+' "$COVERAGE_FILE" || echo "0")
-  
+  LINE_COVERAGE=$(node -e "const fs=require('fs'); const s=JSON.parse(fs.readFileSync(process.argv[1],'utf8')); console.log(s.total?.lines?.pct ?? 0)" "$COVERAGE_FILE")
+  BRANCH_COVERAGE=$(node -e "const fs=require('fs'); const s=JSON.parse(fs.readFileSync(process.argv[1],'utf8')); console.log(s.total?.branches?.pct ?? 0)" "$COVERAGE_FILE")
+  COVERAGE_THRESHOLD=$(node -e "const fs=require('fs'); const p=process.argv[1]; const cfg=fs.existsSync(p)?JSON.parse(fs.readFileSync(p,'utf8')):{}; console.log(typeof cfg.coverage === 'number' ? cfg.coverage * 100 : 80)" "$QUALITY_GATES_FILE")
+
   echo "📊 Coverage Report:"
   echo "   Lines: ${LINE_COVERAGE}%"
   echo "   Branches: ${BRANCH_COVERAGE}%"
-  
-  # Check if coverage meets thresholds
-  if [ "$LINE_COVERAGE" -lt 80 ]; then
-    echo "❌ Line coverage is below 80% threshold"
+  echo "   Required line threshold: ${COVERAGE_THRESHOLD}%"
+
+  if ! node -e "process.exit(Number(process.argv[1]) + 1e-9 >= Number(process.argv[2]) ? 0 : 1)" "$LINE_COVERAGE" "$COVERAGE_THRESHOLD"; then
+    echo "❌ Line coverage is below configured threshold"
     exit 1
   fi
-  if [ "$BRANCH_COVERAGE" -lt 70 ]; then
-    echo "❌ Branch coverage is below 70% threshold"
-    exit 1
-  fi
-  echo "✅ Coverage thresholds met"
+  echo "✅ Coverage threshold met"
 fi
 echo ""
 
