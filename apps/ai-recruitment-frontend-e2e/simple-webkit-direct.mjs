@@ -93,9 +93,21 @@ async function testWebKitDirect() {
     return false;
   } finally {
     // Cleanup
-    if (page) await page.close().catch(() => {});
-    if (context) await context.close().catch(() => {});
-    if (browser) await browser.close().catch(() => {});
+    if (page) {
+      await page.close().catch((error) =>
+        console.warn('Page cleanup failed:', error.message),
+      );
+    }
+    if (context) {
+      await context.close().catch((error) =>
+        console.warn('Context cleanup failed:', error.message),
+      );
+    }
+    if (browser) {
+      await browser.close().catch((error) =>
+        console.warn('Browser cleanup failed:', error.message),
+      );
+    }
   }
 }
 

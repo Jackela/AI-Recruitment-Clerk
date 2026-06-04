@@ -14,7 +14,6 @@ function delay(ms: number): Promise<void> {
 test.describe('Firefox Stability Validation', () => {
   // Skip all tests in this describe block for non-Firefox browsers
   test.beforeEach(({ browserName }) => {
-    // eslint-disable-next-line playwright/no-skipped-test
     test.skip(browserName !== 'firefox', 'This test suite is Firefox-specific');
   });
 
