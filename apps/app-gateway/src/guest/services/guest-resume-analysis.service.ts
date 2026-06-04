@@ -1,9 +1,9 @@
 import type { OnModuleInit } from '@nestjs/common';
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import type { Model } from 'mongoose';
 import type { ResumeDTO } from '@ai-recruitment-clerk/resume-dto';
-import type { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
+import { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
 import type { RequestWithDeviceId } from '../guards/guest.guard';
 import type {
   GuestResumeAnalysisDocument,
@@ -129,6 +129,7 @@ export class GuestResumeAnalysisService implements OnModuleInit {
   constructor(
     @InjectModel(GuestResumeAnalysis.name)
     private readonly analysisModel: Model<GuestResumeAnalysisDocument>,
+    @Inject(AppGatewayNatsService)
     private readonly natsClient: AppGatewayNatsService,
   ) {}
 
@@ -168,7 +169,9 @@ export class GuestResumeAnalysisService implements OnModuleInit {
   }
 
   public async markCompleted(event: ParsedResumeEvent): Promise<void> {
-    const completedAt = event.timestamp ? new Date(event.timestamp) : new Date();
+    const completedAt = event.timestamp
+      ? new Date(event.timestamp)
+      : new Date();
     await this.analysisModel.updateOne(
       { analysisId: event.resumeId },
       {
@@ -258,8 +261,11 @@ export class GuestResumeAnalysisService implements OnModuleInit {
       candidateEmail:
         record.candidateEmail || resume.contactInfo?.email || 'not-provided',
       targetPosition: record.notes || 'General role fit',
-      analysisTime:
-        (record.completedAt ?? record.uploadedAt ?? new Date()).toISOString(),
+      analysisTime: (
+        record.completedAt ??
+        record.uploadedAt ??
+        new Date()
+      ).toISOString(),
       score: this.calculateOverallScore(resume),
       summary,
       keySkills,
@@ -298,11 +304,14 @@ export class GuestResumeAnalysisService implements OnModuleInit {
     }
 
     try {
-      await this.natsClient.subscribe('analysis.resume.parsed', async (event) => {
-        const parsed = event as ParsedResumeEvent;
-        if (!parsed.resumeId) return;
-        await this.markCompleted(parsed);
-      });
+      await this.natsClient.subscribe(
+        'analysis.resume.parsed',
+        async (event) => {
+          const parsed = event as ParsedResumeEvent;
+          if (!parsed.resumeId) return;
+          await this.markCompleted(parsed);
+        },
+      );
 
       await this.natsClient.subscribe('job.resume.failed', async (event) => {
         const failed = event as FailedResumeEvent;
@@ -315,7 +324,9 @@ export class GuestResumeAnalysisService implements OnModuleInit {
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      this.logger.warn(`Guest analysis event subscription unavailable: ${message}`);
+      this.logger.warn(
+        `Guest analysis event subscription unavailable: ${message}`,
+      );
     }
   }
 
@@ -405,9 +416,15 @@ export class GuestResumeAnalysisService implements OnModuleInit {
   private inferSkillCategory(skill: string): string {
     const normalized = skill.toLowerCase();
     if (
-      ['javascript', 'typescript', 'java', 'python', 'go', 'node', 'react'].some(
-        (token) => normalized.includes(token),
-      )
+      [
+        'javascript',
+        'typescript',
+        'java',
+        'python',
+        'go',
+        'node',
+        'react',
+      ].some((token) => normalized.includes(token))
     ) {
       return 'Technical';
     }
@@ -446,12 +463,15 @@ export class GuestResumeAnalysisService implements OnModuleInit {
     if (resume.summary) {
       strengths.push('Professional summary included');
     }
-    return strengths.length > 0 ? strengths : ['Resume content parsed successfully'];
+    return strengths.length > 0
+      ? strengths
+      : ['Resume content parsed successfully'];
   }
 
   private buildImprovements(resume: ResumeDTO): string[] {
     const improvements: string[] = [];
-    if (!resume.summary) improvements.push('Add a concise professional summary');
+    if (!resume.summary)
+      improvements.push('Add a concise professional summary');
     if ((resume.skills?.length ?? 0) < 5) {
       improvements.push('List more role-relevant skills');
     }
@@ -473,7 +493,9 @@ export class GuestResumeAnalysisService implements OnModuleInit {
     ].slice(0, 4);
   }
 
-  private buildSkillAnalysis(resume: ResumeDTO): DetailedAnalysisPayload['skillAnalysis'] {
+  private buildSkillAnalysis(
+    resume: ResumeDTO,
+  ): DetailedAnalysisPayload['skillAnalysis'] {
     const skills = (resume.skills ?? []).map((skill) => skill.toLowerCase());
     const has = (tokens: string[]) =>
       tokens.some((token) => skills.some((skill) => skill.includes(token)));

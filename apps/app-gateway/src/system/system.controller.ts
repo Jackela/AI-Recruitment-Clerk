@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpException,
   HttpStatus,
+  Inject,
   Optional,
   Post,
   Query,
@@ -21,11 +22,14 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import type { CacheService } from '../cache/cache.service';
-import type { HealthCheckService } from '../common/services/health-check.service';
-import type { ServiceHealth, SystemHealth } from '../common/services/health-check.service';
-import type { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
-import type { MetricsService } from '../ops/metrics.service';
+import { CacheService } from '../cache/cache.service';
+import { HealthCheckService } from '../common/services/health-check.service';
+import type {
+  ServiceHealth,
+  SystemHealth,
+} from '../common/services/health-check.service';
+import { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
+import { MetricsService } from '../ops/metrics.service';
 
 type IntegrationStatus = 'passed' | 'failed' | 'skipped';
 
@@ -45,10 +49,18 @@ interface IntegrationCheckResult {
 @Controller('system')
 export class SystemController {
   constructor(
-    @Optional() private readonly healthCheckService?: HealthCheckService,
-    @Optional() private readonly cacheService?: CacheService,
-    @Optional() private readonly natsService?: AppGatewayNatsService,
-    @Optional() private readonly metricsService?: MetricsService,
+    @Optional()
+    @Inject(HealthCheckService)
+    private readonly healthCheckService?: HealthCheckService,
+    @Optional()
+    @Inject(CacheService)
+    private readonly cacheService?: CacheService,
+    @Optional()
+    @Inject(AppGatewayNatsService)
+    private readonly natsService?: AppGatewayNatsService,
+    @Optional()
+    @Inject(MetricsService)
+    private readonly metricsService?: MetricsService,
   ) {
     // Optional dependencies keep the controller testable in isolated specs.
   }
@@ -109,7 +121,9 @@ export class SystemController {
   })
   @ApiResponse({ status: 200, description: '系统状态概览' })
   @Get('status')
-  public async getSystemStatus(@Res({ passthrough: true }) res: Response): Promise<{
+  public async getSystemStatus(
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<{
     success: boolean;
     data: {
       status: 'operational' | 'degraded' | 'maintenance' | 'outage';
@@ -278,8 +292,12 @@ export class SystemController {
     const results = await Promise.all(
       requestedChecks.map((check) => this.runIntegrationCheck(check)),
     );
-    const passed = results.filter((result) => result.status === 'passed').length;
-    const failed = results.filter((result) => result.status === 'failed').length;
+    const passed = results.filter(
+      (result) => result.status === 'passed',
+    ).length;
+    const failed = results.filter(
+      (result) => result.status === 'failed',
+    ).length;
 
     return {
       testSuite,
@@ -444,9 +462,15 @@ export class SystemController {
         case 'cache': {
           const cacheMetrics = this.cacheService?.getMetrics();
           if (!cacheMetrics) {
-            return this.buildIntegrationResult(name, startedAt, false, {
-              reason: 'cache service unavailable',
-            }, 'skipped');
+            return this.buildIntegrationResult(
+              name,
+              startedAt,
+              false,
+              {
+                reason: 'cache service unavailable',
+              },
+              'skipped',
+            );
           }
           return this.buildIntegrationResult(name, startedAt, true, {
             metrics: cacheMetrics,
@@ -455,9 +479,15 @@ export class SystemController {
         case 'nats': {
           const natsHealth = await this.getNatsHealth();
           if (!natsHealth) {
-            return this.buildIntegrationResult(name, startedAt, false, {
-              reason: 'nats service unavailable',
-            }, 'skipped');
+            return this.buildIntegrationResult(
+              name,
+              startedAt,
+              false,
+              {
+                reason: 'nats service unavailable',
+              },
+              'skipped',
+            );
           }
           const healthy =
             natsHealth.status === 'healthy' ||
@@ -468,9 +498,15 @@ export class SystemController {
           });
         }
         default:
-          return this.buildIntegrationResult(name, startedAt, false, {
-            reason: 'unknown integration check',
-          }, 'skipped');
+          return this.buildIntegrationResult(
+            name,
+            startedAt,
+            false,
+            {
+              reason: 'unknown integration check',
+            },
+            'skipped',
+          );
       }
     } catch (error) {
       return {

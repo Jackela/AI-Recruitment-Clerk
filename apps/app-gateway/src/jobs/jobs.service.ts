@@ -1,24 +1,33 @@
 import type { OnModuleInit } from '@nestjs/common';
-import { Injectable, Logger, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import type { CreateJobDto } from './dto/create-job.dto';
 import { ResumeUploadResponseDto } from './dto/resume-upload.dto';
 import type { MulterFile } from './types/multer.types';
 import { JobListDto, JobDetailDto } from './dto/job-response.dto';
-import type { ResumeListItemDto, ResumeDetailDto } from './dto/resume-response.dto';
+import type {
+  ResumeListItemDto,
+  ResumeDetailDto,
+} from './dto/resume-response.dto';
 import { AnalysisReportDto, ReportsListDto } from './dto/report-response.dto';
-import type { JobRepository } from '../repositories/job.repository';
+import { JobRepository } from '../repositories/job.repository';
 import type { UserDto } from '@ai-recruitment-clerk/user-management-domain';
 import { UserRole } from '@ai-recruitment-clerk/user-management-domain';
 import type { JobJdSubmittedEvent } from '@ai-recruitment-clerk/job-management-domain';
 import type { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
-import type { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
-import type { CacheService } from '../cache/cache.service';
+import { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
+import { CacheService } from '../cache/cache.service';
 import type { Job } from '../schemas/job.schema';
-import type { WebSocketGateway } from '../websocket/websocket.gateway';
-import type { ConfigService } from '@nestjs/config';
+import { WebSocketGateway } from '../websocket/websocket.gateway';
+import { ConfigService } from '@nestjs/config';
 import { JobsSemanticCacheService, JobsEventService } from './services';
-import type { ReportsService } from '../reports/reports.service';
+import { ReportsService } from '../reports/reports.service';
 
 /**
  * Main facade service for jobs functionality.
@@ -33,11 +42,17 @@ export class JobsService implements OnModuleInit {
   private readonly eventService: JobsEventService;
 
   constructor(
+    @Inject(JobRepository)
     private readonly jobRepository: JobRepository,
+    @Inject(AppGatewayNatsService)
     private readonly natsClient: AppGatewayNatsService,
+    @Inject(CacheService)
     private readonly cacheService: CacheService,
+    @Inject(ReportsService)
     private readonly reportsService: ReportsService,
+    @Inject(WebSocketGateway)
     webSocketGateway: WebSocketGateway,
+    @Inject(ConfigService)
     configService: ConfigService,
   ) {
     this.semanticCacheService = new JobsSemanticCacheService(

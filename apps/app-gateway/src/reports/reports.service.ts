@@ -1,16 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { Workbook } from 'exceljs';
 import type {
   GeneratedReportDocument,
   GeneratedReport,
 } from './schemas/report.schema';
-import type {
-  ReportRepository} from './repositories/report.repository';
-import {
-  type ReportQuery,
-} from './repositories/report.repository';
-import type { GuestResumeAnalysisService } from '../guest/services/guest-resume-analysis.service';
+import { ReportRepository } from './repositories/report.repository';
+import { type ReportQuery } from './repositories/report.repository';
+import { GuestResumeAnalysisService } from '../guest/services/guest-resume-analysis.service';
 
 export interface ReportListItemResponse {
   id: string;
@@ -53,7 +50,9 @@ export interface ReportDownload {
 @Injectable()
 export class ReportsService {
   constructor(
+    @Inject(ReportRepository)
     private readonly reportRepository: ReportRepository,
+    @Inject(GuestResumeAnalysisService)
     private readonly guestAnalysisService: GuestResumeAnalysisService,
   ) {}
 
@@ -84,7 +83,9 @@ export class ReportsService {
     };
   }
 
-  public async getReportById(reportId: string): Promise<ReportListItemResponse> {
+  public async getReportById(
+    reportId: string,
+  ): Promise<ReportListItemResponse> {
     const report = await this.findReportOrThrow(reportId);
     return this.toListItem(report);
   }
@@ -191,7 +192,9 @@ export class ReportsService {
     return result.reports[0] ?? null;
   }
 
-  private toListItem(report: GeneratedReportDocument | GeneratedReport): ReportListItemResponse {
+  private toListItem(
+    report: GeneratedReportDocument | GeneratedReport,
+  ): ReportListItemResponse {
     const content = report.content ?? {};
     return {
       id: report.reportId,
