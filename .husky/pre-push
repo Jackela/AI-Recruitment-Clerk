@@ -3,8 +3,8 @@ set -e
 
 # Skip local CI for delete-only pushes.
 delete_only=1
-while read -r local_ref local_ref local_sha remote_sha; do
-  if [ "$local_ref" != "0000000000000000000000000000000000000000" ]; then
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if [ "$local_sha" != "0000000000000000000000000000000000000000" ]; then
     delete_only=0
     break
   fi
@@ -59,10 +59,15 @@ echo ""
 
 # 2. Format check affected only
 echo "🎨 Step 2/8: Checking code formatting..."
-npx prettier --check "{apps,libs}/**/*.{ts,html,scss,js,json,md}" || {
-  echo "❌ Code formatting issues found. Run 'npm run format' to fix."
-  exit 1
-}
+FORMAT_FILES=$(git diff --name-only --diff-filter=ACMR origin/main...HEAD -- apps libs | grep -E '\.(ts|html|scss|js|json|md)$' || true)
+if [ -n "$FORMAT_FILES" ]; then
+  printf '%s\n' "$FORMAT_FILES" | xargs npx prettier --check || {
+    echo "❌ Code formatting issues found. Run 'npm run format' to fix."
+    exit 1
+  }
+else
+  echo "No affected app/lib files require formatting checks."
+fi
 echo "✅ Format check passed"
 echo ""
 
