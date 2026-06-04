@@ -1,15 +1,16 @@
-@import '../../../../styles/_variables.scss';
+@use 'sass:color';
+@use '../../../../styles/variables' as vars;
 
 .table-toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: var(--space-4);
-  background-color: $background-light;
-  border-bottom: 1px solid $border-color;
+  background-color: vars.$background-light;
+  border-bottom: 1px solid vars.$border-color;
   gap: var(--space-4);
 
-  @include respond-to-mobile {
+  @include vars.respond-to-mobile {
     flex-direction: column;
     align-items: stretch;
   }
@@ -21,7 +22,7 @@
   align-items: center;
   gap: var(--space-4);
 
-  @include respond-to-mobile {
+  @include vars.respond-to-mobile {
     width: 100%;
     flex-wrap: wrap;
 
@@ -39,7 +40,7 @@
   max-width: 300px;
   width: 100%;
 
-  @include respond-to-mobile {
+  @include vars.respond-to-mobile {
     max-width: 100%;
   }
 }
@@ -47,20 +48,20 @@
 .search-icon {
   position: absolute;
   left: var(--space-3);
-  color: $text-secondary;
+  color: vars.$text-secondary;
   pointer-events: none;
 }
 
 .search-input {
   width: 100%;
   padding: var(--space-2) var(--space-10) var(--space-2) var(--space-10);
-  border: 1px solid $border-color;
+  border: 1px solid vars.$border-color;
   border-radius: var(--radius-md);
   font-size: 0.875rem;
 
   &:focus {
     outline: none;
-    border-color: $primary-color;
+    border-color: vars.$primary-color;
   }
 }
 
@@ -71,25 +72,25 @@
   border: none;
   padding: var(--space-1);
   cursor: pointer;
-  color: $text-secondary;
+  color: vars.$text-secondary;
 
   &:hover {
-    color: $text-color;
+    color: vars.$text-color;
   }
 }
 
 .view-selector {
   padding: var(--space-2);
-  border: 1px solid $border-color;
+  border: 1px solid vars.$border-color;
   border-radius: var(--radius-md);
-  background-color: $background-white;
-  color: $text-color;
+  background-color: vars.$background-white;
+  color: vars.$text-color;
   font-size: 0.875rem;
   cursor: pointer;
 
   &:focus {
     outline: none;
-    border-color: $primary-color;
+    border-color: vars.$primary-color;
   }
 }
 
@@ -98,17 +99,17 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-4);
-  border: 1px solid $border-color;
+  border: 1px solid vars.$border-color;
   border-radius: var(--radius-md);
-  background-color: $background-white;
-  color: $text-color;
+  background-color: vars.$background-white;
+  color: vars.$text-color;
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s;
 
   &:hover {
-    background-color: rgba($primary-color, 0.1);
-    border-color: $primary-color;
+    background-color: rgba(vars.$primary-color, 0.1);
+    border-color: vars.$primary-color;
   }
 
   svg {
@@ -131,20 +132,20 @@
   transition: all 0.2s;
 
   &.edit-bulk-btn {
-    background-color: $primary-color;
-    color: $text-white;
+    background-color: vars.$primary-color;
+    color: vars.$text-white;
 
     &:hover {
-      background-color: darken($primary-color, 10%);
+      background-color: color.adjust(vars.$primary-color, $lightness: -10%);
     }
   }
 
   &.delete-bulk-btn {
-    background-color: $danger-color;
-    color: $text-white;
+    background-color: vars.$danger-color;
+    color: vars.$text-white;
 
     &:hover {
-      background-color: darken($danger-color, 10%);
+      background-color: color.adjust(vars.$danger-color, $lightness: -10%);
     }
   }
 }

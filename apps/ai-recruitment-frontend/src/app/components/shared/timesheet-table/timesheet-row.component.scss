@@ -1,29 +1,30 @@
-@import '../../../../styles/_variables.scss';
+@use 'sass:color';
+@use '../../../../styles/variables' as vars;
 
 // Status-based row styling
 tr[arc-timesheet-row] {
   &.draft {
-    background-color: rgba($warning-color, 0.05);
+    background-color: rgba(vars.$warning-color, 0.05);
   }
 
   &.submitted {
-    background-color: rgba($info-color, 0.05);
+    background-color: rgba(vars.$info-color, 0.05);
   }
 
   &.approved {
-    background-color: rgba($success-color, 0.05);
+    background-color: rgba(vars.$success-color, 0.05);
   }
 
   &.rejected {
-    background-color: rgba($danger-color, 0.05);
+    background-color: rgba(vars.$danger-color, 0.05);
   }
 
   &.selected {
-    background-color: rgba($primary-color, 0.1);
+    background-color: rgba(vars.$primary-color, 0.1);
   }
 
   &:hover {
-    background-color: rgba($primary-color, 0.05);
+    background-color: rgba(vars.$primary-color, 0.05);
   }
 }
 
@@ -52,7 +53,7 @@ tr[arc-timesheet-row] {
     transition: background-color 0.2s;
 
     &:hover {
-      background-color: rgba($primary-color, 0.1);
+      background-color: rgba(vars.$primary-color, 0.1);
     }
 
     &:disabled {
@@ -66,15 +67,15 @@ tr[arc-timesheet-row] {
     }
 
     &.view-btn {
-      color: $info-color;
+      color: vars.$info-color;
     }
 
     &.edit-btn {
-      color: $warning-color;
+      color: vars.$warning-color;
     }
 
     &.delete-btn {
-      color: $danger-color;
+      color: vars.$danger-color;
     }
   }
 }
@@ -88,23 +89,23 @@ tr[arc-timesheet-row] {
   font-weight: 500;
 
   &.status-draft {
-    background-color: rgba($warning-color, 0.2);
-    color: darken($warning-color, 20%);
+    background-color: rgba(vars.$warning-color, 0.2);
+    color: color.adjust(vars.$warning-color, $lightness: -20%);
   }
 
   &.status-submitted {
-    background-color: rgba($info-color, 0.2);
-    color: darken($info-color, 20%);
+    background-color: rgba(vars.$info-color, 0.2);
+    color: color.adjust(vars.$info-color, $lightness: -20%);
   }
 
   &.status-approved {
-    background-color: rgba($success-color, 0.2);
-    color: darken($success-color, 20%);
+    background-color: rgba(vars.$success-color, 0.2);
+    color: color.adjust(vars.$success-color, $lightness: -20%);
   }
 
   &.status-rejected {
-    background-color: rgba($danger-color, 0.2);
-    color: darken($danger-color, 20%);
+    background-color: rgba(vars.$danger-color, 0.2);
+    color: color.adjust(vars.$danger-color, $lightness: -20%);
   }
 }
 
@@ -117,13 +118,13 @@ tr[arc-timesheet-row] {
   font-weight: 500;
 
   &.badge-success {
-    background-color: rgba($success-color, 0.2);
-    color: darken($success-color, 20%);
+    background-color: rgba(vars.$success-color, 0.2);
+    color: color.adjust(vars.$success-color, $lightness: -20%);
   }
 
   &.badge-danger {
-    background-color: rgba($danger-color, 0.2);
-    color: darken($danger-color, 20%);
+    background-color: rgba(vars.$danger-color, 0.2);
+    color: color.adjust(vars.$danger-color, $lightness: -20%);
   }
 }
 
@@ -147,11 +148,11 @@ tr[arc-timesheet-row] {
 }
 
 .column-primary {
-  color: $text-color;
+  color: vars.$text-color;
 }
 
 .column-secondary {
-  color: $text-secondary;
+  color: vars.$text-secondary;
 }
 
 .bulk-editable {
