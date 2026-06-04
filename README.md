@@ -31,12 +31,12 @@ AI Recruitment Clerk is an **event-driven microservices system** that automates 
 
 | Requirement | Version | Notes                                                      |
 | ----------- | ------- | ---------------------------------------------------------- |
-| **Node.js** | 22.x    | Recommended version; Node 20.x still supported             |
+| **Node.js** | 22.x    | Required by `.nvmrc` and package engines                   |
 | npm         | 10+     | Included with Node.js                                      |
 | MongoDB     | 7.0+    | [Download](https://www.mongodb.com/try/download/community) |
 | NATS Server | 2.10+   | [Download](https://nats.io/download/)                      |
 
-> ⚠️ **Important**: This project now supports Node.js 22.x. Node.js 20.x is still supported for backward compatibility. Use `.nvmrc` or `nvm use` to switch to the correct version.
+> ⚠️ **Important**: This project requires Node.js 22.x (`>=22.0.0 <23.0.0`). Use `.nvmrc` or `nvm use` before installing dependencies.
 
 ### Project Phoenix (C2C Coach)
 
@@ -288,7 +288,7 @@ AI-Recruitment-Clerk/
 
 ### Prerequisites
 
-- Node.js 20.18.0+
+- Node.js 22.x (`22.22.0` via `.nvmrc`)
 - npm 10+
 - Docker Desktop (for containerized deployment)
 - MongoDB 7.0+ (if running locally)
@@ -683,4 +683,3 @@ See [TESTING.md](./TESTING.md) for error handling test patterns, shared utilitie
 - ✅ **Ready for User Acceptance Testing (UAT)**
 
 > 💡 The system can now be deployed with a single command and provides a complete, functional AI recruitment platform ready for production use.
-> // Force fresh CodeQL analysis

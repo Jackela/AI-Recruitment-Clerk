@@ -13,7 +13,6 @@ function fail(message: string): never {
   throw new Error(message);
 }
 
-
 describe('EnvAccess', () => {
   const originalEnv = process.env;
 
@@ -73,6 +72,7 @@ describe('EnvAccess', () => {
 
   describe('getNumber', () => {
     it('should return default when not set', () => {
+      delete process.env.PORT;
       const access = new EnvAccess({
         serviceName: 'test',
         variables: [{ name: 'PORT', required: false }],

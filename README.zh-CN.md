@@ -131,7 +131,7 @@ AI-Recruitment-Clerk/
 
 ### 前置要求
 
-- Node.js 20.18.0+
+- Node.js 22.x（通过 `.nvmrc` 使用 `22.22.0`）
 - npm 10+
 - MongoDB 6+
 - NATS Server
