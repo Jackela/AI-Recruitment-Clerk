@@ -6,6 +6,8 @@ on:
 
 permissions:
   contents: read
+  issues: write
+  pull-requests: read
 
 concurrency:
   group: pr-template-check-${{ github.workflow }}-${{ github.ref }}
@@ -15,6 +17,7 @@ concurrency:
 jobs:
   validate-pr-template:
     name: Validate PR Template
+    if: github.event.pull_request.user.login != 'dependabot[bot]' && !startsWith(github.event.pull_request.head.ref, 'dependabot/')
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
