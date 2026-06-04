@@ -5,6 +5,12 @@ All notable changes to the AI Recruitment Clerk project will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.4](https://github.com/Jackela/AI-Recruitment-Clerk/compare/v2.0.3...v2.0.4) (2026-06-04)
+
+### 🐛 Bug Fixes
+
+* **ci:** stabilize nightly and dependabot checks ([cf2f7b2](https://github.com/Jackela/AI-Recruitment-Clerk/commit/cf2f7b2781917c65b8c6b89b0ac53106fa63ae0d))
+
 ## [2.0.3](https://github.com/Jackela/AI-Recruitment-Clerk/compare/v2.0.2...v2.0.3) (2026-06-01)
 
 ### 🐛 Bug Fixes
