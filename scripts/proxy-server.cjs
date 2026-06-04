@@ -36,6 +36,7 @@ const getStaticDir = () => {
 };
 
 const STATIC_DIR = getStaticDir();
+const STATIC_ROOT = path.resolve(STATIC_DIR);
 
 const MIME_TYPES = {
   '.html': 'text/html',
@@ -47,6 +48,24 @@ const MIME_TYPES = {
   '.gif': 'image/gif',
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon',
+};
+
+const getRequestPathname = (requestUrl) => {
+  try {
+    return decodeURIComponent(new URL(requestUrl, 'http://localhost').pathname);
+  } catch {
+    return null;
+  }
+};
+
+const resolveStaticPath = (pathname) => {
+  const filePath = path.resolve(STATIC_ROOT, `.${pathname}`);
+
+  if (filePath !== STATIC_ROOT && !filePath.startsWith(STATIC_ROOT + path.sep)) {
+    return null;
+  }
+
+  return filePath;
 };
 
 // Mock API responses for when real API is unavailable
@@ -564,15 +583,27 @@ const server = http.createServer((req, res) => {
     req.pipe(proxy, { end: true });
   } else {
     // SPA routing support: serve index.html for non-API routes
-    const isFileRequest = req.url.match(/\.[^/]+$/);
+    const pathname = getRequestPathname(req.url);
+    if (!pathname) {
+      res.writeHead(400, { 'Content-Type': 'text/plain' });
+      res.end('Bad Request');
+      return;
+    }
+
+    const isFileRequest = /\.[^/]+$/.test(pathname);
     let filePath;
-    
-    if (req.url === '/' || !isFileRequest) {
+
+    if (pathname === '/' || !isFileRequest) {
       // For root or routes without file extensions, serve index.html (SPA)
-      filePath = path.join(STATIC_DIR, 'index.html');
+      filePath = path.join(STATIC_ROOT, 'index.html');
     } else {
       // For file requests (JS, CSS, images, etc.), serve the actual file
-      filePath = path.join(STATIC_DIR, req.url);
+      filePath = resolveStaticPath(pathname);
+      if (!filePath) {
+        res.writeHead(403, { 'Content-Type': 'text/plain' });
+        res.end('Forbidden');
+        return;
+      }
     }
 
     const ext = path.extname(filePath).toLowerCase();
