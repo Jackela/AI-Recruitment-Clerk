@@ -8,15 +8,19 @@ import {
   Query,
   Res,
   StreamableFile,
+  Inject,
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { Public } from '../auth/decorators/public.decorator';
-import type { ReportsService } from './reports.service';
+import { ReportsService } from './reports.service';
 import type { GenerateReportRequest } from './reports.service';
 
 @Controller()
 export class ReportsController {
-  constructor(private readonly reportsService: ReportsService) {}
+  constructor(
+    @Inject(ReportsService)
+    private readonly reportsService: ReportsService,
+  ) {}
 
   @Public()
   @Get('reports')

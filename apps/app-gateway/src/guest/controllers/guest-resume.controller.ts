@@ -14,6 +14,7 @@ import {
   Req,
   Logger,
   HttpException,
+  Inject,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -31,21 +32,31 @@ import { Public } from '../../auth/decorators/public.decorator';
 import { GuestGuard } from '../guards/guest.guard';
 import type { RequestWithDeviceId } from '../guards/guest.guard';
 import { OptionalJwtAuthGuard } from '../guards/optional-jwt-auth.guard';
-import type { GuestUsageService } from '../services/guest-usage.service';
-import type { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
+import { GuestUsageService } from '../services/guest-usage.service';
+import { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
 import type { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
-import type {
-  GridFsService} from '../../services/gridfs.service';
+import type { MulterFile } from '../../jobs/types/multer.types';
 import {
+  GridFsService,
   type ResumeFileMetadata,
 } from '../../services/gridfs.service';
-import type { GuestResumeAnalysisService } from '../services/guest-resume-analysis.service';
+import { GuestResumeAnalysisService } from '../services/guest-resume-analysis.service';
 
 interface GuestResumeUploadDto {
   candidateName?: string;
   candidateEmail?: string;
   notes?: string;
 }
+
+interface AuthenticatedGuestRequest extends RequestWithDeviceId {
+  user?: {
+    id?: string;
+  };
+}
+
+type UploadedResumeFile = MulterFile & {
+  buffer: Buffer;
+};
 
 // Lightweight file validator compatible with ParseFilePipe expectations
 const resumeFileValidator: {
@@ -92,9 +103,13 @@ export class GuestResumeController {
    * @param gridFsService - The GridFS service for file storage.
    */
   constructor(
+    @Inject(GuestUsageService)
     private readonly guestUsageService: GuestUsageService,
+    @Inject(AppGatewayNatsService)
     private readonly natsClient: AppGatewayNatsService,
+    @Inject(GridFsService)
     private readonly gridFsService: GridFsService,
+    @Inject(GuestResumeAnalysisService)
     private readonly analysisService: GuestResumeAnalysisService,
   ) {}
 
@@ -147,7 +162,7 @@ export class GuestResumeController {
   })
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   public async analyzeResume(
-    @Req() req: RequestWithDeviceId,
+    @Req() req: AuthenticatedGuestRequest,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
@@ -158,8 +173,7 @@ export class GuestResumeController {
         errorHttpStatusCode: HttpStatus.BAD_REQUEST,
       }),
     )
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    file: any, // Express.Multer.File type fix
+    file: UploadedResumeFile,
     @Body() uploadData: GuestResumeUploadDto,
   ) {
     try {
@@ -193,8 +207,7 @@ export class GuestResumeController {
       const analysisRequest = {
         analysisId,
         deviceId: isAuthenticated ? undefined : deviceId,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        userId: isAuthenticated ? (req.user as any)?.id : undefined,
+        userId: isAuthenticated ? req.user?.id : undefined,
         filename: file.originalname,
         fileSize: file.size,
         fileType: file.mimetype,
@@ -208,8 +221,7 @@ export class GuestResumeController {
       await this.analysisService.createQueued({
         analysisId,
         deviceId: isAuthenticated ? undefined : deviceId,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        userId: isAuthenticated ? (req.user as any)?.id : undefined,
+        userId: isAuthenticated ? req.user?.id : undefined,
         filename: file.originalname,
         fileSize: file.size,
         mimeType: file.mimetype,
@@ -225,8 +237,7 @@ export class GuestResumeController {
       try {
         const resumeId = analysisId; // reuse analysisId as resumeId for correlation
         const jobId = isAuthenticated
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ? `user-job-${(req.user as any)?.id || 'unknown'}`
+          ? `user-job-${req.user?.id || 'unknown'}`
           : `guest-job-${deviceId}`;
 
         // ✅ PRIORITY 1 FIX: Store file in GridFS first
@@ -238,8 +249,7 @@ export class GuestResumeController {
           fileType: 'resume',
           analysisId,
           deviceId: isAuthenticated ? undefined : deviceId,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          userId: isAuthenticated ? (req.user as any)?.id : undefined,
+          userId: isAuthenticated ? req.user?.id : undefined,
           originalFilename: file.originalname,
           mimeType: file.mimetype,
           fileSize: file.size,
@@ -579,7 +589,8 @@ export class GuestResumeController {
   @UseGuards(OptionalJwtAuthGuard, GuestGuard)
   @ApiOperation({
     summary: 'Get detailed resume analysis results',
-    description: 'Return the detailed report payload for the frontend results page',
+    description:
+      'Return the detailed report payload for the frontend results page',
   })
   @ApiParam({
     name: 'sessionId',
