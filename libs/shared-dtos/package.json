@@ -23,7 +23,7 @@
   "dependencies": {
     "class-validator": "^0.15.1",
     "class-transformer": "^0.5.1",
-    "ioredis": "^5.7.0",
+    "ioredis": "^6.0.0",
     "mongoose": "^9.2.1"
   },
   "peerDependencies": {
